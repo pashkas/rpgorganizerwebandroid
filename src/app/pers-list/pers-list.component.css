@@ -1,0 +1,13 @@
+.tabimg {
+    object-fit: contain;
+    height: 2em;
+}
+
+.nomarg {
+    margin-right: 0px !important;
+    margin-left: 3px !important;
+}
+
+.opacity{
+    opacity: .8;
+}

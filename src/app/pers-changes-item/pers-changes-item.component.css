@@ -1,0 +1,13 @@
+.example-section {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    height: 24px;
+    background: lightgray;
+}
+
+.text-section {
+    position: absolute;
+    padding: 10px;
+    font-size: small;
+}

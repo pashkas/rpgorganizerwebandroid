@@ -1,0 +1,12 @@
+.grid-login {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: 10px auto 1fr auto 10px;
+    background: black;
+}
+
+.passFields{
+    background-color: lightgray;
+    padding: 5px;
+}

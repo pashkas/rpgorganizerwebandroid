@@ -1,0 +1,49 @@
+<h1 mat-dialog-title class="text-center">{{data.header}}</h1>
+<div mat-dialog-content>
+  <mat-form-field *ngIf="!isGallery">
+    <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.text" autocomplete="off" placeholder="Название" name="data.text">
+  </mat-form-field>
+  <!-- <mat-form-field *ngIf="data.time">
+    <input placeholder="Время" matInput [ngxTimepicker]="picker" [format]="24" [(ngModel)]="data.time"
+      name="tasktime" readonly>
+    <ngx-material-timepicker #picker></ngx-material-timepicker>
+  </mat-form-field> -->
+  <!-- <mat-form-field *ngIf="!isGallery && data?.timeVal">
+    <mat-label>Время</mat-label>
+    <mat-select [(ngModel)]=" data.timeVal" name="tsk.timeVal">
+      <mat-option *ngFor="let req of times" [value]="req">
+        {{req|timeVal}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field> -->
+  <!-- <div *ngIf="isGallery" fxFlexFill fxLayoutAlign="center center" fxLayout="row wrap"
+    fxLayoutGap="10px grid">
+    <ng-container *ngFor="let gi of gallerryImages">
+      <div style="cursor: pointer;" fxLayout="column" fxLayoutAlign="space-around center" (click)="chooseImg(gi)">
+        <img src="{{gi}}" class="img-fluid rounded" [ngStyle]="{'object-fit': 'contain', 'height': '125px', 'width':'125px'}">
+      </div>
+    </ng-container>
+  </div> -->
+  <!-- <mat-grid-list [cols]="6" *ngIf="isGallery">
+    <mat-grid-tile *ngFor="let gi of gallerryImages">
+      <div style="cursor: pointer" class="w-100 h-100" (click)="chooseImg(gi)">
+        <img src="{{gi}}" class="img-fluid rounded w-100 h-100" [ngStyle]="{'object-fit': 'contain'}">
+      </div>
+    </mat-grid-tile>
+  </mat-grid-list> -->
+  <ngx-masonry *ngIf="isGallery" class="row p-0">
+    <div ngxMasonryItem  *ngFor="let gi of gallerryImages" class="col-lg-3 col-4 p-0">
+      <div style="cursor: pointer" class="w-100 h-100" (click)="chooseImg(gi)">
+        <img src="{{gi}}" class="img-fluid w-100 h-100" [ngStyle]="{'object-fit': 'contain'}">
+      </div>
+    </div>
+  </ngx-masonry>
+</div>
+<div mat-dialog-actions [align]="'end'">
+  <button *ngIf="this.data.isGallery" mat-flat-button (click)="gallery()" color='accent'>
+    Путь из интернета
+  </button>
+  <button mat-button mat-dialog-close>Отмена</button>
+  <button  mat-button [mat-dialog-close]="data.text">Ok</button>
+  <!-- <button *ngIf="!data.time" mat-button [mat-dialog-close]="data.text">Ok</button> -->
+</div>

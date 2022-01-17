@@ -1,0 +1,33 @@
+<h1 mat-dialog-title class="text-center">{{d.date|date}}</h1>
+<div mat-dialog-content>
+    <div>
+        <table class="w-100 mt-3">
+            <tbody>
+                <tr *ngFor="let p of d.params; let i=index;">
+                    <td class="fitwidth">
+                        <i>{{p.name}}</i>
+                    </td>
+                    <td>
+                        <mat-slider [thumbLabel]="true" class="w-100 py-0" [max]="10" [min]="0" [step]="1" [(ngModel)]="p.val">
+                        </mat-slider>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <mat-form-field>
+        <mat-label>Заметки</mat-label>
+        <textarea matInput matTextareaAutosize [(ngModel)]="d.notes"></textarea>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Сделано</mat-label>
+        <textarea matInput matTextareaAutosize [(ngModel)]="d.done"></textarea>
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Пропущено</mat-label>
+        <textarea matInput matTextareaAutosize [(ngModel)]="d.notDone"></textarea>
+    </mat-form-field>
+</div>
+<div mat-dialog-actions [align]="'end'">
+    <button mat-button mat-dialog-close>Ok</button>
+</div>
