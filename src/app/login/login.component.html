@@ -19,20 +19,23 @@
       <div *ngIf="err">
         * {{err}}
       </div>
-    </div>
-    <div fxLayout="row" fxLayoutAlign="space-around stretch" fxLayoutGap="5px">
-      <div><button type="button" class="btn btn-light btn-block" (click)="tryGoogleLogin()">GOOGLE</button></div>
-      <div fxFlex>
-        <button type="button" class="btn btn-danger  btn-block" (click)="doLogin()">
-          <ng-container *ngIf="!isNew; else regIn">
-            Войти
-          </ng-container>
-          <ng-template #regIn>
-            Зарегистрироваться
-          </ng-template>
-        </button>
+
+      <div fxLayout="row" fxLayoutAlign="space-around stretch" fxLayoutGap="5px">
+        <div>
+          <button mat-flat-button (click)="tryGoogleLogin()">GOOGLE</button></div>
+        <div fxFlex>
+          <button mat-flat-button color="warn" class="w-100" (click)="doLogin()">
+            <ng-container *ngIf="!isNew; else regIn">
+              Войти
+            </ng-container>
+            <ng-template #regIn>
+              Зарегистрироваться
+            </ng-template>
+          </button>
+        </div>
       </div>
     </div>
+
   </div>
   <div>&nbsp;</div>
 </div>
