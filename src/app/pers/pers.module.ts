@@ -36,6 +36,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { AbHardnessComponent } from './ab-hardness/ab-hardness.component';
 import { AutosizeModule } from 'ngx-autosize';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
+import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
+
 
 @NgModule({
   declarations: [
@@ -51,7 +53,6 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
     AbilityDetailComponent,
     TaskDetailComponent,
     QwestDetailComponent,
-
     AddOrEditRevardComponent,
     AbupcolPipe,
     EditDiaryParamsComponent,
@@ -61,6 +62,7 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
     ChangeCharactComponent,
     ImageComponentComponent,
     AbHardnessComponent,
+    PersImportExportDialogComponent
   ],
   imports: [
     NgxMaterialTimepickerModule,
@@ -86,7 +88,8 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
       AddOrEditRevardComponent,
       EditDiaryParamsComponent,
       ReqAddComponent,
-      ChangeCharactComponent
+      ChangeCharactComponent,
+      PersImportExportDialogComponent,
     ],
   providers: [{ provide: OWL_DATE_TIME_LOCALE, useValue: 'ru' },]
 })

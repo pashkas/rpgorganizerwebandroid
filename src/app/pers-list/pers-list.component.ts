@@ -13,6 +13,7 @@ import { AddOrEditRevardComponent } from '../add-or-edit-revard/add-or-edit-reva
 import { Qwest } from 'src/Models/Qwest';
 import { StatesService } from '../states.service';
 import { takeUntil } from 'rxjs/operators';
+import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
 
 @Component({
   selector: 'app-pers-list',
@@ -31,6 +32,47 @@ export class PersListComponent implements OnInit {
   selCha: Characteristic;
 
   constructor(private location: Location, public srvSt: StatesService, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) { }
+
+
+  /**
+   * Экспорт персонажа - в виде текста.
+   *
+   */
+  exportPers() {
+    this.srv.isDialogOpen = true;
+    const dialogRef = this.dialog.open(PersImportExportDialogComponent, {
+      data: { isImport: false },
+      backdropClass: 'backdrop'
+    });
+
+    dialogRef.afterClosed()
+      .subscribe(n => {
+        this.srv.isDialogOpen = false;
+      });
+  }
+
+  /**
+   * Импорт персонажа - из текстового файла.
+   *
+   */
+  importPers() {
+    this.srv.isDialogOpen = true;
+    const dialogRef = this.dialog.open(PersImportExportDialogComponent, {
+      data: { isImport: true },
+      backdropClass: 'backdrop'
+    });
+
+    dialogRef.afterClosed()
+      .subscribe(n => {
+        if (n) {
+          let newPers: Pers = JSON.parse(n);
+          newPers.id = this.srv.pers$.value.id;
+          newPers.userId = this.srv.pers$.value.userId;
+          this.srv.setPers(JSON.stringify(newPers));
+        }
+        this.srv.isDialogOpen = false;
+      });
+  }
 
   /**
    * Добавление навыка.

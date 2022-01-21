@@ -1,0 +1,22 @@
+<p mat-dialog-title>
+  <ng-container *ngIf="isImport; else export">
+    Скопируй сюда данные твоего персонажа для импорта.
+  </ng-container>
+  <ng-template #export>
+    Данные твоего персонажа в текстовом виде.
+  </ng-template>
+</p>
+
+<mat-dialog-content>
+  <mat-form-field class="w-100">
+    <textarea matInput autosize useImportant='true' onfocus="this.select()" autocomplete="off"
+      placeholder="Данные персонажа" [(ngModel)]="persData" name="persData" #userinput>
+    </textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button (click)="copy(userinput)" *ngIf="!isImport">Скопировать</button>
+  <button mat-button mat-dialog-close>Отмена</button>
+  <button mat-button [mat-dialog-close]="persData" cdkFocusInitial>ОК</button>
+</mat-dialog-actions>

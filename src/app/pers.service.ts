@@ -1784,6 +1784,7 @@ export class PersService {
     prs.prevExp = 0;
     prs.nextExp = 0;
     prs.isOffline = true;
+    this.isOffline = true;
 
     this.setPers(JSON.stringify(prs));
   }
