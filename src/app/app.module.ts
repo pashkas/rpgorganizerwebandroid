@@ -32,6 +32,7 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { FailModPipe } from './fail-mod.pipe';
 import { MainProgrDescPipe } from './main-window/main-progr-desc.pipe';
 import { ListBgPipe } from './list-bg.pipe';
+import { ImgBrokenDirective } from './img-broken.directive';
 
 registerLocaleData(localeRu, 'ru');
 
@@ -89,7 +90,8 @@ registerLocaleData(localeRu, 'ru');
       ArrSortDialogComponent,
       TskTimeValDialogComponent,
       ConfirmationDialogComponent
-    ]
+    ],
+  exports: []
 })
 export class AppModule {
   // constructor(imgCache: ImgCacheService) {

@@ -104,7 +104,7 @@ export class Pers {
     /**
      * Максимальный уровень аттрибутов.
      */
-    maxAttrLevel: number = 10;
+    maxAttrLevel: number = 100;
 
     Monsters0Queue: number;
     Monsters1Queue: number;

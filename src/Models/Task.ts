@@ -5,6 +5,8 @@ import { Pers } from './Pers';
 import { plusToName } from './plusToName';
 export class Task implements IImg {
     reqvirements: Reqvirement[] = [];
+    prefix: string = '';
+    postfix: string = '';
 
     static maxValue: number = 10;
     static requrenses: string[] = [

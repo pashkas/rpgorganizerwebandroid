@@ -65,7 +65,7 @@
 
     <!-- (error)="ReImages()" -->
     <div class="container" [ngClass]="{'vibrate-1': isSucessShown}">
-      <img (press)="onLongPress($event)" (contextmenu)="$event.preventDefault()" (swipeup)="done(this.pers.currentTask)"
+      <img (press)="onLongPress($event)" (contextmenu)="$event.preventDefault()" (swipeup)="done(this.pers.currentTask)" 
         (swipedown)="fail(this.pers.currentTask)" (swiperight)="onSwipeLeft($event)" (swipeleft)="onSwipeRight($event)"
         class="rounded element img-fluid pt-1 pb-0 px-1 mh-100 w-100" [ngStyle]="{'object-fit': 'contain'}"
         src="{{'assets/img/'+ this.pers.currentTask.imageLvl + '/' + this.pers.currentTask.image + '.jpg'}}">
@@ -137,7 +137,7 @@
     <button (press)="qwickAddTask()" (contextmenu)="$event.preventDefault()" class="h-100 w-100 px-1 py-0 text-left"
       mat-button routerLink="/pers" (click)="openPersList()">
 
-      <img [ngClass]="{'disabled': isSort, 'vibrate-1': isFailShown}" (contextmenu)="$event.preventDefault()"
+      <img appImgBroken [ngClass]="{'disabled': isSort, 'vibrate-1': isFailShown}" (contextmenu)="$event.preventDefault()"
         src="{{this.pers.image}}" class="img-fluid h-100 rounded" [ngStyle]="{'object-fit': 'contain'}">
     </button>
 

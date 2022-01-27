@@ -16,6 +16,7 @@ import { TimeValPipe } from './time-val.pipe';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { DatestringPipe } from './datestring.pipe';
 import { AbHardnessPipe } from '../ab-hardness.pipe';
+import { ImgBrokenDirective } from '../img-broken.directive';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { AbHardnessPipe } from '../ab-hardness.pipe';
     AddItemDialogComponent,
     TimeValPipe,
     DatestringPipe,
-    AbHardnessPipe
+    AbHardnessPipe,
+    ImgBrokenDirective
   ],
   imports: [
     NgxMaterialTimepickerModule,
@@ -50,6 +52,7 @@ import { AbHardnessPipe } from '../ab-hardness.pipe';
       AddItemDialogComponent,
     ],
   exports: [
+    ImgBrokenDirective,
     DiaryEditParamsComponent,
     PersChangesItemComponent,
     MatDialogModule,

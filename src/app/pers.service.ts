@@ -2263,7 +2263,7 @@ export class PersService {
     this.savePers(true, 'plus');
 
     // Переходим в настройку навыка, если это первый уровень
-    if (isOpenForEdit && !this.pers$.value.isAutoPumping) {
+    if (false && isOpenForEdit && !this.pers$.value.isAutoPumping) {
       this.showAbility(ab);
     }
   }
@@ -3101,7 +3101,7 @@ export class PersService {
     tsk.statesDescr = [];
     tsk.curStateDescrInd = 0;
 
-    if (tsk.aimTimer != 0 || tsk.aimCounter != 0 || tsk.states.length > 0) {
+    if (tsk.aimTimer != 0 || tsk.aimCounter != 0 || tsk.states.length > 0 || tsk.postfix || tsk.prefix) {
       let plusState = '';
       if (!this.pers$.value.isTES) {
         // Состояния
@@ -3282,11 +3282,22 @@ export class PersService {
         // Таймер
         if (tsk.aimTimer != 0) {
           plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit), tsk.aimUnit);
+
+          if (tsk.aimUnit == 'Раз' && tsk.postfix && tsk.postfix.length > 0) {
+            plusState = plusState.substring(0, plusState.length - 1);
+          }
         }
 
         // Счетчик
         if (tsk.aimCounter != 0) {
-          plusState += ' ' + this.tesTaskTittleCount(progr, tsk.aimCounter, true, tsk.aimUnit) + '✓';
+          plusState += ' ' + this.tesTaskTittleCount(progr, tsk.aimCounter, true, tsk.aimUnit);
+        }
+
+        // Префикс
+
+        // Постфикс
+        if (tsk.postfix) {
+          plusState += tsk.postfix;
         }
       }
 

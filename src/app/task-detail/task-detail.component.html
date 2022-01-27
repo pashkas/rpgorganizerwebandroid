@@ -116,9 +116,8 @@
       </ng-container>
     </ng-container>
     <div *ngIf="pers.isTES && tsk.curLvlDescr" class="text-center px-0 py-1 border-0">
-      <br>
-      <div class="border">
-        {{tsk.curLvlDescr}}
+      <div class="border rounded d-flex justify-content-center align-items-center" style="min-height: 35px;">
+        <div>{{tsk.curLvlDescr}}</div>
       </div>
     </div>
   </form>
@@ -155,11 +154,6 @@
 
     <!-- Дата, повторение -->
     <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
-      <mat-chip-list fxFlex="noshrink" [selectable]="false">
-        <mat-chip (click)="qwickSetDate('today')" color="accent">Сегодня</mat-chip>
-        <mat-chip (click)="qwickSetDate('tomorrow')" color="accent">&nbsp;Завтра&nbsp;</mat-chip>
-      </mat-chip-list>
-
       <mat-form-field>
         <input [readonly]="true" matInput autocomplete="off" placeholder="Дата" [ngModel]="tsk.date" name="tsk.date"
           (ngModelChange)="onTskDateChange($event)" [owlDateTimeTrigger]="dt1" [owlDateTime]="dt1">
@@ -176,22 +170,12 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <!-- Время -->
-        <!-- <mat-form-field>
-          <input placeholder="Время" matInput [ngxTimepicker]="picker" [format]="24" [(ngModel)]="tsk.time"
-            name="tasktime" readonly>
-          <ngx-material-timepicker #picker></ngx-material-timepicker>
-        </mat-form-field> -->
-
-        <!-- <mat-form-field>
-          <mat-label>Время</mat-label>
-          <mat-select [(ngModel)]="tsk.timeVal" name="tsk.timeVal">
-            <mat-option *ngFor="let req of times" [value]="req">
-              {{req|timeVal}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field> -->
       </ng-container>
+
+      <mat-chip-list fxFlex="noshrink" [selectable]="false">
+        <mat-chip (click)="qwickSetDate('today')" color="accent">Сегодня</mat-chip>
+        <mat-chip (click)="qwickSetDate('tomorrow')" color="accent">&nbsp;Завтра&nbsp;</mat-chip>
+      </mat-chip-list>
     </div>
 
     <!-- Дни недели -->
@@ -208,10 +192,14 @@
 
     <!-- Сложность -->
     <ng-container *ngIf="tsk.requrense != 'нет'">
-      <div fxLayout="row" fxLayoutAlign="center center" class="pb-3">
+      <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px" class="pb-3">
+        <mat-form-field fxFlex>
+          <input onfocus="this.pers" matInput autocomplete="off" placeholder="Постфикс" [(ngModel)]="tsk.postfix"
+            name="tsk.postfix">
+        </mat-form-field>
         <mat-chip-list selectable multiple>
           <mat-chip (click)="tsk.isPerk=!tsk.isPerk" [selected]="tsk.isPerk" color="accent">
-            &nbsp;&nbsp;Перк?&nbsp;&nbsp;
+            &nbsp;Перк?&nbsp;
           </mat-chip>
 
           <!-- <ng-container>
@@ -230,7 +218,7 @@
             (click)="tsk.isStatePlusTitle=!tsk.isStatePlusTitle">
             Название</mat-chip>
           <mat-chip [selected]="tsk.isStateInTitle" color="accent" (click)="tsk.isStateInTitle=!tsk.isStateInTitle">
-            Загловок
+            Заголовок
           </mat-chip>
           <mat-chip color="accent" (click)="setSumStates()" [selected]="tsk.isSumStates">&nbsp;∑&nbsp;</mat-chip>
           <mat-chip [selected]="tsk.isStateRefresh" color="accent" (click)="tsk.isStateRefresh=!tsk.isStateRefresh">

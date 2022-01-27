@@ -42,19 +42,19 @@ export class PerschangesService {
     let newLevel: boolean = false;
 
     // Произошло выполнение квеста
-    let isDoneQwest;
+    let isDoneQwest = false;
+
+    // Произошло открытие навыка
+    let isAbilActivated = false;
+
+    const isShowCharactChanges = true;
+    const isShowAbChanges = true;
+    const isShowAbActivate = true;
+    const isOpenPersAtNewLevel = false;
+    const maxAttrLevel = 100;
+
 
     Object.keys(changesMap).forEach(n => {
-      // Подзадачи
-      if (changesMap[n].type == 'tsk') {
-        // Прогрес в стейтах
-        if (changesMap[n].tskProgrBefore != changesMap[n].tskProgrAfter
-          && changesMap[n].tskProgrAfter != 0 && !this.afterPers.isNoExpShow) {
-          changes.push(
-            new ChangesModel(changesMap[n].name, 'subtask', changesMap[n].tskProgrBefore, changesMap[n].tskProgrAfter, 0, changesMap[n].tskProgrTotal, changesMap[n].img)
-          );
-        }
-      }
       // Квесты
       if (changesMap[n].type == 'qwest') {
         // Квест выполнен
@@ -107,32 +107,23 @@ export class PerschangesService {
       }
       // Характеристики
       else if (changesMap[n].type == 'cha') {
-        if (changesMap[n].after != changesMap[n].before && !this.afterPers.isTES) {
+        if (isShowCharactChanges && changesMap[n].after != changesMap[n].before) {
           changes.push(
-            new ChangesModel(changesMap[n].name, 'cha', changesMap[n].before, changesMap[n].after, 0, this.afterPers.maxAttrLevel, changesMap[n].img)
-          );
-        }
-      }
-      // Перки
-      else if (changesMap[n].type == 'perk') {
-        if (changesMap[n].after != changesMap[n].before && !this.afterPers.isTES) {
-          changes.push(
-            new ChangesModel(changesMap[n].name, 'perk', changesMap[n].before, changesMap[n].after, 0, this.afterPers.maxAttrLevel, changesMap[n].img)
+            new ChangesModel(changesMap[n].name, 'cha', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
           );
         }
       }
       // Навыки
       else if (changesMap[n].type == 'abil') {
-        if (changesMap[n].after != changesMap[n].before && !this.afterPers.isTES) {
+        if (isShowAbActivate && changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
+          isAbilActivated = true;
           changes.push(
-            new ChangesModel(changesMap[n].name, 'abil', changesMap[n].before, changesMap[n].after, 0, this.afterPers.maxAttrLevel, changesMap[n].img)
+            new ChangesModel(`Навык ${changesMap[n].name} активирован!`, 'abil', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
           );
         }
-        // Прогрес в стейтах
-        else if (changesMap[n].tskProgrBefore != changesMap[n].tskProgrAfter
-          && changesMap[n].tskProgrAfter != 0 && this.afterPers.isNoExpShow != true) {
+        if (isShowAbChanges && changesMap[n].after != changesMap[n].before) {
           changes.push(
-            new ChangesModel(changesMap[n].name, 'state', changesMap[n].tskProgrBefore, changesMap[n].tskProgrAfter, 0, changesMap[n].tskProgrTotal, changesMap[n].img)
+            new ChangesModel(changesMap[n].name, 'abil', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
           );
         }
       }
@@ -156,10 +147,8 @@ export class PerschangesService {
     Object.keys(changesMap).forEach(n => {
       // Опыт
       if (changesMap[n].type == 'exp') {
-        let isShowBySettings = this.afterPers.isNoExpShow != true
-          || isDoneQwest == true;
-        // || changesMap[n].after < changesMap[n].before;
-        //|| isDoneQwest == true;
+        let isShowBySettings = isDoneQwest == true;
+
         if (isShowBySettings) {
           if (changesMap[n].after != changesMap[n].before) {
             let expChanges = new ChangesModel('Опыт', 'exp', changesMap[n].before * 10, changesMap[n].after * 10, this.afterPers.prevExp * 10, this.afterPers.nextExp * 10, changesMap[n].img);
@@ -216,13 +205,17 @@ export class PerschangesService {
       let abPoints;
       if (changes[index].type == 'abil') {
         abPoints = this.afterPers.ON;
+        if (isAbilActivated) {
+          head = changes[index].name + '!';
+          changes[index].name = ' ';
+        }
       } else if (changes[index].type == 'inv') {
         head = changes[index].name + '!';
         changes[index].name = ' ';
       }
 
       if (isDoneQwest) {
-        head = changes[index].name + '!';
+        head = changes[index].name;
         changes[index].name = ' ';
       }
 
@@ -238,15 +231,15 @@ export class PerschangesService {
         backdropClass: 'backdrop'
       });
 
-      await sleep(3000);
+      await sleep(5000);
 
       dialogRef.close();
-      if (abToEdit != null) {
-        this.router.navigate(['/task', abToEdit, false]);
-      }
-      if (isDoneQwest && qwestToEdit != null) {
-        this.router.navigate(['pers/qwest', qwestToEdit, true]);
-      }
+      // if (abToEdit != null) {
+      //   this.router.navigate(['/task', abToEdit, false]);
+      // }
+      // if (isDoneQwest && qwestToEdit != null) {
+      //   this.router.navigate(['pers/qwest', qwestToEdit, true]);
+      // }
     }
 
     // || this.afterPers.isTES
@@ -260,9 +253,11 @@ export class PerschangesService {
 
       dialogRefLvlUp.close();
 
-      this.srvSt.selTabPersList = 0;
-      if (this.afterPers.ON > 0) {
-        this.router.navigate(['/pers']);
+      if (isOpenPersAtNewLevel) {
+        this.srvSt.selTabPersList = 0;
+        if (this.afterPers.ON > 0) {
+          this.router.navigate(['/pers']);
+        }
       }
     }
   }
@@ -308,15 +303,11 @@ export class PerschangesService {
       ch.abilities.forEach(ab => {
         ab.tasks.forEach(tsk => {
           if (!changesMap[tsk.id]) {
-            if (tsk.isPerk) {
-              changesMap[tsk.id] = this.getChItem('perk', ab.name, ab.image);
-            }
-            else {
-              changesMap[tsk.id] = this.getChItem('abil', ab.name, ab.image);
-            }
+            changesMap[tsk.id] = this.getChItem('abil', ab.name, ab.image);
           }
 
           changesMap[tsk.id][chType] = Math.floor(tsk.value);
+
           if (chType == 'before') {
             changesMap[tsk.id]['abIsOpenBefore'] = ab.isOpen;
           }
@@ -324,9 +315,9 @@ export class PerschangesService {
             changesMap[tsk.id]['abIsOpenAfter'] = ab.isOpen;
           }
 
-          if (tsk.isSumStates) {
-            this.tskStatesProgress(tsk, chType, changesMap, true);
-          }
+          // if (tsk.isSumStates) {
+          //   this.tskStatesProgress(tsk, chType, changesMap, true);
+          // }
         });
       });
     });
