@@ -386,7 +386,7 @@
               <div style="cursor: pointer;" (click)="useRevard(rev)" fxLayout="column"
                 fxLayoutAlign="space-around center" [ngStyle]="{'border-color': rev.rare | rarecol}"
                 style="border-width: 4px!important; border-style: solid; padding: 10px;">
-                <img src="{{rev.image}}" class="img-fluid rounded"
+                <img appImgBroken src="{{rev.image}}" class="img-fluid rounded"
                   [ngStyle]="{'object-fit': 'contain', 'height': '65px'}">
                 <div fxLayout="row" fxLayoutAlign="space-evenly center">
                   <div>

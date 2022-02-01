@@ -28,14 +28,14 @@ export class AddItemDialogComponent implements OnInit {
       this.isGallery = true;
     }
     if (this.data.isPers) {
-      for (let i = 1; i <= 41; i++) {
+      for (let i = 1; i <= 44; i++) {
         let ss = '000' + i;
         ss = ss.substr(ss.length - 3);
         this.gallerryImages.push('assets/img/Perses/' + ss + '.jpg');
       }
     }
     else{
-      for (let i = 1; i <= 125; i++) {
+      for (let i = 1; i <= 126; i++) {
         let ss = '000' + i;
         ss = ss.substr(ss.length - 3);
         this.gallerryImages.push('assets/img/Gallery/' + ss + '.jpg');

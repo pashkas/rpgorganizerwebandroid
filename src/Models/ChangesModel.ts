@@ -28,7 +28,18 @@ export class ChangesModel {
         this.name = name;
         this.type = type;
 
-        let change = Math.floor(valTo) - Math.floor(valFrom);
+        let change;
+        const changeAbs = Math.abs(valTo - valFrom);
+        if (changeAbs < 1) {
+            if (changeAbs < 0.1) {
+                change = Math.round((valTo - valFrom) * 100) / 100;
+            } else {
+                change = Math.round((valTo - valFrom) * 10) / 10;
+            }
+        } else {
+            change = Math.round(valTo - valFrom);
+        }
+
         if (change != 0 && type != 'subtask' && type != 'qwest' && type != 'state' && type != 'inv' && type != 'perk') {
             if (change > 0) {
                 this.valChange = '+' + change;
@@ -73,7 +84,7 @@ export class persExpChanges {
     constructor(valFrom, valTo, lvlStartExp, lvlEndExp) {
         lvlStartExp = lvlStartExp;
         lvlEndExp = lvlEndExp;
-      
+
 
         this.valFrom = ((valFrom - lvlStartExp) / (lvlEndExp - lvlStartExp)) * 100;
         this.valTo = ((valTo - lvlStartExp) / (lvlEndExp - lvlStartExp)) * 100;

@@ -26,7 +26,7 @@
           <h5 class="p-1"><span class="text-primary">{{r.Name|uppercase}}:</span> {{r.Level}}</h5>
         </td>
         <td class="align-middle text-center">
-          <div><img src="{{r.Pic}}" class="img-fluid p-1" [ngStyle]="{'object-fit': 'contain', 'height': '100px'}">
+          <div><img appImgBroken src="{{r.Pic}}" class="img-fluid p-1" [ngStyle]="{'object-fit': 'contain', 'height': '100px'}">
           </div>
         </td>
       </tr>

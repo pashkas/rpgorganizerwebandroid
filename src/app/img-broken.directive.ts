@@ -12,7 +12,7 @@ export class ImgBrokenDirective {
   @Input() src:string;
 
   updateUrl() {
-    this.src = 'assets/img/ghostbusters.jpg';
+    this.src = 'assets/img/broken.jpg';
   }
 
 }

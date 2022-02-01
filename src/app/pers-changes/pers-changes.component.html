@@ -11,7 +11,7 @@
             [ngStyle]="{'object-fit': 'contain'}">
         <img *ngIf="!isGood && !this.changes[0].img" class="img-fluid" style='height: 125px' src="assets/img/bad.png"
             [ngStyle]="{'object-fit': 'contain'}">
-        <img *ngIf="changes[0]?.img" class="img-fluid" style='height: 125px' src="{{changes[0]?.img}}"
+        <img appImgBroken *ngIf="changes[0]?.img" class="img-fluid" style='height: 125px' src="{{changes[0]?.img}}"
             [ngStyle]="{'object-fit': 'contain'}">
 
         <div *ngIf="this.abPoints != null" class=" m-2">
@@ -25,8 +25,8 @@
 
     <div fxFlex class="px-2 py-1 text-center" style="width: 95%;">
         <mat-list class="p-1">
-            <div mat-list-item *ngIf="headText">
-                <b>{{headText|uppercase}}</b>
+            <div mat-list-item *ngIf="headText" class="py-2" >
+                <h5 style="color: white;">{{headText|uppercase}}</h5>
             </div>
             <div mat-list-item *ngFor="let item of this.changes; let i = index">
                 <app-pers-changes-item [item]="item"></app-pers-changes-item>

@@ -107,7 +107,7 @@ export class PerschangesService {
       }
       // Характеристики
       else if (changesMap[n].type == 'cha') {
-        if (isShowCharactChanges && changesMap[n].after != changesMap[n].before) {
+        if (isShowCharactChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
           changes.push(
             new ChangesModel(changesMap[n].name, 'cha', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
           );
@@ -118,10 +118,10 @@ export class PerschangesService {
         if (isShowAbActivate && changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
           isAbilActivated = true;
           changes.push(
-            new ChangesModel(`Навык ${changesMap[n].name} активирован!`, 'abil', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
+            new ChangesModel(`Навык ${changesMap[n].name} активирован!`, 'abil', 0, 0, 0, maxAttrLevel, changesMap[n].img)
           );
         }
-        if (isShowAbChanges && changesMap[n].after != changesMap[n].before) {
+        if (isShowAbChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
           changes.push(
             new ChangesModel(changesMap[n].name, 'abil', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
           );
@@ -226,7 +226,8 @@ export class PerschangesService {
           changes: [changes[index]],
           isGood: isGood,
           abPoints: abPoints,
-          isTES: this.afterPers.isTES
+          isTES: this.afterPers.isTES,
+          itemType: changes[index].type
         },
         backdropClass: 'backdrop'
       });
@@ -306,7 +307,8 @@ export class PerschangesService {
             changesMap[tsk.id] = this.getChItem('abil', ab.name, ab.image);
           }
 
-          changesMap[tsk.id][chType] = Math.floor(tsk.value);
+          //changesMap[tsk.id][chType] = Math.floor(tsk.value);
+          changesMap[tsk.id][chType] = tsk.tesValue;
 
           if (chType == 'before') {
             changesMap[tsk.id]['abIsOpenBefore'] = ab.isOpen;
