@@ -16,7 +16,7 @@
 <div class="container pt-2 pb-4" *ngIf="this.pers && tsk && !isEditMode">
   <form class="pb-4">
     <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image"></app-image-component>
-    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/'+ tsk.imageLvl + '/'+tsk.image+'.jpg'">
+    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/'+ tsk.imageLvl + '/'+tsk.image+'.webp'">
     </app-image-component>
     <div class="progress position-relative" style="height: 32px;" *ngIf="tskAbility">
       <div class="progress-bar abprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'">
@@ -129,7 +129,7 @@
   <form class="pb-4">
     <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image" [isCanEdit]="true">
     </app-image-component>
-    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/'+ tsk.imageLvl + '/'+tsk.image+'.jpg'">
+    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/'+ tsk.imageLvl + '/'+tsk.image+'.webp'">
     </app-image-component>
     <!-- Название -->
     <div fxLayout="row" xLayoutAlign="none center" fxLayoutGap='15px'>

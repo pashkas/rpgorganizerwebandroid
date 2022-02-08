@@ -29,7 +29,7 @@ export class Ability {
 
     descr: string;
     id: any = uuid();
-    image: string = "assets/icons/defAbil.png";
+    image: string = "assets/icons/defAbil.webp";
     name: string;
     progressValue: number = 0;
     rang: Rangse = { val: 0, name: "0", img: "" };

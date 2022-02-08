@@ -18,12 +18,12 @@
     *ngIf="this.pers.currentView=='SkillsSort'||this.pers.currentView=='SkillsGlobal'||this.pers.currentView=='QwestsGlobal'||this.pers.currentView=='QwestSort'">
     <mat-list (cdkDropListDropped)="drop($event)" cdkDropList class="list-group  py-2 h-100 w-100 overflow-auto">
       <ng-container *ngFor="let t of this.pers.tasks; let i = index;">
-        <div cdkDrag mat-list-item (click)="tskClick(i);" class="{{t| listBg:this.pers.currentView}}">
+        <div cdkDrag mat-list-item (click)="tskClick(i);" class="{{t| listBg:this.pers.currentView:pers.isMegaPlan}}">
           <div class="d-flex align-items-center"
             [ngClass]="{'py-2': pers.currentView!='SkillsSort', 'py-0':  pers.currentView=='SkillsSort'}">
             <div class="flex-grow-1 text-center">
               <div class="pointer">
-                <ng-container *ngIf="t.requrense != 'нет' && checkDate(t.date)" class="bg-danger">
+                <ng-container *ngIf="t.requrense != 'нет' && !pers.isMegaPlan && checkDate(t.date)" class="bg-danger">
                   [{{t.date| datestring}}]
                 </ng-container>
                 <ng-container *ngIf="t.requrense != 'нет' || this.pers.currentView=='QwestSort'; else elseTemplate">
@@ -65,10 +65,10 @@
 
     <!-- (error)="ReImages()" -->
     <div class="container" [ngClass]="{'vibrate-1': isSucessShown}">
-      <img (press)="onLongPress($event)" (contextmenu)="$event.preventDefault()" (swipeup)="done(this.pers.currentTask)" 
+      <img appImgBroken (press)="onLongPress($event)" (contextmenu)="$event.preventDefault()" (swipeup)="done(this.pers.currentTask)" 
         (swipedown)="fail(this.pers.currentTask)" (swiperight)="onSwipeLeft($event)" (swipeleft)="onSwipeRight($event)"
         class="rounded element img-fluid pt-1 pb-0 px-1 mh-100 w-100" [ngStyle]="{'object-fit': 'contain'}"
-        src="{{'assets/img/'+ this.pers.currentTask.imageLvl + '/' + this.pers.currentTask.image + '.jpg'}}">
+        src="{{'assets/img/'+ this.pers.currentTask.imageLvl + '/' + this.pers.currentTask.image + '.webp'}}">
     </div>
     <!-- (error)="onImgErr()" -->
 
@@ -151,6 +151,8 @@
       <button (click)="setSort()" mat-icon-button style="width: 47px !important;">
         <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'3em'}">
       </button>
+
+      <mat-slide-toggle (change)="setMegaPlan()" [(ngModel)]="this.srv.pers$.value.isMegaPlan">Мега план</mat-slide-toggle>
     </div>
 
     <!-- Сортировка квестов -->

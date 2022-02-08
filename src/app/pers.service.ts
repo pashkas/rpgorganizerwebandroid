@@ -39,11 +39,11 @@ export class PersService {
   isOffline: boolean = false;
   isOnline: boolean;
   isSynced: boolean = false;
-  mn1Count: number = 65;
-  mn2Count: number = 149;
-  mn3Count: number = 713;
-  mn4Count: number = 745;
-  mn5Count: number = 285;
+  mn1Count: number = 62;
+  mn2Count: number = 136;
+  mn3Count: number = 617;
+  mn4Count: number = 655;
+  mn5Count: number = 281;
   pers$ = new BehaviorSubject<Pers>(null);
   twoDaysTes = 12.546;
   // Пользователь
@@ -77,11 +77,7 @@ export class PersService {
   }
 
   get baseTaskPoints(): number {
-    if (this.pers$.value.isTES) {
-      return 5.0;
-    }
-
-    return 1.0;
+    return 5.0;
   }
 
   /**
@@ -398,21 +394,15 @@ export class PersService {
 
   changeTes(task: Task, isUp: boolean, subTasksCoef: number = 1) {
     let change = this.getTaskChangesExp(task, isUp, null, subTasksCoef);
-    // let changeAb = this.getTaskChangesExp(task, isUp, null, subTasksCoef, true);
 
     if (isUp) {
       task.tesValue += change;
-      // task.tesAbValue += changeAb;
     }
     else {
       task.tesValue -= change;
-      // task.tesAbValue -= changeAb;
       if (task.tesValue < 0) {
         task.tesValue = 0;
       }
-      // if (task.tesAbValue < 0) {
-      //   task.tesAbValue = 0;
-      // }
     }
   }
 
@@ -583,11 +573,8 @@ export class PersService {
   }
 
   countTesExp(tesAbTotalMax: number, tesAbTotalCur: number): number {
-    // let tesThreeAbTwoDays = 37.63;
-    let tesThreeAbTwoDays = 22;
-
+    let tesThreeAbTwoDays = 30;
     let exp = tesAbTotalCur / (tesThreeAbTwoDays / 1);
-    // let exp = (tesAbTotalCur / tesAbTotalMax) * 100;
 
     return exp;
   }
@@ -1167,6 +1154,23 @@ export class PersService {
 
     let tasks: Task[] = [];
 
+    // Переделка картинок
+    if (!prs.isWebp) {
+      prs.image = this.checkAndChangeWebP(prs.image);
+      for (const ch of prs.characteristics) {
+        ch.image = this.checkAndChangeWebP(ch.image);
+        for (const ab of ch.abilities) {
+          ab.image = this.checkAndChangeWebP(ab.image);
+        }
+      }
+
+      for (const qw of prs.qwests) {
+        qw.image = this.checkAndChangeWebP(qw.image);
+      }
+
+      prs.isWebp = true;
+    }
+
     for (const ch of prs.characteristics) {
       let abMax = 0;
       let abCur = 0;
@@ -1397,12 +1401,14 @@ export class PersService {
           if (prs.currentView == curpersview.SkillTasks
             || prs.currentView == curpersview.SkillsSort
             || prs.currentView == curpersview.SkillsGlobal) {
-            if (doneReq && (tsk.value >= 1 || (prs.isTES && ab.isOpen))) {
+            if ((prs.isMegaPlan && prs.currentView == curpersview.SkillsSort) || (doneReq && (tsk.value >= 1 || (prs.isTES && ab.isOpen)))) {
               if (tsk.isSumStates && tsk.states.length > 0 && !tsk.isStateInTitle) {
                 if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
                   for (const st of tsk.states) {
-                    if (st.isActive
-                      && (!st.isDone || prs.currentView == curpersview.SkillsSort)) {
+                    if (
+                      (prs.isMegaPlan && prs.currentView == curpersview.SkillsSort) ||
+                      (st.isActive
+                        && (!st.isDone || prs.currentView == curpersview.SkillsSort))) {
                       let stT = this.getTskFromState(tsk, st, false);
                       tasks.push(stT);
                     }
@@ -1737,6 +1743,10 @@ export class PersService {
         this.changesAfter(true);
       }
     }
+  }
+  checkAndChangeWebP(img: string): string {
+    img = img.substr(0, img.lastIndexOf(".")) + ".webp";
+    return img;
   }
 
   hardnessKoef(hardnes: number) {
@@ -2545,7 +2555,7 @@ export class PersService {
 
     let ons = totalGained - abOpenned;
     if (startOn + gainedOns > abs) {
-      ons = abs - abOpenned;
+      ons = (abs - abOpenned) + 1;
     }
     exp = exp * 100;
     let prevOn = 0;
@@ -2800,13 +2810,6 @@ export class PersService {
       subTasksCoef = subTasksCoef * task.hardnes;
     }
 
-    // if (this.pers$.value.isTES) {
-    //   expKoef = expKoef / Task.getHardness(task);
-    // }
-    // else {
-    //   expKoef = expKoef * Task.getHardness(task);
-    // }
-
     let chVal = (this.baseTaskPoints / subTasksCoef) * koef * expKoef;
 
     if (task.tesAbValue == null || task.tesAbValue == undefined) {
@@ -2835,6 +2838,9 @@ export class PersService {
 
       while (true) {
         let tesKoef = this.getTesChangeKoef(tesVal);
+        if (tesVal >= 100) {
+          tesKoef = 100;
+        }
 
         let tesLeft = 1;
         if (isPlus) {
@@ -3220,7 +3226,7 @@ export class PersService {
           progr = 0.01;
         }
 
-        if (tsk.isPerk) {
+        if (tsk.isPerk || this.pers$.value.isMegaPlan) {
           progr = 1;
         }
 

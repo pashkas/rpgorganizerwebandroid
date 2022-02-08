@@ -6,7 +6,11 @@ import { Task } from 'src/Models/Task';
 })
 export class ListBgPipe implements PipeTransform {
 
-  transform(tsk: Task, view: string, ...args: any[]): any {
+  transform(tsk: Task, view: string, isMegaPlan: boolean, ...args: any[]): any {
+    if (isMegaPlan) {
+      return '';
+    }
+
     if (tsk.lastNotDone && view == 'SkillsGlobal') {
       return 'list-group-item-danger';
     }
@@ -14,11 +18,11 @@ export class ListBgPipe implements PipeTransform {
     let check = this.checkDate(tsk.date);
 
     if (check != 'now' && view == 'SkillsSort') {
-      if (tsk.requrense != 'нет' && this.checkDate(tsk.date)=='back') {
+      if (tsk.requrense != 'нет' && this.checkDate(tsk.date) == 'back') {
         return 'list-group-item-warning';
       }
 
-      if (tsk.requrense != 'нет' && this.checkDate(tsk.date)=='later') {
+      if (tsk.requrense != 'нет' && this.checkDate(tsk.date) == 'later') {
         return 'list-group-item-info';
       }
     }

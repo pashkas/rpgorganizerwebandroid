@@ -368,7 +368,15 @@ export class MainWindowComponent implements OnInit {
     }
   }
 
+  setMegaPlan() {
+    this.srv.savePers(false);
+  }
+
   setSort() {
+    if (this.srv.pers$.value.isMegaPlan == null) {
+      this.srv.pers$.value.isMegaPlan = false;
+    }
+
     if (this.srv.pers$.value.currentView == curpersview.QwestTasks) {
       this.srv.pers$.value.currentView = curpersview.QwestSort;
     }
@@ -392,6 +400,8 @@ export class MainWindowComponent implements OnInit {
         else {
           this.srv.pers$.value.tasks[index].order = index;
         }
+
+        this.srv.pers$.value.isMegaPlan = false;
       }
 
 

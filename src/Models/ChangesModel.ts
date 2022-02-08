@@ -32,12 +32,12 @@ export class ChangesModel {
         const changeAbs = Math.abs(valTo - valFrom);
         if (changeAbs < 1) {
             if (changeAbs < 0.1) {
-                change = Math.round((valTo - valFrom) * 100) / 100;
+                change = Math.floor((valTo - valFrom) * 100) / 100;
             } else {
-                change = Math.round((valTo - valFrom) * 10) / 10;
+                change = Math.floor((valTo - valFrom) * 10) / 10;
             }
         } else {
-            change = Math.round(valTo - valFrom);
+            change = Math.floor(valTo) - Math.floor(valFrom);
         }
 
         if (change != 0 && type != 'subtask' && type != 'qwest' && type != 'state' && type != 'inv' && type != 'perk') {
@@ -63,6 +63,10 @@ export class ChangesModel {
                 this.valChange = 'использован!';
             }
         }
+
+        // if (type == 'abil' || type == 'cha') {
+        //     this.valChange = '';
+        // }
 
         //--------------------------------------
         this.totalMin = totalMin;

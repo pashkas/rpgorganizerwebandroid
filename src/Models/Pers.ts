@@ -106,6 +106,8 @@ export class Pers {
      */
     maxAttrLevel: number = 100;
 
+    isMegaPlan: boolean = false;
+
     Monsters0Queue: number;
     Monsters1Queue: number;
     Monsters2Queue: number;
@@ -161,7 +163,7 @@ export class Pers {
     dateLastUse: Date = new Date();
     exp: number = 0;
     id: any;
-    image: string = "https://live.staticflickr.com/7888/47533068482_b007e8ae03_o.png";
+    image: string = "assets/icons/link.webp";
     inventory: Reward[] = [];
     level: number = 0;
     name: string = "Хиро";
@@ -169,15 +171,15 @@ export class Pers {
     prevOrderSeq: number = 0;
     progressValue: number = 0;
     qwests: Qwest[] = [];
-    rang: Rangse = { val: 0, name: "Обыватель", img: "https://live.staticflickr.com/7901/40619949183_fbb6652b25_o.jpg" };
+    rang: Rangse = { val: 0, name: "Обыватель", img: "" };
     rangProgress: number;
     rangse: Rangse[] = [
-        { val: 0, name: "Обыватель", img: "https://live.staticflickr.com/7901/40619949183_fbb6652b25_o.jpg" },
-        { val: 20, name: "Авантюрист", img: "https://live.staticflickr.com/7888/47533068482_b007e8ae03_o.png" },
-        { val: 40, name: "Воин", img: "https://live.staticflickr.com/7879/46670486965_490750b77e_o.jpg" },
-        { val: 60, name: "Герой", img: "https://live.staticflickr.com/7803/47533073972_5302712b17_o.jpg" },
-        { val: 80, name: "Супергерой", img: "https://live.staticflickr.com/7855/33709082758_52c128029b_o.jpg" },
-        { val: 100, name: "Легенда", img: "https://live.staticflickr.com/7855/33709082758_52c128029b_o.jpg" },
+        { val: 0, name: "Обыватель", img: "" },
+        { val: 20, name: "Авантюрист", img: "" },
+        { val: 40, name: "Воин", img: "" },
+        { val: 60, name: "Герой", img: "" },
+        { val: 80, name: "Супергерой", img: "" },
+        { val: 100, name: "Легенда", img: "" },
     ];
     rewards: Reward[] = [];
     sellectedView: string = 'навыки';
@@ -195,4 +197,5 @@ export class Pers {
     totalProgress: number;
     isOffline: boolean = false;
     currentView: curpersview;
+    isWebp: boolean = true;
 }
