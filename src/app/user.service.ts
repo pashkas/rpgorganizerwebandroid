@@ -7,13 +7,11 @@ import * as firebase from 'firebase/app';
   providedIn: 'root'
 })
 export class UserService {
-
   constructor(
     public db: AngularFirestore,
     public afAuth: AngularFireAuth
   ) {
   }
-
 
   async getCurrentUser() {
     return await new Promise<any>((resolve, reject) => {

@@ -14,9 +14,14 @@ export class UserResolver implements Resolve<any> {
   constructor(public userService: UserService, private router: Router, private srv: PersService) { }
 
   async resolve(route: ActivatedRouteSnapshot): Promise<any> {
-    if (!this.srv.isOffline) {
+    let prsJson = localStorage.getItem("pers");
+    if (prsJson) {
+      this.srv.setPers(prsJson);
+      return await new Promise((resolve, reject) => {
+        return resolve(true);
+      });
+    } else {
       let user = new FirebaseUserModel();
-
       return await new Promise((resolve, reject) => {
         this.userService.getCurrentUser()
           .then(res => {
@@ -27,18 +32,32 @@ export class UserResolver implements Resolve<any> {
             return resolve(user);
           }, err => {
             this.router.navigate(['/login']);
-
+            
             return reject(err);
-          })
+          });
       })
     }
-    else{
-      let prsJson = localStorage.getItem("pers");
-      if (prsJson) {
-        return await new Promise((resolve, reject) => {
-          return resolve(prsJson);
-        });
-      }
-    }
+
+    // if (!this.srv.isOffline) {
+    //   let user = new FirebaseUserModel();
+
+    //   return await new Promise((resolve, reject) => {
+    //     this.userService.getCurrentUser()
+    //       .then(res => {
+    //         user.name = res.displayName;
+    //         user.provider = res.providerData[0].providerId;
+    //         user.id = res.uid;
+
+    //         return resolve(user);
+    //       }, err => {
+    //         this.router.navigate(['/login']);
+
+    //         return reject(err);
+    //       })
+    //   })
+    // }
+    // else {
+
+    // }
   }
 }

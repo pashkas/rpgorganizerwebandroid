@@ -9,9 +9,9 @@ import { TurnirTableComponent } from './turnir-table/turnir-table.component';
 
 
 const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full', resolve: { data: UserResolver } },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent, canActivate: [AuthGuard] },
-  { path: 'main', component: MainWindowComponent, resolve: { data: UserResolver }, data: { key: 'main' } },
+  { path: 'main', component: MainWindowComponent },
   { path: 'pers', loadChildren: () => import('./pers/pers.module').then(m => m.PersModule) },
   { path: 'turnirtable', component: TurnirTableComponent },
   { path: 'mind-map', loadChildren: () => import('./mind-map/mind-map.module').then(m => m.MindMapModule) },

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Pers } from 'src/Models/Pers';
-import { BehaviorSubject, Subject, Observable, fromEvent, merge, Observer } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { FirebaseUserModel } from 'src/Models/User';
 import { Characteristic } from 'src/Models/Characteristic';
 import { Ability } from 'src/Models/Ability';
 import { Task, taskState, IImg } from 'src/Models/Task';
-import { first, take, takeUntil, share, map, filter } from 'rxjs/operators';
+import { take, share, map } from 'rxjs/operators';
 import { Qwest } from 'src/Models/Qwest';
 import { Reward } from 'src/Models/Reward';
 import { plusToName } from 'src/Models/plusToName';
@@ -14,13 +14,13 @@ import { Rangse } from 'src/Models/Rangse';
 import { Router } from '@angular/router';
 import { PerschangesService } from './perschanges.service';
 import { EnamiesService } from './enamies.service';
-import { Diary, DiaryParam } from 'src/Models/Diary';
+import { Diary } from 'src/Models/Diary';
 import * as moment from 'moment';
-import { isNullOrUndefined } from 'util';
 import { SamplePers } from 'src/Models/SamplePers';
 import { curpersview } from 'src/Models/curpersview';
-import { DateTime } from 'luxon';
-import { TskTimeValDialogComponent } from './tsk-time-val-dialog/tsk-time-val-dialog.component';
+import { UserService } from './user.service';
+import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
+import { MatDialog } from '@angular/material';
 
 @Injectable({
   providedIn: 'root'
@@ -45,35 +45,56 @@ export class PersService {
   mn4Count: number = 655;
   mn5Count: number = 281;
   pers$ = new BehaviorSubject<Pers>(null);
+  currentView$ = new BehaviorSubject<curpersview>(curpersview.SkillTasks); currentTask$ = new BehaviorSubject<Task>(null);
+
   twoDaysTes = 12.546;
   // Пользователь
   user: FirebaseUserModel;
 
-  constructor(public db: AngularFirestore, private router: Router, private changes: PerschangesService, private enmSrv: EnamiesService) {
-    this.createOnline$().subscribe(isOnline => this.isOnline = isOnline);
-    let isOffline = localStorage.getItem("isOffline");
-    if (isOffline === 'undefined' || isOffline === 'null') {
-      this.isOffline = false;
-    }
-    else {
-      this.isOffline = JSON.parse(isOffline);
-    }
+  constructor(public db: AngularFirestore, private router: Router, private changes: PerschangesService, private enmSrv: EnamiesService, public userService: UserService, public dialog: MatDialog) {
+    this.isOffline = true;
+    this.getPers();
+  }
+
+  getPers() {
+    let prsJson = localStorage.getItem("pers");
+    if (prsJson) {
+      this.setPers(prsJson);
+    } else {
+      this.userService.getCurrentUser()
+        .then(res => {
+          this.loadPers(res.uid)
+            .pipe(take(1))
+            .subscribe(n => {
+              let prs: Pers = n as Pers;
+              if (prs != null) {
+                this.setPers(JSON.stringify(prs));
+              } else {
+                const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+                  panelClass: 'custom-black'
+                });
+
+                dialogRef.afterClosed()
+                  .pipe(take(1))
+                  .subscribe(result => {
+                    if (result) {
+                      this.setNewPers(res.uid);
+                    }
+                  });
+              }
+            });
+        }, err => {
+          this.router.navigate(['/login']);
+        });
+    };
   }
 
   get _maxAbilLevel(): number {
-    if (this.pers$.value.isTES) {
-      return 100;
-    }
-
-    return 10;
+    return 100;
   }
 
   get _maxCharactLevel(): number {
-    if (this.pers$.value.isTES) {
-      return 100;
-    }
-
-    return 10;
+    return 100;
   }
 
   get baseTaskPoints(): number {
@@ -176,12 +197,10 @@ export class PersService {
       }
 
       // Открыта?
-      if (this.pers$.value.isTES) {
-        let aIsOpen = a.isOpen ? 1 : 0;
-        let bIsOpen = b.isOpen ? 1 : 0;;
-        if (aIsOpen != bIsOpen) {
-          return -(aIsOpen - bIsOpen);
-        }
+      let aIsOpen = a.isOpen ? 1 : 0;
+      let bIsOpen = b.isOpen ? 1 : 0;;
+      if (aIsOpen != bIsOpen) {
+        return -(aIsOpen - bIsOpen);
       }
 
       // Можно открыть
@@ -191,14 +210,6 @@ export class PersService {
       if (aMayUp != bMayUp) {
         return -(aMayUp - bMayUp);
       }
-
-      // Следующий уровень такой же
-      // let aSame = aTask.IsNextLvlSame ? 1 : 0;
-      // let bSame = bTask.IsNextLvlSame ? 1 : 0;
-
-      // if (aSame != bSame) {
-      //   return -(aSame - bSame);
-      // }
 
       // Значение
       if (a.value != b.value) {
@@ -588,16 +599,6 @@ export class PersService {
         return +prev + +cur.probability;
       }, 0);
     }
-  }
-
-  createOnline$() {
-    return merge<boolean>(
-      fromEvent(window, 'offline').pipe(map(() => false)),
-      fromEvent(window, 'online').pipe(map(() => true)),
-      new Observable((sub: Observer<boolean>) => {
-        sub.next(navigator.onLine);
-        sub.complete();
-      }));
   }
 
   /**
@@ -1132,12 +1133,9 @@ export class PersService {
   /**
    * Записать персонажа в БД.
    */
-  savePers(isShowNotif: boolean, plusOrMinus?): any {
-    //let prs: Pers = JSON.parse(JSON.stringify(this.pers$.value));
-    let prs: Pers = this.pers$.value;
-    // prs.isAutofocus = false;
+  savePers(isShowNotif: boolean, plusOrMinus?, pers?): any {
+    let prs: Pers = pers != null ? pers : this.pers$.value;
 
-    prs.maxAttrLevel = 10;
     prs.dateLastUse = new Date();
 
     this.getAllMapping(prs);
@@ -1189,13 +1187,6 @@ export class PersService {
           }
 
           tsk.hardnes = 1;
-          // if (!tsk.hardnes) {
-          //   tsk.hardnes = 1;
-          // }
-          // if (prs.isTES && tsk.hardnes < 1) {
-          //   tsk.hardnes = 1;
-          // }
-
           abCount += 1;
 
           if (!tsk.tskWeekDays) {
@@ -1211,8 +1202,7 @@ export class PersService {
               tsk.aimUnit = 'Раз';
               tsk.aimTimer = tsk.aimCounter;
               tsk.aimCounter = 0;
-            }
-            else {
+            } else {
               tsk.aimUnit = 'Минут';
             }
           }
@@ -1225,8 +1215,7 @@ export class PersService {
             if (tsk.isPerk && tsk.value >= 1) {
               tsk.value = 10;
             }
-          }
-          else {
+          } else {
             tsk.value = Math.floor(tsk.tesValue);
 
             tsk.failCounter = 0;
@@ -1245,7 +1234,7 @@ export class PersService {
           tsk.plusToNames = [];
           tsk.plusToNames.push(new plusToName(ch.name, ch.id, '/pers/characteristic', ''));
 
-          this.setTaskTittle(tsk);
+          this.setTaskTittle(tsk, prs.isMegaPlan);
 
           if (tsk.requrense != 'нет') {
             tsk.plusToNames.unshift(new plusToName('' + tsk.time, null, null, ''));
@@ -1255,8 +1244,7 @@ export class PersService {
 
               if (tsk.isSumStates && tsk.states.length > 0) {
                 exp = this.getSubtaskExpChange(tsk, true, tsk.states[0]) * 10.0;
-              }
-              else {
+              } else {
                 exp = this.getTaskChangesExp(tsk, true) * 10.0;
               }
 
@@ -1289,8 +1277,7 @@ export class PersService {
             && tsk.hardnes == 1
           ) {
             ab.isNotChanged = true;
-          }
-          else {
+          } else {
             ab.isNotChanged = false;
           }
 
@@ -1307,8 +1294,7 @@ export class PersService {
                 req.elName = abil.name;
                 if (abil.value >= req.elVal) {
                   req.isDone = true;
-                }
-                else {
+                } else {
                   req.isDone = false;
                   doneReq = false;
                 }
@@ -1356,8 +1342,7 @@ export class PersService {
           if (tsk.value <= 9
             && doneReq) {
             tsk.mayUp = true;
-          }
-          else {
+          } else {
             tsk.mayUp = false;
           }
           if (prs.isTES && ab.isOpen) {
@@ -1373,16 +1358,14 @@ export class PersService {
             if (tsk.isPerk) {
               if (tsk.value == 0) {
                 rng.name = "-";
-              }
-              else {
+              } else {
                 rng.name = "👍";
               }
             }
             else {
               if (tsk.value == 10) {
                 rng.name = "👍";
-              }
-              else {
+              } else {
                 rng.name = tsk.value + '';
               }
             }
@@ -1390,8 +1373,7 @@ export class PersService {
           else {
             if (ab.isOpen == false) {
               rng.name = '-';
-            }
-            else {
+            } else {
               rng.name = tsk.value + '';
             }
           }
@@ -1718,32 +1700,10 @@ export class PersService {
       this.savePers(false);
     }
 
-    if (prs.isAutoPumping) {
-      let isNoUp = true;
-      if (prs.ON > 0) {
-        if (prs.characteristics.length > 0) {
-          if (prs.characteristics[0].abilities.length > 0) {
-            const abil = prs.characteristics[0].abilities[0];
-            const tsk = abil.tasks[0];
-
-            if (tsk.value < 10 && tsk.mayUp) {
-              if (!this.isAutoPumpInProcess) {
-                this.isAutoPumpInProcess = true;
-                this.changesBefore();
-              }
-              this.upAbility(abil);
-              isNoUp = false;
-            }
-          }
-        }
-      }
-
-      if (isNoUp == true && this.isAutoPumpInProcess) {
-        this.isAutoPumpInProcess = false;
-        this.changesAfter(true);
-      }
-    }
+    this.currentView$.next(prs.currentView);
+    this.currentTask$.next(prs.currentTask);
   }
+
   checkAndChangeWebP(img: string): string {
     img = img.substr(0, img.lastIndexOf(".")) + ".webp";
     return img;
@@ -1771,6 +1731,8 @@ export class PersService {
         this.pers$.value.currentQwestId = this.pers$.value.currentTask.qwestId;
       }
     }
+
+    this.currentTask$.next(this.pers$.value.currentTask);
   }
 
   setLearningPers(userId) {
@@ -1799,16 +1761,9 @@ export class PersService {
     this.setPers(JSON.stringify(prs));
   }
 
-  setPers(data: any) {
-    const pers = data;
-    let prs: Pers;
-
-    if (!this.isOffline) {
-      prs = (pers as Pers);
-    }
-    else {
-      prs = JSON.parse(pers);
-    }
+  setPers(data: string) {
+    let prs: Pers = JSON.parse(data);
+    prs.currentView = curpersview.SkillTasks;
 
     if (prs.tasks && prs.tasks.length > 0) {
       prs.currentTaskIndex = 0;
@@ -1817,14 +1772,7 @@ export class PersService {
 
     this.checkPersNewFields(prs);
 
-    if (!prs.imgVers || prs.imgVers < 1) {
-      prs.imgVers = 1;
-      this.reImages(prs);
-    }
-
-    prs.currentView = curpersview.SkillTasks;
-    this.pers$.next(prs);
-    this.savePers(false);
+    this.savePers(false, undefined, prs);
   }
 
   setStatesNotDone(tsk: Task) {
@@ -2049,12 +1997,13 @@ export class PersService {
 
     if (isDownload) {
       // download
-      this.loadPers(this.pers$.value.userId).subscribe(n => {
-        let prs: Pers = n as Pers;
-        prs.currentView = curpersview.SkillTasks;
-        this.pers$.next(prs);
-        this.savePers(false);
-      });
+      this.loadPers(this.pers$.value.userId)
+        .pipe(take(1))
+        .subscribe(n => {
+          let prs: Pers = n as Pers;
+          prs.currentView = curpersview.SkillTasks;
+          this.savePers(false, null, prs);
+        });
     } else {
       // upload
       this.savePers(false);
@@ -2419,10 +2368,6 @@ export class PersService {
       prs.qwests = [];
     }
 
-    if (prs.isOffline == null || prs.isOffline == undefined) {
-      prs.isOffline = false;
-    }
-
     // Настройки
     // prs.isTES = false;
     prs.isEra = false;
@@ -2435,48 +2380,7 @@ export class PersService {
     prs.isTES = true;
     prs.isAutoPumping = false;
     prs.isAutofocus = false;
-
-    if (prs.isNoDiary) {
-      return;
-    }
-
-    if (!prs.Diary) {
-      prs.Diary = [];
-    }
-
-    let lastDate: moment.Moment = null;
-    let nowDate: moment.Moment = moment().startOf('day');
-    if (prs.Diary.length > 0) {
-      let first_element = prs.Diary[0];
-      lastDate = moment(first_element.date);
-    }
-
-    if (lastDate == null) {
-      // Добавляем новый
-      prs.Diary.unshift(new Diary(moment().startOf('day').toDate(), []));
-    }
-    else {
-      if (lastDate) {
-        let first_element = prs.Diary[0];
-        if (lastDate.isBefore(nowDate)) {
-          while (true) {
-            lastDate.add(1, 'day');
-
-            let d = new Diary(lastDate.toDate(), JSON.parse(JSON.stringify(first_element.params)));
-            prs.Diary.unshift(d);
-
-            if (lastDate.isSameOrAfter(nowDate)) {
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    // Не больше 28 дней
-    if (prs.Diary.length > 28) {
-      prs.Diary.splice(28);
-    }
+    prs.Diary = [];
   }
 
   private countPersLevelAndOns(abTotalMax: number, prevOn: number, startExp: number, exp: number, ons: number, nextExp: number, prs: Pers, persLevel: number) {
@@ -3074,277 +2978,139 @@ export class PersService {
     }
   }
 
-  private setTaskTittle(tsk: Task) {
+  private setTaskTittle(tsk: Task, isMegaPlan: boolean) {
     tsk.statesDescr = [];
     tsk.curStateDescrInd = 0;
 
     if (tsk.aimTimer != 0 || tsk.aimCounter != 0 || tsk.states.length > 0 || tsk.postfix || tsk.prefix) {
       let plusState = '';
-      if (!this.pers$.value.isTES) {
-        // Состояния
-        if (tsk.states.length > 0) {
-          let nms: number[] = this.getSet(tsk, tsk.states.length, 'State');
+      // Для TES
+      tsk.curLvlDescr = '';
+      plusState = '';
+      tsk.statesDescr = [];
+      tsk.IsNextLvlSame = false;
+      let start = 0;
+      let progr = start + (1 - start) * (tsk.value / this._maxAbilLevel);
 
-          if (tsk.isStateRefresh) {
-            if (tsk.refreshCounter == null && tsk.refreshCounter == undefined) {
-              tsk.refreshCounter = 0;
-            }
-            let cVal = tsk.refreshCounter % tsk.states.length;
+      if (progr < 0.01) {
+        progr = 0.01;
+      }
 
-            for (let i = 0; i < nms.length; i++) {
-              const el = tsk.states[cVal].name;
-              if (tsk.statesDescr[i] != undefined) {
-                tsk.statesDescr[i] += ' ' + el;
-              }
-              else {
-                tsk.statesDescr.push(el);
-              }
-            }
-          }
-          else {
-            for (let i = 0; i < nms.length; i++) {
-              let j = nms[i] - 1;
-              if (j < 0) {
-                tsk.statesDescr.push('');
-              }
-              else {
-                if (tsk.isSumStates) {
-                  let plus = [];
-                  for (let q = 0; q <= j; q++) {
-                    const st = tsk.states[q];
+      if (tsk.isPerk || isMegaPlan) {
+        progr = 1;
+      }
 
-                    plus.push(st.name);
-                  }
+      // Состояния
+      if (tsk.states.length > 0) {
+        let stateInd = this.tesTaskTittleCount(progr, tsk.states.length - 1, false, 'State');
 
-                  tsk.statesDescr.push(plus.join('; '));
-                }
-                else {
-                  tsk.statesDescr.push(tsk.states[j].name);
-                }
-              }
-            }
-
-            let index = nms[Math.floor(tsk.value)] - 1;
-
-            if (index >= 0) {
-              if (tsk.isSumStates) {
-                for (let i = 0; i < tsk.states.length; i++) {
-                  const el = tsk.states[i];
-                  if (i <= index) {
-                    el.isActive = true;
-                  }
-                  else {
-                    el.isActive = false;
-                  }
-                }
-              }
-            }
-          }
-        }
-        // Таймер
-        if (tsk.aimTimer != 0) {
-          //plusState = ' ' + this.getTskValForState(tsk.value, tsk.aimTimer) + '⧖';
-
-          let nms: number[] = this.getSet(tsk, tsk.aimTimer, tsk.aimUnit);
-
-          for (let i = 0; i < nms.length; i++) {
-            const el = nms[i];
-            if (tsk.statesDescr[i] != undefined) {
-              tsk.statesDescr[i] += ' ' + this.getAimString(el, tsk.aimUnit);
-            } else {
-              tsk.statesDescr.push(this.getAimString(el, tsk.aimUnit));
-            }
-          }
-        }
-        // Счетчик
-        if (tsk.aimCounter != 0) {
-          //plusState = ' ' + this.getTskValForState(tsk.value, tsk.aimCounter) + '✓';
-          let nms: number[] = this.getSet(tsk, tsk.aimCounter, tsk.aimUnit);
-
-          for (let i = 0; i < nms.length; i++) {
-            const el = nms[i];
-            if (tsk.statesDescr[i] != undefined) {
-              tsk.statesDescr[i] += ' ' + el + '✓';
-            }
-            else {
-              tsk.statesDescr.push(el + '✓');
-            }
-          }
+        if (stateInd > tsk.states.length - 1) {
+          stateInd = tsk.states.length - 1;
         }
 
-        plusState = tsk.statesDescr[tsk.value];
-        tsk.plusStateMax = tsk.statesDescr[10];
+        if (tsk.isStateRefresh) {
+          if (tsk.refreshCounter == null && tsk.refreshCounter == undefined) {
+            tsk.refreshCounter = 0;
+          }
+          let cVal = tsk.refreshCounter % tsk.states.length;
+          const el = tsk.states[cVal].name;
 
-        if (tsk.value > 0 && tsk.value < 10
-          && tsk.statesDescr[tsk.value] == tsk.statesDescr[tsk.value + 1]) {
-          tsk.IsNextLvlSame = true;
+          if (el) {
+            plusState += ' ' + el;
+          }
         }
         else {
-          tsk.IsNextLvlSame = false;
-        }
-      } else {
-        // Для TES
-        tsk.curLvlDescr = '';
-        plusState = '';
-        tsk.statesDescr = [];
-        tsk.IsNextLvlSame = false;
-        let start = 0;
-        let progr = start + (1 - start) * (tsk.value / this._maxAbilLevel);
-
-        if (progr < 0.01) {
-          progr = 0.01;
-        }
-
-        if (tsk.isPerk || this.pers$.value.isMegaPlan) {
-          progr = 1;
-        }
-
-        // Состояния
-        if (tsk.states.length > 0) {
-          let stateInd = this.tesTaskTittleCount(progr, tsk.states.length - 1, false, 'State');
-
-          if (stateInd > tsk.states.length - 1) {
-            stateInd = tsk.states.length - 1;
-          }
-
-          if (tsk.isStateRefresh) {
-            if (tsk.refreshCounter == null && tsk.refreshCounter == undefined) {
-              tsk.refreshCounter = 0;
+          if (tsk.isSumStates) {
+            if (tsk.aimCounter > 0 || tsk.aimTimer > 0) {
+              stateInd = tsk.states.length - 1;
             }
-            let cVal = tsk.refreshCounter % tsk.states.length;
-            const el = tsk.states[cVal].name;
+            let plus = [];
+            for (let q = 0; q <= stateInd; q++) {
+              const st = tsk.states[q];
 
-            if (el) {
-              plusState += ' ' + el;
+              plus.push(st.name);
             }
+
+            plusState += plus.join('; ');
           }
           else {
-            if (tsk.isSumStates) {
-              if (tsk.aimCounter > 0 || tsk.aimTimer > 0) {
-                stateInd = tsk.states.length - 1;
-              }
-              let plus = [];
-              for (let q = 0; q <= stateInd; q++) {
-                const st = tsk.states[q];
-
-                plus.push(st.name);
-              }
-
-              plusState += plus.join('; ');
-            }
-            else {
-              plusState += tsk.states[stateInd].name;
-            }
+            plusState += tsk.states[stateInd].name;
           }
+        }
 
-          let index = stateInd;
+        let index = stateInd;
 
-          if (index >= 0) {
-            if (tsk.isSumStates) {
-              for (let i = 0; i < tsk.states.length; i++) {
-                const el = tsk.states[i];
-                if (i <= index) {
-                  el.isActive = true;
-                }
-                else {
-                  el.isActive = false;
-                }
+        if (index >= 0) {
+          if (tsk.isSumStates) {
+            for (let i = 0; i < tsk.states.length; i++) {
+              const el = tsk.states[i];
+              if (i <= index) {
+                el.isActive = true;
+              }
+              else {
+                el.isActive = false;
               }
             }
           }
         }
+      }
 
-        // Таймер
-        if (tsk.aimTimer != 0) {
-          plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit), tsk.aimUnit);
+      // Таймер
+      if (tsk.aimTimer != 0) {
+        plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit), tsk.aimUnit);
 
-          if (tsk.aimUnit == 'Раз' && tsk.postfix && tsk.postfix.length > 0) {
-            plusState = plusState.substring(0, plusState.length - 1);
-          }
+        if (tsk.aimUnit == 'Раз' && tsk.postfix && tsk.postfix.length > 0) {
+          plusState = plusState.substring(0, plusState.length - 1);
         }
+      }
 
-        // Счетчик
-        if (tsk.aimCounter != 0) {
-          plusState += ' ' + this.tesTaskTittleCount(progr, tsk.aimCounter, true, tsk.aimUnit);
-        }
+      // Счетчик
+      if (tsk.aimCounter != 0) {
+        plusState += ' ' + this.tesTaskTittleCount(progr, tsk.aimCounter, true, tsk.aimUnit);
+      }
 
-        // Префикс
+      // Префикс
 
-        // Постфикс
-        if (tsk.postfix) {
-          plusState += tsk.postfix;
-        }
+      // Постфикс
+      if (tsk.postfix) {
+        plusState += tsk.postfix;
       }
 
       if (plusState) {
         if (tsk.states.length > 0 && !tsk.isSumStates) {
           if (tsk.isStatePlusTitle) {
             tsk.tittle = tsk.name + ': ' + plusState;
-          }
-          else {
+          } else {
             tsk.tittle = plusState;
           }
-        }
-        else {
+        } else {
           if (tsk.states.length > 0 && tsk.isStateInTitle) {
             if (tsk.isStatePlusTitle) {
               tsk.tittle = tsk.name + ': ' + plusState;
-            }
-            else {
+            } else {
               tsk.tittle = plusState;
             }
-          }
-          else {
+          } else {
             tsk.tittle = tsk.name + ': ' + plusState;
           }
         }
-      }
-      else {
+      } else {
         tsk.tittle = tsk.name;
       }
 
-      // tsk.curLvlDescr = "Ур. " + Math.floor(tsk.value) + "" + ': ' + plusState.trim() + '';
       tsk.curLvlDescr = plusState.trim();
       tsk.curLvlDescr2 = ' (' + plusState.trim() + ')';
       tsk.curLvlDescr3 = plusState.trim();
     }
     else {
-      for (let i = 0; i <= this.pers$.value.maxAttrLevel; i++) {
+      for (let i = 0; i <= this._maxAbilLevel; i++) {
         tsk.statesDescr.push('');
       }
 
       tsk.tittle = tsk.name;
-      if (!this.pers$.value.isTES) {
-        tsk.curLvlDescr = Math.floor(tsk.value) + "";
-      }
-      else {
-        tsk.curLvlDescr = '';
-      }
-      tsk.curLvlDescr2 = '';
-    }
-
-    if (tsk.value < 1 && !this.pers$.value.isTES) {
-      tsk.curLvlDescr2 = '';
       tsk.curLvlDescr = '';
+      tsk.curLvlDescr2 = '';
     }
-  }
-
-  private setTaskValueAndProgress(tsk: Task) {
-    if (tsk.value > this.pers$.value.maxAttrLevel + 0.99) {
-      tsk.value = this.pers$.value.maxAttrLevel + 0.99;
-    }
-    if (tsk.value < 0) {
-      tsk.value = 0;
-    }
-    let tv = tsk.value;
-
-    // Прогресс задачи
-    let tskProgress = tv / this.pers$.value.maxAttrLevel;
-    if (tskProgress > 1) {
-      tskProgress = 1;
-    }
-
-    tsk.progressValue = tskProgress * 100;
   }
 
   private sortQwestTasks(qw: Qwest) {

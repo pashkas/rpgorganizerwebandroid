@@ -43,7 +43,7 @@ import { ImgBrokenDirective } from '../img-broken.directive';
     MatButtonModule,
     DragDropModule,
     FlexLayoutModule,
-    MatSelectModule
+    MatSelectModule,
   ],
   entryComponents:
     [
@@ -69,7 +69,7 @@ import { ImgBrokenDirective } from '../img-broken.directive';
     TimeValPipe,
     MatSelectModule,
     DatestringPipe,
-    AbHardnessPipe
+    AbHardnessPipe,
   ]
 })
 export class SharedModule { }

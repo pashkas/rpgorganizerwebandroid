@@ -1,23 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Pers } from 'src/Models/Pers';
 import { PersService } from '../pers.service';
 import { Task } from 'src/Models/Task';
-import { Subject } from 'rxjs';
-import { takeUntil, take } from 'rxjs/operators';
-import { ImgCacheService } from 'ng-imgcache';
+import { BehaviorSubject } from 'rxjs';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { Ability } from 'src/Models/Ability';
 import { MatDialog } from '@angular/material';
-import { LevelUpMsgComponent } from '../level-up-msg/level-up-msg.component';
-import { DiaryEditParamsComponent } from '../diary/diary-edit-params/diary-edit-params.component';
 import { sortArr } from 'src/Models/sortArr';
-import { ArrSortDialogComponent } from '../arr-sort-dialog/arr-sort-dialog.component';
-import * as moment from 'moment';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
-import { TskTimeValDialogComponent } from '../tsk-time-val-dialog/tsk-time-val-dialog.component';
 import { StatesService } from '../states.service';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { curpersview } from 'src/Models/curpersview';
 import { Qwest } from 'src/Models/Qwest';
 
@@ -25,21 +15,22 @@ import { Qwest } from 'src/Models/Qwest';
   selector: 'app-main-window',
   templateUrl: './main-window.component.html',
   styleUrls: ['./main-window.component.css'],
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MainWindowComponent implements OnInit {
-  private unsubscribe$ = new Subject();
+  isFailShown$ = new BehaviorSubject<boolean>(false);
+  isFailShownOv$ = new BehaviorSubject<boolean>(false);
+  isSucessShown$ = new BehaviorSubject<boolean>(false);
+  isSucessShownOv$ = new BehaviorSubject<boolean>(false);
 
-  isFailShown = false;
-  isFailShownOv = false;
   isSort: boolean = false;
-  isSucessShown = false;
-  isSucessShownOv = false;
   lastGlobalBeforeSort: boolean;
-  pers: Pers;
   qwickSortVals: sortArr[] = [];
+  currentView$ = this.srv.currentView$.asObservable();
+  currentTask$ = this.srv.currentTask$.asObservable();
+  pers$ = this.srv.pers$.asObservable();
 
-  constructor(private route: ActivatedRoute, public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, private router: Router) {
+  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService) {
   }
 
   addToQwest() {
@@ -65,25 +56,25 @@ export class MainWindowComponent implements OnInit {
 
   async animate(isDone: boolean) {
     if (isDone) {
-      this.isSucessShownOv = true;
+      this.isSucessShownOv$.next(true);
       await this.delay(250);
-      this.isSucessShownOv = false;
-      this.isSucessShown = true;
-      await this.delay(1000);
-      this.isSucessShown = false;
+      this.isSucessShownOv$.next(false);
+      this.isSucessShown$.next(true);
+      await this.delay(500);
+      this.isSucessShown$.next(false);
     }
     else {
-      this.isFailShownOv = true;
+      this.isFailShownOv$.next(true);
       await this.delay(250);
-      this.isFailShownOv = false;
-      this.isFailShown = true;
-      await this.delay(1000);
-      this.isFailShown = false;
+      this.isFailShownOv$.next(false);
+      this.isFailShown$.next(true);
+      await this.delay(500);
+      this.isFailShown$.next(false);
     }
   }
 
   changeEnamyImageForItem(id) {
-    this.srv.GetRndEnamy(this.srv.allMap[id].item, this.pers.level, this.pers.maxPersLevel);
+    this.srv.GetRndEnamy(this.srv.allMap[id].item, this.srv.pers$.value.level, this.srv.pers$.value.maxPersLevel);
   }
 
   checkDate(date: Date) {
@@ -136,7 +127,7 @@ export class MainWindowComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.pers.tasks, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.srv.pers$.value.tasks, event.previousIndex, event.currentIndex);
   }
 
   editCansel() {
@@ -195,8 +186,8 @@ export class MainWindowComponent implements OnInit {
   }
 
   focusFocus() {
-    if (this.pers.currentTaskIndex) {
-      this.srv.setCurInd(this.pers.currentTaskIndex);
+    if (this.srv.pers$.value.currentTaskIndex) {
+      this.srv.setCurInd(this.srv.pers$.value.currentTaskIndex);
     }
     else {
       this.srv.setCurInd(0);
@@ -204,73 +195,64 @@ export class MainWindowComponent implements OnInit {
   }
 
   nextTask() {
-    let i = this.pers.currentTaskIndex + 1;
-    if (i >= this.pers.tasks.length) {
+    let i = this.srv.pers$.value.currentTaskIndex + 1;
+    if (i >= this.srv.pers$.value.tasks.length) {
       i = 0;
     }
     this.srv.setCurInd(i);
   }
 
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
-  }
-
   ngOnInit() {
-    this.srv.pers$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(n =>
-        this.pers = n);
-    if (!this.pers) {
-      this.route.data.pipe(take(1))
-        .subscribe(routeData => {
-          let data = routeData['data'];
-          if (!this.srv.isOffline) {
-            // Оналайн
-            if (data) {
-              this.srv.user = data;
-              // Пользователь пустой
-              if (!this.srv.user || !this.srv.user.id) {
-                this.router.navigate(['/login']);
-              }
-              else {
-                this.srv.loadPers(this.srv.user.id)
-                  .pipe(takeUntil(this.unsubscribe$))
-                  .subscribe(prsInDb => {
-                    // Если перс есть
-                    if (prsInDb) {
-                      this.srv.setPers(prsInDb);
-                    }
-                    // Если перса пока что не было
-                    else if (!prsInDb) {
-                      const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-                        panelClass: 'custom-black'
-                      });
+    // if (!this.pers) {
+    //   this.route.data.pipe(take(1))
+    //     .subscribe(routeData => {
+    //       let data = routeData['data'];
+    //       if (!this.srv.isOffline) {
+    //         // Оналайн
+    //         if (data) {
+    //           this.srv.user = data;
+    //           // Пользователь пустой
+    //           if (!this.srv.user || !this.srv.user.id) {
+    //             this.router.navigate(['/login']);
+    //           }
+    //           else {
+    //             this.srv.loadPers(this.srv.user.id)
+    //               .pipe(takeUntil(this.unsubscribe$))
+    //               .subscribe(prsInDb => {
+    //                 // Если перс есть
+    //                 if (prsInDb) {
+    //                   this.srv.setPers(prsInDb);
+    //                 }
+    //                 // Если перса пока что не было
+    //                 else if (!prsInDb) {
+    //                   const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+    //                     panelClass: 'custom-black'
+    //                   });
 
-                      dialogRef.afterClosed().subscribe(result => {
-                        if (result) {
-                          this.srv.setNewPers(this.srv.user.id);
-                        }
-                      });
-                    }
-                  });
-              }
-            }
-          }
-          else {
-            // Оффлайн
-            let prs = JSON.parse(data);
-            if (prs) {
-              this.srv.setPers(data);
-            }
-            else {
-              // Сбрасывем оффлайн
-              localStorage.setItem("isOffline", JSON.stringify(false));
-              localStorage.setItem("pers", JSON.stringify(null));
-            }
-          }
-        });
-    }
+    //                   dialogRef.afterClosed().subscribe(result => {
+    //                     if (result) {
+    //                       this.srv.setNewPers(this.srv.user.id);
+    //                     }
+    //                   });
+    //                 }
+    //               });
+    //           }
+    //         }
+    //       }
+    //       else {
+    //         // Оффлайн
+    //         let prs = JSON.parse(data);
+    //         if (prs) {
+    //           this.srv.setPers(data);
+    //         }
+    //         else {
+    //           // Сбрасывем оффлайн
+    //           localStorage.setItem("isOffline", JSON.stringify(false));
+    //           localStorage.setItem("pers", JSON.stringify(null));
+    //         }
+    //       }
+    //     });
+    // }
   }
 
   onLongPress(e) {
@@ -305,15 +287,15 @@ export class MainWindowComponent implements OnInit {
       this.srv.pers$.value.currentQwestId = null;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
       this.srv.savePers(false);
-      let idx = this.pers.tasks.findIndex(n => n.plusToNames.filter(q => q.linkId == linkId).length > 0);
+      let idx = this.srv.pers$.value.tasks.findIndex(n => n.plusToNames.filter(q => q.linkId == linkId).length > 0);
       this.srv.setCurInd(idx);
     }
   }
 
   prevTask() {
-    let i = this.pers.currentTaskIndex - 1;
+    let i = this.srv.pers$.value.currentTaskIndex - 1;
     if (i < 0) {
-      i = this.pers.tasks.length - 1;
+      i = this.srv.pers$.value.tasks.length - 1;
     }
     this.srv.setCurInd(i);
   }
@@ -372,38 +354,33 @@ export class MainWindowComponent implements OnInit {
     this.srv.savePers(false);
   }
 
-  setSort() {
+  setSort(currentView) {
     if (this.srv.pers$.value.isMegaPlan == null) {
       this.srv.pers$.value.isMegaPlan = false;
     }
 
-    if (this.srv.pers$.value.currentView == curpersview.QwestTasks) {
+    if (currentView == curpersview.QwestTasks) {
       this.srv.pers$.value.currentView = curpersview.QwestSort;
-    }
-    else if (this.srv.pers$.value.currentView == curpersview.QwestSort) {
+    } else if (currentView == curpersview.QwestSort) {
       let qwest: Qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
-      for (let index = 0; index < this.pers.tasks.length; index++) {
-        this.pers.tasks[index].order = index;
+      for (let index = 0; index < this.srv.pers$.value.tasks.length; index++) {
+        this.srv.pers$.value.tasks[index].order = index;
       }
       qwest.tasks.sort((a, b) => a.order - b.order);
 
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
-    }
-    else if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
+    } else if (currentView == curpersview.SkillTasks) {
       this.srv.pers$.value.currentView = curpersview.SkillsSort;
-    }
-    else if (this.srv.pers$.value.currentView == curpersview.SkillsSort) {
+    } else if (currentView == curpersview.SkillsSort) {
       for (let index = 0; index < this.srv.pers$.value.tasks.length; index++) {
         if (this.srv.pers$.value.tasks[index].parrentTask) {
           this.setIndForState(this.srv.pers$.value.tasks[index].parrentTask, this.srv.pers$.value.tasks[index].id, index);
-        }
-        else {
+        } else {
           this.srv.pers$.value.tasks[index].order = index;
         }
 
         this.srv.pers$.value.isMegaPlan = false;
       }
-
 
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     }
@@ -415,11 +392,11 @@ export class MainWindowComponent implements OnInit {
    * Задать вид - задачи, квесты.
    * @param name Название вида.
    */
-  setView() {
-    if (this.srv.pers$.value.currentView == curpersview.SkillTasks || this.srv.pers$.value.currentView == curpersview.SkillsGlobal) {
+  setView(currentView) {
+    if (currentView == curpersview.SkillTasks || currentView == curpersview.SkillsGlobal) {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
     }
-    else if (this.srv.pers$.value.currentView == curpersview.QwestTasks || this.srv.pers$.value.currentView == curpersview.QwestsGlobal) {
+    else if (currentView == curpersview.QwestTasks || currentView == curpersview.QwestsGlobal) {
       this.srv.pers$.value.currentQwestId = null;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     }

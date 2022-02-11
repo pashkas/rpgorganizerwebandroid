@@ -16,7 +16,7 @@ import { LevelUpMsgComponent } from './level-up-msg/level-up-msg.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { registerLocaleData } from '@angular/common';
 import localeRu from '@angular/common/locales/ru';
-import { GestureConfig, MatProgressSpinnerModule, MatGridListModule, MatGridTile, MatIconModule, MatBadgeModule, MatSlideToggleModule } from '@angular/material';
+import { GestureConfig, MatProgressSpinnerModule, MatIconModule, MatBadgeModule, MatSlideToggleModule } from '@angular/material';
 import { SharedModule } from './shared/shared.module';
 import { TurnirTableComponent } from './turnir-table/turnir-table.component';
 import { ArrSortDialogComponent } from './arr-sort-dialog/arr-sort-dialog.component';
@@ -32,7 +32,6 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { FailModPipe } from './fail-mod.pipe';
 import { MainProgrDescPipe } from './main-window/main-progr-desc.pipe';
 import { ListBgPipe } from './list-bg.pipe';
-import { ImgBrokenDirective } from './img-broken.directive';
 
 registerLocaleData(localeRu, 'ru');
 
