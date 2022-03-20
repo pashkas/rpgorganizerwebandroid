@@ -37,6 +37,7 @@ import { AbHardnessComponent } from './ab-hardness/ab-hardness.component';
 import { AutosizeModule } from 'ngx-autosize';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
+import { AbilitySignsPipe } from '../ability-signs.pipe';
 
 
 @NgModule({
@@ -62,7 +63,8 @@ import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pe
     ChangeCharactComponent,
     ImageComponentComponent,
     AbHardnessComponent,
-    PersImportExportDialogComponent
+    PersImportExportDialogComponent,
+    AbilitySignsPipe
   ],
   imports: [
     NgxMaterialTimepickerModule,

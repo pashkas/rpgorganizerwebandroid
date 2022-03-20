@@ -18,8 +18,9 @@
       </mat-form-field>
 
       <div fxLayout="row" fxLayoutAlign="space-around stretch" fxLayoutGap="5px">
-        <div>
-          <button mat-flat-button (click)="tryGoogleLogin()">GOOGLE</button></div>
+        <!-- <div>
+          <button mat-flat-button (click)="tryGoogleLogin()">GOOGLE</button>
+        </div> -->
         <div fxFlex>
           <button mat-flat-button color="warn" class="w-100" (click)="doLogin()">
             <ng-container *ngIf="!isNew; else regIn">

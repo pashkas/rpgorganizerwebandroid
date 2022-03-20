@@ -10,11 +10,8 @@ export class AbHardnessPipe implements PipeTransform {
 
   transform(tsk: Task): any {
     let hrd = '';
-    if (tsk.hardnes == 2) {
+    if (tsk.isPerk) {
       hrd = '*';
-    }
-    else if (tsk.hardnes == 3) {
-      hrd = '**';
     }
 
     return tsk.name + hrd;

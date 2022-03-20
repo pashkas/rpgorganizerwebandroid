@@ -98,7 +98,7 @@ export class PersService {
   }
 
   get baseTaskPoints(): number {
-    return 5.0;
+    return 12.0;
   }
 
   /**
@@ -415,6 +415,9 @@ export class PersService {
         task.tesValue = 0;
       }
     }
+
+    let nextChange = this.getTaskChangesExp(task, isUp, null, subTasksCoef);
+    task.nextAbVal = Math.floor(task.tesValue + nextChange);
   }
 
   changesAfter(isGood) {
@@ -584,8 +587,7 @@ export class PersService {
   }
 
   countTesExp(tesAbTotalMax: number, tesAbTotalCur: number): number {
-    let tesThreeAbTwoDays = 30;
-    let exp = tesAbTotalCur / (tesThreeAbTwoDays / 1);
+    let exp = tesAbTotalCur / 25;
 
     return exp;
   }
@@ -785,15 +787,6 @@ export class PersService {
     }
 
     let seconds = aimVal;
-    // if (aimUnit == 'Секунд') {
-    //   seconds = aimVal;
-    // }
-    // else if (aimUnit == 'Минут') {
-    //   seconds = aimVal * 60;
-    // }
-    // else if (aimUnit == 'Часов') {
-    //   seconds = aimVal * 60 * 60;
-    // }
 
     let h = 0;
     let min = 0;
@@ -809,6 +802,7 @@ export class PersService {
     if (h > 0) {
       result += h + 'ч '
     }
+
     if (min > 0 || (h > 0 && sec > 0)) {
       result += min + 'м '
     }
@@ -2087,11 +2081,7 @@ export class PersService {
         this.setStatesNotDone(task);
 
         // Плюсуем значение
-        if (!this.pers$.value.isTES) {
-          this.pers$.value.exp += this.getTaskChangesExp(task, true);
-        } else {
-          this.changeTes(tsk, true);
-        }
+        this.changeTes(tsk, true);
 
         task.lastNotDone = false;
         this.setCurInd(0);
@@ -2124,13 +2114,16 @@ export class PersService {
 
   tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string) {
     let av = this.getAimValueWithUnit(aimVal, aimUnit);
-
-    let value = Math.floor(progr * av);
+    let value = Math.ceil(progr * av);
 
     if (moreThenOne) {
       if (value <= 1) {
         value = 1;
       }
+    }
+
+    if (value > av) {
+      value = av;
     }
 
     return value;
@@ -2432,23 +2425,14 @@ export class PersService {
       abs = 1;
     }
 
-    // let onEveryLevel = Math.floor(100 / abs);
-    // if (onEveryLevel < 1) {
-    //   onEveryLevel = 1;
-    // }
-
     let onEveryLevel = 1;
 
     let gainedOns = Math.floor(persLevel / onEveryLevel);
 
     let startOn = 1;
-    // let pointLev = 1 / abs;
 
     startOn = 3;
     const totalGained = (startOn + gainedOns);
-    // startOn = Math.ceil(onEveryLevel / (twoDaysTes * pointLev));
-    // startOn = Math.ceil(2 / (twoDaysTes * pointLev));
-    // startOn = 5;
 
     let ons = totalGained - abOpenned;
     if (startOn + gainedOns > abs) {
@@ -2793,8 +2777,10 @@ export class PersService {
     // let multi = new_xp - old_xp;
 
     // return 1 / multi;
+    // let tesValTen = 1 + Math.floor(tesVal / 10.0);
+    let tesValL = 1 + (tesVal / 10.0);
 
-    return (1 / (1 + Math.floor(tesVal) / 10.0));
+    return 1 / (2 * tesValL);
   }
 
   private getTskFromState(tsk: Task, st: taskState, isAll: boolean): Task {
@@ -2822,14 +2808,6 @@ export class PersService {
       stT.tittle = plusName;
     }
 
-    // if (!isAll) {
-    //   let all = tsk.states.filter(n => n.isActive).length;
-    //   let done = tsk.states.filter(n => n.isActive && n.isDone).length;
-    //   if (all > 1) {
-    //     stateProgr = done + '/' + all;
-    //   }
-    // }
-
     stT.name = stT.tittle;
     stT.qwestId = tsk.qwestId;
     stT.order = st.order;
@@ -2853,7 +2831,6 @@ export class PersService {
     stT.requrense = tsk.requrense;
     stT.lastDate = st.lastDate;
 
-    //stT.image = tsk.image;
     if (!st.image) {
       this.GetRndEnamy(st, this.pers$.value.level, this.pers$.value.maxPersLevel);
     }
@@ -2864,6 +2841,7 @@ export class PersService {
     stT.parrentTask = tsk.id;
     stT.lastNotDone = tsk.lastNotDone;
     stT.plusToNames = [...tsk.plusToNames];
+    stT.nextAbVal = tsk.nextAbVal;
 
     if (stT.requrense != 'нет') {
       stT.plusToNames.shift();
@@ -2873,7 +2851,7 @@ export class PersService {
       stT.plusToNames.unshift(new plusToName(stateProgr, null, null, ''));
     }
 
-    if (stT.requrense != 'нет' && !this.pers$.value.isAutofocus) {
+    if (stT.requrense != 'нет') {
       stT.time = st.time;
       stT.plusToNames.unshift(new plusToName('' + st.time, null, null, ''));
     }
@@ -2984,16 +2962,23 @@ export class PersService {
 
     if (tsk.aimTimer != 0 || tsk.aimCounter != 0 || tsk.states.length > 0 || tsk.postfix || tsk.prefix) {
       let plusState = '';
-      // Для TES
       tsk.curLvlDescr = '';
       plusState = '';
       tsk.statesDescr = [];
       tsk.IsNextLvlSame = false;
-      let start = 0;
-      let progr = start + (1 - start) * (tsk.value / this._maxAbilLevel);
+
+      if (tsk.nextAbVal == null || tsk.nextAbVal < 5) {
+        tsk.nextAbVal = 5;
+      }
+
+      let start = (tsk.nextAbVal - tsk.value) / 100.0;
+      let progr = start + (tsk.value / this._maxAbilLevel);
 
       if (progr < 0.01) {
         progr = 0.01;
+      }
+      if (progr > 1) {
+        progr = 1
       }
 
       if (tsk.isPerk || isMegaPlan) {
@@ -3002,11 +2987,9 @@ export class PersService {
 
       // Состояния
       if (tsk.states.length > 0) {
-        let stateInd = this.tesTaskTittleCount(progr, tsk.states.length - 1, false, 'State');
+        let stateInd = this.tesTaskTittleCount(progr, tsk.states.length, true, 'State');
 
-        if (stateInd > tsk.states.length - 1) {
-          stateInd = tsk.states.length - 1;
-        }
+        stateInd = stateInd - 1;
 
         if (tsk.isStateRefresh) {
           if (tsk.refreshCounter == null && tsk.refreshCounter == undefined) {
@@ -3032,8 +3015,7 @@ export class PersService {
             }
 
             plusState += plus.join('; ');
-          }
-          else {
+          } else {
             plusState += tsk.states[stateInd].name;
           }
         }
@@ -3046,8 +3028,7 @@ export class PersService {
               const el = tsk.states[i];
               if (i <= index) {
                 el.isActive = true;
-              }
-              else {
+              } else {
                 el.isActive = false;
               }
             }
@@ -3055,7 +3036,7 @@ export class PersService {
         }
       }
 
-      // Таймер
+      // Таймер, счетчик
       if (tsk.aimTimer != 0) {
         plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit), tsk.aimUnit);
 
@@ -3063,13 +3044,6 @@ export class PersService {
           plusState = plusState.substring(0, plusState.length - 1);
         }
       }
-
-      // Счетчик
-      if (tsk.aimCounter != 0) {
-        plusState += ' ' + this.tesTaskTittleCount(progr, tsk.aimCounter, true, tsk.aimUnit);
-      }
-
-      // Префикс
 
       // Постфикс
       if (tsk.postfix) {

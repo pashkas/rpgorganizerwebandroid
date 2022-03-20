@@ -202,12 +202,7 @@ export class MindMapComponent implements OnInit {
         // SumStates
         for (const t of ab.tasks) {
           this.dic.set(t.id, new mapDicItem('t', t.name, idx, ab));
-          if (t.isPerk) {
-            this.date.push(new mindMapItem(t.id, t.name, 25, 'yellow'));
-          }
-          else {
-            this.date.push(new mindMapItem(t.id, t.name, 25, 'transparent'));
-          }
+          this.date.push(new mindMapItem(t.id, t.name, 25, 'transparent'));
           idx++;
 
           // Если в требованиях есть с такой же характеристикой, ссылку не делаем

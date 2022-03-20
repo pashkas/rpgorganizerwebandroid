@@ -32,6 +32,7 @@ export class Task implements IImg {
         ];
 
     tskWeekDays: string[] = []; //[...Task.weekDays];
+    nextAbVal: number;
 
     aimCounter: number = 0;
     aimTimer: number = 0;

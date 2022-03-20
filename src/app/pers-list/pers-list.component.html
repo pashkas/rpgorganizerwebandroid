@@ -228,7 +228,7 @@
                     <div mat-list-item *ngFor="let ab of item.abilities">
                       <div class="d-flex align-items-center">
                         <div class="flex-grow-1 align-self-center">
-                          <i>{{ab.name}}</i>
+                          <i>{{ab.name+(ab|abilitySigns)}}</i>
                         </div>
                         <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
                           <!-- Удалить -->

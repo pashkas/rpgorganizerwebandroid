@@ -93,13 +93,11 @@ export class PerschangesService {
           changes.push(
             new ChangesModel('Получен ' + changesMap[n].name, 'inv', 1, 1, 0, 1, changesMap[n].img)
           );
-        }
-        else if (changesMap[n].after > changesMap[n].before) {
+        } else if (changesMap[n].after > changesMap[n].before) {
           changes.push(
             new ChangesModel('Получен ' + changesMap[n].name, 'inv', changesMap[n].after, changesMap[n].after, 0, changesMap[n].after, changesMap[n].img)
           );
-        }
-        else if (changesMap[n].after < changesMap[n].before) {
+        } else if (changesMap[n].after < changesMap[n].before) {
           changes.push(
             new ChangesModel('Использован ' + changesMap[n].name, 'inv', changesMap[n].before, changesMap[n].before, 0, changesMap[n].before, changesMap[n].img)
           );
@@ -117,6 +115,7 @@ export class PerschangesService {
       else if (changesMap[n].type == 'abil') {
         if (isShowAbActivate && changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
           isAbilActivated = true;
+          abToEdit = n;
           changes.push(
             new ChangesModel(`"${changesMap[n].name}" активирован`, 'abil', 0, 0, 0, maxAttrLevel, changesMap[n].img)
           );
@@ -179,8 +178,7 @@ export class PerschangesService {
 
             if (isDoneQwest) {
               changes.push(expChanges);
-            }
-            else {
+            } else {
               changes.unshift(expChanges);
             }
           }
@@ -232,12 +230,14 @@ export class PerschangesService {
         backdropClass: 'backdrop'
       });
 
-      await sleep(5000);
+      await sleep(3500);
 
       dialogRef.close();
-      // if (abToEdit != null) {
-      //   this.router.navigate(['/task', abToEdit, false]);
-      // }
+
+      if (abToEdit != null) {
+        this.router.navigate(['pers/task', abToEdit, false]);
+      }
+
       // if (isDoneQwest && qwestToEdit != null) {
       //   this.router.navigate(['pers/qwest', qwestToEdit, true]);
       // }
@@ -250,7 +250,7 @@ export class PerschangesService {
         backdropClass: 'backdrop'
       });
 
-      await sleep(5000);
+      await sleep(3500);
 
       dialogRefLvlUp.close();
 
