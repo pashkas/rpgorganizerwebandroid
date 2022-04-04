@@ -50,8 +50,10 @@ export class PerschangesService {
     const isShowCharactChanges = true;
     const isShowAbChanges = true;
     const isShowAbActivate = true;
-    const isOpenPersAtNewLevel = false;
-    const maxAttrLevel = 100;
+    const isShowExpChanges = true;
+
+    const isOpenPersAtNewLevel = true;
+    const maxAttrLevel = 10;
 
 
     Object.keys(changesMap).forEach(n => {
@@ -63,7 +65,7 @@ export class PerschangesService {
             new ChangesModel('Квест завершен - ' + changesMap[n].name, 'qwest', changesMap[n].before, changesMap[n].before, 0, changesMap[n].total, changesMap[n].img)
           );
           isDoneQwest = true;
-          //qwestToEdit = n;
+          // qwestToEdit = n;
         }
         else {
           if (changesMap[n].after > changesMap[n].before) {
@@ -146,7 +148,7 @@ export class PerschangesService {
     Object.keys(changesMap).forEach(n => {
       // Опыт
       if (changesMap[n].type == 'exp') {
-        let isShowBySettings = isDoneQwest == true;
+        let isShowBySettings = isDoneQwest || isShowExpChanges;
 
         if (isShowBySettings) {
           if (changesMap[n].after != changesMap[n].before) {
@@ -176,7 +178,7 @@ export class PerschangesService {
 
             expChanges.expChanges = eCh;
 
-            if (isDoneQwest) {
+            if (isDoneQwest || isShowExpChanges) {
               changes.push(expChanges);
             } else {
               changes.unshift(expChanges);
@@ -195,6 +197,9 @@ export class PerschangesService {
     if (isDoneQwest) {
       changes = changes.filter(n => n.type != 'subtask');
     }
+
+    let combineChanges: ChangesModel[] = [];
+    let unionChanges: ChangesModel[] = [];
 
     for (let index = 0; index < changes.length; index++) {
       let head;
@@ -217,33 +222,102 @@ export class PerschangesService {
         changes[index].name = ' ';
       }
 
+      // if (changes[index].type == 'abil') {
+      //   combineChanges.push(changes[index]);
+      // } else if (changes[index].type == 'cha') {
+      //   combineChanges.push(changes[index]);
+      // } else if (changes[index].type == 'exp') {
+      //   combineChanges.push(changes[index]);
+      // } else {
+      //   unionChanges.push(changes[index]);
+      // }
+
+      unionChanges.push(changes[index]);
+
+      changes[index].head = head;
+      changes[index].abPoints = abPoints;
+
+    }
+
+    if (combineChanges.length) {
+      const head = combineChanges[0].head;
+      const abPoints = combineChanges[0].head;
+      const type = combineChanges[0].type;
+      const img = combineChanges[0].img;
+
+      combineChanges.sort((a, b) => {
+        return getChSort(a) - getChSort(b);
+
+        function getChSort(ch: ChangesModel): number {
+          if (ch.type == 'exp') { return 2; }
+
+          if (ch.type == 'abil') { return 1; }
+
+          if (ch.type == 'cha') { return 0; }
+
+          return 3;
+        }
+      });
+
+
       let dialogRef = this.dialog.open(PersChangesComponent, {
         panelClass: classPanel,
         data: {
           headText: head,
-          changes: [changes[index]],
+          changes: combineChanges,
           isGood: isGood,
           abPoints: abPoints,
           isTES: this.afterPers.isTES,
-          itemType: changes[index].type
+          itemType: type,
+          img: img
         },
         backdropClass: 'backdrop'
       });
 
-      await sleep(3500);
+      await sleep(5500);
 
       dialogRef.close();
-
-      if (abToEdit != null) {
-        this.router.navigate(['pers/task', abToEdit, false]);
-      }
-
-      // if (isDoneQwest && qwestToEdit != null) {
-      //   this.router.navigate(['pers/qwest', qwestToEdit, true]);
-      // }
     }
 
-    // || this.afterPers.isTES
+    unionChanges.sort((a, b) => {
+      return getChSort(a) - getChSort(b);
+
+      function getChSort(ch: ChangesModel): number {
+        if (ch.type == 'exp') { return 0; }
+
+        if (ch.type == 'abil') { return 1; }
+
+        if (ch.type == 'cha') { return 2; }
+
+        return 3;
+      }
+    });
+
+    for (const ch of unionChanges) {
+      const head = ch.head;
+      const abPoints = ch.head;
+      const type = ch.type;
+      const img = ch.img;
+
+      let dialogRef = this.dialog.open(PersChangesComponent, {
+        panelClass: classPanel,
+        data: {
+          headText: head,
+          changes: [ch],
+          isGood: isGood,
+          abPoints: abPoints,
+          isTES: this.afterPers.isTES,
+          itemType: type,
+          img: img
+        },
+        backdropClass: 'backdrop'
+      });
+
+      await sleep(4500);
+
+      dialogRef.close();
+    }
+
     if (newLevel) {
       let dialogRefLvlUp = this.dialog.open(LevelUpMsgComponent, {
         panelClass: classPanel,
@@ -260,6 +334,14 @@ export class PerschangesService {
           this.router.navigate(['/pers']);
         }
       }
+    }
+
+    if (abToEdit != null) {
+      this.router.navigate(['pers/task', abToEdit, false]);
+    }
+
+    if (isDoneQwest && qwestToEdit != null) {
+      this.router.navigate(['pers/qwest', qwestToEdit, true]);
     }
   }
 
@@ -308,7 +390,7 @@ export class PerschangesService {
           }
 
           //changesMap[tsk.id][chType] = Math.floor(tsk.value);
-          changesMap[tsk.id][chType] = tsk.tesValue;
+          changesMap[tsk.id][chType] = tsk.value;
 
           if (chType == 'before') {
             changesMap[tsk.id]['abIsOpenBefore'] = ab.isOpen;

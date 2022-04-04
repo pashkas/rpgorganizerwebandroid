@@ -90,11 +90,11 @@ export class PersService {
   }
 
   get _maxAbilLevel(): number {
-    return 100;
+    return 10;
   }
 
   get _maxCharactLevel(): number {
-    return 100;
+    return 10;
   }
 
   get baseTaskPoints(): number {
@@ -237,19 +237,19 @@ export class PersService {
    * Добавить навык.
    * @param charactId Идентификатор характеристики.
    */
-  addAbil(charactId: string, name: string): any {
+  addAbil(charactId: string, name: string): string {
     var charact: Characteristic = this.pers$.value.characteristics.filter(n => {
       return n.id === charactId;
     })[0];
     if (charact != null && charact != undefined) {
-      var abil = new Ability();
+      let abil = new Ability();
       abil.name = name;
 
-      if (Pers.GameSettings.isNoAbilities) {
-        this.addTsk(abil, name);
-      }
+      let tsk = this.addTsk(abil, name);
 
       charact.abilities.push(abil);
+
+      return tsk;
     }
   }
 
@@ -288,13 +288,15 @@ export class PersService {
    * @param abil Навык.
    * @param newTsk Название задачи.
    */
-  addTsk(abil: Ability, newTsk: string): any {
+  addTsk(abil: Ability, newTsk: string): string {
     var tsk = new Task();
     tsk.name = newTsk;
 
     this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
 
     abil.tasks.push(tsk);
+
+    return tsk.id;
   }
 
   /**
@@ -416,8 +418,8 @@ export class PersService {
       }
     }
 
-    let nextChange = this.getTaskChangesExp(task, isUp, null, subTasksCoef);
-    task.nextAbVal = Math.floor(task.tesValue + nextChange);
+    // let nextChange = this.getTaskChangesExp(task, isUp, null, subTasksCoef);
+    // task.nextAbVal = this.getAbVal(task.tesValue + nextChange);
   }
 
   changesAfter(isGood) {
@@ -587,7 +589,33 @@ export class PersService {
   }
 
   countTesExp(tesAbTotalMax: number, tesAbTotalCur: number): number {
-    let exp = tesAbTotalCur / 25;
+    const baseV = 5;
+    let exp = 0;
+
+    let thisLevel = 0;
+    let prevLevel = 0;
+    let curLevelExp = 0;
+    let nextLevelExp = 0;
+
+    for (let i = 0; i < 1000; i++) {
+      if (i < 20) {
+        thisLevel = prevLevel + baseV;
+      } else {
+        thisLevel = prevLevel;
+      }
+
+      curLevelExp = prevLevel;
+      nextLevelExp = prevLevel + thisLevel;
+
+      prevLevel = prevLevel + thisLevel;
+
+      if (nextLevelExp > tesAbTotalCur) {
+        exp = i + ((tesAbTotalCur - curLevelExp) / (nextLevelExp - curLevelExp));
+        break;
+      }
+    }
+
+    // let exp = tesAbTotalCur / 29;
 
     return exp;
   }
@@ -1210,7 +1238,7 @@ export class PersService {
               tsk.value = 10;
             }
           } else {
-            tsk.value = Math.floor(tsk.tesValue);
+            tsk.value = this.getAbVal(tsk.tesValue);
 
             tsk.failCounter = 0;
           }
@@ -1696,6 +1724,10 @@ export class PersService {
 
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
+  }
+
+  private getAbVal(tesVal: number): number {
+    return Math.floor(tesVal / 10.0);
   }
 
   checkAndChangeWebP(img: string): string {
@@ -2431,7 +2463,7 @@ export class PersService {
 
     let startOn = 1;
 
-    startOn = 3;
+    startOn = 1;
     const totalGained = (startOn + gainedOns);
 
     let ons = totalGained - abOpenned;
@@ -2525,7 +2557,7 @@ export class PersService {
       return 1;
     } else if (prsLvl < 20) { // Авантюрист
       return 2;
-    } else if (prsLvl < 60) { // Воин
+    } else if (prsLvl < 50) { // Воин
       return 3;
     } else if (prsLvl < 100) { // Герой
       return 4;
@@ -2674,13 +2706,12 @@ export class PersService {
 
   private getTaskChangesExp(task: Task, isPlus: boolean, subTask: taskState = null, subTasksCoef: number = 1, isChangeAb: boolean = false) {
     const koef = this.getWeekKoef(task.requrense, isPlus, task.tskWeekDays);
-    let expKoef = 1;
 
     if (isChangeAb) {
       subTasksCoef = subTasksCoef * task.hardnes;
     }
 
-    let chVal = (this.baseTaskPoints / subTasksCoef) * koef * expKoef;
+    let chVal = (this.baseTaskPoints / subTasksCoef) * koef;
 
     if (task.tesAbValue == null || task.tesAbValue == undefined) {
       task.tesAbValue = 0;
@@ -2690,75 +2721,61 @@ export class PersService {
       task.tesValue = 0;
     }
 
-    let taskStreang = task.value;
-
-    if (this.pers$.value.isTES) {
-      taskStreang = 1.0;
-    }
-
     // Расчет для ТЕС
-    if (this.pers$.value.isTES) {
-      let change = 0;
-      let tesVal;
+    let change = 0;
+    let tesVal;
 
-      if (isChangeAb) {
-        tesVal = task.tesAbValue;
-      } else {
-        tesVal = task.tesValue;
-      }
-
-      while (true) {
-        let tesKoef = this.getTesChangeKoef(tesVal);
-
-        let tesLeft = 1;
-        if (isPlus) {
-          tesLeft = (Math.floor(tesVal) + 1) - tesVal;
-        } else {
-          tesLeft = tesVal - Math.floor(tesVal);
-        }
-
-        let ch: number = 0;
-        if (chVal * tesKoef > tesLeft) {
-          ch = tesLeft / tesKoef;
-          if (ch < 0.01) {
-            ch = 0.01;
-          }
-        } else {
-          ch = chVal;
-        }
-
-        change += ch * tesKoef;
-
-        if (!isChangeAb) {
-          if (isPlus) {
-            tesVal = task.tesValue + change;
-          } else {
-            tesVal = task.tesValue - change;
-          }
-        }
-        else {
-          if (isPlus) {
-            tesVal = task.tesAbValue + change;
-          } else {
-            tesVal = task.tesAbValue - change;
-          }
-        }
-
-        chVal -= ch;
-
-        if (chVal <= 0 || tesVal <= 0) {
-          break;
-        }
-      }
-
-      return change;
+    if (isChangeAb) {
+      tesVal = task.tesAbValue;
+    } else {
+      tesVal = task.tesValue;
     }
 
-    let chValFinaly = chVal * Math.floor(taskStreang);
+    while (true) {
+      let tesKoef = this.getTesChangeKoef(tesVal);
 
-    chValFinaly = Math.ceil(chValFinaly * 10.0) / 10.0;
+      let tesLeft = 1;
+      if (isPlus) {
+        tesLeft = (Math.floor(tesVal) + 1) - tesVal;
+      } else {
+        tesLeft = tesVal - Math.floor(tesVal);
+      }
 
-    return chValFinaly;
+      let ch: number = 0;
+      if (chVal * tesKoef > tesLeft) {
+        ch = tesLeft / tesKoef;
+        if (ch < 0.01) {
+          ch = 0.01;
+        }
+      } else {
+        ch = chVal;
+      }
+
+      change += ch * tesKoef;
+
+      if (!isChangeAb) {
+        if (isPlus) {
+          tesVal = task.tesValue + change;
+        } else {
+          tesVal = task.tesValue - change;
+        }
+      }
+      else {
+        if (isPlus) {
+          tesVal = task.tesAbValue + change;
+        } else {
+          tesVal = task.tesAbValue - change;
+        }
+      }
+
+      chVal -= ch;
+
+      if (chVal <= 0 || tesVal <= 0) {
+        break;
+      }
+    }
+
+    return change;
   }
 
   private getTesChangeKoef(tesVal: number): number {
@@ -2778,9 +2795,8 @@ export class PersService {
 
     // return 1 / multi;
     // let tesValTen = 1 + Math.floor(tesVal / 10.0);
-    let tesValL = 1 + (tesVal / 10.0);
 
-    return 1 / (2 * tesValL);
+    return (1 / (2 + Math.floor(tesVal) / 10.0));
   }
 
   private getTskFromState(tsk: Task, st: taskState, isAll: boolean): Task {
@@ -2967,11 +2983,13 @@ export class PersService {
       tsk.statesDescr = [];
       tsk.IsNextLvlSame = false;
 
-      if (tsk.nextAbVal == null || tsk.nextAbVal < 5) {
-        tsk.nextAbVal = 5;
-      }
+      // if (tsk.nextAbVal == null || tsk.nextAbVal < 1) {
+      //   tsk.nextAbVal = 1;
+      // }
 
-      let start = (tsk.nextAbVal - tsk.value) / 100.0;
+      tsk.nextAbVal = tsk.value + 1;
+
+      let start = (tsk.nextAbVal - tsk.value) / this._maxAbilLevel;
       let progr = start + (tsk.value / this._maxAbilLevel);
 
       if (progr < 0.01) {

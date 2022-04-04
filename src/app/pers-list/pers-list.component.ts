@@ -14,6 +14,7 @@ import { Qwest } from 'src/Models/Qwest';
 import { StatesService } from '../states.service';
 import { takeUntil } from 'rxjs/operators';
 import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
+import { QuickAddAbilityComponent } from '../pers/quick-add-ability/quick-add-ability.component';
 
 @Component({
   selector: 'app-pers-list',
@@ -297,6 +298,7 @@ export class PersListComponent implements OnInit {
             tsk.tesAbValue = 0;
             tsk.refreshCounter = 0;
             tsk.date = new Date();
+            tsk.nextAbVal = 0;
             this.srv.GetRndEnamy(tsk, 0, this.pers.maxPersLevel);
             tsk.states.forEach(st => {
               st.order = -1;
@@ -380,5 +382,19 @@ export class PersListComponent implements OnInit {
     this.srv.savePers(true);
 
     this.srv.changesAfter(null);
+  }
+
+  quickAddAbil() {
+    this.srv.isDialogOpen = true;
+
+    const dialogRef = this.dialog.open(QuickAddAbilityComponent, {
+      data: { isImport: false },
+      backdropClass: 'backdrop'
+    });
+
+    dialogRef.afterClosed()
+      .subscribe(n => {
+        this.srv.isDialogOpen = false;
+      });
   }
 }

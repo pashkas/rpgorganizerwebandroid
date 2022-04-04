@@ -7,7 +7,7 @@ import { ChartsModule } from 'ng2-charts';
 import { DiaryComponent } from '../diary/diary.component';
 import { DiaryShowComponent } from '../diary/diary-show/diary-show.component';
 import { MatTabsModule } from '@angular/material/tabs';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RarecolPipe } from '../rarecol.pipe';
 import { MatCardModule, MatIconModule } from '@angular/material';
@@ -38,6 +38,7 @@ import { AutosizeModule } from 'ngx-autosize';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
 import { AbilitySignsPipe } from '../ability-signs.pipe';
+import { QuickAddAbilityComponent } from './quick-add-ability/quick-add-ability.component';
 
 
 @NgModule({
@@ -64,9 +65,11 @@ import { AbilitySignsPipe } from '../ability-signs.pipe';
     ImageComponentComponent,
     AbHardnessComponent,
     PersImportExportDialogComponent,
-    AbilitySignsPipe
+    AbilitySignsPipe,
+    QuickAddAbilityComponent
   ],
   imports: [
+    ReactiveFormsModule,
     NgxMaterialTimepickerModule,
     AutosizeModule,
     MatChipsModule,
@@ -92,6 +95,7 @@ import { AbilitySignsPipe } from '../ability-signs.pipe';
       ReqAddComponent,
       ChangeCharactComponent,
       PersImportExportDialogComponent,
+      QuickAddAbilityComponent
     ],
   providers: [{ provide: OWL_DATE_TIME_LOCALE, useValue: 'ru' },]
 })

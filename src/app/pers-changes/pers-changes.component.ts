@@ -1,9 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA } from '@angular/material';
 import { ChangesModel } from 'src/Models/ChangesModel';
-import { AnimationBuilder, style, animate } from '@angular/animations';
-import { PersService } from '../pers.service';
 
 @Component({
   selector: 'app-pers-changes',
@@ -11,15 +8,16 @@ import { PersService } from '../pers.service';
   styleUrls: ['./pers-changes.component.css']
 })
 export class PersChangesComponent implements OnInit {
-
-  headText: string;
-  changes: ChangesModel[] = [];
-  isGood: boolean = true;
-  counto: number[] = [];
-  slidingDoorValue: string = 'out';
   abPoints: any;
+  changes: ChangesModel[] = [];
+  counto: number[] = [];
+  headText: string;
+  isGood: boolean = true;
+  slidingDoorValue: string = 'out';
+  img: any;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+    this.img = data.img;
     this.headText = data.headText;
     this.changes = data.changes;
     this.changes.forEach(element => {
@@ -33,6 +31,5 @@ export class PersChangesComponent implements OnInit {
   }
 
   ngOnInit() {
-
   }
 }

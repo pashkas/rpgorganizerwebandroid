@@ -8,6 +8,8 @@ export class ChangesModel {
     totalMin: number;
     expChanges: persExpChanges[] = [];
     img: string;
+    head: any;
+    abPoints: any;
 
     constructor(name, type, valFrom, valTo, totalMin, totalMax, img) {
         this.img = img;
@@ -47,6 +49,7 @@ export class ChangesModel {
                 this.valChange = '' + change;
             }
         }
+
         if (type == 'perk') {
             this.name = '"' + this.name + '"';
             if (change > 0) {
@@ -54,15 +57,17 @@ export class ChangesModel {
             } else {
                 this.valChange = 'потерян!';
             }
-        }
-        if (type == 'inv') {
+        } else if (type == 'inv') {
             this.name = '"' + this.name + '"';
             if (change > 0) {
                 this.valChange = 'получен!';
             } else {
                 this.valChange = 'использован!';
             }
+        } else if (type == 'exp' || type == 'cha' || type == 'abil') {
+            this.valChange = '';
         }
+
 
         // if (type == 'abil' || type == 'cha') {
         //     this.valChange = '';

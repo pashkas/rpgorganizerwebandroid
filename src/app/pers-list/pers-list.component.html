@@ -32,12 +32,14 @@
           <app-image-component [(data)]="pers.image" [isCanEdit]="false"></app-image-component>
           <div fxLayout="row" fxLayoutAlign="space-between center">
             <div fxFlex="initial">
-              <img src="assets/icons/опыт.png" class="img-fluid mr-1"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-              <span>
-                <span class="text-success">{{pers.level}}</span>
-                <!-- <span class="text-secondary"> ({{pers.totalProgress}}%)</span> -->
-              </span>
+              <button mat-stroked-button [routerLink]="['/turnirtable']">
+                <img src="assets/icons/опыт.png" class="img-fluid mr-1"
+                  [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+                <span>
+                  <span class="text-success">{{pers.level}}</span>
+                  <!-- <span class="text-secondary"> ({{pers.totalProgress}}%)</span> -->
+                </span>
+              </button>
             </div>
 
             <!-- Имя -->
@@ -49,11 +51,13 @@
             </div>
 
             <div fxFlex="initial">
-              <img src="assets/icons/diamond.png" class="img-fluid"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-              <span [ngClass]="{'text-success': pers.ON>0, 'text-danger': pers.ON<0}">
-                {{pers.ON}}
-              </span>
+              <button mat-stroked-button (click)="quickAddAbil()">
+                <img src="assets/icons/diamond.png" class="img-fluid"
+                  [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+                <span [ngClass]="{'text-success': pers.ON>0, 'text-danger': pers.ON<0}">
+                  {{pers.ON}}
+                </span>
+              </button>
             </div>
           </div>
 
@@ -140,11 +144,6 @@
             <div fxFlex="100">
               <button class="w-100" [routerLink]="['/mind-map']" mat-stroked-button color="accent">
                 Карта персонажа
-              </button>
-            </div>
-            <div fxFlex="100">
-              <button class="w-100" [routerLink]="['/turnirtable']" mat-stroked-button color="accent">
-                Турнирная таблица
               </button>
             </div>
             <div fxFlex="100">
