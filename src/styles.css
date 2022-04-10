@@ -104,6 +104,14 @@ button:focus {
     background-color: white !important;
 }
 
+.abNextLevProgr .mat-progress-bar-buffer {
+    background-color: lightgray !important;
+}
+
+.abNextLevProgr .mat-progress-bar-fill::after {
+    background-color: #FFFF5C !important;
+}
+
 /* .icon-small.mat-icon-button {
     font-size: 1em !important;
     height: 1em !important;
@@ -178,6 +186,13 @@ button:focus {
 .my-big .mat-dialog-container {
     width: 95vw;
     max-width: 900px;
+}
+
+.my-middle {}
+
+.my-middle .mat-dialog-container {
+    width: 95vw;
+    max-width: 600px;
 }
 
 h5 {

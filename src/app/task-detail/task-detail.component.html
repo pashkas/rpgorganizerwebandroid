@@ -30,6 +30,10 @@
         </div>
       </div>
     </div>
+    <div *ngIf="tskAbility" class="pt-2">
+      <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel">
+      </mat-progress-bar>
+    </div>
 
     <div class="w-100 px-0 text-center" *ngIf="!tskAbility">
       <h4>{{tsk.name}}</h4>
@@ -38,8 +42,8 @@
     <br *ngIf="tskAbility">
     <!-- Дата и время, повтор -->
     <div fxLayout="row" fxLayoutAlign="space-between center" class="px-1" *ngIf="tskAbility">
-      <ng-container *ngIf="tskCharact">
-        <a [routerLink]="['/pers/characteristic', tskCharact.id]">{{tskCharact.name}}</a>
+      <ng-container *ngIf="tskCharact$|async as charact">
+        <a [routerLink]="['/pers/characteristic', charact.id]">{{charact.name}}</a>
       </ng-container>
 
       <div>
@@ -106,20 +110,13 @@
         </div>
       </mat-list>
     </ng-container>
-    <ng-container *ngIf="!pers.isTES">
-      <br>
-      <ng-container *ngFor="let st of tsk.statesDescr; let i = index;">
-        <div *ngIf="i!=0 && st &&(!tsk.isPerk || (tsk.isPerk && i==10))" class="text-center px-0 py-1 border-0"
-          [ngClass]="{'bg-success': i==tsk.value && tskAbility.isOpen}">
-          <b *ngIf="!tsk.isPerk">{{i}}<ng-container *ngIf="st&&!tsk.isPerk">: </ng-container></b>{{st}}
-        </div>
-      </ng-container>
-    </ng-container>
-    <div *ngIf="pers.isTES && tsk.curLvlDescr" class="text-center px-0 py-1 border-0">
-      <div class="border rounded d-flex justify-content-center align-items-center" style="min-height: 35px;">
-        <div>{{tsk.curLvlDescr}}</div>
+    <br>
+    <ng-container *ngFor="let st of tsk.statesDescr; let i = index;">
+      <div *ngIf="st" class="text-center px-0 py-1 border-0"
+        [ngClass]="{'bg-success': i==tsk.value && tskAbility.isOpen}">
+        <b>{{i}} </b>{{st}}
       </div>
-    </div>
+    </ng-container>
   </form>
   <br>
   <br>
@@ -139,9 +136,9 @@
       </mat-form-field>
 
     </div>
-    <mat-form-field *ngIf="tskCharact">
+    <mat-form-field *ngIf="tskCharact$|async as charact">
       <input class="pointer" (click)="changeCharact()" matInput readonly placeholder="Характеристика" name="tsk.charact"
-        value="{{tskCharact.name}}">
+        value="{{charact.name}}">
     </mat-form-field>
 
     <!-- Описание -->
@@ -183,7 +180,7 @@
       <div *ngFor="let wd of weekDays">
         <ng-container>
           <mat-chip (click)="setWeekDays(wd)" [selected]="tsk.tskWeekDays.includes(wd)" color="accent">
-            {{'    ' + wd + '    '}}
+            {{' ' + wd + ' '}}
           </mat-chip>
         </ng-container>
       </div>

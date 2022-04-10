@@ -103,6 +103,7 @@ export class Task implements IImg {
     autoInd: number;
     lastDate: number;
     tesAbValue: number = 0;
+    progresNextLevel: number;
 
     static getHardness(tsk: Task): number {
         if (!tsk.hardnes) {

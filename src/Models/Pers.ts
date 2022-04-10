@@ -198,4 +198,5 @@ export class Pers {
     isOffline: boolean = false;
     currentView: curpersview;
     isWebp: boolean = true;
+    expDirect: number;
 }

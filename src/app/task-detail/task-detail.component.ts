@@ -4,7 +4,7 @@ import { Task, taskState, Reqvirement } from 'src/Models/Task';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PersService } from '../pers.service';
 import { Location } from '@angular/common';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Ability } from 'src/Models/Ability';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -30,7 +30,7 @@ export class TaskDetailComponent implements OnInit {
   times = [1, 2, 3, 4, 5];
   tsk: Task;
   tskAbility: Ability;
-  tskCharact: Characteristic;
+  tskCharact$ = new BehaviorSubject<Characteristic>(undefined);
   weekDays: string[] = Task.weekDays;
 
   constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) { }
@@ -100,21 +100,21 @@ export class TaskDetailComponent implements OnInit {
   }
 
   changeCharact() {
-    if (!this.tskAbility || !this.tskCharact) {
+    if (!this.tskAbility || !this.tskCharact$.value) {
       return;
     }
 
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(ChangeCharactComponent, {
       panelClass: 'my-big',
-      data: { characteristic: this.tskCharact, allCharacts: this.pers.characteristics.sort((a, b) => a.name.localeCompare(b.name)), tittle: 'Выберите квест' },
+      data: { characteristic: this.tskCharact$.value, allCharacts: this.pers.characteristics.sort((a, b) => a.name.localeCompare(b.name)), tittle: 'Выберите квест' },
       backdropClass: 'backdrop'
     });
 
     dialogRef.afterClosed()
       .subscribe(n => {
         if (n) {
-          if (n.id != this.tskCharact.id) {
+          if (n.id != this.tskCharact$.value.id) {
             for (const ch of this.pers.characteristics) {
               if (ch.id == n.id) {
                 ch.abilities.push(this.tskAbility);
@@ -124,9 +124,9 @@ export class TaskDetailComponent implements OnInit {
             }
 
             // Перемещаем
-            this.tskCharact.abilities = this.tskCharact.abilities.filter(n => n.id !== this.tskAbility.id);
+            this.tskCharact$.value.abilities = this.tskCharact$.value.abilities.filter(n => n.id !== this.tskAbility.id);
 
-            this.findTask();
+            this.tskCharact$.next(n);
           }
         }
         this.srv.isDialogOpen = false;
@@ -185,7 +185,7 @@ export class TaskDetailComponent implements OnInit {
       }
       else {
         this.tskAbility=this.srv.allMap[id].link;
-        this.tskCharact=this.srv.allMap[this.srv.allMap[id].link.id].link;
+        this.tskCharact$.next(this.srv.allMap[this.srv.allMap[id].link.id].link);
         this.requrenses = Task.requrenses.filter(n => {
           return n != 'нет';
         });

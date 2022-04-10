@@ -6,12 +6,12 @@
     <div class="passFields" fxLayout="column" fxLayoutGap="5px" fxLayoutAlign="space-around stretch">
       <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="space-around center">
         <mat-form-field class="w-100">
-          <input matInput autocomplete="off" placeholder="Email" [(ngModel)]="email" name="email">
+          <input matInput autocomplete="off" placeholder="Email" [(ngModel)]="email" name="email" type="email">
         </mat-form-field>
         <mat-slide-toggle [(ngModel)]="isNew">Новичок?</mat-slide-toggle>
       </div>
       <mat-form-field class="w-100">
-        <input matInput autocomplete="off" placeholder="Пароль" [(ngModel)]="password" name="password">
+        <input matInput autocomplete="off" placeholder="Пароль" [(ngModel)]="password" name="password" type="password">
         <mat-hint *ngIf="err">
           * {{err}}
         </mat-hint>

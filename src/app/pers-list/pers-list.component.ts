@@ -388,6 +388,7 @@ export class PersListComponent implements OnInit {
     this.srv.isDialogOpen = true;
 
     const dialogRef = this.dialog.open(QuickAddAbilityComponent, {
+      panelClass: 'my-middle',
       data: { isImport: false },
       backdropClass: 'backdrop'
     });
