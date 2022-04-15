@@ -298,6 +298,7 @@ export class PersListComponent implements OnInit {
             tsk.tesAbValue = 0;
             tsk.refreshCounter = 0;
             tsk.date = new Date();
+            tsk.secondsDone=0;
             tsk.nextAbVal = 0;
             this.srv.GetRndEnamy(tsk, 0, this.pers.maxPersLevel);
             tsk.states.forEach(st => {

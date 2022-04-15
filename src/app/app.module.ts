@@ -25,13 +25,14 @@ import { TskTimeValDialogComponent } from './tsk-time-val-dialog/tsk-time-val-di
 import { RestComponent } from './rest/rest.component';
 import { RouteReuseStrategy } from '@angular/router';
 import { RouteReuseService } from './route-reuse.service';
-import {MatDividerModule} from '@angular/material/divider';
+import { MatDividerModule } from '@angular/material/divider';
 import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import { TimerCounterComponent } from './main-window/timer-counter/timer-counter.component';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { FailModPipe } from './fail-mod.pipe';
 import { MainProgrDescPipe } from './main-window/main-progr-desc.pipe';
 import { ListBgPipe } from './list-bg.pipe';
+import { TaskTimerComponentComponent } from './task-timer-component/task-timer-component.component';
 
 registerLocaleData(localeRu, 'ru');
 
@@ -53,6 +54,7 @@ registerLocaleData(localeRu, 'ru');
     FailModPipe,
     MainProgrDescPipe,
     ListBgPipe,
+    TaskTimerComponentComponent,
   ],
   imports: [
     NgxMaterialTimepickerModule,
@@ -88,7 +90,8 @@ registerLocaleData(localeRu, 'ru');
       LevelUpMsgComponent,
       ArrSortDialogComponent,
       TskTimeValDialogComponent,
-      ConfirmationDialogComponent
+      ConfirmationDialogComponent,
+      TaskTimerComponentComponent,
     ],
   exports: []
 })

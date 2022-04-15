@@ -804,7 +804,7 @@ export class PersService {
       result += min + 'м '
     }
 
-    if (sec > 0) {
+    if (sec > 0 || (h == 0 && min == 0)) {
       result += sec + 'с '
     }
 
@@ -1205,15 +1205,8 @@ export class PersService {
             tsk.time = "00:00";
           }
 
-          if (!prs.isTES) {
-            if (tsk.isPerk && tsk.value >= 1) {
-              tsk.value = 10;
-            }
-          } else {
-            tsk.value = this.getAbVal(tsk.tesValue);
+          tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen);
 
-            tsk.failCounter = 0;
-          }
 
           if (tsk.value < 0) {
             tsk.value = 0;
@@ -1417,12 +1410,12 @@ export class PersService {
         abMax = 1;
       }
 
-      const start = ch.startRang.val;
-      let left = this._maxCharactLevel - start;
+      const start = ch.startRang.val + 1;
+      let left = (this._maxCharactLevel) - start;
       let progr = (abCur / abMax);
       ch.value = start + (left * progr);
       const chaCeilProgr = Math.floor(ch.value);
-      ch.progressValue = (chaCeilProgr / this._maxCharactLevel) * 100;
+      ch.progressValue = (chaCeilProgr / (this._maxCharactLevel)) * 100;
 
       const rng = new Rangse();
       rng.val = chaCeilProgr;
@@ -1850,8 +1843,14 @@ export class PersService {
     return { persLevel, exp, startExp, nextExp, expDirect }
   }
 
-  private getAbVal(tesVal: number): number {
-    return Math.floor(tesVal / 10.0);
+  private getAbVal(tesVal: number, isOpen: boolean): number {
+    let val = Math.floor(tesVal / 10.0);
+
+    if (isOpen) {
+      val = val + 1;
+    }
+
+    return val;
   }
 
   checkAndChangeWebP(img: string): string {
@@ -2193,6 +2192,7 @@ export class PersService {
       }
 
       task.lastNotDone = true;
+      task.secondsDone = 0;
       task.failCounter++;
 
       this.setCurInd(0);
@@ -2238,6 +2238,7 @@ export class PersService {
 
         // Плюсуем значение
         this.changeTes(tsk, true);
+        tsk.secondsDone = 0;
 
         task.lastNotDone = false;
         this.setCurInd(0);
@@ -2268,8 +2269,9 @@ export class PersService {
     }
   }
 
-  tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string) {
+  tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number) {
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
+
     let value = Math.ceil(progr * av);
 
     if (aimVal < 0) {
@@ -2288,6 +2290,10 @@ export class PersService {
 
     if (aimVal < 0) {
       value = av - value;
+    }
+
+    if (aimDone != null) {
+      value = Math.floor(value - aimDone);
     }
 
     return value;
@@ -3100,7 +3106,11 @@ export class PersService {
       // Текущий уровень
       const progr = this.getProgrForTittle(tsk.value + 1, tsk.value, tsk.isPerk, isMegaPlan);
 
-      const plusState = this.getPlusState(tsk, progr);
+      if (tsk.aimTimer && tsk.aimUnit != 'Раз') {
+        tsk.secondsToDone = this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit);
+      }
+
+      const plusState = this.getPlusState(tsk, progr, true);
 
       if (plusState) {
         if (tsk.states.length > 0 && !tsk.isSumStates) {
@@ -3139,7 +3149,7 @@ export class PersService {
     }
   }
 
-  private getPlusState(tsk: Task, progr: number) {
+  private getPlusState(tsk: Task, progr: number, isCur?: boolean) {
     let plusState = '';
     // Состояния
     if (tsk.states.length > 0) {
@@ -3194,7 +3204,11 @@ export class PersService {
 
     // Таймер, счетчик
     if (tsk.aimTimer != 0) {
-      plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit), tsk.aimUnit);
+      let aimVal = 0;
+      if (isCur) {
+        aimVal = tsk.secondsDone;
+      }
+      plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal), tsk.aimUnit);
 
       if (tsk.aimUnit == 'Раз' && tsk.postfix && tsk.postfix.length > 0) {
         plusState = plusState.substring(0, plusState.length - 1);
@@ -3209,7 +3223,7 @@ export class PersService {
   }
 
   private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean) {
-    let start = (nextAbVal - tskVal) / (this._maxAbilLevel);
+    let start = 0; //(nextAbVal - tskVal) / (this._maxAbilLevel);
     let progr = start + (tskVal / this._maxAbilLevel);
 
     if (progr < 0.01) {

@@ -33,7 +33,8 @@
               [ngClass]="{'py-2': data.currentView!='SkillsSort', 'py-0':  data.currentView=='SkillsSort'}">
               <div class="flex-grow-1 text-center">
                 <div class="pointer">
-                  <ng-container *ngIf="t.requrense != 'нет' && !data.pers.isMegaPlan && checkDate(t.date)" class="bg-danger">
+                  <ng-container *ngIf="t.requrense != 'нет' && !data.pers.isMegaPlan && checkDate(t.date)"
+                    class="bg-danger">
                     [{{t.date| datestring}}]
                   </ng-container>
                   <ng-container *ngIf="t.requrense != 'нет' || data.currentView=='QwestSort'; else elseTemplate">
@@ -95,10 +96,10 @@
           </a>
           <app-timer-counter [tsk]="data.currentTask"></app-timer-counter>
         </div>
-        <small *ngIf="data.currentTask.descr" class="text-center text-secondary mynote">
+        <small *ngIf="data?.currentTask?.descr" class="text-center text-secondary mynote">
           {{data.currentTask.descr}}
         </small>
-        <small class="text-center" *ngIf="data.currentTask.plusToNames&&data.currentTask.plusToNames.length>0;">
+        <small class="text-center" *ngIf="data?.currentTask?.plusToNames&&data?.currentTask?.plusToNames?.length>0;">
           <ng-container *ngFor="let pl of data.currentTask.plusToNames; let i=index;">
             <ng-container *ngIf="i>0"> | </ng-container>
             <ng-container *ngIf="pl.linkType; else noLinkType">
@@ -121,10 +122,14 @@
               </ng-template>
             </ng-template>
           </ng-container>
+          <a *ngIf="data?.currentTask?.aimTimer && (data?.currentTask?.aimUnit != 'Раз')" class="text-secondary pointer" (click)="openTaskTimer()">
+            | ⌛&nbsp;
+          </a>
         </small>
       </div>
     </ng-container>
-    <app-progress-bar-num [text]="data.pers.name+' ('+data.pers.rangName+')'+', уровень ' + data.pers.level + ': ' + data.pers.exp + '/' + + data.pers.nextExp"
+    <app-progress-bar-num
+      [text]="data.pers.name+' ('+data.pers.rangName+')'+', уровень ' + data.pers.level + ': ' + data.pers.exp + '/' + + data.pers.nextExp"
       [val]="data.pers.progressValue">
     </app-progress-bar-num>
     <div fxLayout="row" fxLayoutAlign="space-between center" class="w-100 h-100 py-1" style="min-height: 120px;">

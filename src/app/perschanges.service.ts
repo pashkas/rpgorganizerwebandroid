@@ -49,7 +49,7 @@ export class PerschangesService {
 
     const isShowCharactChanges = true;
     const isShowAbChanges = true;
-    const isShowAbActivate = true;
+    const isShowAbActivate = false;
     const isShowExpChanges = true;
 
     const isOpenPersAtNewLevel = true;

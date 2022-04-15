@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { PersService } from '../pers.service';
 import { Task } from 'src/Models/Task';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { Ability } from 'src/Models/Ability';
 import { MatDialog } from '@angular/material';
@@ -10,6 +10,8 @@ import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.compo
 import { StatesService } from '../states.service';
 import { curpersview } from 'src/Models/curpersview';
 import { Qwest } from 'src/Models/Qwest';
+import { TaskTimerComponentComponent } from '../task-timer-component/task-timer-component.component';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-main-window',
@@ -18,17 +20,18 @@ import { Qwest } from 'src/Models/Qwest';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MainWindowComponent implements OnInit {
+  private unsubscribe$ = new Subject();
+
+  currentTask$ = this.srv.currentTask$.asObservable();
+  currentView$ = this.srv.currentView$.asObservable();
   isFailShown$ = new BehaviorSubject<boolean>(false);
   isFailShownOv$ = new BehaviorSubject<boolean>(false);
+  isSort: boolean = false;
   isSucessShown$ = new BehaviorSubject<boolean>(false);
   isSucessShownOv$ = new BehaviorSubject<boolean>(false);
-
-  isSort: boolean = false;
   lastGlobalBeforeSort: boolean;
-  qwickSortVals: sortArr[] = [];
-  currentView$ = this.srv.currentView$.asObservable();
-  currentTask$ = this.srv.currentTask$.asObservable();
   pers$ = this.srv.pers$.asObservable();
+  qwickSortVals: sortArr[] = [];
 
   constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService) {
   }
@@ -202,6 +205,11 @@ export class MainWindowComponent implements OnInit {
     this.srv.setCurInd(i);
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   ngOnInit() {
     // if (!this.pers) {
     //   this.route.data.pipe(take(1))
@@ -290,6 +298,32 @@ export class MainWindowComponent implements OnInit {
       let idx = this.srv.pers$.value.tasks.findIndex(n => n.plusToNames.filter(q => q.linkId == linkId).length > 0);
       this.srv.setCurInd(idx);
     }
+  }
+
+  openTaskTimer() {
+    let dialogRef = this.dialog.open(TaskTimerComponentComponent, {
+      disableClose: true,
+      backdropClass: 'backdrop'
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(n => {
+        let diffSecconds = n/1000;
+        let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
+        let tt: number = tsk.secondsToDone - diffSecconds;
+        if (tt<0) {
+          tt=0;
+        }
+
+        if(tt>tsk.secondsToDone){
+          tt=tsk.secondsToDone;
+        }
+
+        tsk.secondsDone = tt;
+
+        this.srv.savePers(false);
+      });
   }
 
   prevTask() {

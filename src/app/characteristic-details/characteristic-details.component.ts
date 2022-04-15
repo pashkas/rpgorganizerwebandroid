@@ -85,7 +85,7 @@ export class CharacteristicDetailsComponent implements OnInit {
     }
 
     this.rangse = [];
-    for (let index = 0; index <= this.srv._maxCharactLevel; index++) {
+    for (let index = 0; index <= this.srv._maxCharactLevel - 1; index++) {
       let rng = new Rangse();
       rng.val = index;
       rng.img = '';
