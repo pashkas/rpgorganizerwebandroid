@@ -264,8 +264,8 @@
     </div>
 
     <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="states" *ngIf="tsk.states.length > 0">
-      <div mat-list-item cdkDrag *ngFor="let st of tsk.states; let i = index">
-        <div class="d-flex">
+      <div mat-list-item cdkDrag *ngFor="let st of tsk.states; let i = index; let even = even; let odd = odd">
+        <div class="d-flex row-striped" [ngClass]="{ even: even }">
           <div class="flex-grow-1 align-self-center">
             <a class="text-primary">
               <ng-container *ngIf="tsk.requrense != 'нет' || st.isDone == false">

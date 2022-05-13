@@ -282,12 +282,14 @@ export class PersListComponent implements OnInit {
     if (window.confirm('Вы уверены?')) {
       this.pers.lastTaskId = null;
       this.pers.isOffline = true;
+      this.pers.gold = 0;
       this.pers.characteristics.forEach(cha => {
         cha.abilities.forEach(ab => {
           ab.isOpen = false;
           ab.tasks.forEach(tsk => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
             tsk.order = -1;
+            tsk.plusExp = 0;
             tsk.lastDate = 0;
             tsk.prevId = null;
             tsk.nextId = null;
@@ -298,7 +300,7 @@ export class PersListComponent implements OnInit {
             tsk.tesAbValue = 0;
             tsk.refreshCounter = 0;
             tsk.date = new Date();
-            tsk.secondsDone=0;
+            tsk.secondsDone = 0;
             tsk.nextAbVal = 0;
             this.srv.GetRndEnamy(tsk, 0, this.pers.maxPersLevel);
             tsk.states.forEach(st => {
@@ -362,6 +364,16 @@ export class PersListComponent implements OnInit {
     this.srv.upAbility(ab);
 
     this.srv.changesAfter(true);
+  }
+
+  buyRevard(rev: Reward) {
+    this.srv.changesBefore();
+
+    this.pers.gold -= rev.cost;
+    this.srv.addToInventory(rev);
+    this.srv.savePers(true);
+
+    this.srv.changesAfter(null);
   }
 
   /**

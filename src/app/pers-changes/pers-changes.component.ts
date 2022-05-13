@@ -9,6 +9,7 @@ import { ChangesModel } from 'src/Models/ChangesModel';
 })
 export class PersChangesComponent implements OnInit {
   abPoints: any;
+  gold: any;
   changes: ChangesModel[] = [];
   counto: number[] = [];
   headText: string;
@@ -25,6 +26,7 @@ export class PersChangesComponent implements OnInit {
     });
     this.isGood = data.isGood;
     this.abPoints = data.abPoints;
+    this.gold = data.gold;
     if (data.isTES) {
       this.abPoints = null;
     }

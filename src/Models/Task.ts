@@ -107,6 +107,7 @@ export class Task implements IImg {
 
     secondsToDone: number = 0;
     secondsDone: number = 0;
+    plusExp: number = 0;
 
     static getHardness(tsk: Task): number {
         if (!tsk.hardnes) {

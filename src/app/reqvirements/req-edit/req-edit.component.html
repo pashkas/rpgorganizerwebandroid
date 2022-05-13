@@ -6,7 +6,7 @@
     </button>
 </div>
 <mat-list *ngIf="reqvirements?.length>0">
-    <div fxLayout="row" fxLayoutAlign="space-between center" mat-list-item *ngFor="let r of reqvirements">
+    <div fxLayout="row" fxLayoutAlign="space-between center" mat-list-item *ngFor="let r of reqvirements; let even = even; let odd = odd" class="row-striped" [ngClass]="{ even: even }">
         <div>
             {{r.elName}} ≥ {{r.elVal}}
         </div>

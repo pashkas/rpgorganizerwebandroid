@@ -1,29 +1,36 @@
 <h1 mat-dialog-title class="text-center">{{data.header}}</h1>
 <div mat-dialog-content>
     <div fxLayout="column" fxLayoutAlign="space-around center">
-        <!-- <div class="text-center p-1" *ngIf="data.rev.image">
-            <img src="{{data.rev.image}}" class="img-fluid rounded"
-                [ngStyle]="{'object-fit': 'contain', 'height': '100px'}">
-        </div> -->
-        <app-image-component [(data)]="data.rev.image" [isCanEdit]="true"></app-image-component>
+        <app-image-component [(data)]="rev.image" [isCanEdit]="true" [isRev]="true"></app-image-component>
         <div fxFill fxLayoutGap='15px'>
             <mat-form-field fxFlex>
-                <input cdkFocusInitial matInput [(ngModel)]="data.rev.name" autocomplete="off" placeholder="Название"
-                    name="data.rev.name">
+                <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.rev.name" autocomplete="off"
+                    placeholder="Название" name="data.rev.name">
             </mat-form-field>
-            <!-- <mat-form-field fxFlex="30">
-                <input matInput [(ngModel)]="data.rev.image" autocomplete="off" placeholder="Изображение"
-                    name="data.rev.image">
-            </mat-form-field> -->
         </div>
 
-        <mat-form-field *ngIf="!data.isArt">
+        <!-- <mat-form-field *ngIf="!data.isArt">
             <mat-label>Редкость</mat-label>
             <mat-select [(ngModel)]="data.rev.rare" name="data.rev.rare">
                 <mat-option *ngFor="let t of revTypes" [value]="t">
                     {{t}}
                 </mat-option>
             </mat-select>
+        </mat-form-field> -->
+    </div>
+    <div fxLayout="column" fxLayoutAlign="space-between start" fxLayoutGap='15px'>
+        <mat-slide-toggle [(ngModel)]="rev.isLud">Трофей?</mat-slide-toggle>
+        <mat-form-field fxFlex *ngIf="rev.isLud">
+            <input type="number" matInput onfocus="this.select()" [(ngModel)]="rev.ludProbability" autocomplete="off"
+                placeholder="Вероятность выпадения, %" name="data.rev.ludProbability">
+        </mat-form-field>
+    </div>
+
+    <div fxLayout="column" fxLayoutAlign="space-between start" fxLayoutGap='15px'>
+        <mat-slide-toggle [(ngModel)]="rev.isShop">Магазин?</mat-slide-toggle>
+        <mat-form-field fxFlex *ngIf="rev.isShop">
+            <input type="number" matInput onfocus="this.select()" [(ngModel)]="data.rev.cost" autocomplete="off"
+                placeholder="Стоимость" name="data.rev.cost">
         </mat-form-field>
     </div>
 </div>

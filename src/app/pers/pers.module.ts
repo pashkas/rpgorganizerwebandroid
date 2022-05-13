@@ -39,6 +39,7 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
 import { AbilitySignsPipe } from '../ability-signs.pipe';
 import { QuickAddAbilityComponent } from './quick-add-ability/quick-add-ability.component';
+import { ShopPipe } from '../shop.pipe';
 
 
 @NgModule({
@@ -66,7 +67,8 @@ import { QuickAddAbilityComponent } from './quick-add-ability/quick-add-ability.
     AbHardnessComponent,
     PersImportExportDialogComponent,
     AbilitySignsPipe,
-    QuickAddAbilityComponent
+    QuickAddAbilityComponent,
+    ShopPipe
   ],
   imports: [
     ReactiveFormsModule,

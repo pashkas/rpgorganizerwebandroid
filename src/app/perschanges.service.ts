@@ -123,6 +123,10 @@ export class PerschangesService {
           );
         }
         if (isShowAbChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
+          if (changesMap[n].after > changesMap[n].before && changesMap[n].after == 1) {
+            abToEdit = n;
+          }
+
           changes.push(
             new ChangesModel(changesMap[n].name, 'abil', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
           );
@@ -206,6 +210,7 @@ export class PerschangesService {
       ({ head, isGood } = this.GetHead(isGood, congrantMsg, failMsg));
 
       let abPoints;
+      let gold;
       if (changes[index].type == 'abil') {
         abPoints = this.afterPers.ON;
         if (isAbilActivated) {
@@ -215,6 +220,17 @@ export class PerschangesService {
       } else if (changes[index].type == 'inv') {
         head = changes[index].name + '!';
         changes[index].name = ' ';
+      }
+
+      if (changes[index].type == 'exp'
+        || changes[index].type == 'qwest'
+        || changes[index].type == 'inv') {
+        if (this.afterPers.gold != this.beforePers.gold) {
+          gold = this.afterPers.gold - this.beforePers.gold;
+          if(gold > 0){
+            gold = '+'+gold;
+          }
+        }
       }
 
       if (isDoneQwest) {
@@ -236,9 +252,10 @@ export class PerschangesService {
 
       changes[index].head = head;
       changes[index].abPoints = abPoints;
-
+      changes[index].gold = gold;
     }
 
+    // Объединенные изменения
     if (combineChanges.length) {
       const head = combineChanges[0].head;
       const abPoints = combineChanges[0].head;
@@ -250,9 +267,7 @@ export class PerschangesService {
 
         function getChSort(ch: ChangesModel): number {
           if (ch.type == 'exp') { return 2; }
-
           if (ch.type == 'abil') { return 1; }
-
           if (ch.type == 'cha') { return 0; }
 
           return 3;
@@ -279,14 +294,13 @@ export class PerschangesService {
       dialogRef.close();
     }
 
+    // Отдельные изменения
     unionChanges.sort((a, b) => {
       return getChSort(a) - getChSort(b);
 
       function getChSort(ch: ChangesModel): number {
         if (ch.type == 'exp') { return 0; }
-
         if (ch.type == 'abil') { return 1; }
-
         if (ch.type == 'cha') { return 2; }
 
         return 3;
@@ -308,12 +322,17 @@ export class PerschangesService {
           abPoints: abPoints,
           isTES: this.afterPers.isTES,
           itemType: type,
-          img: img
+          img: img,
+          gold: ch.gold
         },
         backdropClass: 'backdrop'
       });
 
-      await sleep(4500);
+      if (ch.type == 'exp') {
+        await sleep(3000);
+      } else {
+        await sleep(6000);
+      }
 
       dialogRef.close();
     }
@@ -324,7 +343,7 @@ export class PerschangesService {
         backdropClass: 'backdrop'
       });
 
-      await sleep(3500);
+      await sleep(6000);
 
       dialogRefLvlUp.close();
 

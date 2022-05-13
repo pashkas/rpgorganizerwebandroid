@@ -8,4 +8,11 @@ export class Reward {
     cumulative: number = 0;
     count: number = 0;
     rare: string = 'Обычный';
+
+    isLud: boolean = false;
+    ludProbability: number = 0;
+    isShop: boolean = true;
+    cost: number = 0;
+    startProbability: number;
+    endProbability: number;
 }

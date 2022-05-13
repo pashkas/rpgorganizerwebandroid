@@ -39,7 +39,7 @@
     </div>
     <!-- Навыки -->
     <ul class="list-group p-0 pt-1" *ngIf="charact.abilities.length>0">
-      <li *ngFor="let ab of charact.abilities" class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0">
+      <li *ngFor="let ab of charact.abilities; let even = even; let odd = odd" class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped" [ngClass]="{ even: even }">
         <div class="align-self-center w-100 d-flex">
           <div class=" flex-grow-1 progress position-relative" style="height: 20px;">
             <div class="progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'">
@@ -105,8 +105,8 @@
     </div>
     <!-- Навыки -->
     <mat-list id="abs" *ngIf="charact.abilities.length>0">
-      <div mat-list-item *ngFor="let ab of charact.abilities">
-        <div class="d-flex">
+      <div mat-list-item *ngFor="let ab of charact.abilities; let even = even; let odd = odd">
+        <div class="d-flex row-striped" [ngClass]="{ even: even }">
           <div class="flex-grow-1 align-self-center">
             <a>
               {{ab.name}}

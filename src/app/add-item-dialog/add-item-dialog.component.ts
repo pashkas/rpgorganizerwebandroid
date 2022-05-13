@@ -13,7 +13,7 @@ export class AddItemDialogComponent implements OnInit {
   times = [1, 2, 3, 4, 5];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data, public dialogRef: MatDialogRef<AddItemDialogComponent>) {
-   }
+  }
 
   chooseImg(img) {
     this.dialogRef.close(img);
@@ -33,8 +33,14 @@ export class AddItemDialogComponent implements OnInit {
         ss = ss.substr(ss.length - 3);
         this.gallerryImages.push('assets/img/Perses/' + ss + '.webp');
       }
-    }
-    else{
+    } else if (this.data.isRev) {
+
+      for (let i = 1; i <= 44; i++) {
+        let ss = '000' + i;
+        ss = ss.substr(ss.length - 3);
+        this.gallerryImages.push('assets/img/Revards/' + ss + '.webp');
+      }
+    } else {
       for (let i = 1; i <= 126; i++) {
         let ss = '000' + i;
         ss = ss.substr(ss.length - 3);

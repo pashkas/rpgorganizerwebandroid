@@ -291,3 +291,7 @@ body {
 body {
     margin: 0;
 }
+
+.row-striped.even {
+  background-color: #F9F9F9;
+}

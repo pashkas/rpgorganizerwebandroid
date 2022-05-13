@@ -1128,6 +1128,9 @@ export class PersService {
     let prs: Pers = pers != null ? pers : this.pers$.value;
 
     prs.dateLastUse = new Date();
+    if (prs.gold == null) {
+      prs.gold = 0;
+    }
 
     this.getAllMapping(prs);
 
@@ -1365,9 +1368,9 @@ export class PersService {
                 if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
                   for (const st of tsk.states) {
                     if (
-                      (prs.isMegaPlan && prs.currentView == curpersview.SkillsSort) ||
-                      (st.isActive
-                        && (!st.isDone || prs.currentView == curpersview.SkillsSort))) {
+                      (prs.currentView == curpersview.SkillsSort) ||
+                      (st.isActive && !st.isDone)
+                    ) {
                       let stT = this.getTskFromState(tsk, st, false);
                       tasks.push(stT);
                     }
@@ -1588,7 +1591,7 @@ export class PersService {
 
     prs.qwests = ordered;
 
-    // prs.Diary = [];
+    prs.Diary = [];
 
     prs.tasks = tasks;
 
@@ -1656,6 +1659,39 @@ export class PersService {
       this.updateAbTasksImages(prs);
     }
 
+    // Награды
+    prs.rewards = prs.rewards.sort((a, b) => {
+      let aCost = getCostRev(a);
+      let bCost = getCostRev(b);
+      if (aCost != bCost) {
+        return aCost - bCost;
+      }
+
+      let aProb = getProbRev(a);
+      let bProb = getProbRev(b);
+      if (aProb != bProb) {
+        return aProb - bProb;
+      }
+
+      return a.name.localeCompare(b.name);
+
+      function getCostRev(r: Reward): number {
+        if (!r.isShop) {
+          return 99999999;
+        }
+
+        return r.cost;
+      }
+
+      function getProbRev(r: Reward): number {
+        if (!r.isLud) {
+          return 99999999;
+        }
+
+        return r.ludProbability;
+      }
+    });
+
     // Перерасчет опыта задач
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
@@ -1685,6 +1721,8 @@ export class PersService {
               amap.item.plusToNames.push(new plusToName('+' + tesChange + ' exp', null, null, ''));
             }
           }
+
+          tsk.plusExp = tesChange;
         }
       }
     }
@@ -2101,6 +2139,7 @@ export class PersService {
 
     if (isDone) {
       this.CasinoRevards(tsk);
+      this.CasinoGold(tsk.plusExp);
     }
 
     if (!this.pers$.value.isTES) {
@@ -2223,6 +2262,9 @@ export class PersService {
         // Разыгрываем награды
         this.CasinoRevards(task);
 
+        // Золото
+        this.CasinoGold(task.plusExp);
+
         // Счетчик обновлений стейтов
         if (task.isStateRefresh) {
           if (task.refreshCounter == null || task.refreshCounter == undefined) {
@@ -2264,9 +2306,17 @@ export class PersService {
           this.setCurInd(0);
         }
 
+        // Золото
+        this.CasinoGold(this.baseTaskPoints * 10.0);
+
         return 'квест';
       }
     }
+  }
+
+  CasinoGold(tskExp: number) {
+    let gold = Math.round((tskExp / 10) * Math.random());
+    this.pers$.value.gold += gold;
   }
 
   tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number) {
@@ -2410,84 +2460,41 @@ export class PersService {
    * Розыгрыш наград.
    */
   private CasinoRevards(task: Task) {
-    if (!this.pers$.value.rewards || this.pers$.value.rewards.length == 0) {
+    let revards = this.pers$.value.rewards.filter(q => q.isLud && q.ludProbability > 0);
+
+    if (!revards.length) {
       return;
     }
 
-    let rand = Math.random() * 100.0;
+    let total: number = 0;
+    let start: number = 0;
 
-    let revType = '';
-
-    // if (rand > 3) {
-    //   return;
-    // }
-
-    // if (this.pers.isMax5) {
-    //   if (task.value >= 5) {
-    //     revType = Pers.legendaryRevSet.name;
-    //   }
-    //   else if (task.value >= 4) {
-    //     revType = Pers.epicRevSet.name;
-    //   }
-    //   else if (task.value >= 3) {
-    //     revType = Pers.rareRevSet.name;
-    //   }
-    //   else if (task.value >= 2) {
-    //     revType = Pers.uncommonRevSet.name;
-    //   }
-    //   else {
-    //     revType = Pers.commonRevSet.name;
-    //   }
-    // }
-    // else {
-    //   if (task.value >= 9) {
-    //     revType = Pers.legendaryRevSet.name;
-    //   }
-    //   else if (task.value >= 7) {
-    //     revType = Pers.epicRevSet.name;
-    //   }
-    //   else if (task.value >= 5) {
-    //     revType = Pers.rareRevSet.name;
-    //   }
-    //   else if (task.value >= 3) {
-    //     revType = Pers.uncommonRevSet.name;
-    //   }
-    //   else {
-    //     revType = Pers.commonRevSet.name;
-    //   }
-    // }
-
-    if (rand <= Pers.commonRevSet.cumulative) {
-      revType = Pers.commonRevSet.name;
-    } else if (rand <= Pers.uncommonRevSet.cumulative) {
-      revType = Pers.uncommonRevSet.name;
-    } else if (rand <= Pers.rareRevSet.cumulative) {
-      revType = Pers.rareRevSet.name;
-    } else if (rand <= Pers.epicRevSet.cumulative) {
-      revType = Pers.epicRevSet.name;
-    } else if (rand <= Pers.legendaryRevSet.cumulative) {
-      revType = Pers.legendaryRevSet.name;
-    } else {
-      return;
+    for (const rev of revards) {
+      total = total + 100;
+      rev.startProbability = start;
+      start = start + rev.ludProbability;
+      rev.endProbability = start;
     }
 
-    let revsOfType = this.getRewsOfType(revType);
+    let rnd = Math.random() * total;
+    var rev = revards.find(q => rnd > q.startProbability && rnd <= q.endProbability);
 
-    if (revsOfType.length > 0) {
-      var rev = revsOfType[Math.floor(Math.random() * revsOfType.length)];
+    if (rev) {
+      this.addToInventory(rev);
+    }
+  }
 
-      // То добавляем к наградам
-      let idx = this.pers$.value.inventory.findIndex(n => {
-        return n.id === rev.id;
-      });
+  addToInventory(rev: Reward) {
+    let idx = this.pers$.value.inventory.findIndex(n => {
+      return n.id === rev.id;
+    });
 
-      if (idx === -1) {
-        rev.count = 1;
-        this.pers$.value.inventory.push(rev);
-      }
-      else {
-        this.pers$.value.inventory[idx].count = this.pers$.value.inventory[idx].count + 1;
-      }
+    if (idx === -1) {
+      rev.count = 1;
+      this.pers$.value.inventory.push(rev);
+    }
+    else {
+      this.pers$.value.inventory[idx].count = this.pers$.value.inventory[idx].count + 1;
     }
   }
 
@@ -2804,7 +2811,7 @@ export class PersService {
 
   private getSubtaskExpChange(tsk: Task, isDone: boolean, subTask: taskState) {
     let activeSubtasksCount = tsk.states.filter(n => n.isActive).length;
-    let expChange = this.getTaskChangesExp(tsk, isDone, subTask) / activeSubtasksCount;
+    let expChange = this.getTaskChangesExp(tsk, isDone, subTask, activeSubtasksCount);
 
     expChange = expChange;
 
@@ -2812,7 +2819,12 @@ export class PersService {
   }
 
   private getTaskChangesExp(task: Task, isPlus: boolean, subTask: taskState = null, subTasksCoef: number = 1, isChangeAb: boolean = false) {
-    const koef = this.getWeekKoef(task.requrense, isPlus, task.tskWeekDays);
+    let koef = this.getWeekKoef(task.requrense, isPlus, task.tskWeekDays);
+
+    // При пропуске учитывается количество пропусков задачи
+    // if (!isPlus && task.failCounter > 0) {
+    //   koef = koef * (task.failCounter + 1);
+    // }
 
     if (isChangeAb) {
       subTasksCoef = subTasksCoef * task.hardnes;

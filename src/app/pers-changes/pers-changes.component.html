@@ -7,6 +7,12 @@
             <img src="assets/icons/diamond.png" class="img-fluid"
                 [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
         </div>
+        <div *ngIf="this.gold != null" class=" m-2">
+            <span>
+                {{this.gold}}
+            </span>
+            <img src="assets/icons/gold.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+        </div>
         <img *ngIf="isGood && !img" class="img-fluid" style='height: 125px' src="assets/img/good.png"
             [ngStyle]="{'object-fit': 'contain'}">
         <img *ngIf="!isGood && !img" class="img-fluid" style='height: 125px' src="assets/img/bad.png"
@@ -20,6 +26,12 @@
             <span>
                 {{this.abPoints}}
             </span>
+        </div>
+        <div *ngIf="this.gold != null" class=" m-2">
+            <span>
+                {{this.gold}}
+            </span>
+            <img src="assets/icons/gold.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
         </div>
     </div>
 

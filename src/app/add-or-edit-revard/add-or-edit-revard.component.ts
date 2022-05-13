@@ -9,11 +9,12 @@ import { Pers } from 'src/Models/Pers';
   styleUrls: ['./add-or-edit-revard.component.css']
 })
 export class AddOrEditRevardComponent implements OnInit {
+  rev: Reward;
   constructor(@Inject(MAT_DIALOG_DATA) public data) { }
 
   revTypes: string[] = [Pers.commonRevSet.name, Pers.uncommonRevSet.name, Pers.rareRevSet.name, Pers.epicRevSet.name, Pers.legendaryRevSet.name];
 
   ngOnInit() {
+    this.rev = this.data.rev;
   }
-
 }

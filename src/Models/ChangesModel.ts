@@ -10,6 +10,7 @@ export class ChangesModel {
     img: string;
     head: any;
     abPoints: any;
+    gold: string;
 
     constructor(name, type, valFrom, valTo, totalMin, totalMax, img) {
         this.img = img;

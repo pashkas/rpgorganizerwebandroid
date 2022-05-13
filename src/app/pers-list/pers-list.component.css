@@ -11,3 +11,8 @@
 .opacity{
     opacity: .8;
 }
+
+.revBtn {
+    padding: 5px;
+    line-height: 1.1em !important;
+}

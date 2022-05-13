@@ -199,4 +199,6 @@ export class Pers {
     currentView: curpersview;
     isWebp: boolean = true;
     expDirect: number;
+
+    gold: number = 0;
 }

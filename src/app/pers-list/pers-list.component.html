@@ -29,15 +29,32 @@
             <img src="{{pers.image}}" class="img-fluid rounded"
               [ngStyle]="{'object-fit': 'contain', 'height': '30vh'}">
           </div> -->
-          <app-image-component [(data)]="pers.image" [isCanEdit]="false"></app-image-component>
+          <div fxLayout="row" fxLayoutAlign="space-between start">
+            <button mat-button style="visibility:hidden">
+              <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+              <span>
+                <span class="text-success">{{pers.gold| number}}</span>
+              </span>
+            </button>
+            <app-image-component [(data)]="pers.image" [isCanEdit]="false"></app-image-component>
+            <div fxFlex="initial">
+              <button mat-button>
+                <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                  [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+                <span>
+                  <span class="text-success">{{pers.gold}}</span>
+                </span>
+              </button>
+            </div>
+          </div>
           <div fxLayout="row" fxLayoutAlign="space-between center">
             <div fxFlex="initial">
-              <button mat-stroked-button [routerLink]="['/turnirtable']">
+              <button mat-button [routerLink]="['/turnirtable']">
                 <img src="assets/icons/опыт.png" class="img-fluid mr-1"
                   [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
                 <span>
                   <span class="text-success">{{pers.level}}</span>
-                  <!-- <span class="text-secondary"> ({{pers.totalProgress}}%)</span> -->
                 </span>
               </button>
             </div>
@@ -45,13 +62,10 @@
             <!-- Имя -->
             <div class="text-center text-dark" fxFlex>
               {{pers.name + ', '+pers.rangName+''}}
-              <!-- <span style="visibility: hidden;">
-                ({{pers.totalProgress}}%)
-              </span> -->
             </div>
 
             <div fxFlex="initial">
-              <button mat-stroked-button (click)="quickAddAbil()">
+              <button mat-button (click)="quickAddAbil()">
                 <img src="assets/icons/diamond.png" class="img-fluid"
                   [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
                 <span [ngClass]="{'text-success': pers.ON>0, 'text-danger': pers.ON<0}">
@@ -94,7 +108,9 @@
                 <div class="d-flex flex-column w-100">
                   <div>
                     <ul class="list-group py-0" *ngIf="item.abilities.length>0">
-                      <li *ngFor="let ab of item.abilities" class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0">
+                      <li *ngFor="let ab of item.abilities; let even = even; let odd = odd"
+                        class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0  row-striped"
+                        [ngClass]="{ even: even }">
                         <div class="align-self-center w-100 d-flex">
                           <div class=" flex-grow-1 progress position-relative" style="height: 20px;">
                             <div class="progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'">
@@ -224,7 +240,8 @@
                   </div>
                   <!-- Навыки -->
                   <mat-list *ngIf="item.abilities.length>0" class="p-0">
-                    <div mat-list-item *ngFor="let ab of item.abilities">
+                    <div mat-list-item *ngFor="let ab of item.abilities; let even = even; let odd = odd"
+                      class="row-striped" [ngClass]="{ even: even }">
                       <div class="d-flex align-items-center">
                         <div class="flex-grow-1 align-self-center">
                           <i>{{ab.name+(ab|abilitySigns)}}</i>
@@ -269,7 +286,7 @@
           <mat-slide-toggle [(ngModel)]="pers.isAutoPumping">Автопрокачка!</mat-slide-toggle>
           <br>
           <mat-slide-toggle [(ngModel)]="pers.isNoDiary">Отключить дневник</mat-slide-toggle> -->
-          
+
           <button mat-stroked-button color="accent" class="w-100 mt-2" (click)="resp()">
             Респаун
           </button>
@@ -310,7 +327,8 @@
 
             <ul class="list-group py-0 px-0">
               <li [ngStyle]="{'opacity': qwest.parrentId||qwest.isNoActive ? '0.4' : '1'}"
-                *ngFor="let qwest of pers.qwests" class="list-group-item px-0 py-1 border-0">
+                *ngFor="let qwest of pers.qwests; let even = even; let odd = odd"
+                class="list-group-item px-0 py-1 border-0 row-striped" [ngClass]="{ even: even }">
 
                 <div fxLayout="row" fxLayoutAlign="space-between center">
                   <a class="align-self-center w-100" [routerLink]="['/pers/qwest', qwest.id]">
@@ -327,8 +345,6 @@
                       </div>
                     </div>
                   </a>
-
-
                   <img *ngIf="qwest.progressValue >= 100" (click)="doneQwest(qwest)" src="assets/icons/star.png"
                     class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
                 </div>
@@ -351,8 +367,8 @@
           </div>
           <!-- Список квестов -->
           <mat-list>
-            <div mat-list-item *ngFor="let qwest of pers.qwests; let i = index">
-              <div class="d-flex align-items-center">
+            <div mat-list-item *ngFor="let qwest of pers.qwests; let i = index; let even = even; let odd = odd">
+              <div class="d-flex align-items-center row-striped" [ngClass]="{ even: even }">
                 <div class="flex-grow-1 align-self-center">
                   {{qwest.name}}
                 </div>
@@ -378,28 +394,62 @@
       </ng-template>
       <!-- Просмотр -->
       <div *ngIf="!isEditMode" class="pt-2 pb-4 w-100">
-        <div class="pb-4">
-          <!-- Инвентарь -->
-          <div fxFlexFill fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="10px grid"
-            style="padding-left: 10px;">
-            <div [fxFlex]="(100/3) + '%'" *ngFor="let rev of pers.inventory">
-              <div style="cursor: pointer;" (click)="useRevard(rev)" fxLayout="column"
-                fxLayoutAlign="space-around center" [ngStyle]="{'border-color': rev.rare | rarecol}"
-                style="border-width: 4px!important; border-style: solid; padding: 10px;">
-                <img appImgBroken src="{{rev.image}}" class="img-fluid rounded"
-                  [ngStyle]="{'object-fit': 'contain', 'height': '65px'}">
-                <div fxLayout="row" fxLayoutAlign="space-evenly center">
-                  <div>
-                    <small>{{rev.name}}</small>
-                  </div>
-                  <div>
-                    &nbsp;<small>x{{rev.count}}</small>
-                  </div>
+        <mat-tab-group mat-align-tabs="center" animationDuration="0ms">
+          <mat-tab label="Магазин">
+            <!-- Магазин -->
+            <div class="p-3">
+              <button mat-button class="float-right">
+                <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                  [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+                <span>
+                  <span class="text-success">{{pers.gold}}</span>
+                </span>
+              </button>
+              <div fxFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="10px grid"
+                style="padding-left: 10px;">
+                <div [fxFlex]="(100/3) + '%'" *ngFor="let rev of pers.rewards|shop">
+                  <button (click)="buyRevard(rev)" mat-stroked-button class="w-100 h-100 revBtn"
+                    [disabled]="pers.gold < rev.cost">
+                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+                      <img appImgBroken src="{{rev.image}}" class="img-fluid rounded pt-2"
+                        [ngStyle]="{'object-fit': 'contain', 'height': '65px'}">
+                      <div class="text-wrap py-2">
+                        {{rev.name}}
+                      </div>
+                      <div style="color: gold">
+                        <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                          [ngStyle]="{'object-fit': 'contain', 'height':'1em'}">
+                        <small>{{rev.cost}}</small>
+                      </div>
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </mat-tab>
+          <mat-tab label="Инвентарь" dynamicHeight>
+            <!-- Инвентарь -->
+            <div class="p-3">
+              <div fxFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="10px grid"
+                style="padding-left: 10px;">
+                <div [fxFlex]="(100/3) + '%'" *ngFor="let rev of pers.inventory">
+                  <button mat-stroked-button mat-stroked-button class="w-100 h-100 revBtn" (click)="useRevard(rev)">
+                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+                      <img appImgBroken src="{{rev.image}}" class="img-fluid rounded"
+                        [ngStyle]="{'object-fit': 'contain', 'height': '65px'}">
+                      <div class="text-wrap py-2">
+                        {{rev.name}}
+                      </div>
+                      <div>
+                        <small>x{{rev.count}}</small>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
       </div>
       <!-- Редактирование -->
       <div *ngIf="isEditMode" class="pt-2 pb-4 w-100">
@@ -413,20 +463,28 @@
           </div>
           <!-- Список наград -->
           <mat-list>
-            <div mat-list-item *ngFor="let rev of pers.rewards; let i = index">
-              <div fxFill>
-                <div fxFlex fxLayout="row" fxLayoutAlign="start center">
+            <div mat-list-item *ngFor="let rev of pers.rewards; let i = index; let even = even; let odd = odd;">
+              <div fxFill class="row-striped" [ngClass]="{ even: even }">
+                <div fxFlex fxLayout="row" fxLayoutAlign="space-between center">
                   <div>
                     {{rev.name}}&nbsp;
                   </div>
-                  <span class="badge pointer mr-1" [ngStyle]="{'background-color': rev.rare | rarecol}">
+                  <!-- <span class="badge pointer mr-1" [ngStyle]="{'background-color': rev.rare | rarecol}">
                     {{rev.rare}}
-                  </span>
+                  </span> -->
                 </div>
                 <div>
-                  <!-- Удалить -->
-                  <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
-                    <!-- Редактировать -->
+                  <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px">
+                    <div fxLayout="row" fxLayoutGap="25px" class="pr-4">
+                      <div *ngIf="rev.isShop" style="color: gold">
+                        <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                          [ngStyle]="{'object-fit': 'contain', 'height':'1em'}">
+                        <small>{{rev.cost}}</small>
+                      </div>
+                      <div *ngIf="rev.isLud" style="color: green">
+                        <small>{{rev.ludProbability + '%'}}</small>
+                      </div>
+                    </div>
                     <button class="icon-small" (click)="addNewRevard(rev)" mat-icon-button>
                       <img src="assets/icons/edit.png" class="img-fluid">
                     </button>
