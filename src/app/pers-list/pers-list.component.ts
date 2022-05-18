@@ -15,6 +15,7 @@ import { StatesService } from '../states.service';
 import { takeUntil } from 'rxjs/operators';
 import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
 import { QuickAddAbilityComponent } from '../pers/quick-add-ability/quick-add-ability.component';
+import { RevardDialogData } from 'src/Models/RevardDialogData';
 
 @Component({
   selector: 'app-pers-list',
@@ -154,7 +155,7 @@ export class PersListComponent implements OnInit {
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddOrEditRevardComponent, {
       panelClass: 'my-dialog',
-      data: { header: header, rev: r },
+      data: <RevardDialogData>{ header: header, rev: r },
       backdropClass: 'backdrop'
     });
 
@@ -165,7 +166,7 @@ export class PersListComponent implements OnInit {
             this.srv.AddRevard(rev);
           }
 
-          this.srv.sortRevards();
+          this.srv.recountRewards(this.srv.pers$.value);
         }
         this.srv.isDialogOpen = false;
       });
@@ -371,6 +372,10 @@ export class PersListComponent implements OnInit {
 
     this.pers.gold -= rev.cost;
     this.srv.addToInventory(rev);
+    if (rev.isArtefact) {
+      this.srv.pers$.value.rewards = this.srv.pers$.value.rewards.filter(r => r.id != rev.id);
+    }
+
     this.srv.savePers(true);
 
     this.srv.changesAfter(null);

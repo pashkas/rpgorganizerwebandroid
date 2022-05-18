@@ -3,6 +3,7 @@ import { Time } from '@angular/common';
 import { Rangse } from './Rangse';
 import { Pers } from './Pers';
 import { plusToName } from './plusToName';
+import { ReqItemType } from './ReqItem';
 export class Task implements IImg {
     reqvirements: Reqvirement[] = [];
     prefix: string = '';
@@ -259,6 +260,7 @@ export class Reqvirement {
     id: any = uuid();
     elId: any;
     elVal: number;
-    elName: string;
-    isDone: boolean = false;
+    elName?: string;
+    type?: string;
+    isDone?: boolean = false;
 }

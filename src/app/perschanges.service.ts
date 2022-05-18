@@ -62,7 +62,7 @@ export class PerschangesService {
         // Квест выполнен
         if (changesMap[n].after === null || changesMap[n].after === undefined) {
           changes.push(
-            new ChangesModel('Квест завершен - ' + changesMap[n].name, 'qwest', changesMap[n].before, changesMap[n].before, 0, changesMap[n].total, changesMap[n].img)
+            new ChangesModel('"' + changesMap[n].name + '" выполнен!', 'qwest', changesMap[n].before, changesMap[n].before, 0, changesMap[n].total, changesMap[n].img)
           );
           isDoneQwest = true;
           // qwestToEdit = n;
@@ -87,21 +87,21 @@ export class PerschangesService {
         if (changesMap[n].after === null || changesMap[n].after === undefined) {
           // Использован больше нет
           changes.push(
-            new ChangesModel('Использован ' + changesMap[n].name, 'inv', 0, 0, 0, 1, changesMap[n].img)
+            new ChangesModel('Использован "' + changesMap[n].name + '"', 'inv', 0, 0, 0, 1, changesMap[n].img)
           );
         }
         else if (changesMap[n].before === null || changesMap[n].before === undefined) {
           // Получен новый
           changes.push(
-            new ChangesModel('Получен ' + changesMap[n].name, 'inv', 1, 1, 0, 1, changesMap[n].img)
+            new ChangesModel('Получен "' + changesMap[n].name + '"', 'inv', 1, 1, 0, 1, changesMap[n].img)
           );
         } else if (changesMap[n].after > changesMap[n].before) {
           changes.push(
-            new ChangesModel('Получен ' + changesMap[n].name, 'inv', changesMap[n].after, changesMap[n].after, 0, changesMap[n].after, changesMap[n].img)
+            new ChangesModel('Получен "' + changesMap[n].name + '"', 'inv', changesMap[n].after, changesMap[n].after, 0, changesMap[n].after, changesMap[n].img)
           );
         } else if (changesMap[n].after < changesMap[n].before) {
           changes.push(
-            new ChangesModel('Использован ' + changesMap[n].name, 'inv', changesMap[n].before, changesMap[n].before, 0, changesMap[n].before, changesMap[n].img)
+            new ChangesModel('Использован "' + changesMap[n].name + '"', 'inv', changesMap[n].before, changesMap[n].before, 0, changesMap[n].before, changesMap[n].img)
           );
         }
       }
@@ -205,12 +205,20 @@ export class PerschangesService {
     let combineChanges: ChangesModel[] = [];
     let unionChanges: ChangesModel[] = [];
 
+    if (!changes.length && this.afterPers.gold != this.beforePers.gold) {
+      changes.push(
+        new ChangesModel('Золото', 'qwest', this.beforePers.gold, this.afterPers.gold, 0, this.afterPers.gold, null)
+      );
+    }
+
     for (let index = 0; index < changes.length; index++) {
       let head;
       ({ head, isGood } = this.GetHead(isGood, congrantMsg, failMsg));
 
       let abPoints;
       let gold;
+      let goldTotal;
+
       if (changes[index].type == 'abil') {
         abPoints = this.afterPers.ON;
         if (isAbilActivated) {
@@ -227,13 +235,14 @@ export class PerschangesService {
         || changes[index].type == 'inv') {
         if (this.afterPers.gold != this.beforePers.gold) {
           gold = this.afterPers.gold - this.beforePers.gold;
-          if(gold > 0){
-            gold = '+'+gold;
+          if (gold > 0) {
+            gold = '+' + gold;
           }
+          goldTotal = this.afterPers.gold;
         }
       }
 
-      if (isDoneQwest) {
+      if (isDoneQwest && changes[index].type == 'qwest') {
         head = changes[index].name;
         changes[index].name = ' ';
       }
@@ -253,46 +262,47 @@ export class PerschangesService {
       changes[index].head = head;
       changes[index].abPoints = abPoints;
       changes[index].gold = gold;
+      changes[index].goldTotal = goldTotal;
     }
 
     // Объединенные изменения
-    if (combineChanges.length) {
-      const head = combineChanges[0].head;
-      const abPoints = combineChanges[0].head;
-      const type = combineChanges[0].type;
-      const img = combineChanges[0].img;
+    // if (combineChanges.length) {
+    //   const head = combineChanges[0].head;
+    //   const abPoints = combineChanges[0].head;
+    //   const type = combineChanges[0].type;
+    //   const img = combineChanges[0].img;
 
-      combineChanges.sort((a, b) => {
-        return getChSort(a) - getChSort(b);
+    //   combineChanges.sort((a, b) => {
+    //     return getChSort(a) - getChSort(b);
 
-        function getChSort(ch: ChangesModel): number {
-          if (ch.type == 'exp') { return 2; }
-          if (ch.type == 'abil') { return 1; }
-          if (ch.type == 'cha') { return 0; }
+    //     function getChSort(ch: ChangesModel): number {
+    //       if (ch.type == 'exp') { return 2; }
+    //       if (ch.type == 'abil') { return 1; }
+    //       if (ch.type == 'cha') { return 0; }
 
-          return 3;
-        }
-      });
+    //       return 3;
+    //     }
+    //   });
 
 
-      let dialogRef = this.dialog.open(PersChangesComponent, {
-        panelClass: classPanel,
-        data: {
-          headText: head,
-          changes: combineChanges,
-          isGood: isGood,
-          abPoints: abPoints,
-          isTES: this.afterPers.isTES,
-          itemType: type,
-          img: img
-        },
-        backdropClass: 'backdrop'
-      });
+    //   let dialogRef = this.dialog.open(PersChangesComponent, {
+    //     panelClass: classPanel,
+    //     data: {
+    //       headText: head,
+    //       changes: combineChanges,
+    //       isGood: isGood,
+    //       abPoints: abPoints,
+    //       isTES: this.afterPers.isTES,
+    //       itemType: type,
+    //       img: img
+    //     },
+    //     backdropClass: 'backdrop'
+    //   });
 
-      await sleep(5500);
+    //   await sleep(5500);
 
-      dialogRef.close();
-    }
+    //   dialogRef.close();
+    // }
 
     // Отдельные изменения
     unionChanges.sort((a, b) => {
@@ -302,16 +312,29 @@ export class PerschangesService {
         if (ch.type == 'exp') { return 0; }
         if (ch.type == 'abil') { return 1; }
         if (ch.type == 'cha') { return 2; }
+        if (ch.type == 'qwest') { return 3; }
 
-        return 3;
+        return 4;
       }
     });
 
+    let wasGold = false;
     for (const ch of unionChanges) {
       const head = ch.head;
       const abPoints = ch.head;
       const type = ch.type;
       const img = ch.img;
+      let gold = ch.gold;
+      let goldTotal = ch.goldTotal;
+
+      if (gold) {
+        wasGold = true;
+      }
+
+      if (wasGold) {
+        gold = null;
+        goldTotal = null;
+      }
 
       let dialogRef = this.dialog.open(PersChangesComponent, {
         panelClass: classPanel,
@@ -323,15 +346,17 @@ export class PerschangesService {
           isTES: this.afterPers.isTES,
           itemType: type,
           img: img,
-          gold: ch.gold
+          gold: gold,
+          goldTotal: goldTotal
         },
         backdropClass: 'backdrop'
       });
 
-      if (ch.type == 'exp') {
-        await sleep(3000);
+      if (ch.type == 'abil'
+        || ch.type == 'cha') {
+        await sleep(5500);
       } else {
-        await sleep(6000);
+        await sleep(3500);
       }
 
       dialogRef.close();
@@ -343,7 +368,7 @@ export class PerschangesService {
         backdropClass: 'backdrop'
       });
 
-      await sleep(6000);
+      await sleep(5500);
 
       dialogRefLvlUp.close();
 

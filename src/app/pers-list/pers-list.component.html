@@ -395,6 +395,28 @@
       <!-- Просмотр -->
       <div *ngIf="!isEditMode" class="pt-2 pb-4 w-100">
         <mat-tab-group mat-align-tabs="center" animationDuration="0ms">
+          <mat-tab label="Инвентарь">
+            <!-- Инвентарь -->
+            <div class="p-3">
+              <div fxFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="10px grid"
+                style="padding-left: 10px;">
+                <div [fxFlex]="(100/3) + '%'" *ngFor="let rev of pers.inventory">
+                  <button mat-stroked-button mat-stroked-button class="w-100 h-100 revBtn" (click)="useRevard(rev)">
+                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+                      <img appImgBroken src="{{rev.image}}" class="img-fluid rounded"
+                        [ngStyle]="{'object-fit': 'contain', 'height': '65px'}">
+                      <div class="text-wrap py-2">
+                        {{rev.name}}
+                      </div>
+                      <div>
+                        <small *ngIf="rev.count > 1">x{{rev.count}}</small>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
           <mat-tab label="Магазин">
             <!-- Магазин -->
             <div class="p-3">
@@ -409,40 +431,28 @@
                 style="padding-left: 10px;">
                 <div [fxFlex]="(100/3) + '%'" *ngFor="let rev of pers.rewards|shop">
                   <button (click)="buyRevard(rev)" mat-stroked-button class="w-100 h-100 revBtn"
-                    [disabled]="pers.gold < rev.cost">
+                    [disabled]="!rev.isAviable">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                       <img appImgBroken src="{{rev.image}}" class="img-fluid rounded pt-2"
                         [ngStyle]="{'object-fit': 'contain', 'height': '65px'}">
                       <div class="text-wrap py-2">
                         {{rev.name}}
                       </div>
-                      <div style="color: gold">
-                        <img src="assets/icons/gold.png" class="img-fluid mr-1"
-                          [ngStyle]="{'object-fit': 'contain', 'height':'1em'}">
-                        <small>{{rev.cost}}</small>
-                      </div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </mat-tab>
-          <mat-tab label="Инвентарь" dynamicHeight>
-            <!-- Инвентарь -->
-            <div class="p-3">
-              <div fxFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="10px grid"
-                style="padding-left: 10px;">
-                <div [fxFlex]="(100/3) + '%'" *ngFor="let rev of pers.inventory">
-                  <button mat-stroked-button mat-stroked-button class="w-100 h-100 revBtn" (click)="useRevard(rev)">
-                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                      <img appImgBroken src="{{rev.image}}" class="img-fluid rounded"
-                        [ngStyle]="{'object-fit': 'contain', 'height': '65px'}">
-                      <div class="text-wrap py-2">
-                        {{rev.name}}
-                      </div>
-                      <div>
-                        <small>x{{rev.count}}</small>
-                      </div>
+                      <ng-container *ngIf="!rev.isReward; else isReward">
+                        <div style="color: gold">
+                          <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                            [ngStyle]="{'object-fit': 'contain', 'height':'1em'}">
+                          <small>{{rev.cost}}</small>
+                        </div>
+                      </ng-container>
+                      <ng-template #isReward>
+                        <div class="text-danger">
+                          <small *ngFor="let req of rev.reqStr"><i><span
+                                style="word-break: break-word; white-space: normal;">
+                                {{req}}
+                              </span></i></small>
+                        </div>
+                      </ng-template>
                     </div>
                   </button>
                 </div>
@@ -476,14 +486,21 @@
                 <div>
                   <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px">
                     <div fxLayout="row" fxLayoutGap="25px" class="pr-4">
-                      <div *ngIf="rev.isShop" style="color: gold">
-                        <img src="assets/icons/gold.png" class="img-fluid mr-1"
-                          [ngStyle]="{'object-fit': 'contain', 'height':'1em'}">
-                        <small>{{rev.cost}}</small>
-                      </div>
-                      <div *ngIf="rev.isLud" style="color: green">
-                        <small>{{rev.ludProbability + '%'}}</small>
-                      </div>
+                      <ng-container *ngIf="!rev.isReward">
+                        <div *ngIf="rev.isLud" style="color: green">
+                          <small>{{rev.ludProbability + '%'}}</small>
+                        </div>
+                        <div *ngIf="rev.isShop" style="color: gold">
+                          <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                            [ngStyle]="{'object-fit': 'contain', 'height':'1em'}">
+                          <small>{{rev.cost}}</small>
+                        </div>
+                      </ng-container>
+                      <ng-container *ngIf="rev.isReward">
+                        <div class="pl-4 text-danger" fxLayout="column" fxLayoutAlign="space-between end">
+                          <small *ngFor="let req of rev.reqStr"><i>{{req}}</i></small>
+                        </div>
+                      </ng-container>
                     </div>
                     <button class="icon-small" (click)="addNewRevard(rev)" mat-icon-button>
                       <img src="assets/icons/edit.png" class="img-fluid">

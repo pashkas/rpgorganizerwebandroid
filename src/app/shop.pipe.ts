@@ -8,7 +8,8 @@ export class ShopPipe implements PipeTransform {
 
   transform(revs: Reward[], ...args: any[]): Reward[] {
     if (revs) {
-      return revs.filter(r => r.isShop).sort((a, b) => (a.cost - b.cost));
+      return revs
+        .filter(r => r.isShop || r.isReward);
     }
 
     return [];

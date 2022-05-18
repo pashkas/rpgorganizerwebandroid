@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { FirebaseUserModel } from 'src/Models/User';
 import { Characteristic } from 'src/Models/Characteristic';
 import { Ability } from 'src/Models/Ability';
-import { Task, taskState, IImg } from 'src/Models/Task';
+import { Task, taskState, IImg, Reqvirement } from 'src/Models/Task';
 import { take, share, map } from 'rxjs/operators';
 import { Qwest } from 'src/Models/Qwest';
 import { Reward } from 'src/Models/Reward';
@@ -22,6 +22,7 @@ import { UserService } from './user.service';
 import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material';
 import { preserveWhitespacesDefault } from '@angular/compiler';
+import { ReqItemType } from 'src/Models/ReqItem';
 
 @Injectable({
   providedIn: 'root'
@@ -148,6 +149,11 @@ export class PersService {
     qw.rewards.forEach(rew => {
       this.pers$.value.inventory.push(rew);
     });
+
+    // Прибавка к золоту
+    if (qw.gold > 0) {
+      this.pers$.value.gold = +qw.gold + this.pers$.value.gold;
+    }
 
     // Прибавка к опыту
     if (qw.exp > 0) {
@@ -1660,37 +1666,25 @@ export class PersService {
     }
 
     // Награды
-    prs.rewards = prs.rewards.sort((a, b) => {
-      let aCost = getCostRev(a);
-      let bCost = getCostRev(b);
-      if (aCost != bCost) {
-        return aCost - bCost;
+    this.recountRewards(prs);
+
+    // Автополучение наград
+    let addedIds = [];
+    let addedRevs: Reward[] = [];
+    for (const rev of prs.rewards) {
+      if (rev.isReward && rev.isAviable) {
+        addedRevs.push(rev);
+        addedIds.push(rev.id);
       }
+    }
 
-      let aProb = getProbRev(a);
-      let bProb = getProbRev(b);
-      if (aProb != bProb) {
-        return aProb - bProb;
-      }
+    for (const rev of addedRevs) {
+      this.addToInventory(rev, prs);
+    }
 
-      return a.name.localeCompare(b.name);
-
-      function getCostRev(r: Reward): number {
-        if (!r.isShop) {
-          return 99999999;
-        }
-
-        return r.cost;
-      }
-
-      function getProbRev(r: Reward): number {
-        if (!r.isLud) {
-          return 99999999;
-        }
-
-        return r.ludProbability;
-      }
-    });
+    if (addedIds.length) {
+      prs.rewards = prs.rewards.filter(r => !addedIds.includes(r.id));
+    }
 
     // Перерасчет опыта задач
     for (const ch of prs.characteristics) {
@@ -1756,6 +1750,147 @@ export class PersService {
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
   }
+
+  recountRewards(prs: Pers) {
+    for (const r of prs.rewards) {
+      let notDoneReqs: string[] = [];
+
+      if (!r.reqvirements) {
+        r.reqvirements = [];
+      }
+
+      if (r.isReward) {
+        for (const req of r.reqvirements) {
+          if (req.type == ReqItemType.persLvl) {
+            reqCheck(prs.level, req, notDoneReqs);
+          } else {
+            let el = this.allMap[req.elId];
+            if (el != null && el.item != null) {
+              if (req.type == ReqItemType.qwest) {
+                reqCheck(0, req, notDoneReqs);
+              } else if (req.type == ReqItemType.abil) {
+                let abil: Ability = el.item;
+                reqCheck(abil.value, req, notDoneReqs);
+              } else if (req.type == ReqItemType.charact) {
+                let cha: Characteristic = el.item;
+                reqCheck(cha.value, req, notDoneReqs);
+              }
+            } else {
+              req.isDone = true;
+            }
+          }
+        }
+
+        if (notDoneReqs.length) {
+          r.isAviable = false;
+          r.reqStr = notDoneReqs;
+        } else {
+          r.isAviable = true;
+          r.reqStr = [];
+        }
+      } else {
+        if (r.isShop) {
+          if (prs.gold >= r.cost) {
+            r.isAviable = true;
+          } else {
+            r.isAviable = false;
+          }
+        } else {
+          r.isAviable = true;
+        }
+      }
+    }
+
+    function reqCheck(val: number, req: Reqvirement, notDoneReqs: string[]) {
+      if (val < req.elVal) {
+        notDoneReqs.push(getReqStr(req));
+        req.isDone = false;
+      } else {
+        req.isDone = true;
+      }
+    }
+
+    function getReqStr(req: Reqvirement) {
+      let str = '';
+
+      str += req.type;
+      if (req.type != ReqItemType.persLvl) {
+        str += ' \"' + req.elName + '\"';
+      }
+
+      if (req.type != ReqItemType.qwest) {
+        str += ' ≥ ' + req.elVal;
+      }
+
+      return str;
+    }
+
+    prs.rewards = prs.rewards.sort((a, b) => {
+      // Награда?
+      let aIsRev = isRew(a);
+      let bIsRev = isRew(b);
+      if (aIsRev != bIsRev) {
+        return aIsRev - bIsRev;
+      }
+
+      // Количество невыполненных заданий
+      let aR = reqNotDone(a);
+      let bR = reqNotDone(b);
+      if (aR != bR) {
+        return aR - bR;
+      }
+
+      // Цена
+      let aCost = getCostRev(a);
+      let bCost = getCostRev(b);
+      if (aCost != bCost) {
+        return aCost - bCost;
+      }
+
+      // Вероятность получения
+      let aProb = getProbRev(a);
+      let bProb = getProbRev(b);
+      if (aProb != bProb) {
+        return aProb - bProb;
+      }
+
+      // Название
+      return a.name.localeCompare(b.name);
+
+      function getCostRev(r: Reward): number {
+        if (!r.isShop) {
+          return 99999999;
+        }
+
+        return r.cost;
+      }
+
+      function getProbRev(r: Reward): number {
+        if (!r.isLud) {
+          return 99999999;
+        }
+
+        return r.ludProbability;
+      }
+
+      function reqNotDone(r: Reward) {
+        if (!r.reqvirements) {
+          return 0;
+        }
+
+        return r.reqvirements.filter(q => !q.isDone).length;
+      }
+
+      function isRew(r: Reward): number {
+        if (!r.isReward) {
+          return 0;
+        }
+
+        return 1;
+      }
+    });
+  }
+
   getAbExpPointsFromTes(tesValue: number): number {
     let expPoints: number = 0;
     let floorTes = Math.floor(tesValue / 10);
@@ -2108,27 +2243,6 @@ export class PersService {
     });
   }
 
-  sortRevards() {
-    this.pers$.value.rewards.forEach(rev => {
-      if (rev.rare == Pers.commonRevSet.name) {
-        rev.cumulative = Pers.commonRevSet.cumulative;
-      } else if (rev.rare == Pers.uncommonRevSet.name) {
-        rev.cumulative = Pers.uncommonRevSet.cumulative;
-      } else if (rev.rare == Pers.rareRevSet.name) {
-        rev.cumulative = Pers.rareRevSet.cumulative;
-      } else if (rev.rare == Pers.epicRevSet.name) {
-        rev.cumulative = Pers.epicRevSet.cumulative;
-      } else if (rev.rare == Pers.legendaryRevSet.name) {
-        rev.cumulative = Pers.legendaryRevSet.cumulative;
-      } else {
-        rev.cumulative = Pers.commonRevSet.cumulative;
-        rev.rare = Pers.commonRevSet.name;
-      }
-    });
-
-    this.pers$.value.rewards = this.pers$.value.rewards.sort((a, b) => a.cumulative - b.cumulative);
-  }
-
   subtaskDoneOrFail(taskId: string, subtaskId: string, isDone: boolean) {
     let tsk: Task = this.allMap[taskId].item;
     let subTask: taskState = this.allMap[subtaskId].item;
@@ -2460,7 +2574,7 @@ export class PersService {
    * Розыгрыш наград.
    */
   private CasinoRevards(task: Task) {
-    let revards = this.pers$.value.rewards.filter(q => q.isLud && q.ludProbability > 0);
+    let revards = this.pers$.value.rewards.filter(q => q.isLud && q.ludProbability > 0 && !q.isReward);
 
     if (!revards.length) {
       return;
@@ -2484,17 +2598,25 @@ export class PersService {
     }
   }
 
-  addToInventory(rev: Reward) {
-    let idx = this.pers$.value.inventory.findIndex(n => {
+  addToInventory(rev: Reward, prs: Pers = null) {
+    if (prs == null) {
+      prs = this.pers$.value;
+    }
+
+    let idx = prs.inventory.findIndex(n => {
       return n.id === rev.id;
     });
 
     if (idx === -1) {
       rev.count = 1;
-      this.pers$.value.inventory.push(rev);
+      prs.inventory.push(rev);
     }
     else {
-      this.pers$.value.inventory[idx].count = this.pers$.value.inventory[idx].count + 1;
+      prs.inventory[idx].count = prs.inventory[idx].count + 1;
+    }
+
+    if (rev.isArtefact) {
+      prs.rewards = prs.rewards.filter(r => r.id != rev.id);
     }
   }
 

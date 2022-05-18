@@ -11,6 +11,7 @@ export class Qwest {
   tasks: Task[] = [];
   progressValue: number = 0;
   exp: number = 0;
+  gold: number = 0;
   parrentId: any = 0;
   abilitiId: any;
   hardnes: number;

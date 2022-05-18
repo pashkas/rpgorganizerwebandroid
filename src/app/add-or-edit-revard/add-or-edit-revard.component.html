@@ -8,30 +8,57 @@
                     placeholder="Название" name="data.rev.name">
             </mat-form-field>
         </div>
-
-        <!-- <mat-form-field *ngIf="!data.isArt">
-            <mat-label>Редкость</mat-label>
-            <mat-select [(ngModel)]="data.rev.rare" name="data.rev.rare">
-                <mat-option *ngFor="let t of revTypes" [value]="t">
-                    {{t}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field> -->
     </div>
-    <div fxLayout="column" fxLayoutAlign="space-between start" fxLayoutGap='15px'>
+    <div *ngIf="!rev.isReward" fxLayout="column" fxLayoutAlign="space-between start" fxLayoutGap='15px'>
         <mat-slide-toggle [(ngModel)]="rev.isLud">Трофей?</mat-slide-toggle>
         <mat-form-field fxFlex *ngIf="rev.isLud">
             <input type="number" matInput onfocus="this.select()" [(ngModel)]="rev.ludProbability" autocomplete="off"
                 placeholder="Вероятность выпадения, %" name="data.rev.ludProbability">
         </mat-form-field>
     </div>
-
-    <div fxLayout="column" fxLayoutAlign="space-between start" fxLayoutGap='15px'>
+    <div *ngIf="!rev.isReward" fxLayout="column" fxLayoutAlign="space-between start" fxLayoutGap='15px'>
         <mat-slide-toggle [(ngModel)]="rev.isShop">Магазин?</mat-slide-toggle>
         <mat-form-field fxFlex *ngIf="rev.isShop">
             <input type="number" matInput onfocus="this.select()" [(ngModel)]="data.rev.cost" autocomplete="off"
                 placeholder="Стоимость" name="data.rev.cost">
         </mat-form-field>
+    </div>
+    <div *ngIf="!rev.isReward" fxLayout="column" fxLayoutAlign="space-between start" fxLayoutGap='15px'>
+        <mat-slide-toggle [(ngModel)]="rev.isArtefact">Артефакт?</mat-slide-toggle>
+    </div>
+    <div fxLayout="column" fxLayoutAlign="space-between start" fxLayoutGap='15px'>
+        <mat-slide-toggle [(ngModel)]="rev.isReward">Награда?</mat-slide-toggle>
+    </div>
+    <div *ngIf="rev.isReward">
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-3">
+            <h5>Требования:</h5>
+            <button class="icon-small" (click)="addReq();" mat-icon-button>
+                <img src="assets/icons/create.png" class="img-fluid">
+            </button>
+        </div>
+        <mat-list *ngIf="rev.reqvirements.length" class="p-0">
+            <div mat-list-item *ngFor="let r of rev.reqvirements; let even = even; let odd = odd" class="row-striped"
+                [ngClass]="{ even: even }">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 align-self-center" [ngClass]="{'done': r.isDone}">
+                        <span *ngIf="r.type != 'Уровень персонажа'"><i>{{'('+ r.type +') '}}</i></span>
+                        <span><i>{{r.elName}}</i></span>
+                        <span *ngIf="r.type != 'Квест'"><i>{{' ≥ ' + r.elVal}}</i></span>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <!-- Удалить -->
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="icon-small" (click)="edit(r)" mat-icon-button>
+                                <img src="assets/icons/edit.png" class="img-fluid">
+                            </button>
+                            <button class="icon-small" (click)="del(r.id)" mat-icon-button>
+                                <img src="assets/icons/del.png" class="img-fluid">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </mat-list>
     </div>
 </div>
 <div mat-dialog-actions [align]="'end'">

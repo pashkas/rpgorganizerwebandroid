@@ -11,6 +11,7 @@ export class ChangesModel {
     head: any;
     abPoints: any;
     gold: string;
+    goldTotal: number;
 
     constructor(name, type, valFrom, valTo, totalMin, totalMax, img) {
         this.img = img;
@@ -59,7 +60,6 @@ export class ChangesModel {
                 this.valChange = 'потерян!';
             }
         } else if (type == 'inv') {
-            this.name = '"' + this.name + '"';
             if (change > 0) {
                 this.valChange = 'получен!';
             } else {

@@ -1,3 +1,4 @@
+import { v4 as uuid } from 'uuid';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PersService } from '../pers.service';
@@ -12,8 +13,10 @@ import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.compo
 import { filter, switchMap, takeUntil } from 'rxjs/operators';
 import { AddOrEditRevardComponent } from '../add-or-edit-revard/add-or-edit-revard.component';
 import { ChangeCharactComponent } from '../pers/change-charact/change-charact.component';
-import { Task } from 'src/Models/Task';
+import { Reqvirement, Task } from 'src/Models/Task';
 import { combineLatest, of, Subject } from 'rxjs';
+import { RevardDialogData } from 'src/Models/RevardDialogData';
+import { ReqItemType } from 'src/Models/ReqItem';
 
 @Component({
   selector: 'app-qwest-detail',
@@ -36,6 +39,7 @@ export class QwestDetailComponent implements OnInit {
   prevQwest: Qwest;
   qwest: Qwest;
   qwestAbiliti;
+  qwestRewards: Reward[] = [];
 
   constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) { }
 
@@ -46,19 +50,34 @@ export class QwestDetailComponent implements OnInit {
     let header, isEdit;
 
     if (r) {
-      header = 'Редактировать артефакт';
+      header = 'Редактировать награду';
       isEdit = true;
     } else {
-      header = 'Добавить артефакт';
+      header = 'Добавить награду';
       isEdit = false;
       r = new Reward();
       r.image = 'assets/icons/tresure.png';
+      r.isReward = true;
+      r.reqvirements = [];
+      r.reqvirements.push(<Reqvirement>{
+        elName: this.qwest.name,
+        elId: this.qwest.id,
+        type: ReqItemType.qwest,
+        elVal: 1,
+        isDone: false,
+        id: uuid()
+      });
     }
 
     this.srv.isDialogOpen = true;
+    let data: RevardDialogData = {
+      header: header,
+      qwestId: this.qwest.id,
+      rev: r
+    };
     const dialogRef = this.dialog.open(AddOrEditRevardComponent, {
       panelClass: 'my-dialog',
-      data: { header: header, rev: r, isArt: true },
+      data: data,
       backdropClass: 'backdrop'
     });
 
@@ -66,16 +85,13 @@ export class QwestDetailComponent implements OnInit {
       .subscribe(rev => {
         if (rev) {
           if (!isEdit) {
-            r.count = 1;
-            this.qwest.rewards.push(rev);
+            this.srv.AddRevard(rev);
           }
-
-          this.srv.sortRevards();
         }
+
         this.srv.isDialogOpen = false;
       });
   }
-
 
   addNextQwest() {
     this.srv.isDialogOpen = true;
@@ -118,7 +134,6 @@ export class QwestDetailComponent implements OnInit {
   }
 
   chooseNextQwest() {
-
     let sortedQwests = this.pers.qwests.sort((a, b) => a.name.localeCompare(b.name)).filter(n => n.id != this.qwest.id);
 
     if (sortedQwests.length < 1) {
@@ -174,41 +189,6 @@ export class QwestDetailComponent implements OnInit {
     this.qwest.rewards = this.qwest.rewards.filter(n => {
       return n.id != id;
     });
-  }
-
-  moveTaskToAnotherQwest(tsk: Task) {
-    let sortedQwests = this.pers.qwests.sort((a, b) => a.name.localeCompare(b.name)).filter(n => n.id != this.qwest.id);
-
-    if (sortedQwests.length < 1) {
-      return;
-    }
-
-    this.srv.isDialogOpen = true;
-
-    const dialogRef = this.dialog.open(ChangeCharactComponent, {
-      panelClass: 'my-big',
-      data: { characteristic: sortedQwests[0], allCharacts: sortedQwests, tittle: 'Выберите квест (перенос задачи)' },
-      backdropClass: 'backdrop'
-    });
-
-    dialogRef.afterClosed()
-      .subscribe(n => {
-        if (n) {
-          if (n.id != this.qwest.id) {
-            for (const qw of this.pers.qwests) {
-              if (qw.id == n.id) {
-                qw.tasks.push(tsk);
-                this.qwest.tasks = this.qwest.tasks.filter(n => n.id != tsk.id);
-
-                break;
-              }
-            }
-          }
-
-          this.srv.savePers(false);
-        }
-        this.srv.isDialogOpen = false;
-      });
   }
 
   /**
@@ -285,6 +265,14 @@ export class QwestDetailComponent implements OnInit {
     this.qwestAbiliti = qwAb;
   }
 
+  getQwestRewards(qw: Qwest): Reward[] {
+    if (qw) {
+      return this.pers.rewards.filter(r => r.reqvirements.filter(req => req.elId == qw.id).length);
+    } else {
+      return [];
+    }
+  }
+
   goBack() {
     if (this.isEditMode) {
       this.isEditMode = false;
@@ -292,6 +280,41 @@ export class QwestDetailComponent implements OnInit {
     else {
       this.location.back();
     }
+  }
+
+  moveTaskToAnotherQwest(tsk: Task) {
+    let sortedQwests = this.pers.qwests.sort((a, b) => a.name.localeCompare(b.name)).filter(n => n.id != this.qwest.id);
+
+    if (sortedQwests.length < 1) {
+      return;
+    }
+
+    this.srv.isDialogOpen = true;
+
+    const dialogRef = this.dialog.open(ChangeCharactComponent, {
+      panelClass: 'my-big',
+      data: { characteristic: sortedQwests[0], allCharacts: sortedQwests, tittle: 'Выберите квест (перенос задачи)' },
+      backdropClass: 'backdrop'
+    });
+
+    dialogRef.afterClosed()
+      .subscribe(n => {
+        if (n) {
+          if (n.id != this.qwest.id) {
+            for (const qw of this.pers.qwests) {
+              if (qw.id == n.id) {
+                qw.tasks.push(tsk);
+                this.qwest.tasks = this.qwest.tasks.filter(n => n.id != tsk.id);
+
+                break;
+              }
+            }
+          }
+
+          this.srv.savePers(false);
+        }
+        this.srv.isDialogOpen = false;
+      });
   }
 
   ngOnDestroy(): void {
@@ -330,6 +353,8 @@ export class QwestDetailComponent implements OnInit {
               qw.hardnes = 0;
             }
             this.qwest = qw;
+            this.qwestRewards = this.getQwestRewards(qw);
+
             break;
           }
         }

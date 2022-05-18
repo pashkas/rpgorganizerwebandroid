@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid';
+import { Reqvirement } from './Task';
 export class Reward {
     id: any = uuid();
     name: string = "";
@@ -10,9 +11,17 @@ export class Reward {
     rare: string = 'Обычный';
 
     isLud: boolean = false;
-    ludProbability: number = 0;
     isShop: boolean = true;
+    isArtefact: boolean = false;
+    isReward: boolean = false;
+
+    reqvirements: Reqvirement[] = [];
+    reqStr: string[];
+
+    ludProbability: number = 0;
     cost: number = 0;
     startProbability: number;
     endProbability: number;
+
+    isAviable: boolean = false;
 }

@@ -40,6 +40,7 @@ import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pe
 import { AbilitySignsPipe } from '../ability-signs.pipe';
 import { QuickAddAbilityComponent } from './quick-add-ability/quick-add-ability.component';
 import { ShopPipe } from '../shop.pipe';
+import { RequirementsAddDialogComponent } from './requirements-add-dialog/requirements-add-dialog.component';
 
 
 @NgModule({
@@ -68,7 +69,8 @@ import { ShopPipe } from '../shop.pipe';
     PersImportExportDialogComponent,
     AbilitySignsPipe,
     QuickAddAbilityComponent,
-    ShopPipe
+    ShopPipe,
+    RequirementsAddDialogComponent
   ],
   imports: [
     ReactiveFormsModule,
@@ -97,7 +99,8 @@ import { ShopPipe } from '../shop.pipe';
       ReqAddComponent,
       ChangeCharactComponent,
       PersImportExportDialogComponent,
-      QuickAddAbilityComponent
+      QuickAddAbilityComponent,
+      RequirementsAddDialogComponent
     ],
   providers: [{ provide: OWL_DATE_TIME_LOCALE, useValue: 'ru' },]
 })

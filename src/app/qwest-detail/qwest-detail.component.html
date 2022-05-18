@@ -47,10 +47,21 @@
     </div>
 
     <!-- Награды -->
-    <ng-container *ngIf="qwest.rewards?.length > 0 || qwest.exp > 0">
+    <ng-container *ngIf="qwest.rewards?.length > 0 || qwest.exp > 0 || qwest.gold > 0">
 
       <div class="mt-2" style="padding-left: 10px;" fxFlexFill fxLayout="row wrap" fxLayoutAlign="center center"
         fxLayoutGap="10px grid">
+        <div fxFlex="33" *ngIf="qwest.gold > 0">
+          <div fxLayout="column" fxLayoutAlign="space-around center">
+            <img src="assets/icons/gold.png" class="img-fluid rounded"
+              [ngStyle]="{'object-fit': 'contain', 'height': '50px'}">
+            <div fxLayout="row" fxLayoutAlign="space-evenly center">
+              <div>
+                <small>+{{qwest.gold}}</small>
+              </div>
+            </div>
+          </div>
+        </div>
         <div fxFlex="33" *ngIf="qwest.exp > 0">
           <div fxLayout="column" fxLayoutAlign="space-around center">
             <img src="assets/icons/опыт.png" class="img-fluid rounded"
@@ -152,6 +163,15 @@
         placeholder="Описание" [(ngModel)]="qwest.descr" name="descr"></textarea>
     </mat-form-field>
 
+    <!-- Золото -->
+    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="8px">
+      <div style="width: 100%;">
+        <mat-form-field class="w-100">
+          <input matInput type="number" onfocus="this.select()" autocomplete="off" placeholder="Золото" [(ngModel)]="qwest.gold"
+            name="gold">
+        </mat-form-field>
+      </div>
+    </div>
     <!-- Опыт -->
     <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="8px" *ngIf="!pers.isTES">
       <div style="width: 100%;">
@@ -242,11 +262,11 @@
       </button>
     </div>
     <!-- Список наград -->
-    <mat-list *ngIf="qwest.rewards.length > 0">
-      <div mat-list-item *ngFor="let rev of qwest.rewards; let i = index">
+    <mat-list *ngIf="qwestRewards.length > 0">
+      <div mat-list-item *ngFor="let rev of qwestRewards; let i = index">
         <div class="d-flex">
           <div class="flex-grow-1 align-self-center">
-            {{rev.name}} <i>{{rev.descr}}</i>
+            {{rev.name}}
           </div>
           <div class="d-flex">
             <!-- Удалить -->
