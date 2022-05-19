@@ -327,13 +327,13 @@ export class PerschangesService {
       let gold = ch.gold;
       let goldTotal = ch.goldTotal;
 
-      if (gold) {
-        wasGold = true;
-      }
-
       if (wasGold) {
         gold = null;
         goldTotal = null;
+      }
+
+      if (gold) {
+        wasGold = true;
       }
 
       let dialogRef = this.dialog.open(PersChangesComponent, {
