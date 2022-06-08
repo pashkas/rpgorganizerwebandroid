@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class StatesService {
   selTabPersList: number = 0;
+  selInventoryList: number = 0;
 
   constructor() { }
 }

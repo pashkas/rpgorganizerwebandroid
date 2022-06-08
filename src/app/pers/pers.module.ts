@@ -41,6 +41,8 @@ import { AbilitySignsPipe } from '../ability-signs.pipe';
 import { QuickAddAbilityComponent } from './quick-add-ability/quick-add-ability.component';
 import { ShopPipe } from '../shop.pipe';
 import { RequirementsAddDialogComponent } from './requirements-add-dialog/requirements-add-dialog.component';
+import { TurnirTableComponent } from '../turnir-table/turnir-table.component';
+import { LoginComponent } from '../login/login.component';
 
 
 @NgModule({
@@ -70,7 +72,9 @@ import { RequirementsAddDialogComponent } from './requirements-add-dialog/requir
     AbilitySignsPipe,
     QuickAddAbilityComponent,
     ShopPipe,
-    RequirementsAddDialogComponent
+    RequirementsAddDialogComponent,
+    TurnirTableComponent,
+    LoginComponent,
   ],
   imports: [
     ReactiveFormsModule,

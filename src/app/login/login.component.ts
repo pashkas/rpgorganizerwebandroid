@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
-import { PersService } from '../pers.service';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-login',
@@ -14,13 +14,13 @@ export class LoginComponent implements OnInit {
   email: string = '';
   password: string = '';
 
-  constructor(private authService: AuthService, private router: Router, private srv: PersService) { }
+  constructor(private authService: AuthService, private router: Router, private usrSrv: UserService, ) { }
 
   doLogin() {
     if (!this.isNew) {
       this.authService.doMailPasswordLogin(this.email, this.password)
         .then(res => {
-          this.srv.getPers();
+          this.usrSrv.getPers();
           this.router.navigate(['/main']);
         }, err => {
           this.err = err.message;
@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     else {
       this.authService.makeMailPasswordLogin(this.email, this.password)
         .then(res => {
-          this.srv.getPers();
+          this.usrSrv.getPers();
           this.router.navigate(['/main']);
         }, err => {
           this.err = err.message;

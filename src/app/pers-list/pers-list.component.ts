@@ -16,6 +16,7 @@ import { takeUntil } from 'rxjs/operators';
 import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
 import { QuickAddAbilityComponent } from '../pers/quick-add-ability/quick-add-ability.component';
 import { RevardDialogData } from 'src/Models/RevardDialogData';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-pers-list',
@@ -33,7 +34,7 @@ export class PersListComponent implements OnInit {
   selAb: Ability;
   selCha: Characteristic;
 
-  constructor(private location: Location, public srvSt: StatesService, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) { }
+  constructor(private location: Location, public srvSt: StatesService, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, private usrSrv: UserService) { }
 
 
   /**
@@ -149,6 +150,7 @@ export class PersListComponent implements OnInit {
       header = 'Добавить трофей';
       isEdit = false;
       r = new Reward();
+      r.isArtefact = true;
       r.image = 'assets/icons/tresure.png';
     }
 
@@ -249,7 +251,7 @@ export class PersListComponent implements OnInit {
 
   newgame() {
     if (window.confirm('Вы уверены, что хотите очистить все данные?')) {
-      this.srv.setNewPers(this.pers.userId);
+      this.usrSrv.setNewPers(this.pers.userId);
       this.saveData();
     }
   }
@@ -267,6 +269,7 @@ export class PersListComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('isFirst');
     if (id) {
       this.srvSt.selTabPersList = 0;
+      this.srvSt.selInventoryList = 0;
     }
 
     this.srv.pers$
@@ -356,7 +359,7 @@ export class PersListComponent implements OnInit {
   }
 
   sync(isDownload) {
-    this.srv.sync(isDownload);
+    this.usrSrv.sync(isDownload);
   }
 
   upAbil(ab: Ability) {
@@ -415,5 +418,10 @@ export class PersListComponent implements OnInit {
       .subscribe(n => {
         this.srv.isDialogOpen = false;
       });
+  }
+
+  openShop() {
+    this.srvSt.selTabPersList = 2;
+    this.srvSt.selInventoryList = 1;
   }
 }

@@ -15,6 +15,7 @@ export class ImageComponentComponent implements OnInit {
   @Input() isCanEdit;
   @Input() isPers: boolean = false;
   @Input() isRev: boolean = false;
+  @Input() isQwest: boolean = false;
 
   constructor(private srv: PersService, public dialog: MatDialog, private overlay: Overlay) { }
 
@@ -32,7 +33,7 @@ export class ImageComponentComponent implements OnInit {
     }
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       panelClass: 'my-big',
-      data: { header: 'Выберите изображение', text: '', isGallery: true, isPers: this.isPers, isRev: this.isRev },
+      data: { header: 'Выберите изображение', text: '', isGallery: true, isPers: this.isPers, isRev: this.isRev, isQwest: this.isQwest },
       backdropClass: 'backdrop',
       maxWidth: undefined,
       maxHeight: undefined,

@@ -72,4 +72,5 @@ import { ImgBrokenDirective } from '../img-broken.directive';
     AbHardnessPipe,
   ]
 })
-export class SharedModule { }
+export class SharedModule {
+}

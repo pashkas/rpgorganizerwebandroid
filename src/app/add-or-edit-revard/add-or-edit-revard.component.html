@@ -1,7 +1,7 @@
 <h1 mat-dialog-title class="text-center">{{data.header}}</h1>
 <div mat-dialog-content>
     <div fxLayout="column" fxLayoutAlign="space-around center">
-        <app-image-component [(data)]="rev.image" [isCanEdit]="true" [isRev]="true"></app-image-component>
+        <app-image-component [(data)]="rev.image" [isCanEdit]="true" [isRev]="true" [isQwest]="false"></app-image-component>
         <div fxFill fxLayoutGap='15px'>
             <mat-form-field fxFlex>
                 <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.rev.name" autocomplete="off"

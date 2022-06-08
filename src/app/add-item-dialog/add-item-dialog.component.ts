@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild, ElementRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
 @Component({
@@ -23,6 +23,10 @@ export class AddItemDialogComponent implements OnInit {
     this.isGallery = !this.isGallery;
   }
 
+  ok() {
+    this.dialogRef.close(this.data.text);
+  }
+
   ngOnInit() {
     if (this.data && this.data.isGallery) {
       this.isGallery = true;
@@ -34,13 +38,16 @@ export class AddItemDialogComponent implements OnInit {
         this.gallerryImages.push('assets/img/Perses/' + ss + '.webp');
       }
     } else if (this.data.isRev) {
-
+      this.isGallery = false;
       for (let i = 1; i <= 44; i++) {
         let ss = '000' + i;
         ss = ss.substr(ss.length - 3);
         this.gallerryImages.push('assets/img/Revards/' + ss + '.webp');
       }
     } else {
+      if (this.data.isQwest) {
+        this.isGallery = false;
+      }
       for (let i = 1; i <= 126; i++) {
         let ss = '000' + i;
         ss = ss.substr(ss.length - 3);

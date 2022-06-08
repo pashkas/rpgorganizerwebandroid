@@ -52,7 +52,7 @@ export class PerschangesService {
     const isShowAbActivate = false;
     const isShowExpChanges = true;
 
-    const isOpenPersAtNewLevel = true;
+    const isOpenPersAtNewLevel = false;
     const maxAttrLevel = 10;
 
 
@@ -374,6 +374,7 @@ export class PerschangesService {
 
       if (isOpenPersAtNewLevel) {
         this.srvSt.selTabPersList = 0;
+        this.srvSt.selInventoryList = 0;
         if (this.afterPers.ON > 0) {
           this.router.navigate(['/pers']);
         }

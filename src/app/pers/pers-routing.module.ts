@@ -5,9 +5,8 @@ import { CharacteristicDetailsComponent } from '../characteristic-details/charac
 import { AbilityDetailComponent } from '../ability-detail/ability-detail.component';
 import { TaskDetailComponent } from '../task-detail/task-detail.component';
 import { QwestDetailComponent } from '../qwest-detail/qwest-detail.component';
-
-
-
+import { TurnirTableComponent } from '../turnir-table/turnir-table.component';
+import { LoginComponent } from '../login/login.component';
 
 const routes: Routes = [
   { path: '', component: PersListComponent, data: { key: 'pers' } },
@@ -16,7 +15,8 @@ const routes: Routes = [
   { path: 'task/:id/:isEdit', component: TaskDetailComponent },
   { path: 'qwest/:id', component: QwestDetailComponent },
   { path: 'qwest/:id/:fromMain', component: QwestDetailComponent },
-  { path: 'turnirtable', component: AbilityDetailComponent },
+  { path: 'turnirtable', component: TurnirTableComponent },
+  { path: 'login', component: LoginComponent },
 ];
 
 @NgModule({

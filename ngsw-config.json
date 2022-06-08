@@ -17,7 +17,8 @@
           "/assets/*.png"
         ]
       }
-    }, {
+    },
+    {
       "name": "assets",
       "installMode": "lazy",
       "updateMode": "lazy",

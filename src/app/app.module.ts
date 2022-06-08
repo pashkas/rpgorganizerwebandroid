@@ -7,7 +7,6 @@ import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
 import { MainWindowComponent } from './main-window/main-window.component';
-import { LoginComponent } from './login/login.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AutofocusDirective } from './autofocus.directive';
 import { HttpClientModule } from '@angular/common/http';
@@ -18,7 +17,6 @@ import { registerLocaleData } from '@angular/common';
 import localeRu from '@angular/common/locales/ru';
 import { GestureConfig, MatProgressSpinnerModule, MatIconModule, MatBadgeModule, MatSlideToggleModule } from '@angular/material';
 import { SharedModule } from './shared/shared.module';
-import { TurnirTableComponent } from './turnir-table/turnir-table.component';
 import { ArrSortDialogComponent } from './arr-sort-dialog/arr-sort-dialog.component';
 import { ProgressBarNumComponent } from './shared/progress-bar-num/progress-bar-num.component';
 import { TskTimeValDialogComponent } from './tsk-time-val-dialog/tsk-time-val-dialog.component';
@@ -40,11 +38,9 @@ registerLocaleData(localeRu, 'ru');
   declarations: [
     AppComponent,
     MainWindowComponent,
-    LoginComponent,
     AutofocusDirective,
     SelectOnClickDirective,
     LevelUpMsgComponent,
-    TurnirTableComponent,
     ArrSortDialogComponent,
     ProgressBarNumComponent,
     TskTimeValDialogComponent,
@@ -71,7 +67,7 @@ registerLocaleData(localeRu, 'ru');
     AppRoutingModule,
     HttpClientModule,
     MatSlideToggleModule,
-    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
   ],
   providers: [
     {
@@ -96,9 +92,4 @@ registerLocaleData(localeRu, 'ru');
   exports: []
 })
 export class AppModule {
-  // constructor(imgCache: ImgCacheService) {
-  //   imgCache.init({
-  //     // Pass any options here...
-  //   });
-  // }
 }

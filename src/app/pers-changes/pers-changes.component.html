@@ -1,37 +1,36 @@
 <div fxLayout="column" fxFill fxLayoutAlign="space-around center" class="text-light">
-    <div fxLayout="row" fxLayoutAlign="space-evenly end">
-        <div *ngIf="this.abPoints != null" class=" m-2">
+    <div fxLayout="row" fxLayoutAlign="space-evenly end" fxLayoutGap="15px">
+        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null" class="m-2">
+            <div class="pl-2">
+                {{this.abPoints}}
+            </div>
+            <img src="assets/icons/diamond.png" class="img-fluid px-2"
+                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+        </div>
+        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.gold != null">
+            <div class="pl-2"> {{this.gold}} </div>
+            <img src="assets/icons/gold.png" class="img-fluid px-2"
+                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+        </div>
+        <div>
+            <img *ngIf="isGood && !img" class="img-fluid" style='max-height: 125px' src="assets/img/good.png"
+                [ngStyle]="{'object-fit': 'contain'}">
+            <img *ngIf="!isGood && !img" class="img-fluid" style='max-height: 125px' src="assets/img/bad.png"
+                [ngStyle]="{'object-fit': 'contain'}">
+            <img appImgBroken *ngIf="img" class="img-fluid" style='max-height: 125px' src="{{img}}"
+                [ngStyle]="{'object-fit': 'contain'}">
+        </div>
+        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null" class="m-2">
+            <img src="assets/icons/diamond.png" class="img-fluid"
+                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
             <span>
                 {{this.abPoints}}
             </span>
-            <img src="assets/icons/diamond.png" class="img-fluid"
+        </div>
+        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.goldTotal != null">
+            <div class="pl-2"> {{this.goldTotal}} </div>
+            <img src="assets/icons/gold.png" class="img-fluid px-2"
                 [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-        </div>
-        <div *ngIf="this.gold != null" class=" m-2">
-            <span>
-                {{this.gold}}
-            </span>
-            <img src="assets/icons/gold.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-        </div>
-        <img *ngIf="isGood && !img" class="img-fluid" style='height: 125px' src="assets/img/good.png"
-            [ngStyle]="{'object-fit': 'contain'}">
-        <img *ngIf="!isGood && !img" class="img-fluid" style='height: 125px' src="assets/img/bad.png"
-            [ngStyle]="{'object-fit': 'contain'}">
-        <img appImgBroken *ngIf="img" class="img-fluid" style='height: 125px' src="{{img}}"
-            [ngStyle]="{'object-fit': 'contain'}">
-
-        <div *ngIf="this.abPoints != null" class=" m-2">
-            <img src="assets/icons/diamond.png" class="img-fluid"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-            <span>
-                {{this.abPoints}}
-            </span>
-        </div>
-        <div *ngIf="this.goldTotal != null" class=" m-2">
-            <span>
-                {{this.goldTotal}}
-            </span>
-            <img src="assets/icons/gold.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
         </div>
     </div>
 

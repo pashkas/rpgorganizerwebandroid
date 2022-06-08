@@ -1,27 +1,21 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { Pers } from 'src/Models/Pers';
-import { BehaviorSubject, Subject, Observable } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { FirebaseUserModel } from 'src/Models/User';
 import { Characteristic } from 'src/Models/Characteristic';
 import { Ability } from 'src/Models/Ability';
 import { Task, taskState, IImg, Reqvirement } from 'src/Models/Task';
-import { take, share, map } from 'rxjs/operators';
 import { Qwest } from 'src/Models/Qwest';
 import { Reward } from 'src/Models/Reward';
 import { plusToName } from 'src/Models/plusToName';
 import { Rangse } from 'src/Models/Rangse';
 import { Router } from '@angular/router';
 import { PerschangesService } from './perschanges.service';
-import { EnamiesService } from './enamies.service';
 import { Diary } from 'src/Models/Diary';
 import * as moment from 'moment';
 import { SamplePers } from 'src/Models/SamplePers';
 import { curpersview } from 'src/Models/curpersview';
-import { UserService } from './user.service';
-import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material';
-import { preserveWhitespacesDefault } from '@angular/compiler';
 import { ReqItemType } from 'src/Models/ReqItem';
 
 @Injectable({
@@ -35,6 +29,8 @@ export class PersService {
   _tesStartOn: number = 5;
   absMap: any;
   allMap: {};
+  currentTask$ = new BehaviorSubject<Task>(null);
+  currentView$ = new BehaviorSubject<curpersview>(curpersview.SkillTasks);
   isAutoPumpInProcess: boolean = false;
   isDialogOpen: boolean = false;
   isGlobalTaskView: boolean;
@@ -43,52 +39,21 @@ export class PersService {
   isSynced: boolean = false;
   mn1Count: number = 62;
   mn2Count: number = 136;
-  mn3Count: number = 617;
-  mn4Count: number = 655;
-  mn5Count: number = 281;
+  mn3Count: number = 439;
+  mn4Count: number = 300;
+  mn5Count: number = 532;
+  mn6Count: number = 281;
   pers$ = new BehaviorSubject<Pers>(null);
-  currentView$ = new BehaviorSubject<curpersview>(curpersview.SkillTasks); currentTask$ = new BehaviorSubject<Task>(null);
-
   twoDaysTes = 12.546;
   // Пользователь
   user: FirebaseUserModel;
 
-  constructor(public db: AngularFirestore, private router: Router, private changes: PerschangesService, private enmSrv: EnamiesService, public userService: UserService, public dialog: MatDialog) {
+  constructor(
+    private router: Router,
+    private changes: PerschangesService,
+    public dialog: MatDialog) {
     this.isOffline = true;
     this.getPers();
-  }
-
-  getPers() {
-    let prsJson = localStorage.getItem("pers");
-    if (prsJson) {
-      this.setPers(prsJson);
-    } else {
-      this.userService.getCurrentUser()
-        .then(res => {
-          this.loadPers(res.uid)
-            .pipe(take(1))
-            .subscribe(n => {
-              let prs: Pers = n as Pers;
-              if (prs != null) {
-                this.setPers(JSON.stringify(prs));
-              } else {
-                const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-                  panelClass: 'custom-black'
-                });
-
-                dialogRef.afterClosed()
-                  .pipe(take(1))
-                  .subscribe(result => {
-                    if (result) {
-                      this.setNewPers(res.uid);
-                    }
-                  });
-              }
-            });
-        }, err => {
-          this.router.navigate(['/login']);
-        });
-    };
   }
 
   get _maxAbilLevel(): number {
@@ -100,7 +65,7 @@ export class PersService {
   }
 
   get baseTaskPoints(): number {
-    return 10.0 / 3.0;
+    return 10.0 / 2.0;
   }
 
   /**
@@ -108,6 +73,11 @@ export class PersService {
    */
   AddRevard(rev: Reward): any {
     this.pers$.value.rewards.push(rev);
+  }
+
+  CasinoGold(tskExp: number) {
+    let gold = Math.round((tskExp / 10) * Math.random());
+    this.pers$.value.gold += gold;
   }
 
   /**
@@ -290,6 +260,28 @@ export class PersService {
     this.pers$.value.qwests.push(qwest);
   }
 
+  addToInventory(rev: Reward, prs: Pers = null) {
+    if (prs == null) {
+      prs = this.pers$.value;
+    }
+
+    let idx = prs.inventory.findIndex(n => {
+      return n.id === rev.id;
+    });
+
+    if (idx === -1) {
+      rev.count = 1;
+      prs.inventory.push(rev);
+    }
+    else {
+      prs.inventory[idx].count = prs.inventory[idx].count + 1;
+    }
+
+    if (rev.isArtefact) {
+      prs.rewards = prs.rewards.filter(r => r.id != rev.id);
+    }
+  }
+
   /**
    * Добавить новую задачу к навыку
    * @param abil Навык.
@@ -440,6 +432,11 @@ export class PersService {
 
   changesBefore() {
     this.changes.beforePers = this.changes.getClone(this.pers$.value);
+  }
+
+  checkAndChangeWebP(img: string): string {
+    img = img.substr(0, img.lastIndexOf(".")) + ".webp";
+    return img;
   }
 
   /**
@@ -758,6 +755,33 @@ export class PersService {
     return { task, abil };
   }
 
+  getAbExpPointsFromTes(tesValue: number): number {
+    let expPoints: number = 0;
+    let floorTes = Math.floor(tesValue / 10);
+
+    for (let i = 0; i < floorTes; i++) {
+      let multi = (i + 1);
+      if (i > 9) {
+        i = 10;
+      }
+
+      expPoints += (i + 1) * multi;
+    }
+
+    let left = (tesValue / 10) - floorTes;
+    if (left > 0) {
+      let multi = floorTes + 1;
+
+      if (floorTes > 9) {
+        multi = 10;
+      }
+
+      expPoints += left * (floorTes + 1) * multi;
+    }
+
+    return expPoints;
+  }
+
   getAbTesLvl(tesValue: number): number {
     let levels: number = this._maxAbilLevel + 1;
     let xp_for_first_level: number = 0.7;
@@ -829,26 +853,6 @@ export class PersService {
     return aimVal;
   }
 
-  /**
-   * Загрузить персонажей с уровнем, большим чем 0;
-   */
-  getChampions(): Observable<any> {
-    //var dat = new Date();
-    //dat.setDate(dat.getDate() - 21);
-
-    return this.db.collection<Pers>('/pers', ref => ref.where('level', '>=', 1)
-      .orderBy('level', 'desc'))
-      .valueChanges()
-      .pipe(
-        map(champ => champ.map(n => {
-          return { Name: n.name, Level: n.level, Pic: n.image ? n.image : n.rang.img, Id: n.id, date: new Date(n.dateLastUse) };
-        })),
-        //.filter(n => n.date.valueOf() >= dat.valueOf())),
-        take(1),
-        share()
-      );
-  }
-
   getEraCostLvl(curAbLvl: number) {
     //return curAbLvl + 1;
     if (curAbLvl == 0) {
@@ -903,6 +907,9 @@ export class PersService {
       case 5:
         max = this.mn5Count;
         break;
+      case 6:
+        max = this.mn6Count;
+        break;
 
       default:
         max = this.mn1Count;
@@ -929,6 +936,89 @@ export class PersService {
     result += ss;
 
     return result;
+  }
+
+  getPers() {
+    let prsJson = localStorage.getItem("pers");
+    if (prsJson) {
+      this.setPers(prsJson);
+    } else {
+      this.router.navigate(['pers/login']);
+    };
+  }
+
+  getPersExp(tesAbTotalCur: number, abCount: number, expPoints: number): { persLevel: number; exp: number; startExp: number; nextExp: number, expDirect: number } {
+    if (abCount < 10) {
+      abCount = 10;
+    }
+
+    let persLevel = 0;
+    let exp: number = 0;
+    let startExp = 0;
+    let nextExp = 0;
+    let thisLevel = 0;
+    let prevLevel = 0;
+    let curLevelExp = 0;
+    let nextLevelExp = 0;
+    expPoints = expPoints * 10;
+    let expDirect = expPoints * 10;
+
+    let expElements: number[] = [];
+
+    for (let i = 0; i < 1000; i++) {
+      if (i < abCount) {
+        expElements.push(0);
+      }
+
+      thisLevel = 0;
+
+      for (let i = 0; i < expElements.length; i++) {
+        const el = expElements[i];
+        const koef = this.getTesChangeKoef(el);
+
+        expElements[i] = expElements[i] + this.baseTaskPoints * koef;
+        thisLevel += (this.baseTaskPoints / koef);
+      }
+
+      // Рост дней с уровнем
+      thisLevel = thisLevel * (1 + i * 0.1);
+
+      nextLevelExp = prevLevel + thisLevel;
+      curLevelExp = prevLevel;
+      prevLevel = prevLevel + thisLevel;
+
+      if (nextLevelExp > expPoints) {
+        exp = Math.floor(expPoints * 10);
+        persLevel = i;
+        startExp = Math.floor(curLevelExp * 10);
+        nextExp = Math.floor(nextLevelExp * 10);
+
+        break;
+      }
+
+      // if (i < 30) {
+      //   thisLevel = prevLevel + this.baseTaskPoints;
+      // } else {
+      //   thisLevel = prevLevel;
+      // }
+
+      // curLevelExp = prevLevel;
+      // nextLevelExp = prevLevel + thisLevel;
+
+      // prevLevel = prevLevel + thisLevel;
+
+      // if (nextLevelExp > tesAbTotalCur) {
+      //   exp = Math.floor(tesAbTotalCur * 10);
+      //   expDirect = tesAbTotalCur * 10;
+      //   persLevel = i;
+      //   startExp = Math.floor(curLevelExp * 10);
+      //   nextExp = Math.floor(nextLevelExp * 10);
+
+      //   break;
+      // }
+    }
+
+    return { persLevel, exp, startExp, nextExp, expDirect }
   }
 
   getQwestExpChange(qwHardness: number) {
@@ -1044,20 +1134,24 @@ export class PersService {
     return 1.0;
   }
 
+  hardnessKoef(hardnes: number) {
+    if (hardnes <= 1) {
+      return 1;
+    }
+    if (hardnes <= 2) {
+      return 100.45454545454547 / 124.25373134328362;
+    }
+    if (hardnes <= 3) {
+      return 100.45454545454547 / 144.4155844155844;
+    }
+  }
+
   isNullOrUndefined(ob) {
     if (ob == null || ob == undefined) {
       return true;
     }
 
     return false;
-  }
-
-  /**
-   * Загрузить персонажа из БД.
-   * @param userId Идентификатор пользователя
-   */
-  loadPers(userId: string) {
-    return this.db.collection<Pers>('pers').doc(userId).valueChanges().pipe(take(1), share());
   }
 
   ngOnDestroy(): void {
@@ -1105,6 +1199,161 @@ export class PersService {
     });
 
     this.savePers(false);
+  }
+
+  recountRewards(prs: Pers) {
+    for (const r of prs.rewards) {
+      let notDoneReqs: string[] = [];
+
+      if (!r.reqvirements) {
+        r.reqvirements = [];
+      }
+
+      if (r.isReward) {
+        for (const req of r.reqvirements) {
+          if (req.type == ReqItemType.persLvl) {
+            reqCheck(prs.level, req, notDoneReqs);
+          } else {
+            let el = this.allMap[req.elId];
+            if (el != null && el.item != null) {
+              if (req.type == ReqItemType.qwest) {
+                reqCheck(0, req, notDoneReqs);
+              } else if (req.type == ReqItemType.abil) {
+                let abil: Ability = el.item;
+                reqCheck(abil.value, req, notDoneReqs);
+              } else if (req.type == ReqItemType.charact) {
+                let cha: Characteristic = el.item;
+                reqCheck(cha.value, req, notDoneReqs);
+              }
+            } else {
+              req.isDone = true;
+            }
+          }
+        }
+
+        if (notDoneReqs.length) {
+          r.isAviable = false;
+          r.reqStr = notDoneReqs;
+        } else {
+          r.isAviable = true;
+          r.reqStr = [];
+        }
+      } else {
+        if (r.isShop) {
+          if (prs.gold >= r.cost) {
+            r.isAviable = true;
+          } else {
+            r.isAviable = false;
+          }
+        } else {
+          r.isAviable = true;
+        }
+      }
+    }
+
+    function reqCheck(val: number, req: Reqvirement, notDoneReqs: string[]) {
+      if (val < req.elVal) {
+        notDoneReqs.push(getReqStr(req));
+        req.isDone = false;
+      } else {
+        req.isDone = true;
+      }
+    }
+
+    function getReqStr(req: Reqvirement) {
+      let str = '';
+
+      str += req.type;
+      if (req.type != ReqItemType.persLvl) {
+        str += ' \"' + req.elName + '\"';
+      }
+
+      if (req.type != ReqItemType.qwest) {
+        str += ' ≥ ' + req.elVal;
+      }
+
+      return str;
+    }
+
+    prs.rewards = prs.rewards.sort((a, b) => {
+      // Награда?
+      let aIsRev = isRew(a);
+      let bIsRev = isRew(b);
+      if (aIsRev != bIsRev) {
+        return aIsRev - bIsRev;
+      }
+
+      // Количество невыполненных заданий
+      let aR = reqNotDone(a);
+      let bR = reqNotDone(b);
+      if (aR != bR) {
+        return aR - bR;
+      }
+
+      // Цена
+      let aCost = getCostRev(a);
+      let bCost = getCostRev(b);
+      if (aCost != bCost) {
+        return aCost - bCost;
+      }
+
+      // Артефакт
+      let aArt = isArt(a);
+      let bArt = isArt(b);
+      if (aArt != bArt) {
+        return aArt - bArt;
+      }
+
+      // Вероятность получения
+      let aProb = getProbRev(a);
+      let bProb = getProbRev(b);
+      if (aProb != bProb) {
+        return aProb - bProb;
+      }
+
+      // Название
+      return a.name.localeCompare(b.name);
+
+      function getCostRev(r: Reward): number {
+        if (!r.isShop) {
+          return 99999999;
+        }
+
+        return r.cost;
+      }
+
+      function getProbRev(r: Reward): number {
+        if (!r.isLud) {
+          return 99999999;
+        }
+
+        return r.ludProbability;
+      }
+
+      function reqNotDone(r: Reward) {
+        if (!r.reqvirements) {
+          return 0;
+        }
+
+        return r.reqvirements.filter(q => !q.isDone).length;
+      }
+
+      function isRew(r: Reward): number {
+        if (!r.isReward) {
+          return 0;
+        }
+
+        return 1;
+      }
+
+      function isArt(r: Reward) {
+        if (!r.isArtefact) {
+          return 0;
+        }
+
+        return 1;
+      }
+    });
   }
 
   returnToAdventure() {
@@ -1215,7 +1464,6 @@ export class PersService {
           }
 
           tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen);
-
 
           if (tsk.value < 0) {
             tsk.value = 0;
@@ -1721,20 +1969,11 @@ export class PersService {
       }
     }
 
-
     // Ранг
     prs.rangName = Pers.rangNames[thisMonstersLevel - 1];
 
-    const persJson = JSON.parse(JSON.stringify(prs));
-
-    if (this.isSynced || !prs.isOffline) {
-      this.db.collection('pers').doc(prs.id)
-        .set(persJson);
-    }
-    localStorage.setItem("isOffline", JSON.stringify(prs.isOffline));
+    localStorage.setItem("isOffline", JSON.stringify(true));
     localStorage.setItem("pers", JSON.stringify(prs));
-
-    this.isSynced = false;
 
     this.pers$.next(prs);
 
@@ -1749,298 +1988,6 @@ export class PersService {
 
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
-  }
-
-  recountRewards(prs: Pers) {
-    for (const r of prs.rewards) {
-      let notDoneReqs: string[] = [];
-
-      if (!r.reqvirements) {
-        r.reqvirements = [];
-      }
-
-      if (r.isReward) {
-        for (const req of r.reqvirements) {
-          if (req.type == ReqItemType.persLvl) {
-            reqCheck(prs.level, req, notDoneReqs);
-          } else {
-            let el = this.allMap[req.elId];
-            if (el != null && el.item != null) {
-              if (req.type == ReqItemType.qwest) {
-                reqCheck(0, req, notDoneReqs);
-              } else if (req.type == ReqItemType.abil) {
-                let abil: Ability = el.item;
-                reqCheck(abil.value, req, notDoneReqs);
-              } else if (req.type == ReqItemType.charact) {
-                let cha: Characteristic = el.item;
-                reqCheck(cha.value, req, notDoneReqs);
-              }
-            } else {
-              req.isDone = true;
-            }
-          }
-        }
-
-        if (notDoneReqs.length) {
-          r.isAviable = false;
-          r.reqStr = notDoneReqs;
-        } else {
-          r.isAviable = true;
-          r.reqStr = [];
-        }
-      } else {
-        if (r.isShop) {
-          if (prs.gold >= r.cost) {
-            r.isAviable = true;
-          } else {
-            r.isAviable = false;
-          }
-        } else {
-          r.isAviable = true;
-        }
-      }
-    }
-
-    function reqCheck(val: number, req: Reqvirement, notDoneReqs: string[]) {
-      if (val < req.elVal) {
-        notDoneReqs.push(getReqStr(req));
-        req.isDone = false;
-      } else {
-        req.isDone = true;
-      }
-    }
-
-    function getReqStr(req: Reqvirement) {
-      let str = '';
-
-      str += req.type;
-      if (req.type != ReqItemType.persLvl) {
-        str += ' \"' + req.elName + '\"';
-      }
-
-      if (req.type != ReqItemType.qwest) {
-        str += ' ≥ ' + req.elVal;
-      }
-
-      return str;
-    }
-
-    prs.rewards = prs.rewards.sort((a, b) => {
-      // Награда?
-      let aIsRev = isRew(a);
-      let bIsRev = isRew(b);
-      if (aIsRev != bIsRev) {
-        return aIsRev - bIsRev;
-      }
-
-      // Количество невыполненных заданий
-      let aR = reqNotDone(a);
-      let bR = reqNotDone(b);
-      if (aR != bR) {
-        return aR - bR;
-      }
-
-      // Цена
-      let aCost = getCostRev(a);
-      let bCost = getCostRev(b);
-      if (aCost != bCost) {
-        return aCost - bCost;
-      }
-
-      // Вероятность получения
-      let aProb = getProbRev(a);
-      let bProb = getProbRev(b);
-      if (aProb != bProb) {
-        return aProb - bProb;
-      }
-
-      // Название
-      return a.name.localeCompare(b.name);
-
-      function getCostRev(r: Reward): number {
-        if (!r.isShop) {
-          return 99999999;
-        }
-
-        return r.cost;
-      }
-
-      function getProbRev(r: Reward): number {
-        if (!r.isLud) {
-          return 99999999;
-        }
-
-        return r.ludProbability;
-      }
-
-      function reqNotDone(r: Reward) {
-        if (!r.reqvirements) {
-          return 0;
-        }
-
-        return r.reqvirements.filter(q => !q.isDone).length;
-      }
-
-      function isRew(r: Reward): number {
-        if (!r.isReward) {
-          return 0;
-        }
-
-        return 1;
-      }
-    });
-  }
-
-  getAbExpPointsFromTes(tesValue: number): number {
-    let expPoints: number = 0;
-    let floorTes = Math.floor(tesValue / 10);
-
-    for (let i = 0; i < floorTes; i++) {
-      let multi = (i + 1);
-      if (i > 9) {
-        i = 10;
-      }
-
-      expPoints += (i + 1) * multi;
-    }
-
-    let left = (tesValue / 10) - floorTes;
-    if (left > 0) {
-      let multi = floorTes + 1;
-
-      if (floorTes > 9) {
-        multi = 10;
-      }
-
-      expPoints += left * (floorTes + 1) * multi;
-    }
-
-    return expPoints;
-  }
-
-  private getPersAbPoints(abCount: number, persLevel: number, abOpenned: number) {
-    let ons = 0;
-    let abs = abCount;
-
-    if (abs < 1) {
-      abs = 1;
-    }
-
-    let onEveryLevel = 1;
-
-    let gainedOns = Math.floor(persLevel / onEveryLevel);
-
-    let startOn = 1;
-
-    startOn = 1;
-    const totalGained = (startOn + gainedOns);
-
-    ons = totalGained - abOpenned;
-    if (startOn + gainedOns > abs) {
-      ons = (abs - abOpenned) + 1;
-    }
-    return ons;
-  }
-
-  getPersExp(tesAbTotalCur: number, abCount: number, expPoints: number): { persLevel: number; exp: number; startExp: number; nextExp: number, expDirect: number } {
-    if (abCount < 10) {
-      abCount = 10;
-    }
-
-    let persLevel = 0;
-    let exp: number = 0;
-    let startExp = 0;
-    let nextExp = 0;
-    let thisLevel = 0;
-    let prevLevel = 0;
-    let curLevelExp = 0;
-    let nextLevelExp = 0;
-    expPoints = expPoints * 10;
-    let expDirect = expPoints * 10;
-
-    let expElements: number[] = [];
-
-    for (let i = 0; i < 1000; i++) {
-      if (i < abCount) {
-        expElements.push(0);
-      }
-
-      thisLevel = 0;
-
-      for (let i = 0; i < expElements.length; i++) {
-        const el = expElements[i];
-        const koef = this.getTesChangeKoef(el);
-
-        expElements[i] = expElements[i] + this.baseTaskPoints * koef;
-        thisLevel += (this.baseTaskPoints / koef);
-      }
-
-      // Рост дней с уровнем
-      thisLevel = thisLevel * (1 + i * 0.1);
-
-      nextLevelExp = prevLevel + thisLevel;
-      curLevelExp = prevLevel;
-      prevLevel = prevLevel + thisLevel;
-
-      if (nextLevelExp > expPoints) {
-        exp = Math.floor(expPoints * 10);
-        persLevel = i;
-        startExp = Math.floor(curLevelExp * 10);
-        nextExp = Math.floor(nextLevelExp * 10);
-
-        break;
-      }
-
-      // if (i < 30) {
-      //   thisLevel = prevLevel + this.baseTaskPoints;
-      // } else {
-      //   thisLevel = prevLevel;
-      // }
-
-      // curLevelExp = prevLevel;
-      // nextLevelExp = prevLevel + thisLevel;
-
-      // prevLevel = prevLevel + thisLevel;
-
-      // if (nextLevelExp > tesAbTotalCur) {
-      //   exp = Math.floor(tesAbTotalCur * 10);
-      //   expDirect = tesAbTotalCur * 10;
-      //   persLevel = i;
-      //   startExp = Math.floor(curLevelExp * 10);
-      //   nextExp = Math.floor(nextLevelExp * 10);
-
-      //   break;
-      // }
-    }
-
-    return { persLevel, exp, startExp, nextExp, expDirect }
-  }
-
-  private getAbVal(tesVal: number, isOpen: boolean): number {
-    let val = Math.floor(tesVal / 10.0);
-
-    if (isOpen) {
-      val = val + 1;
-    }
-
-    return val;
-  }
-
-  checkAndChangeWebP(img: string): string {
-    img = img.substr(0, img.lastIndexOf(".")) + ".webp";
-    return img;
-  }
-
-  hardnessKoef(hardnes: number) {
-    if (hardnes <= 1) {
-      return 1;
-    }
-    if (hardnes <= 2) {
-      return 100.45454545454547 / 124.25373134328362;
-    }
-    if (hardnes <= 3) {
-      return 100.45454545454547 / 144.4155844155844;
-    }
   }
 
   setCurInd(i: number): any {
@@ -2068,19 +2015,6 @@ export class PersService {
     }
 
     this.setPers(JSON.stringify(samplePers));
-  }
-
-  setNewPers(userid: string) {
-    const prs = new Pers();
-    prs.userId = userid;
-    prs.id = userid;
-    prs.level = 0;
-    prs.prevExp = 0;
-    prs.nextExp = 0;
-    prs.isOffline = true;
-    this.isOffline = true;
-
-    this.setPers(JSON.stringify(prs));
   }
 
   setPers(data: string) {
@@ -2294,24 +2228,6 @@ export class PersService {
     this.setCurInd(0);
   }
 
-  sync(isDownload) {
-    this.isSynced = true;
-
-    if (isDownload) {
-      // download
-      this.loadPers(this.pers$.value.userId)
-        .pipe(take(1))
-        .subscribe(n => {
-          let prs: Pers = n as Pers;
-          prs.currentView = curpersview.SkillTasks;
-          this.savePers(false, null, prs);
-        });
-    } else {
-      // upload
-      this.savePers(false);
-    }
-  }
-
   /**
    * Клик минус по задаче.
    * @param id Идентификатор задачи.
@@ -2426,11 +2342,6 @@ export class PersService {
         return 'квест';
       }
     }
-  }
-
-  CasinoGold(tskExp: number) {
-    let gold = Math.round((tskExp / 10) * Math.random());
-    this.pers$.value.gold += gold;
   }
 
   tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number) {
@@ -2598,28 +2509,6 @@ export class PersService {
     }
   }
 
-  addToInventory(rev: Reward, prs: Pers = null) {
-    if (prs == null) {
-      prs = this.pers$.value;
-    }
-
-    let idx = prs.inventory.findIndex(n => {
-      return n.id === rev.id;
-    });
-
-    if (idx === -1) {
-      rev.count = 1;
-      prs.inventory.push(rev);
-    }
-    else {
-      prs.inventory[idx].count = prs.inventory[idx].count + 1;
-    }
-
-    if (rev.isArtefact) {
-      prs.rewards = prs.rewards.filter(r => r.id != rev.id);
-    }
-  }
-
   private changeLvlAbLogic(tsk: Task, curTaskValue: number, prevTaskVal: number) {
     if (tsk.value >= 2 && !tsk.isSumStates && tsk.states.length > 0) {
       try {
@@ -2719,6 +2608,16 @@ export class PersService {
     return this.pers$.value.rewards.filter(n => n.rare == revType);
   }
 
+  private getAbVal(tesVal: number, isOpen: boolean): number {
+    let val = Math.floor(tesVal / 10.0);
+
+    if (isOpen) {
+      val = val + 1;
+    }
+
+    return val;
+  }
+
   private getAllMapping(prs: Pers) {
     let allMap = {};
 
@@ -2791,15 +2690,132 @@ export class PersService {
   private getMonsterLevel(prsLvl: number, maxLevel: number): number {
     if (prsLvl < 10) { // Обыватель
       return 1;
-    } else if (prsLvl < 30) { // Авантюрист
+    } else if (prsLvl < 20) { // Авантюрист
       return 2;
-    } else if (prsLvl < 50) { // Воин
+    } else if (prsLvl < 30) { // Охотник
       return 3;
-    } else if (prsLvl < 100) { // Герой
+    } else if (prsLvl < 40) { // Воин
+      return 3;
+    } else if (prsLvl < 50) { // Герой
       return 4;
     } else { // Легенда
       return 5;
     }
+  }
+
+  private getPersAbPoints(abCount: number, persLevel: number, abOpenned: number) {
+    let ons = 0;
+    let abs = abCount;
+
+    if (abs < 1) {
+      abs = 1;
+    }
+
+    let onEveryLevel = 1;
+
+    let gainedOns = Math.floor(persLevel / onEveryLevel);
+
+    let startOn = 1;
+
+    startOn = 1;
+    const totalGained = (startOn + gainedOns);
+
+    ons = totalGained - abOpenned;
+    if (startOn + gainedOns > abs) {
+      ons = (abs - abOpenned) + 1;
+    }
+    return ons;
+  }
+
+  private getPlusState(tsk: Task, progr: number, isCur?: boolean) {
+    let plusState = '';
+    // Состояния
+    if (tsk.states.length > 0) {
+      let stateInd = this.tesTaskTittleCount(progr, tsk.states.length, true, 'State');
+
+      stateInd = stateInd - 1;
+
+      if (tsk.isStateRefresh) {
+        if (tsk.refreshCounter == null && tsk.refreshCounter == undefined) {
+          tsk.refreshCounter = 0;
+        }
+        let cVal = tsk.refreshCounter % tsk.states.length;
+        const el = tsk.states[cVal].name;
+
+        if (el) {
+          plusState += ' ' + el;
+        }
+      }
+      else {
+        if (tsk.isSumStates) {
+          if (tsk.aimCounter > 0 || tsk.aimTimer > 0) {
+            stateInd = tsk.states.length - 1;
+          }
+          let plus = [];
+          for (let q = 0; q <= stateInd; q++) {
+            const st = tsk.states[q];
+
+            plus.push(st.name);
+          }
+
+          plusState += plus.join('; ');
+        } else {
+          plusState += tsk.states[stateInd].name;
+        }
+      }
+
+      let index = stateInd;
+
+      if (index >= 0) {
+        if (tsk.isSumStates) {
+          for (let i = 0; i < tsk.states.length; i++) {
+            const el = tsk.states[i];
+            if (i <= index) {
+              el.isActive = true;
+            } else {
+              el.isActive = false;
+            }
+          }
+        }
+      }
+    }
+
+    // Таймер, счетчик
+    if (tsk.aimTimer != 0) {
+      let aimVal = 0;
+      if (isCur) {
+        aimVal = tsk.secondsDone;
+      }
+      plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal), tsk.aimUnit);
+
+      if (tsk.aimUnit == 'Раз' && tsk.postfix && tsk.postfix.length > 0) {
+        plusState = plusState.substring(0, plusState.length - 1);
+      }
+    }
+
+    // Постфикс
+    if (tsk.postfix) {
+      plusState += tsk.postfix;
+    }
+    return plusState;
+  }
+
+  private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean) {
+    let start = 0; //(nextAbVal - tskVal) / (this._maxAbilLevel);
+    let progr = start + (tskVal / this._maxAbilLevel);
+
+    if (progr < 0.01) {
+      progr = 0.01;
+    }
+    if (progr > 1) {
+      progr = 1;
+    }
+
+    if (isPerk || isMegaPlan) {
+      progr = 1;
+    }
+
+    return Math.round(progr * 100) / 100;
   }
 
   private getRewsOfType(revType: any) {
@@ -3281,97 +3297,6 @@ export class PersService {
       tsk.curLvlDescr = '';
       tsk.curLvlDescr2 = '';
     }
-  }
-
-  private getPlusState(tsk: Task, progr: number, isCur?: boolean) {
-    let plusState = '';
-    // Состояния
-    if (tsk.states.length > 0) {
-      let stateInd = this.tesTaskTittleCount(progr, tsk.states.length, true, 'State');
-
-      stateInd = stateInd - 1;
-
-      if (tsk.isStateRefresh) {
-        if (tsk.refreshCounter == null && tsk.refreshCounter == undefined) {
-          tsk.refreshCounter = 0;
-        }
-        let cVal = tsk.refreshCounter % tsk.states.length;
-        const el = tsk.states[cVal].name;
-
-        if (el) {
-          plusState += ' ' + el;
-        }
-      }
-      else {
-        if (tsk.isSumStates) {
-          if (tsk.aimCounter > 0 || tsk.aimTimer > 0) {
-            stateInd = tsk.states.length - 1;
-          }
-          let plus = [];
-          for (let q = 0; q <= stateInd; q++) {
-            const st = tsk.states[q];
-
-            plus.push(st.name);
-          }
-
-          plusState += plus.join('; ');
-        } else {
-          plusState += tsk.states[stateInd].name;
-        }
-      }
-
-      let index = stateInd;
-
-      if (index >= 0) {
-        if (tsk.isSumStates) {
-          for (let i = 0; i < tsk.states.length; i++) {
-            const el = tsk.states[i];
-            if (i <= index) {
-              el.isActive = true;
-            } else {
-              el.isActive = false;
-            }
-          }
-        }
-      }
-    }
-
-    // Таймер, счетчик
-    if (tsk.aimTimer != 0) {
-      let aimVal = 0;
-      if (isCur) {
-        aimVal = tsk.secondsDone;
-      }
-      plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal), tsk.aimUnit);
-
-      if (tsk.aimUnit == 'Раз' && tsk.postfix && tsk.postfix.length > 0) {
-        plusState = plusState.substring(0, plusState.length - 1);
-      }
-    }
-
-    // Постфикс
-    if (tsk.postfix) {
-      plusState += tsk.postfix;
-    }
-    return plusState;
-  }
-
-  private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean) {
-    let start = 0; //(nextAbVal - tskVal) / (this._maxAbilLevel);
-    let progr = start + (tskVal / this._maxAbilLevel);
-
-    if (progr < 0.01) {
-      progr = 0.01;
-    }
-    if (progr > 1) {
-      progr = 1;
-    }
-
-    if (isPerk || isMegaPlan) {
-      progr = 1;
-    }
-
-    return Math.round(progr * 100) / 100;
   }
 
   private sortQwestTasks(qw: Qwest) {

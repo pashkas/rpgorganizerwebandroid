@@ -283,6 +283,7 @@ export class MainWindowComponent implements OnInit {
 
   openPersList() {
     this.srvSt.selTabPersList = 0;
+    this.srvSt.selInventoryList = 0;
   }
 
   openPlusType(linkId, linkType) {
