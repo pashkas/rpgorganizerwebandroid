@@ -207,7 +207,7 @@ export class PerschangesService {
 
     if (!changes.length && this.afterPers.gold != this.beforePers.gold) {
       changes.push(
-        new ChangesModel('Золото', 'qwest', this.beforePers.gold, this.afterPers.gold, 0, this.afterPers.gold, null)
+        new ChangesModel('Золото', 'qwest', 0, 0, 0, 1, null)
       );
     }
 
@@ -309,10 +309,10 @@ export class PerschangesService {
       return getChSort(a) - getChSort(b);
 
       function getChSort(ch: ChangesModel): number {
-        if (ch.type == 'exp') { return 0; }
+        if (ch.type == 'qwest') { return 0; }
         if (ch.type == 'abil') { return 1; }
         if (ch.type == 'cha') { return 2; }
-        if (ch.type == 'qwest') { return 3; }
+        if (ch.type == 'exp') { return 3; }
 
         return 4;
       }
@@ -349,14 +349,14 @@ export class PerschangesService {
           gold: gold,
           goldTotal: goldTotal
         },
-        backdropClass: 'backdrop'
+        backdropClass: 'backdrop-changes'
       });
 
       if (ch.type == 'abil'
         || ch.type == 'cha') {
-        await sleep(5500);
+        await sleep(5000);
       } else {
-        await sleep(3500);
+        await sleep(2750);
       }
 
       dialogRef.close();
@@ -365,10 +365,10 @@ export class PerschangesService {
     if (newLevel) {
       let dialogRefLvlUp = this.dialog.open(LevelUpMsgComponent, {
         panelClass: classPanel,
-        backdropClass: 'backdrop'
+        backdropClass: 'backdrop-changes'
       });
 
-      await sleep(5500);
+      await sleep(5000);
 
       dialogRefLvlUp.close();
 
@@ -381,9 +381,9 @@ export class PerschangesService {
       }
     }
 
-    if (abToEdit != null) {
-      this.router.navigate(['pers/task', abToEdit, false]);
-    }
+    // if (abToEdit != null) {
+    //   this.router.navigate(['pers/task', abToEdit, false]);
+    // }
 
     if (isDoneQwest && qwestToEdit != null) {
       this.router.navigate(['pers/qwest', qwestToEdit, true]);

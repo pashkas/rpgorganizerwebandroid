@@ -86,6 +86,10 @@ export class UserService {
     } else {
       // upload
       this.srv.savePers(false);
+      let prs = this.srv.pers$.value;
+      const persJson = JSON.parse(JSON.stringify(prs));
+      this.db.collection('pers').doc(prs.id)
+        .set(persJson);
     }
   }
 

@@ -3,7 +3,7 @@
   <div *ngIf="!isGallery">
     <mat-form-field>
       <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.text" autocomplete="off"
-        placeholder="Название" name="data.text">
+        name="data.text" [placeholder]="lblTxt">
     </mat-form-field>
   </div>
   <ngx-masonry *ngIf="isGallery" class="row p-0">
@@ -15,8 +15,13 @@
   </ngx-masonry>
 </div>
 <div mat-dialog-actions [align]="'end'">
-  <button *ngIf="this.data.isGallery" mat-flat-button (click)="gallery()" color='accent'>
-    Путь из интернета
+  <button *ngIf="data.isGallery" mat-flat-button (click)="gallery()" color='accent'>
+    <ng-container *ngIf="isGallery; else isNoGallery">
+      Из интернета
+    </ng-container>
+    <ng-template #isNoGallery>
+      Галлерея
+    </ng-template>
   </button>
   <button mat-button mat-dialog-close>Отмена</button>
   <button mat-button (click)="ok()">Ok</button>

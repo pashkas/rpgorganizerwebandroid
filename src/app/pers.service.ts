@@ -25,7 +25,7 @@ export class PersService {
   // Персонаж
   private unsubscribe$ = new Subject();
 
-  _tesMaxLvl: number = 100;
+  _tesMaxLvl: number = 90;
   _tesStartOn: number = 5;
   absMap: any;
   allMap: {};
@@ -65,7 +65,7 @@ export class PersService {
   }
 
   get baseTaskPoints(): number {
-    return 10.0 / 2.0;
+    return 10.0 / 1.0;
   }
 
   /**
@@ -76,7 +76,7 @@ export class PersService {
   }
 
   CasinoGold(tskExp: number) {
-    let gold = Math.round((tskExp / 10) * Math.random());
+    let gold = Math.round(tskExp * Math.random());
     this.pers$.value.gold += gold;
   }
 
@@ -156,7 +156,10 @@ export class PersService {
     let mnstrLvl = this.getMonsterLevel(lvl, maxlvl);
 
     tsk.imageLvl = '' + mnstrLvl;
-    tsk.image = this.getImgPathRandome(mnstrLvl);
+    let prs = this.pers$.value;
+    if (prs != null) {
+      tsk.image = this.getImgPathRandome(mnstrLvl, prs);
+    }
 
     return;
   }
@@ -887,7 +890,7 @@ export class PersService {
     return result;
   }
 
-  getImgPathRandome(lvl: number): string {
+  getImgPathRandome(lvl: number, prs: Pers): string {
     let im: number = 0;
     let max: number = 0;
 
@@ -916,15 +919,15 @@ export class PersService {
         break;
     }
 
-    if (!this.pers$.value.mnstrCounter) {
-      this.pers$.value.mnstrCounter = 0;
+    if (!prs.mnstrCounter) {
+      prs.mnstrCounter = 0;
     }
-    if (this.pers$.value.mnstrCounter >= max) {
-      this.pers$.value.mnstrCounter = 0;
+    if (prs.mnstrCounter >= max) {
+      prs.mnstrCounter = 0;
     }
 
-    this.pers$.value.mnstrCounter++;
-    im = this.pers$.value.mnstrCounter;
+    prs.mnstrCounter++;
+    im = prs.mnstrCounter;
 
     //im = this.randomInteger(1, max);
 
@@ -1184,9 +1187,9 @@ export class PersService {
     prs.characteristics.forEach(ch => {
       ch.abilities.forEach(ab => {
         ab.tasks.forEach(tsk => {
-          this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+          this.GetRndEnamy(tsk, prs.level, prs.maxPersLevel);
           tsk.states.forEach(st => {
-            this.GetRndEnamy(st, this.pers$.value.level, this.pers$.value.maxPersLevel);
+            this.GetRndEnamy(st, prs.level, prs.maxPersLevel);
           });
         });
       });
@@ -1194,7 +1197,7 @@ export class PersService {
 
     prs.qwests.forEach(qw => {
       qw.tasks.forEach(tsk => {
-        this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+        this.GetRndEnamy(tsk, prs.level, prs.maxPersLevel);
       });
     });
 
@@ -1395,7 +1398,7 @@ export class PersService {
     let tesAbTotalCur = 0;
     let abTotalCur = 0;
     let tesAbTotalMax = 0;
-    let abExpPointsTotalCur = 0;
+    // let abExpPointsTotalCur = 0;
 
     if (!prs.currentView) {
       prs.currentView = curpersview.SkillTasks;
@@ -1426,7 +1429,7 @@ export class PersService {
       let tesAbMax = 0;
       let tesAbCur = 0;
       let isHasSameAbil = false;
-      let abExpPointsCur = 0;
+      // let abExpPointsCur = 0;
 
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
@@ -1570,8 +1573,15 @@ export class PersService {
           abMax += this._maxAbilLevel;
           abCur += tsk.value;
           tesAbMax += this._tesMaxLvl;
-          tesAbCur += tsk.tesValue;
-          abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
+
+          let tesV = tsk.tesValue;
+          if (tesV > this._tesMaxLvl) {
+            tesV = this._tesMaxLvl;
+          }
+          tesV = Math.floor(tesV / 10);
+
+          tesAbCur += tesV;
+          // abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
 
           if (tsk.value <= 9
             && doneReq) {
@@ -1617,26 +1627,33 @@ export class PersService {
           if (prs.currentView == curpersview.SkillTasks
             || prs.currentView == curpersview.SkillsSort
             || prs.currentView == curpersview.SkillsGlobal) {
-            if ((prs.isMegaPlan && prs.currentView == curpersview.SkillsSort) || (doneReq && (tsk.value >= 1 || (prs.isTES && ab.isOpen)))) {
-              if (tsk.isSumStates && tsk.states.length > 0 && !tsk.isStateInTitle) {
-                if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
-                  for (const st of tsk.states) {
-                    if (
-                      (prs.currentView == curpersview.SkillsSort) ||
-                      (st.isActive && !st.isDone)
-                    ) {
-                      let stT = this.getTskFromState(tsk, st, false);
-                      tasks.push(stT);
+            if (prs.isMegaPlan && prs.currentView == curpersview.SkillsSort) {
+              if (tsk.states.length > 0 && !tsk.isStateInTitle) {
+                for (const st of tsk.states) {
+                  let stT = this.getTskFromState(tsk, st, false);
+                  stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
+                  tasks.push(stT);
+                }
+              } else {
+                tasks.push(tsk);
+              }
+            } else {
+              if (doneReq && (tsk.value >= 1 || (prs.isTES && ab.isOpen))) {
+                if (tsk.states.length > 0 && !tsk.isStateInTitle) {
+                  if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
+                    for (const st of tsk.states) {
+                      if (prs.currentView == curpersview.SkillsSort || (st.isActive && !st.isDone)) {
+                        let stT = this.getTskFromState(tsk, st, false);
+                        stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
+                        tasks.push(stT);
+                      }
                     }
                   }
                 }
-              }
-              else {
-                if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
-                  if (prs.isAutofocus) {
-                    tsk.plusToNames.shift();
+                else {
+                  if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
+                    tasks.push(tsk);
                   }
-                  tasks.push(tsk);
                 }
               }
             }
@@ -1661,7 +1678,7 @@ export class PersService {
       tesAbTotalMax += tesAbMax;
       abTotalCur += abCur;
       tesAbTotalCur += tesAbCur;
-      abExpPointsTotalCur += abExpPointsCur;
+      // abExpPointsTotalCur += abExpPointsCur;
 
       if (abMax == 0) {
         abMax = 1;
@@ -1747,7 +1764,7 @@ export class PersService {
           }
         }
 
-        if ((prs.currentView == curpersview.QwestSort)
+        if ((prs.currentView == curpersview.QwestSort || prs.currentView == curpersview.QwestTasks)
           && !qw.isNoActive
           && (qw.id == prs.currentQwestId || !prs.currentQwestId)) {
           if (noDoneStates.length > 0 && prs.currentView != curpersview.QwestSort) {
@@ -1790,7 +1807,7 @@ export class PersService {
 
       this.sortQwestTasks(qw);
 
-      if ((prs.currentView == curpersview.QwestTasks || prs.currentView == curpersview.QwestsGlobal)
+      if (prs.currentView == curpersview.QwestsGlobal
         && !qw.isNoActive && totalTasks > 0 && totalTasks != doneTasks) {
         if (this.checkTask(qw.tasks[0])) {
           tasks.push(qw.tasks[0]);
@@ -1859,30 +1876,37 @@ export class PersService {
 
     let maxLevel = 100;
 
-    if (tesAbTotalMax == 0) {
-      tesAbTotalMax = 1;
+    if (tesAbTotalMax < 900) {
+      tesAbTotalMax = 900;
     }
 
-    const { persLevel, exp, startExp, nextExp, expDirect } = this.getPersExp(tesAbTotalCur, abCount, abExpPointsTotalCur);
-    let ons = this.getPersAbPoints(abCount, persLevel, abOpenned);
+    // const { persLevel, exp, startExp, nextExp, expDirect } = this.getPersExp(tesAbTotalCur, abCount, abExpPointsTotalCur);
+    // let ons = this.getPersAbPoints(abCount, persLevel, abOpenned);
 
     // exp = exp * 100;
     // let prevOn = 0;
     // let startExp = persLevel * 100;
     // let nextExp = (persLevel + 1) * 100;
     //----------------------------------------------
+    if (abCount < 10) {
+      abCount = 10;
+    }
+
+    let persLevel = 100 * (tesAbTotalCur / (tesAbTotalMax / 10));
+    let exp = persLevel;
+    let startExp = Math.floor(persLevel);
+    let nextExp = startExp + 1;
+    let abTesFormula = (abCount * (this._tesMaxLvl / 10)) / 100;
+    let startOn = Math.ceil(abTesFormula);
+    let totalOn = startOn + Math.floor(persLevel);
+    let ons = totalOn - abOpenned;
 
     let prevPersLevel = prs.level;
-    prs.level = persLevel;
+    prs.level = Math.floor(persLevel);
     prs.prevExp = startExp;
     prs.nextExp = nextExp;
-    if (!prs.isTES) {
-      prs.ON = ons - abTotalCur;
-    }
-    else {
-      prs.ON = ons;
-      prs.exp = exp;
-    }
+    prs.ON = ons;
+    prs.exp = exp;
     prs.maxPersLevel = maxLevel;
     prs.totalProgress = Math.floor((prs.level / prs.maxPersLevel) * 100);
 
@@ -1897,7 +1921,7 @@ export class PersService {
     prs.exp = prs.exp - startExp;
     prs.nextExp = prs.nextExp - startExp;
     prs.prevExp = prs.prevExp - startExp;
-    prs.expDirect = expDirect;
+    // prs.expDirect = expDirect;
 
     let thisMonstersLevel = this.getMonsterLevel(prs.level, prs.maxPersLevel);
 
@@ -1934,40 +1958,65 @@ export class PersService {
       prs.rewards = prs.rewards.filter(r => !addedIds.includes(r.id));
     }
 
-    // Перерасчет опыта задач
+    // Расчет золота задач
+    let baseGold = 10;
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
-          let tesChange = 0;
+          let weekKoef = this.getWeekKoef(tsk.requrense, true, tsk.tskWeekDays);
+          let tskLvl = tsk.value;
+          let subTasksKoef = 1;
 
           if (tsk.isSumStates && tsk.states.length > 0) {
-            tesChange = this.getSubtaskExpChange(tsk, true, tsk.states[0]);
-          } else {
-            tesChange = this.getTaskChangesExp(tsk, true);
+            baseGold = this.getSubtaskExpChange(tsk, true, tsk.states[0]);
+            subTasksKoef = tsk.states.filter(n => n.isActive).length;
           }
 
-          let expNow = this.getAbExpPointsFromTes(tsk.tesValue);
-          let expChange = (this.getAbExpPointsFromTes(tsk.tesValue + tesChange) - expNow) * 100;
-
-          if (prs.expDirect) {
-            tesChange = Math.floor((prs.expDirect + expChange) - Math.floor(prs.expDirect));
-          } else {
-            tesChange = Math.floor(expChange);
-          }
-
-          tsk.plusToNames.push(new plusToName('+' + tesChange + ' exp', null, null, ''));
-
-          for (const st of tsk.states) {
-            const amap = this.allMap['stt' + st.id];
-            if (amap) {
-              amap.item.plusToNames.push(new plusToName('+' + tesChange + ' exp', null, null, ''));
-            }
-          }
-
-          tsk.plusExp = tesChange;
+          tsk.plusExp = (baseGold * tskLvl * weekKoef) / subTasksKoef;
         }
       }
     }
+
+    for (const qw of prs.qwests) {
+      for (const tsk of prs.tasks) {
+        tsk.plusExp = baseGold;
+      }
+    }
+
+    // Перерасчет опыта задач
+    // for (const ch of prs.characteristics) {
+    //   for (const ab of ch.abilities) {
+    //     for (const tsk of ab.tasks) {
+    //       let tesChange = 0;
+
+    //       if (tsk.isSumStates && tsk.states.length > 0) {
+    //         tesChange = this.getSubtaskExpChange(tsk, true, tsk.states[0]);
+    //       } else {
+    //         tesChange = this.getTaskChangesExp(tsk, true);
+    //       }
+
+    //       let expNow = this.getAbExpPointsFromTes(tsk.tesValue);
+    //       let expChange = (this.getAbExpPointsFromTes(tsk.tesValue + tesChange) - expNow) * 100;
+
+    //       if (prs.expDirect) {
+    //         tesChange = Math.floor((prs.expDirect + expChange) - Math.floor(prs.expDirect));
+    //       } else {
+    //         tesChange = Math.floor(expChange);
+    //       }
+
+    //       tsk.plusToNames.push(new plusToName('+' + tesChange + ' exp', null, null, ''));
+
+    //       for (const st of tsk.states) {
+    //         const amap = this.allMap['stt' + st.id];
+    //         if (amap) {
+    //           amap.item.plusToNames.push(new plusToName('+' + tesChange + ' exp', null, null, ''));
+    //         }
+    //       }
+
+    //       tsk.plusExp = tesChange;
+    //     }
+    //   }
+    // }
 
     // Ранг
     prs.rangName = Pers.rangNames[thisMonstersLevel - 1];
@@ -2337,7 +2386,7 @@ export class PersService {
         }
 
         // Золото
-        this.CasinoGold(this.baseTaskPoints * 10.0);
+        this.CasinoGold(tsk.plusExp);
 
         return 'квест';
       }
@@ -2461,9 +2510,9 @@ export class PersService {
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
-          this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+          this.GetRndEnamy(tsk, prs.level, prs.maxPersLevel);
           for (const st of tsk.states) {
-            this.GetRndEnamy(st, this.pers$.value.level, this.pers$.value.maxPersLevel);
+            this.GetRndEnamy(st, prs.level, prs.maxPersLevel);
           }
         }
       }
@@ -2473,9 +2522,9 @@ export class PersService {
   updateQwestTasksImages(prs: Pers) {
     for (const qwest of prs.qwests) {
       for (const tsk of qwest.tasks) {
-        this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+        this.GetRndEnamy(tsk, prs.level, prs.maxPersLevel);
         for (const sub of tsk.states) {
-          this.GetRndEnamy(sub, this.pers$.value.level, this.pers$.value.maxPersLevel);
+          this.GetRndEnamy(sub, prs.level, prs.maxPersLevel);
         }
       }
     }
@@ -2692,14 +2741,14 @@ export class PersService {
       return 1;
     } else if (prsLvl < 20) { // Авантюрист
       return 2;
-    } else if (prsLvl < 30) { // Охотник
+    } else if (prsLvl < 50) { // Охотник
       return 3;
-    } else if (prsLvl < 40) { // Воин
-      return 3;
-    } else if (prsLvl < 50) { // Герой
+    } else if (prsLvl < 70) { // Воин
       return 4;
-    } else { // Легенда
+    } else if (prsLvl < 90) { // Герой
       return 5;
+    } else { // Легенда
+      return 6;
     }
   }
 
@@ -2743,7 +2792,7 @@ export class PersService {
         const el = tsk.states[cVal].name;
 
         if (el) {
-          plusState += ' ' + el;
+          plusState += ' ' + '___' + el + '___';
         }
       }
       else {
@@ -2755,26 +2804,24 @@ export class PersService {
           for (let q = 0; q <= stateInd; q++) {
             const st = tsk.states[q];
 
-            plus.push(st.name);
+            plus.push('___' + st.name + '___');
           }
 
           plusState += plus.join('; ');
         } else {
-          plusState += tsk.states[stateInd].name;
+          plusState += '___' + tsk.states[stateInd].name + '___';
         }
       }
 
       let index = stateInd;
 
       if (index >= 0) {
-        if (tsk.isSumStates) {
-          for (let i = 0; i < tsk.states.length; i++) {
-            const el = tsk.states[i];
-            if (i <= index) {
-              el.isActive = true;
-            } else {
-              el.isActive = false;
-            }
+        for (let i = 0; i < tsk.states.length; i++) {
+          const el = tsk.states[i];
+          if (i <= index) {
+            el.isActive = true;
+          } else {
+            el.isActive = false;
           }
         }
       }
@@ -2797,6 +2844,7 @@ export class PersService {
     if (tsk.postfix) {
       plusState += tsk.postfix;
     }
+
     return plusState;
   }
 
@@ -3055,6 +3103,7 @@ export class PersService {
     // return (1 / (2 + Math.floor(tesVal) / 10.0));
 
     let tesValTen = 1 + Math.floor(tesVal / 10.0);
+    tesValTen = tesValTen + (tesValTen - 1);
 
     return 1 / tesValTen;
   }
@@ -3118,6 +3167,7 @@ export class PersService {
     stT.lastNotDone = tsk.lastNotDone;
     stT.plusToNames = [...tsk.plusToNames];
     stT.nextAbVal = tsk.nextAbVal;
+    stT.tesValue = tsk.tesValue;
 
     if (stT.requrense != 'нет') {
       stT.plusToNames.shift();
@@ -3249,7 +3299,7 @@ export class PersService {
           const progrSt = this.getProgrForTittle(i + 1, i, tsk.isPerk, isMegaPlan);
           const pSt = this.getPlusState(tsk, progrSt);
 
-          tsk.statesDescr.push(pSt);
+          tsk.statesDescr.push(pSt.replace(/___/g, ''));
         }
       }
 

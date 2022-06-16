@@ -17,14 +17,19 @@ export class ListBgPipe implements PipeTransform {
 
     let check = this.checkDate(tsk.date);
 
-    if (check != 'now' && view == 'SkillsSort') {
-      if (tsk.requrense != 'нет' && this.checkDate(tsk.date) == 'back') {
+    if (view == 'SkillsSort') {
+      // if (tsk.requrense != 'нет' && this.checkDate(tsk.date) == 'back') {
+      //   return 'list-group-item-warning';
+      // }
+
+      // Новые задачи подсвечиваем
+      if (tsk.tesValue < 10) {
         return 'list-group-item-warning';
       }
 
-      if (tsk.requrense != 'нет' && this.checkDate(tsk.date) == 'later') {
-        return 'list-group-item-info';
-      }
+      // if (tsk.requrense != 'нет' && check == 'later') {
+      //   return 'list-group-item-info';
+      // }
     }
 
     return '';
