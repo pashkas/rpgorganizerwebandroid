@@ -130,7 +130,7 @@ button:focus {
 }
 
 .backdrop-changes {
-    background: rgba(0, 0, 0, 0.50);
+    background: rgba(0, 0, 0, 0.60);
 }
 
 .icon-small.mat-icon-button img {

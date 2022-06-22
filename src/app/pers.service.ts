@@ -77,6 +77,10 @@ export class PersService {
 
   CasinoGold(tskExp: number) {
     let gold = Math.round(tskExp * Math.random());
+    if (gold < 1) {
+      gold = 1;
+    }
+
     this.pers$.value.gold += gold;
   }
 
@@ -1466,6 +1470,9 @@ export class PersService {
             tsk.time = "00:00";
           }
 
+          // Чуть округляем
+          tsk.tesValue = Math.ceil(tsk.tesValue * 10000) / 10000;
+
           tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen);
 
           if (tsk.value < 0) {
@@ -1567,17 +1574,22 @@ export class PersService {
             tsk.value = this._maxAbilLevel;
           }
 
-          tsk.progressValue = (tsk.value / this._maxAbilLevel) * 100;
-          tsk.progresNextLevel = ((tsk.tesValue / 10.0) - Math.floor(tsk.tesValue / 10.0)) * 100;
+          let progressNextLevel = ((tsk.tesValue / 10.0) - Math.floor(tsk.tesValue / 10.0)) * 100;
+          if (tsk.tesValue > this._tesMaxLvl) {
+            progressNextLevel = 100;
+          }
+          tsk.progresNextLevel = progressNextLevel;
+          tsk.progressValue = tsk.progresNextLevel;
+          // tsk.progressValue = (tsk.value / this._maxAbilLevel) * 100;
 
           abMax += this._maxAbilLevel;
           abCur += tsk.value;
           tesAbMax += this._tesMaxLvl;
 
           let tesV = tsk.tesValue;
-          if (tesV > this._tesMaxLvl) {
-            tesV = this._tesMaxLvl;
-          }
+          // if (tesV > this._tesMaxLvl) {
+          //   tesV = this._tesMaxLvl;
+          // }
           tesV = Math.floor(tesV / 10);
 
           tesAbCur += tesV;
@@ -1689,7 +1701,12 @@ export class PersService {
       let progr = (abCur / abMax);
       ch.value = start + (left * progr);
       const chaCeilProgr = Math.floor(ch.value);
-      ch.progressValue = (chaCeilProgr / (this._maxCharactLevel)) * 100;
+      // ch.progressValue = (chaCeilProgr / (this._maxCharactLevel)) * 100;
+      let chaProgr = ((ch.value) - Math.floor(ch.value)) * 100;
+      if(ch.value >= this._maxCharactLevel){
+        chaProgr = 100;
+      }
+      ch.progressValue = chaProgr;
 
       const rng = new Rangse();
       rng.val = chaCeilProgr;
@@ -1892,12 +1909,12 @@ export class PersService {
       abCount = 10;
     }
 
-    let persLevel = 100 * (tesAbTotalCur / (tesAbTotalMax / 10));
+    let persLevel = tesAbTotalCur / 3;
     let exp = persLevel;
     let startExp = Math.floor(persLevel);
     let nextExp = startExp + 1;
-    let abTesFormula = (abCount * (this._tesMaxLvl / 10)) / 100;
-    let startOn = Math.ceil(abTesFormula);
+    // let abTesFormula = (abCount * (this._tesMaxLvl / 10)) / 100;
+    let startOn = 3;
     let totalOn = startOn + Math.floor(persLevel);
     let ons = totalOn - abOpenned;
 
@@ -1959,7 +1976,7 @@ export class PersService {
     }
 
     // Расчет золота задач
-    let baseGold = 10;
+    const baseGold = 1;
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
@@ -1968,7 +1985,6 @@ export class PersService {
           let subTasksKoef = 1;
 
           if (tsk.isSumStates && tsk.states.length > 0) {
-            baseGold = this.getSubtaskExpChange(tsk, true, tsk.states[0]);
             subTasksKoef = tsk.states.filter(n => n.isActive).length;
           }
 
@@ -2033,6 +2049,9 @@ export class PersService {
     else if (prs.currentView == curpersview.QwestsGlobal && prs.tasks.length == 0) {
       prs.currentView = curpersview.SkillTasks;
       this.savePers(false);
+    } else if (prs.currentView == curpersview.QwestTasks
+      && tasks.length) {
+      prs.currentTask = tasks[0];
     }
 
     this.currentView$.next(prs.currentView);
@@ -2741,11 +2760,11 @@ export class PersService {
       return 1;
     } else if (prsLvl < 20) { // Авантюрист
       return 2;
-    } else if (prsLvl < 50) { // Охотник
+    } else if (prsLvl < 30) { // Охотник
       return 3;
-    } else if (prsLvl < 70) { // Воин
+    } else if (prsLvl < 50) { // Воин
       return 4;
-    } else if (prsLvl < 90) { // Герой
+    } else if (prsLvl < 100) { // Герой
       return 5;
     } else { // Легенда
       return 6;

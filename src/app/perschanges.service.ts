@@ -108,28 +108,111 @@ export class PerschangesService {
       // Характеристики
       else if (changesMap[n].type == 'cha') {
         if (isShowCharactChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
-          changes.push(
-            new ChangesModel(changesMap[n].name, 'cha', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
-          );
+          // let chaChanges = new ChangesModel(changesMap[n].name, 'cha', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img);
+          // chaChanges.lvl = changesMap[n].after;
+          // changes.push(
+          //   chaChanges
+          // );
+
+          let beforeVal = changesMap[n].before;
+          let afterVal = changesMap[n].after;
+
+          let abBeforePrevExp = Math.floor(beforeVal);
+          let abBeforeNextExp = abBeforePrevExp + 1;
+
+          let abAfterPrevExp = Math.floor(afterVal);
+          let abAfterNextExp = abAfterPrevExp + 1;
+
+          let abilChanges = new ChangesModel(changesMap[n].name, 'cha', beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, changesMap[n].img);
+
+          let eCh: persExpChanges[] = [];
+          let prevAbLvl = Math.floor(beforeVal);
+          let afterAbLvl = Math.floor(afterVal);
+          abilChanges.lvl = prevAbLvl;
+
+          if (afterAbLvl > prevAbLvl) {
+            //1
+            eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
+            //2
+            eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+          } else if (afterAbLvl < prevAbLvl) {
+            //1
+            eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
+            //2
+            eCh.push(new persExpChanges(abAfterNextExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+          } else {
+            eCh.push(new persExpChanges(beforeVal, afterVal, abAfterPrevExp, abAfterNextExp, prevAbLvl));
+          }
+
+          abilChanges.abilChanges = eCh;
+
+          changes.push(abilChanges);
         }
       }
       // Навыки
       else if (changesMap[n].type == 'abil') {
-        if (isShowAbActivate && changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
-          isAbilActivated = true;
-          abToEdit = n;
-          changes.push(
-            new ChangesModel(`"${changesMap[n].name}" активирован`, 'abil', 0, 0, 0, maxAttrLevel, changesMap[n].img)
-          );
-        }
-        if (isShowAbChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
-          if (changesMap[n].after > changesMap[n].before && changesMap[n].after == 1) {
-            abToEdit = n;
+        // if (isShowAbActivate && changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
+        //   isAbilActivated = true;
+        //   abToEdit = n;
+        //   changes.push(
+        //     new ChangesModel(`"${changesMap[n].name}" активирован`, 'abil', 0, 0, 0, maxAttrLevel, changesMap[n].img)
+        //   );
+        // }
+        // if (isShowAbChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
+        //   // if (changesMap[n].after > changesMap[n].before && changesMap[n].after == 1) {
+        //   //   abToEdit = n;
+        //   // }
+
+        //   changes.push(
+        //     new ChangesModel(changesMap[n].name, 'abil', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
+        //   );
+        // }
+        if (isShowAbChanges &&
+          (changesMap[n].after != changesMap[n].before && changesMap[n].after <= 90)
+          || (changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter)
+        ) {
+          // if (changesMap[n].after > changesMap[n].before && changesMap[n].after == 1) {
+          //   abToEdit = n;
+          // }
+
+          let beforeVal = changesMap[n].before;
+          let afterVal = changesMap[n].after;
+
+          if (changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
+            beforeVal = 0;
+            afterVal = 10;
           }
 
-          changes.push(
-            new ChangesModel(changesMap[n].name, 'abil', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img)
-          );
+          let abBeforePrevExp = Math.floor(beforeVal / 10) * 10;
+          let abBeforeNextExp = abBeforePrevExp + 10;
+
+          let abAfterPrevExp = Math.floor(afterVal / 10) * 10;
+          let abAfterNextExp = abAfterPrevExp + 10;
+
+          let abilChanges = new ChangesModel(changesMap[n].name, 'abil', beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, changesMap[n].img);
+
+          let eCh: persExpChanges[] = [];
+          let prevAbLvl = (Math.floor(beforeVal / 10) * 10) / 10;
+          let afterAbLvl = (Math.floor(afterVal / 10) * 10) / 10;
+          abilChanges.lvl = prevAbLvl;
+
+          if (afterAbLvl > prevAbLvl) {
+            //1
+            eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
+            //2
+            eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+          } else if (afterAbLvl < prevAbLvl) {
+            //1
+            eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
+            //2
+            eCh.push(new persExpChanges(abAfterNextExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+          } else {
+            eCh.push(new persExpChanges(beforeVal, afterVal, abAfterPrevExp, abAfterNextExp, prevAbLvl));
+          }
+
+          abilChanges.abilChanges = eCh;
+
+          changes.push(abilChanges);
         }
       }
       // Уровень
@@ -156,28 +239,29 @@ export class PerschangesService {
 
         if (isShowBySettings) {
           if (changesMap[n].after != changesMap[n].before) {
-            let expChanges = new ChangesModel('Опыт', 'exp', changesMap[n].before * 10, changesMap[n].after * 10, this.afterPers.prevExp * 10, this.afterPers.nextExp * 10, changesMap[n].img);
+            let expChanges = new ChangesModel('Уровень', 'exp', changesMap[n].before * 10, changesMap[n].after * 10, this.afterPers.prevExp * 10, this.afterPers.nextExp * 10, changesMap[n].img);
 
             let beforeExp = changesMap[n].before;
             let afterExp = changesMap[n].after;
 
             let prevLvl = this.beforePers.level;
             let afterLvl = this.afterPers.level;
+            expChanges.lvl = afterLvl;
 
             let eCh: persExpChanges[] = [];
 
             if (afterLvl > prevLvl) {
               //1
-              eCh.push(new persExpChanges(beforeExp, this.beforePers.nextExp, this.beforePers.prevExp, this.beforePers.nextExp));
+              eCh.push(new persExpChanges(beforeExp, this.beforePers.nextExp, this.beforePers.prevExp, this.beforePers.nextExp, prevLvl));
               //2
-              eCh.push(new persExpChanges(this.afterPers.prevExp, afterExp, this.afterPers.prevExp, this.afterPers.nextExp));
+              eCh.push(new persExpChanges(this.afterPers.prevExp, afterExp, this.afterPers.prevExp, this.afterPers.nextExp, afterLvl));
             } else if (afterLvl < prevLvl) {
               //1
-              eCh.push(new persExpChanges(beforeExp, this.beforePers.prevExp, this.beforePers.prevExp, this.beforePers.nextExp));
+              eCh.push(new persExpChanges(beforeExp, this.beforePers.prevExp, this.beforePers.prevExp, this.beforePers.nextExp, prevLvl));
               //2
-              eCh.push(new persExpChanges(this.afterPers.nextExp, afterExp, this.afterPers.prevExp, this.afterPers.nextExp));
+              eCh.push(new persExpChanges(this.afterPers.nextExp, afterExp, this.afterPers.prevExp, this.afterPers.nextExp, afterLvl));
             } else {
-              eCh.push(new persExpChanges(beforeExp, afterExp, this.afterPers.prevExp, this.afterPers.nextExp));
+              eCh.push(new persExpChanges(beforeExp, afterExp, this.afterPers.prevExp, this.afterPers.nextExp, prevLvl));
             }
 
             expChanges.expChanges = eCh;
@@ -230,16 +314,13 @@ export class PerschangesService {
         changes[index].name = ' ';
       }
 
-      if (changes[index].type == 'exp'
-        || changes[index].type == 'qwest'
-        || changes[index].type == 'inv') {
-        if (this.afterPers.gold != this.beforePers.gold) {
-          gold = this.afterPers.gold - this.beforePers.gold;
-          if (gold > 0) {
-            gold = '+' + gold;
-          }
-          goldTotal = this.afterPers.gold;
+      // Добавляем золото к первому изменению
+      if (index == 0 && this.afterPers.gold != this.beforePers.gold) {
+        gold = this.afterPers.gold - this.beforePers.gold;
+        if (gold > 0) {
+          gold = '+' + gold;
         }
+        goldTotal = this.afterPers.gold;
       }
 
       if (isDoneQwest && changes[index].type == 'qwest') {
@@ -352,12 +433,14 @@ export class PerschangesService {
         backdropClass: 'backdrop-changes'
       });
 
-      if (ch.type == 'abil'
-        || ch.type == 'cha') {
-        await sleep(5000);
-      } else {
-        await sleep(2750);
-      }
+      // if (ch.type == 'abil'
+      //   || ch.type == 'cha') {
+      //   await sleep(5000);
+      // } else {
+      //   await sleep(2750);
+      // }
+
+      await sleep(4000);
 
       dialogRef.close();
     }
@@ -435,7 +518,9 @@ export class PerschangesService {
           }
 
           //changesMap[tsk.id][chType] = Math.floor(tsk.value);
-          changesMap[tsk.id][chType] = tsk.value;
+          // changesMap[tsk.id][chType] = tsk.value;
+          changesMap[tsk.id][chType] = tsk.tesValue;
+
 
           if (chType == 'before') {
             changesMap[tsk.id]['abIsOpenBefore'] = ab.isOpen;
@@ -456,7 +541,7 @@ export class PerschangesService {
       if (!changesMap[ch.id]) {
         changesMap[ch.id] = this.getChItem('cha', ch.name, ch.image);
       }
-      changesMap[ch.id][chType] = Math.floor(ch.value);
+      changesMap[ch.id][chType] = ch.value;
     });
 
     // Квесты

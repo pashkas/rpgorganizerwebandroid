@@ -7,11 +7,13 @@ export class ChangesModel {
     totalMax: number;
     totalMin: number;
     expChanges: persExpChanges[] = [];
+    abilChanges: persExpChanges[] = [];
     img: string;
     head: any;
     abPoints: any;
     gold: string;
     goldTotal: number;
+    lvl: number;
 
     constructor(name, type, valFrom, valTo, totalMin, totalMax, img) {
         this.img = img;
@@ -90,16 +92,17 @@ export class persExpChanges {
     valTo: number;
     lvlStartExp: number;
     lvlEndExp: number;
+    lvl: number;
 
-    constructor(valFrom, valTo, lvlStartExp, lvlEndExp) {
+    constructor(valFrom, valTo, lvlStartExp, lvlEndExp, lvl) {
         lvlStartExp = lvlStartExp;
         lvlEndExp = lvlEndExp;
-
 
         this.valFrom = ((valFrom - lvlStartExp) / (lvlEndExp - lvlStartExp)) * 100;
         this.valTo = ((valTo - lvlStartExp) / (lvlEndExp - lvlStartExp)) * 100;
 
         this.lvlStartExp = 0;
         this.lvlEndExp = 100;
+        this.lvl = lvl;
     }
 }
