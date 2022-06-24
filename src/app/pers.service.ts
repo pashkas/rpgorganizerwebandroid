@@ -65,7 +65,7 @@ export class PersService {
   }
 
   get baseTaskPoints(): number {
-    return 10.0 / 1.0;
+    return 10.0 / 2.0;
   }
 
   /**
@@ -1587,9 +1587,9 @@ export class PersService {
           tesAbMax += this._tesMaxLvl;
 
           let tesV = tsk.tesValue;
-          // if (tesV > this._tesMaxLvl) {
-          //   tesV = this._tesMaxLvl;
-          // }
+          if (tesV > this._tesMaxLvl) {
+            tesV = this._tesMaxLvl;
+          }
           tesV = Math.floor(tesV / 10);
 
           tesAbCur += tesV;
@@ -1703,7 +1703,7 @@ export class PersService {
       const chaCeilProgr = Math.floor(ch.value);
       // ch.progressValue = (chaCeilProgr / (this._maxCharactLevel)) * 100;
       let chaProgr = ((ch.value) - Math.floor(ch.value)) * 100;
-      if(ch.value >= this._maxCharactLevel){
+      if (ch.value >= this._maxCharactLevel) {
         chaProgr = 100;
       }
       ch.progressValue = chaProgr;
@@ -1891,12 +1891,6 @@ export class PersService {
 
     this.setCurPersTask(prs);
 
-    let maxLevel = 100;
-
-    if (tesAbTotalMax < 900) {
-      tesAbTotalMax = 900;
-    }
-
     // const { persLevel, exp, startExp, nextExp, expDirect } = this.getPersExp(tesAbTotalCur, abCount, abExpPointsTotalCur);
     // let ons = this.getPersAbPoints(abCount, persLevel, abOpenned);
 
@@ -1905,16 +1899,31 @@ export class PersService {
     // let startExp = persLevel * 100;
     // let nextExp = (persLevel + 1) * 100;
     //----------------------------------------------
+
+    let abPointsForLevel = 3;
+
+    if (tesAbTotalMax < 900) {
+      tesAbTotalMax = 900;
+    }
+
     if (abCount < 10) {
       abCount = 10;
     }
 
-    let persLevel = tesAbTotalCur / 3;
+    let maxLevel = 0;
+
+    maxLevel = (abCount * 9) / abPointsForLevel;
+
+    if(maxLevel < 50){
+      maxLevel = 50;
+    }
+
+    let persLevel = tesAbTotalCur / abPointsForLevel;
     let exp = persLevel;
     let startExp = Math.floor(persLevel);
     let nextExp = startExp + 1;
     // let abTesFormula = (abCount * (this._tesMaxLvl / 10)) / 100;
-    let startOn = 3;
+    let startOn = abPointsForLevel;
     let totalOn = startOn + Math.floor(persLevel);
     let ons = totalOn - abOpenned;
 
@@ -2443,7 +2452,7 @@ export class PersService {
   }
 
   upAbility(ab: Ability) {
-    let isOpenForEdit = false;
+    // let isOpenForEdit = false;
 
     for (let i = 0; i < ab.tasks.length; i++) {
       const tsk: Task = ab.tasks[i];
@@ -2461,7 +2470,7 @@ export class PersService {
         tsk.states.forEach(st => {
           st.order = -1;
         });
-        isOpenForEdit = true;
+        // isOpenForEdit = true;
       }
       if (!ab.isOpen) {
         tsk.date = new Date();
@@ -2469,7 +2478,7 @@ export class PersService {
         tsk.states.forEach(st => {
           st.order = -1;
         });
-        isOpenForEdit = true;
+        // isOpenForEdit = true;
       }
 
       let prevTaskVal = tsk.value;
@@ -2520,9 +2529,9 @@ export class PersService {
     this.savePers(true, 'plus');
 
     // Переходим в настройку навыка, если это первый уровень
-    if (false && isOpenForEdit && !this.pers$.value.isAutoPumping) {
-      this.showAbility(ab);
-    }
+    // if (false && isOpenForEdit && !this.pers$.value.isAutoPumping) {
+    //   this.showAbility(ab);
+    // }
   }
 
   updateAbTasksImages(prs: Pers) {
@@ -2762,9 +2771,9 @@ export class PersService {
       return 2;
     } else if (prsLvl < 30) { // Охотник
       return 3;
-    } else if (prsLvl < 50) { // Воин
+    } else if (prsLvl < 40) { // Воин
       return 4;
-    } else if (prsLvl < 100) { // Герой
+    } else if (prsLvl < maxLevel) { // Герой
       return 5;
     } else { // Легенда
       return 6;
@@ -3121,8 +3130,11 @@ export class PersService {
 
     // return (1 / (2 + Math.floor(tesVal) / 10.0));
 
+    // let tesValTen = 1 + Math.floor(tesVal / 10.0);
+    // tesValTen = tesValTen + (tesValTen - 1);
+
+    // return 1 / tesValTen;
     let tesValTen = 1 + Math.floor(tesVal / 10.0);
-    tesValTen = tesValTen + (tesValTen - 1);
 
     return 1 / tesValTen;
   }

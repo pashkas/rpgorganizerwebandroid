@@ -314,6 +314,8 @@ export class TaskDetailComponent implements OnInit {
       this.srv.upAbility(this.tskAbility);
 
       this.srv.changesAfter(true);
+
+      this.isEditMode = false;
     }
   }
 

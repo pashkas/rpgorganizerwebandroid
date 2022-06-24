@@ -519,7 +519,11 @@ export class PerschangesService {
 
           //changesMap[tsk.id][chType] = Math.floor(tsk.value);
           // changesMap[tsk.id][chType] = tsk.value;
-          changesMap[tsk.id][chType] = tsk.tesValue;
+          let abVal = tsk.tesValue;
+          if(abVal > 90){
+            abVal = 90;
+          }
+          changesMap[tsk.id][chType] = abVal;
 
 
           if (chType == 'before') {
@@ -541,6 +545,12 @@ export class PerschangesService {
       if (!changesMap[ch.id]) {
         changesMap[ch.id] = this.getChItem('cha', ch.name, ch.image);
       }
+
+      let chaVal = ch.value;
+      if(chaVal > 10){
+        chaVal = 10;
+      }
+
       changesMap[ch.id][chType] = ch.value;
     });
 
