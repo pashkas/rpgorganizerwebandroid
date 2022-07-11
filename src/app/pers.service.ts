@@ -1471,7 +1471,11 @@ export class PersService {
           }
 
           // Чуть округляем
-          tsk.tesValue = Math.ceil(tsk.tesValue * 10000) / 10000;
+          // if(tsk.name == "Витамины"){
+          //   debugger;
+          // }
+
+          tsk.tesValue = Math.ceil(tsk.tesValue * 100) / 100;
 
           tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen);
 
@@ -2773,7 +2777,7 @@ export class PersService {
       return 3;
     } else if (prsLvl < 40) { // Воин
       return 4;
-    } else if (prsLvl < maxLevel) { // Герой
+    } else if (prsLvl < 50) { // Герой
       return 5;
     } else { // Легенда
       return 6;

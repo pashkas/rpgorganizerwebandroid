@@ -440,7 +440,7 @@ export class PerschangesService {
       //   await sleep(2750);
       // }
 
-      await sleep(4000);
+      await sleep(3000);
 
       dialogRef.close();
     }

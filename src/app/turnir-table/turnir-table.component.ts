@@ -29,8 +29,8 @@ export class TurnirTableComponent implements OnInit {
   constructor(
     private usrService: UserService,
     public srv: PersService,
-     private router: Router,
-      private location: Location) { }
+    private router: Router,
+    private location: Location) { }
 
   ngOnInit() {
     this.champions$ = this.usrService.getChampions();

@@ -4,9 +4,21 @@
     grid-template-columns: auto;
     grid-template-rows: 15px auto auto 1fr 15px;
     background: black;
+    overflow: hidden;
 }
 
 .passFields{
     background-color: lightgray;
     padding: 5px;
+}
+
+.container {
+    position: relative;
+}
+
+.container .element {
+   position: absolute;
+   left: 50%;
+   top: 50%;
+   transform: translate(-50%, -50%);
 }

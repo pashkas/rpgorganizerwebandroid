@@ -13,7 +13,7 @@
     <!-- Если пусто -->
     <div *ngIf="!data.currentTask && (data.currentView=='QwestTasks'||data.currentView=='SkillTasks')" fxLayout="row"
       fxLayoutAlign="center center">
-      <h3 class="text-center" *ngIf="data.pers.exp==0">
+      <h3 class="text-center" *ngIf="!data.pers.characteristics?.length">
         Пока пусто... Может стоит
         <a href="https://pashkas.github.io/rpgorganizertutorial.github.io/" target="_blank">
           посетить инструкцию?
@@ -122,15 +122,15 @@
               </ng-template>
             </ng-template>
           </ng-container>
-          <a *ngIf="data?.currentTask?.aimTimer && (data?.currentTask?.aimUnit != 'Раз')" class="text-secondary pointer" (click)="openTaskTimer()">
+          <a *ngIf="data?.currentTask?.aimTimer && (data?.currentTask?.aimUnit != 'Раз')" class="text-secondary pointer"
+            (click)="openTaskTimer()">
             | ⌛&nbsp;
           </a>
         </small>
       </div>
     </ng-container>
     <!-- + ': ' + data.pers.exp + '/' + + data.pers.nextExp -->
-    <app-progress-bar-num
-      [text]="data.pers.name+' ('+data.pers.rangName+')'+', уровень ' + data.pers.level"
+    <app-progress-bar-num [text]="data.pers.name+' ('+data.pers.rangName+')'+', уровень ' + data.pers.level"
       [val]="data.pers.progressValue">
     </app-progress-bar-num>
     <div fxLayout="row" fxLayoutAlign="space-between center" class="w-100 h-100 py-1" style="min-height: 120px;">
