@@ -78,6 +78,10 @@ export class CharacteristicDetailsComponent implements OnInit {
         this.pers = n;
         const id = this.route.snapshot.paramMap.get('id');
         this.charact = this.srv.allMap[id].item;
+        const isEdit = this.route.snapshot.paramMap.get('isEdit');
+        if (isEdit == 'true') {
+          this.isEditMode = true;
+        }
       });
 
     if (!this.srv.pers$.value) {

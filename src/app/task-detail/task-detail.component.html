@@ -30,7 +30,7 @@
         </div>
       </div>
     </div>
-    <div *ngIf="tskAbility" class="pt-2">
+    <div *ngIf="tskAbility" class="pt-1">
       <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel">
       </mat-progress-bar>
     </div>
@@ -240,6 +240,9 @@
           </mat-chip>
           <mat-chip (click)="tsk.aimUnit = 'Раз'" [selected]="tsk.aimUnit == 'Раз'" color="accent">Раз</mat-chip>
         </mat-chip-list>
+
+        <mat-slide-toggle *ngIf="tsk.aimUnit == 'Раз'" [(ngModel)]="tsk.isEven" name="tsk.isEven">Чет?</mat-slide-toggle>
+
         <!-- <mat-form-field>
           <input matInput autocomplete="off" onfocus="this.select()" placeholder="Раз" [(ngModel)]="tsk.aimCounter"
             name="tsk.aimCounter">

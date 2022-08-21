@@ -10,6 +10,7 @@ export class Characteristic {
     image: string = "assets/icons/defCha.webp";
     name: string;
     progressValue: number = 0;
+    progresNextLevel: number = 0;
     rang: Rangse = { val: 0, name: "0", img: "" };
     startRang: Rangse = { val: 0, name: "0", img: "" };
     value: number = 0;

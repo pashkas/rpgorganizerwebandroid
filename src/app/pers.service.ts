@@ -228,6 +228,7 @@ export class PersService {
     if (charact != null && charact != undefined) {
       let abil = new Ability();
       abil.name = name;
+      abil.isOpen = true;
 
       let tsk = this.addTsk(abil, name);
 
@@ -245,6 +246,8 @@ export class PersService {
     var cha = new Characteristic();
     cha.name = newCharact;
     this.pers$.value.characteristics.push(cha);
+
+    return cha;
   }
 
   /**
@@ -763,30 +766,31 @@ export class PersService {
   }
 
   getAbExpPointsFromTes(tesValue: number): number {
-    let expPoints: number = 0;
-    let floorTes = Math.floor(tesValue / 10);
+    return tesValue;
+    // let expPoints: number = 0;
+    // let floorTes = Math.floor(tesValue / 10);
 
-    for (let i = 0; i < floorTes; i++) {
-      let multi = (i + 1);
-      if (i > 9) {
-        i = 10;
-      }
+    // for (let i = 0; i < floorTes; i++) {
+    //   let multi = (i + 1);
+    //   if (i > 9) {
+    //     i = 10;
+    //   }
 
-      expPoints += (i + 1) * multi;
-    }
+    //   expPoints += (i + 1) * multi;
+    // }
 
-    let left = (tesValue / 10) - floorTes;
-    if (left > 0) {
-      let multi = floorTes + 1;
+    // let left = (tesValue / 10) - floorTes;
+    // if (left > 0) {
+    //   let multi = floorTes + 1;
 
-      if (floorTes > 9) {
-        multi = 10;
-      }
+    //   if (floorTes > 9) {
+    //     multi = 10;
+    //   }
 
-      expPoints += left * (floorTes + 1) * multi;
-    }
+    //   expPoints += left * (floorTes + 1) * multi;
+    // }
 
-    return expPoints;
+    // return expPoints;
   }
 
   getAbTesLvl(tesValue: number): number {
@@ -955,40 +959,50 @@ export class PersService {
   }
 
   getPersExp(tesAbTotalCur: number, abCount: number, expPoints: number): { persLevel: number; exp: number; startExp: number; nextExp: number, expDirect: number } {
-    if (abCount < 10) {
-      abCount = 10;
+    if (abCount < 30) {
+      abCount = 30;
     }
 
     let persLevel = 0;
     let exp: number = 0;
     let startExp = 0;
     let nextExp = 0;
-    let thisLevel = 0;
+    let thisLevel = this.baseTaskPoints/2;
     let prevLevel = 0;
     let curLevelExp = 0;
     let nextLevelExp = 0;
-    expPoints = expPoints * 10;
-    let expDirect = expPoints * 10;
+    expPoints = expPoints;
+    let expDirect = expPoints;
 
-    let expElements: number[] = [];
+    // let expElements: number[] = [];
 
     for (let i = 0; i < 1000; i++) {
-      if (i < abCount) {
-        expElements.push(0);
-      }
+      // if (i < abCount) {
+      //   expElements.push(0);
+      // }
 
-      thisLevel = 0;
+      // thisLevel = 0;
 
-      for (let i = 0; i < expElements.length; i++) {
-        const el = expElements[i];
-        const koef = this.getTesChangeKoef(el);
+      // for (let i = 0; i < expElements.length; i++) {
+      //   const el = expElements[i];
+      //   const koef = this.getTesChangeKoef(el);
 
-        expElements[i] = expElements[i] + this.baseTaskPoints * koef;
-        thisLevel += (this.baseTaskPoints / koef);
-      }
+      //   expElements[i] = expElements[i] + this.baseTaskPoints * koef;
+      //   thisLevel += (this.baseTaskPoints / koef);
+      // }
 
       // Рост дней с уровнем
-      thisLevel = thisLevel * (1 + i * 0.1);
+      // let kLevel = (1 + i * 0.1);
+      // if(kLevel > 4){
+      //   kLevel = 4;
+      // }
+
+      // thisLevel = thisLevel * kLevel;
+
+      thisLevel = thisLevel + (this.baseTaskPoints / 2);
+      if (thisLevel > 50) {
+        thisLevel = 50;
+      }
 
       nextLevelExp = prevLevel + thisLevel;
       curLevelExp = prevLevel;
@@ -1402,7 +1416,7 @@ export class PersService {
     let tesAbTotalCur = 0;
     let abTotalCur = 0;
     let tesAbTotalMax = 0;
-    // let abExpPointsTotalCur = 0;
+    let abExpPointsTotalCur = 0;
 
     if (!prs.currentView) {
       prs.currentView = curpersview.SkillTasks;
@@ -1433,7 +1447,7 @@ export class PersService {
       let tesAbMax = 0;
       let tesAbCur = 0;
       let isHasSameAbil = false;
-      // let abExpPointsCur = 0;
+      let abExpPointsCur = 0;
 
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
@@ -1584,20 +1598,21 @@ export class PersService {
           }
           tsk.progresNextLevel = progressNextLevel;
           tsk.progressValue = tsk.progresNextLevel;
-          // tsk.progressValue = (tsk.value / this._maxAbilLevel) * 100;
+          tsk.progressValue = (tsk.value / this._maxAbilLevel) * 100;
 
           abMax += this._maxAbilLevel;
           abCur += tsk.value;
           tesAbMax += this._tesMaxLvl;
 
           let tesV = tsk.tesValue;
-          if (tesV > this._tesMaxLvl) {
-            tesV = this._tesMaxLvl;
-          }
-          tesV = Math.floor(tesV / 10);
+          // if (tesV > this._tesMaxLvl) {
+          //   tesV = this._tesMaxLvl;
+          // }
+          // tesV = Math.floor(tesV / 10);
+          tesV = tesV / 10;
 
           tesAbCur += tesV;
-          // abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
+          abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
 
           if (tsk.value <= 9
             && doneReq) {
@@ -1658,7 +1673,7 @@ export class PersService {
                 if (tsk.states.length > 0 && !tsk.isStateInTitle) {
                   if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
                     for (const st of tsk.states) {
-                      if (prs.currentView == curpersview.SkillsSort || (st.isActive && !st.isDone)) {
+                      if ((prs.currentView == curpersview.SkillsSort && st.isActive) || (st.isActive && !st.isDone)) {
                         let stT = this.getTskFromState(tsk, st, false);
                         stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
                         tasks.push(stT);
@@ -1668,6 +1683,7 @@ export class PersService {
                 }
                 else {
                   if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
+                    tsk.tittle = tsk.tittle.replace(/___/g, '');
                     tasks.push(tsk);
                   }
                 }
@@ -1694,10 +1710,10 @@ export class PersService {
       tesAbTotalMax += tesAbMax;
       abTotalCur += abCur;
       tesAbTotalCur += tesAbCur;
-      // abExpPointsTotalCur += abExpPointsCur;
+      abExpPointsTotalCur += abExpPointsCur;
 
-      if (abMax == 0) {
-        abMax = 1;
+      if (abMax < 30) {
+        abMax = 30;
       }
 
       const start = ch.startRang.val + 1;
@@ -1705,12 +1721,14 @@ export class PersService {
       let progr = (abCur / abMax);
       ch.value = start + (left * progr);
       const chaCeilProgr = Math.floor(ch.value);
-      // ch.progressValue = (chaCeilProgr / (this._maxCharactLevel)) * 100;
-      let chaProgr = ((ch.value) - Math.floor(ch.value)) * 100;
-      if (ch.value >= this._maxCharactLevel) {
-        chaProgr = 100;
-      }
-      ch.progressValue = chaProgr;
+      ch.progressValue = (chaCeilProgr / (this._maxCharactLevel)) * 100;
+
+      ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
+      // let chaProgr = ((ch.value) - Math.floor(ch.value)) * 100;
+      // if (ch.value >= this._maxCharactLevel) {
+      //   chaProgr = 100;
+      // }
+      // ch.progressValue = chaProgr;
 
       const rng = new Rangse();
       rng.val = chaCeilProgr;
@@ -1895,8 +1913,9 @@ export class PersService {
 
     this.setCurPersTask(prs);
 
-    // const { persLevel, exp, startExp, nextExp, expDirect } = this.getPersExp(tesAbTotalCur, abCount, abExpPointsTotalCur);
-    // let ons = this.getPersAbPoints(abCount, persLevel, abOpenned);
+    let { persLevel, exp, startExp, nextExp, expDirect } = this.getPersExp(tesAbTotalCur, abCount, abExpPointsTotalCur);
+    let ons = this.getPersAbPoints(abCount, persLevel, abOpenned, prs);
+
 
     // exp = exp * 100;
     // let prevOn = 0;
@@ -1904,32 +1923,32 @@ export class PersService {
     // let nextExp = (persLevel + 1) * 100;
     //----------------------------------------------
 
-    let abPointsForLevel = 3;
+    // let abPointsForLevel = 3;
 
-    if (tesAbTotalMax < 900) {
-      tesAbTotalMax = 900;
-    }
+    // if (tesAbTotalMax < 900) {
+    //   tesAbTotalMax = 900;
+    // }
 
-    if (abCount < 10) {
-      abCount = 10;
-    }
+    // if (abCount < 10) {
+    //   abCount = 10;
+    // }
 
-    let maxLevel = 0;
+    // let maxLevel = 0;
 
-    maxLevel = (abCount * 9) / abPointsForLevel;
+    // maxLevel = (abCount * 9) / abPointsForLevel;
 
-    if(maxLevel < 50){
-      maxLevel = 50;
-    }
+    // if (maxLevel < 50) {
+    //   maxLevel = 50;
+    // }
 
-    let persLevel = tesAbTotalCur / abPointsForLevel;
-    let exp = persLevel;
-    let startExp = Math.floor(persLevel);
-    let nextExp = startExp + 1;
-    // let abTesFormula = (abCount * (this._tesMaxLvl / 10)) / 100;
-    let startOn = abPointsForLevel;
-    let totalOn = startOn + Math.floor(persLevel);
-    let ons = totalOn - abOpenned;
+    // let persLevel = tesAbTotalCur / abPointsForLevel;
+    // let exp = persLevel;
+    // let startExp = Math.floor(persLevel);
+    // let nextExp = startExp + 1;
+    // // let abTesFormula = (abCount * (this._tesMaxLvl / 10)) / 100;
+    // let startOn = abPointsForLevel;
+    // let totalOn = startOn + Math.floor(persLevel);
+    // let ons = totalOn - abOpenned;
 
     let prevPersLevel = prs.level;
     prs.level = Math.floor(persLevel);
@@ -1937,7 +1956,7 @@ export class PersService {
     prs.nextExp = nextExp;
     prs.ON = ons;
     prs.exp = exp;
-    prs.maxPersLevel = maxLevel;
+    // prs.maxPersLevel = maxLevel;
     prs.totalProgress = Math.floor((prs.level / prs.maxPersLevel) * 100);
 
     let lvlExp = nextExp - startExp;
@@ -1948,9 +1967,9 @@ export class PersService {
     }
     prs.progressValue = progr * 100;
 
-    prs.exp = prs.exp - startExp;
-    prs.nextExp = prs.nextExp - startExp;
-    prs.prevExp = prs.prevExp - startExp;
+    // prs.exp = prs.exp - startExp;
+    prs.nextExp = prs.nextExp;
+    prs.prevExp = prs.prevExp;
     // prs.expDirect = expDirect;
 
     let thisMonstersLevel = this.getMonsterLevel(prs.level, prs.maxPersLevel);
@@ -2425,7 +2444,7 @@ export class PersService {
     }
   }
 
-  tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number) {
+  tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number, isEven?: boolean) {
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
     let value = Math.ceil(progr * av);
@@ -2442,6 +2461,11 @@ export class PersService {
 
     if (value > av) {
       value = av;
+    }
+
+    if (aimUnit == 'Раз' && isEven == true) {
+      value = 2 * Math.round(value / 2);
+      if (value < 2) value = 2;
     }
 
     if (aimVal < 0) {
@@ -2784,7 +2808,7 @@ export class PersService {
     }
   }
 
-  private getPersAbPoints(abCount: number, persLevel: number, abOpenned: number) {
+  private getPersAbPoints(abCount: number, persLevel: number, abOpenned: number, prs: Pers) {
     let ons = 0;
     let abs = abCount;
 
@@ -2805,6 +2829,11 @@ export class PersService {
     if (startOn + gainedOns > abs) {
       ons = (abs - abOpenned) + 1;
     }
+
+
+    prs.mayAddAbils = totalGained > abCount;
+    debugger;
+
     return ons;
   }
 
@@ -2865,10 +2894,12 @@ export class PersService {
       if (isCur) {
         aimVal = tsk.secondsDone;
       }
-      plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal), tsk.aimUnit);
+      plusState += ' ' + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit);
 
-      if (tsk.aimUnit == 'Раз' && tsk.postfix && tsk.postfix.length > 0) {
-        plusState = plusState.substring(0, plusState.length - 1);
+      if (tsk.aimUnit == 'Раз') {
+        if (tsk.postfix && tsk.postfix.length > 0) {
+          plusState = plusState.substring(0, plusState.length - 1);
+        }
       }
     }
 

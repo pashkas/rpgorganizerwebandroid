@@ -39,6 +39,7 @@ export class Task implements IImg {
     aimTimer: number = 0;
 
     aimUnit = 'Минут';
+    isEven = false;
 
     failCounter: number = 0;
     curStateDescrInd: number;

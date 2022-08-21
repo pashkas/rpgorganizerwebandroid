@@ -202,4 +202,5 @@ export class Pers {
     expDirect: number;
 
     gold: number = 0;
+    mayAddAbils: boolean;
 }

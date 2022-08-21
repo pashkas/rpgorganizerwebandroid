@@ -29,50 +29,55 @@
             <img src="{{pers.image}}" class="img-fluid rounded"
               [ngStyle]="{'object-fit': 'contain', 'height': '30vh'}">
           </div> -->
-          <div fxLayout="row" fxLayoutAlign="space-between start">
-            <button mat-button style="visibility:hidden">
+          <div fxLayout="row" fxLayoutAlign="space-between">
+            <!-- <button mat-button style="visibility:hidden">
               <img src="assets/icons/gold.png" class="img-fluid mr-1"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
+                [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
               <span>
                 <span class="text-success">{{pers.gold| number}}</span>
               </span>
-            </button>
+            </button> -->
+            <div fxLayout="column" fxLayoutAlign="space-between stretch">
+                <button mat-button [routerLink]="['turnirtable']">
+                  <img src="assets/icons/опыт.png" class="img-fluid mr-1"
+                    [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+                  <span >
+                    <span class="text-success">{{pers.level}}</span>
+                  </span>
+                </button>
+                <button mat-button (click)="quickAddCharact()">
+                  <img src="assets/icons/create.png" class="img-fluid"
+                    [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+                  <span style="visibility:hidden">
+                    <span class="text-success">{{pers.ON}}</span>
+                  </span>
+                </button>
+            </div>
             <app-image-component [(data)]="pers.image" [isCanEdit]="false"></app-image-component>
-            <div fxFlex="initial">
-              <button mat-button (click)="openShop()">
-                <img src="assets/icons/gold.png" class="img-fluid mr-1"
-                  [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-                <span>
-                  <span class="text-success">{{pers.gold}}</span>
-                </span>
-              </button>
+            <div fxLayout="column" fxLayoutAlign="space-between">
+                <button mat-button (click)="openShop()">
+                  <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                    [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+                  <span>
+                    <span class="text-success">{{pers.gold}}</span>
+                  </span>
+                </button>
+                <button  [disabled]="!pers.mayAddAbils" mat-button (click)="quickAddAbil()">
+                  <img src="assets/icons/diamond.png" class="img-fluid"
+                    [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+                  <span [ngClass]="{'text-success': pers.ON>0, 'text-danger': pers.ON<0}">
+                    {{pers.ON}}
+                  </span>
+                </button>
             </div>
           </div>
           <div fxLayout="row" fxLayoutAlign="space-between center">
-            <div fxFlex="initial">
-              <button mat-button [routerLink]="['turnirtable']">
-                <img src="assets/icons/опыт.png" class="img-fluid mr-1"
-                  [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-                <span>
-                  <span class="text-success">{{pers.level}}</span>
-                </span>
-              </button>
-            </div>
 
             <!-- Имя -->
-            <div class="text-center text-dark" fxFlex>
+            <div class="text-center text-dark h5 m-0 p-0" fxFlex>
               {{pers.name + ', '+pers.rangName+''}}
             </div>
 
-            <div fxFlex="initial">
-              <button mat-button (click)="quickAddAbil()">
-                <img src="assets/icons/diamond.png" class="img-fluid"
-                  [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-                <span [ngClass]="{'text-success': pers.ON>0, 'text-danger': pers.ON<0}">
-                  {{pers.ON}}
-                </span>
-              </button>
-            </div>
           </div>
 
           <!-- История -->
@@ -227,8 +232,8 @@
                     </div>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
                       <!-- Добавить навык -->
-                      <button class="icon-small" id="cha{{i}}" (click)="addAbil(item?.id); selCha=item;"
-                        mat-icon-button>
+                      <button *ngIf="false && pers.ON >= 1" class="icon-small" id="cha{{i}}"
+                        (click)="addAbil(item?.id); selCha=item;" mat-icon-button>
                         <img src="assets/icons/create.png" class="img-fluid">
                       </button>
                       <!-- Удалить -->
@@ -335,7 +340,8 @@
                   </div>
                   <ng-container *ngIf="qwest.progressValue < 100; else isFullDone">
                     <div class="py-0" class="w-100">
-                      <mat-progress-bar class="myprogr" color="accent" mode="determinate" value="{{qwest.progressValue}}">
+                      <mat-progress-bar class="myprogr" color="accent" mode="determinate"
+                        value="{{qwest.progressValue}}">
                       </mat-progress-bar>
                     </div>
                   </ng-container>

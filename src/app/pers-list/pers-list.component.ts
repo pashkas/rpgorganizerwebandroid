@@ -405,6 +405,27 @@ export class PersListComponent implements OnInit {
     this.srv.changesAfter(null);
   }
 
+  quickAddCharact() {
+    this.srv.isDialogOpen = true;
+    const dialogRef = this.dialog.open(AddItemDialogComponent, {
+      panelClass: 'my-dialog',
+      data: { header: 'Добавить характеристику', text: '' },
+      backdropClass: 'backdrop'
+    });
+
+    dialogRef.afterClosed()
+      .subscribe(name => {
+        if (name) {
+          let cha = this.srv.addCharact(name);
+
+          this.srv.savePers(false);
+
+          this.router.navigate(['pers/characteristic', cha.id, true]);
+        }
+        this.srv.isDialogOpen = false;
+      });
+  }
+
   quickAddAbil() {
     this.srv.isDialogOpen = true;
 

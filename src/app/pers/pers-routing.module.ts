@@ -11,6 +11,7 @@ import { LoginComponent } from '../login/login.component';
 const routes: Routes = [
   { path: '', component: PersListComponent, data: { key: 'pers' } },
   { path: 'characteristic/:id', component: CharacteristicDetailsComponent },
+  { path: 'characteristic/:id/:isEdit', component: CharacteristicDetailsComponent },
   { path: 'ability/:id', component: AbilityDetailComponent },
   { path: 'task/:id/:isEdit', component: TaskDetailComponent },
   { path: 'qwest/:id', component: QwestDetailComponent },

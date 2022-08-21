@@ -31,6 +31,10 @@
         </div>
       </div>
     </div>
+    <div class="pt-1">
+      <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="charact.progresNextLevel">
+      </mat-progress-bar>
+    </div>
     <!-- Описание -->
     <div *ngIf="charact.descr" class="text-center pt-2 font-small  text-secondary">
       <i>
@@ -99,7 +103,7 @@
     <!-- Добавить навык -->
     <div fxLayout="row" fxLayoutAlign="space-between center">
       <h5>Навыки:</h5>
-      <button class="icon-small" (click)="addAbil();" mat-icon-button>
+      <button class="icon-small" *ngIf="false && pers.ON >= 1" (click)="addAbil();" mat-icon-button>
         <img src="assets/icons/create.png" *ngIf="!this.srv.isGlobalTaskView" class="img-fluid">
       </button>
     </div>

@@ -126,11 +126,11 @@ button:focus {
 }
 
 .backdrop {
-    background: rgba(0, 0, 0, 0.95);
+    background: rgba(0, 0, 0, 0.85);
 }
 
 .backdrop-changes {
-    background: rgba(0, 0, 0, 0.80);
+    background: rgba(0, 0, 0, 0.85);
 }
 
 .icon-small.mat-icon-button img {
@@ -207,14 +207,14 @@ h5 {
 
 .my-good .mat-dialog-container {
     background: green;
-    width: 80vw !important;
-    max-width: 500px;
+    width: 90vw !important;
+    max-width: 640px;
 }
 
 .my-bad .mat-dialog-container {
     background: red;
-    width: 80vw !important;
-    max-width: 500px;
+    width: 90vw !important;
+    max-width: 640px;
 }
 
 mat-form-field {

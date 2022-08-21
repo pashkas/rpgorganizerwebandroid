@@ -19,7 +19,7 @@
       </button>
     </div>
     <div fxFlex>
-      <button mat-flat-button [disabled]="item?.type=='st' || item?.type=='t'" color="accent" class="pointer  w-100"
+      <button mat-flat-button [disabled]="item?.type=='st' || item?.type=='t' || (item?.type=='ch')" color="accent" class="pointer  w-100"
         (click)="choose('добавить')">
         Добавить
       </button>

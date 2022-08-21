@@ -66,7 +66,7 @@ export class PersChangesItemComponent implements OnInit {
         player2.play();
       }, firstTime);
     }
-    else if ((this.item.type == 'abil' || this.item.type == 'cha') && this.item.abilChanges.length > 1) {
+    else if ( false && (this.item.type == 'abil' || this.item.type == 'cha') && this.item.abilChanges.length > 1) {
       let firstPerc = this.item.abilChanges[0].valTo - this.item.abilChanges[0].valFrom;
       let secondPerc = this.item.abilChanges[1].valTo - this.item.abilChanges[1].valFrom;
 
