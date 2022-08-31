@@ -967,42 +967,18 @@ export class PersService {
     let exp: number = 0;
     let startExp = 0;
     let nextExp = 0;
-    let thisLevel = this.baseTaskPoints/2;
+    let thisLevel = 20.0;
     let prevLevel = 0;
     let curLevelExp = 0;
     let nextLevelExp = 0;
     expPoints = expPoints;
     let expDirect = expPoints;
 
-    // let expElements: number[] = [];
-
     for (let i = 0; i < 1000; i++) {
-      // if (i < abCount) {
-      //   expElements.push(0);
+      // thisLevel = thisLevel + 0.5;
+      // if (thisLevel > 20) {
+      //   thisLevel = 20;
       // }
-
-      // thisLevel = 0;
-
-      // for (let i = 0; i < expElements.length; i++) {
-      //   const el = expElements[i];
-      //   const koef = this.getTesChangeKoef(el);
-
-      //   expElements[i] = expElements[i] + this.baseTaskPoints * koef;
-      //   thisLevel += (this.baseTaskPoints / koef);
-      // }
-
-      // Рост дней с уровнем
-      // let kLevel = (1 + i * 0.1);
-      // if(kLevel > 4){
-      //   kLevel = 4;
-      // }
-
-      // thisLevel = thisLevel * kLevel;
-
-      thisLevel = thisLevel + (this.baseTaskPoints / 2);
-      if (thisLevel > 50) {
-        thisLevel = 50;
-      }
 
       nextLevelExp = prevLevel + thisLevel;
       curLevelExp = prevLevel;
@@ -1016,27 +992,6 @@ export class PersService {
 
         break;
       }
-
-      // if (i < 30) {
-      //   thisLevel = prevLevel + this.baseTaskPoints;
-      // } else {
-      //   thisLevel = prevLevel;
-      // }
-
-      // curLevelExp = prevLevel;
-      // nextLevelExp = prevLevel + thisLevel;
-
-      // prevLevel = prevLevel + thisLevel;
-
-      // if (nextLevelExp > tesAbTotalCur) {
-      //   exp = Math.floor(tesAbTotalCur * 10);
-      //   expDirect = tesAbTotalCur * 10;
-      //   persLevel = i;
-      //   startExp = Math.floor(curLevelExp * 10);
-      //   nextExp = Math.floor(nextLevelExp * 10);
-
-      //   break;
-      // }
     }
 
     return { persLevel, exp, startExp, nextExp, expDirect }
@@ -1605,14 +1560,19 @@ export class PersService {
           tesAbMax += this._tesMaxLvl;
 
           let tesV = tsk.tesValue;
-          // if (tesV > this._tesMaxLvl) {
-          //   tesV = this._tesMaxLvl;
-          // }
-          // tesV = Math.floor(tesV / 10);
-          tesV = tesV / 10;
+          if (tesV > this._tesMaxLvl) {
+            tesV = this._tesMaxLvl;
+          }
 
           tesAbCur += tesV;
           abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
+
+          const start = ab.isOpen ? 10 : 0;
+          let left = (this._tesMaxLvl + 10) - start;
+          let t = tsk.tesValue <= this._tesMaxLvl ? tsk.tesValue : this._tesMaxLvl;
+          let progr = (tsk.tesValue / this._tesMaxLvl);
+          let v = start + (left * progr);
+          tsk.progressValue = (v / (this._tesMaxLvl + 10)) * 100;
 
           if (tsk.value <= 9
             && doneReq) {
@@ -1670,7 +1630,7 @@ export class PersService {
               }
             } else {
               if (doneReq && (tsk.value >= 1 || (prs.isTES && ab.isOpen))) {
-                if (tsk.states.length > 0 && !tsk.isStateInTitle) {
+                if (tsk.states.length > 0 && !tsk.isStateInTitle && !tsk.isStateRefresh) {
                   if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
                     for (const st of tsk.states) {
                       if ((prs.currentView == curpersview.SkillsSort && st.isActive) || (st.isActive && !st.isDone)) {
@@ -1721,7 +1681,7 @@ export class PersService {
       let progr = (abCur / abMax);
       ch.value = start + (left * progr);
       const chaCeilProgr = Math.floor(ch.value);
-      ch.progressValue = (chaCeilProgr / (this._maxCharactLevel)) * 100;
+      ch.progressValue = (ch.value / (this._maxCharactLevel)) * 100;
 
       ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
       // let chaProgr = ((ch.value) - Math.floor(ch.value)) * 100;
@@ -1957,7 +1917,13 @@ export class PersService {
     prs.ON = ons;
     prs.exp = exp;
     // prs.maxPersLevel = maxLevel;
-    prs.totalProgress = Math.floor((prs.level / prs.maxPersLevel) * 100);
+    prs.totalProgress = (prs.level / prs.maxPersLevel) * 100;
+    let rangStartProgress = (Math.floor(prs.level / 20)) * 20;
+    let rangProgress = (prs.level - rangStartProgress) / 20;
+    if (prs.level >= prs.maxPersLevel) {
+      rangProgress = 1;
+    }
+    prs.rangProgress = rangProgress * 100;
 
     let lvlExp = nextExp - startExp;
     let progr = 0;
@@ -2793,15 +2759,15 @@ export class PersService {
   }
 
   private getMonsterLevel(prsLvl: number, maxLevel: number): number {
-    if (prsLvl < 10) { // Обыватель
+    if (prsLvl < 20) { // Обыватель
       return 1;
-    } else if (prsLvl < 20) { // Авантюрист
+    } else if (prsLvl < 40) { // Авантюрист
       return 2;
-    } else if (prsLvl < 30) { // Охотник
+    } else if (prsLvl < 60) { // Охотник
       return 3;
-    } else if (prsLvl < 40) { // Воин
+    } else if (prsLvl < 80) { // Воин
       return 4;
-    } else if (prsLvl < 50) { // Герой
+    } else if (prsLvl < 100) { // Герой
       return 5;
     } else { // Легенда
       return 6;
@@ -2820,19 +2786,18 @@ export class PersService {
 
     let gainedOns = Math.floor(persLevel / onEveryLevel);
 
-    let startOn = 1;
+    let startOn = 9;
 
-    startOn = 1;
     const totalGained = (startOn + gainedOns);
 
-    ons = totalGained - abOpenned;
-    if (startOn + gainedOns > abs) {
-      ons = (abs - abOpenned) + 1;
-    }
+    ons = 3;
+    // ons = totalGained - (abOpenned * 3);
+    // if (startOn + gainedOns > abs) {
+    //   ons = (abs - abOpenned) + 1;
+    // }
 
-
-    prs.mayAddAbils = totalGained > abCount;
-    debugger;
+    // prs.mayAddAbils = (totalGained - (abCount * 3)) >= 3;
+    prs.mayAddAbils = true;
 
     return ons;
   }
@@ -2879,7 +2844,7 @@ export class PersService {
       if (index >= 0) {
         for (let i = 0; i < tsk.states.length; i++) {
           const el = tsk.states[i];
-          if (i <= index) {
+          if (i <= index || tsk.isStateRefresh || tsk.isPerk) {
             el.isActive = true;
           } else {
             el.isActive = false;

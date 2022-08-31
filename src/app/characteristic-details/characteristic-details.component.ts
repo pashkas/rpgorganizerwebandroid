@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PersService } from '../pers.service';
 import { Pers } from 'src/Models/Pers';
@@ -18,6 +18,7 @@ import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.compo
   changeDetection: ChangeDetectionStrategy.Default
 })
 export class CharacteristicDetailsComponent implements OnInit {
+  @ViewChild('nameEdt', { static: false }) nameEdt: ElementRef;
   private unsubscribe$ = new Subject();
 
   charact: Characteristic;
@@ -25,6 +26,7 @@ export class CharacteristicDetailsComponent implements OnInit {
 
   rangse: Rangse[];
   pers: Pers;
+  isQuick: any;
 
   //  = Characteristic.rangse;
   constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) { }
@@ -72,6 +74,13 @@ export class CharacteristicDetailsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.route.queryParams.subscribe((queryParams: any) => {
+      this.isQuick = queryParams.isQuick;
+      if (this.isQuick) {
+        setTimeout(() => this.nameEdt.nativeElement.focus());
+      }
+    });
+
     this.srv.pers$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(n => {
@@ -113,6 +122,9 @@ export class CharacteristicDetailsComponent implements OnInit {
     if (this.isEditMode) {
       this.srv.savePers(false);
       this.isEditMode = false;
+      if (this.isQuick) {
+        this.router.navigate(['/pers'])
+      }
     }
     else {
       this.isEditMode = true;

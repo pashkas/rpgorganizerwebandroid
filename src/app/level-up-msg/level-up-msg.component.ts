@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA } from '@angular/material';
 
 @Component({
   selector: 'app-level-up-msg',
@@ -6,10 +7,14 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./level-up-msg.component.css']
 })
 export class LevelUpMsgComponent implements OnInit {
+  abPoints: any;
 
-  constructor() { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any) { 
+    if(data){
+      this.abPoints = data.abPoints;
+    }
+  }
 
   ngOnInit() {
   }
-
 }

@@ -23,7 +23,7 @@ export class ListBgPipe implements PipeTransform {
       // }
 
       // Новые задачи подсвечиваем
-      if (tsk.tesValue < 10) {
+      if (tsk.time == "00:00") {
         return 'list-group-item-warning';
       }
 

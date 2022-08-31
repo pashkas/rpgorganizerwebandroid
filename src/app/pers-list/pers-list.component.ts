@@ -238,7 +238,8 @@ export class PersListComponent implements OnInit {
       this.isEditMode = false;
     }
     else {
-      this.location.back();
+      // this.location.back();
+      this.router.navigate(['/main']);
     }
   }
 
@@ -406,39 +407,55 @@ export class PersListComponent implements OnInit {
   }
 
   quickAddCharact() {
-    this.srv.isDialogOpen = true;
-    const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      panelClass: 'my-dialog',
-      data: { header: 'Добавить характеристику', text: '' },
-      backdropClass: 'backdrop'
-    });
-
-    dialogRef.afterClosed()
-      .subscribe(name => {
-        if (name) {
-          let cha = this.srv.addCharact(name);
-
+          let cha = this.srv.addCharact('Характеристика');
           this.srv.savePers(false);
+          this.router.navigate(['pers/characteristic', cha.id, true], { queryParams: {isQuick: true}});
 
-          this.router.navigate(['pers/characteristic', cha.id, true]);
-        }
-        this.srv.isDialogOpen = false;
-      });
+    // this.srv.isDialogOpen = true;
+    // const dialogRef = this.dialog.open(AddItemDialogComponent, {
+    //   panelClass: 'my-dialog',
+    //   data: { header: 'Добавить характеристику', text: '' },
+    //   backdropClass: 'backdrop'
+    // });
+
+    // dialogRef.afterClosed()
+    //   .subscribe(name => {
+    //     if (name) {
+    //       let cha = this.srv.addCharact(name);
+
+    //       this.srv.savePers(false);
+
+    //       this.router.navigate(['pers/characteristic', cha.id, true]);
+    //     }
+    //     this.srv.isDialogOpen = false;
+    //   });
   }
 
   quickAddAbil() {
-    this.srv.isDialogOpen = true;
+    if(this.pers.characteristics == null || !this.pers.characteristics.length){
+      return;
+    }
 
-    const dialogRef = this.dialog.open(QuickAddAbilityComponent, {
-      panelClass: 'my-middle',
-      data: { isImport: false },
-      backdropClass: 'backdrop'
-    });
+    let abilId = this.srv.addAbil(
+      this.pers.characteristics[0].id,
+      'Навык'
+    );
 
-    dialogRef.afterClosed()
-      .subscribe(n => {
-        this.srv.isDialogOpen = false;
-      });
+    this.srv.savePers(false);
+
+    this.router.navigate(['pers/task', abilId, true], { queryParams: {isQuick: true}});
+    // this.srv.isDialogOpen = true;
+
+    // const dialogRef = this.dialog.open(QuickAddAbilityComponent, {
+    //   panelClass: 'my-middle',
+    //   data: { isImport: false },
+    //   backdropClass: 'backdrop'
+    // });
+
+    // dialogRef.afterClosed()
+    //   .subscribe(n => {
+    //     this.srv.isDialogOpen = false;
+    //   });
   }
 
   openShop() {

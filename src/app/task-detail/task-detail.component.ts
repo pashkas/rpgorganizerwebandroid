@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Pers } from 'src/Models/Pers';
 import { Task, taskState, Reqvirement } from 'src/Models/Task';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.compo
 import { Characteristic } from 'src/Models/Characteristic';
 import { ChangeCharactComponent } from '../pers/change-charact/change-charact.component';
 import { Qwest } from 'src/Models/Qwest';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-task-detail',
@@ -21,19 +22,29 @@ import { Qwest } from 'src/Models/Qwest';
   changeDetection: ChangeDetectionStrategy.Default
 })
 export class TaskDetailComponent implements OnInit {
+  @ViewChild('nameEdt', { static: false }) nameEdt: ElementRef;
+
   private unsubscribe$ = new Subject();
 
   isEditMode: boolean = false;
   linkQwests: Qwest[] = [];
-  pers:Pers;
+  pers: Pers;
   requrenses: string[] = Task.requrenses;
   times = [1, 2, 3, 4, 5];
   tsk: Task;
   tskAbility: Ability;
   tskCharact$ = new BehaviorSubject<Characteristic>(undefined);
   weekDays: string[] = Task.weekDays;
+  isQuick: any;
+  charactCntrl: FormControl;
+  charactGroup: FormGroup;
 
-  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) { }
+  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, fb: FormBuilder) {
+    this.charactCntrl = fb.control('');
+    this.charactGroup = fb.group({
+      charact: this.charactCntrl
+    });
+  }
 
   /**
    * Добавить состояние к задаче.
@@ -184,7 +195,7 @@ export class TaskDetailComponent implements OnInit {
         });
       }
       else {
-        this.tskAbility=this.srv.allMap[id].link;
+        this.tskAbility = this.srv.allMap[id].link;
         this.tskCharact$.next(this.srv.allMap[this.srv.allMap[id].link.id].link);
         this.requrenses = Task.requrenses.filter(n => {
           return n != 'нет';
@@ -223,11 +234,41 @@ export class TaskDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.route.queryParams.subscribe((queryParams: any) => {
+      this.isQuick = queryParams.isQuick;
+      if (this.isQuick) {
+        setTimeout(() => this.nameEdt.nativeElement.focus());
+      }
+    });
+
     this.srv.pers$
-    .pipe(takeUntil(this.unsubscribe$))
-    .subscribe(n=>{
-      this.pers=n;
-      this.findTask();
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(n => {
+        this.pers = n;
+        this.findTask();
+      });
+
+    this.tskCharact$.subscribe(n => {
+      if (this.charactCntrl.value != null && n.id != this.charactCntrl.value.id) {
+        this.charactCntrl.setValue(n);
+      }
+    });
+
+    this.charactCntrl.valueChanges.subscribe(n => {
+      if (this.tskCharact$.value != null && n.id != this.tskCharact$.value.id) {
+        for (const ch of this.pers.characteristics) {
+          if (ch.id == n.id) {
+            ch.abilities.push(this.tskAbility);
+
+            break;
+          }
+        }
+
+        // Перемещаем
+        this.tskCharact$.value.abilities = this.tskCharact$.value.abilities.filter(n => n.id !== this.tskAbility.id);
+
+        this.tskCharact$.next(n);
+      }
     });
   }
 
@@ -269,6 +310,9 @@ export class TaskDetailComponent implements OnInit {
       this.srv.savePers(false);
       this.findLinks();
       this.isEditMode = false;
+      if (this.isQuick) {
+        this.router.navigate(['/pers'])
+      }
     }
     else {
       this.isEditMode = true;

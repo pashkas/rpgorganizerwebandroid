@@ -38,46 +38,49 @@
               </span>
             </button> -->
             <div fxLayout="column" fxLayoutAlign="space-between stretch">
-                <button mat-button [routerLink]="['turnirtable']">
-                  <img src="assets/icons/опыт.png" class="img-fluid mr-1"
-                    [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
-                  <span >
-                    <span class="text-success">{{pers.level}}</span>
-                  </span>
-                </button>
-                <button mat-button (click)="quickAddCharact()">
-                  <img src="assets/icons/create.png" class="img-fluid"
-                    [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
-                  <span style="visibility:hidden">
-                    <span class="text-success">{{pers.ON}}</span>
-                  </span>
-                </button>
+              <button mat-button [routerLink]="['turnirtable']">
+                <img src="assets/icons/опыт.png" class="img-fluid mr-1"
+                  [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+                <span>
+                  <span class="text-success">{{pers.level}}</span>
+                </span>
+              </button>
+              <button mat-button (click)="quickAddCharact()">
+                <img src="assets/icons/create.png" class="img-fluid"
+                  [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+                <span style="visibility:hidden">
+                  <span class="text-success">{{pers.ON}}</span>
+                </span>
+              </button>
             </div>
             <app-image-component [(data)]="pers.image" [isCanEdit]="false"></app-image-component>
             <div fxLayout="column" fxLayoutAlign="space-between">
-                <button mat-button (click)="openShop()">
-                  <img src="assets/icons/gold.png" class="img-fluid mr-1"
-                    [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
-                  <span>
-                    <span class="text-success">{{pers.gold}}</span>
-                  </span>
-                </button>
-                <button  [disabled]="!pers.mayAddAbils" mat-button (click)="quickAddAbil()">
-                  <img src="assets/icons/diamond.png" class="img-fluid"
-                    [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
-                  <span [ngClass]="{'text-success': pers.ON>0, 'text-danger': pers.ON<0}">
-                    {{pers.ON}}
-                  </span>
-                </button>
+              <button mat-button (click)="openShop()">
+                <img src="assets/icons/gold.png" class="img-fluid mr-1"
+                  [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+                <span>
+                  <span class="text-success">{{pers.gold}}</span>
+                </span>
+              </button>
+              <button mat-button color="accent" (click)="quickAddAbil()">
+                <img src="assets/icons/diamond.png" class="img-fluid"
+                  [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+              </button>
             </div>
           </div>
-          <div fxLayout="row" fxLayoutAlign="space-between center">
-
-            <!-- Имя -->
-            <div class="text-center text-dark h5 m-0 p-0" fxFlex>
-              {{pers.name + ', '+pers.rangName+''}}
+          <!-- Имя -->
+          <div class="progress position-relative" style="height: 32px;">
+            <div class="progress-bar attrprogr" role="progressbar" [style.width]="pers.totalProgress + '%'">
             </div>
-
+            <div class="d-flex position-absolute w-100 px-1">
+              <div class="text-center text-dark h5 m-0 p-0" fxFlex>
+                {{pers.name + ', ' + pers.rangName+''}}
+              </div>
+            </div>
+          </div>
+          <div class="pt-1">
+            <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="pers.rangProgress">
+            </mat-progress-bar>
           </div>
 
           <!-- История -->
@@ -129,7 +132,7 @@
                               </div>
                             </div>
                           </div>
-                          <a *ngIf="ab.tasks[0]?.mayUp && pers.ON>0" class="ml-0 px-1 mr-0 pointer"
+                          <a *ngIf="ab.tasks[0]?.mayUp && pers.ON>=3" class="ml-0 px-1 mr-0 pointer"
                             (click)="upAbil(ab)">
                             <img src="assets/icons/up.png" class="img-fluid"
                               [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">

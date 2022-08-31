@@ -1,4 +1,21 @@
-<div class="text-light" fxLayout="column" fxFill fxLayoutAlign="center center">
-    <img src="assets/img/levelUp.png" class="p-4" style="height: 40vh;">
-    <h1 class="text-center heartbeat">НОВЫЙ УРОВЕНЬ!!!</h1>
+<div class="text-light" fxLayout="column" fxFill fxLayoutAlign="space-around center">
+    <div fxLayout="row" fxLayoutAlign="space-evenly end" fxLayoutGap="15px">
+        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
+            <div class="pl-2"> {{this.abPoints}} </div>
+            <img src="assets/icons/diamond.png" class="img-fluid px-2"
+                [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+        </div>
+        <div>
+            <img src="assets/img/levelUp.png" class="img-fluid" style="max-height: 196px;"
+                [ngStyle]="{'object-fit': 'contain'}">
+        </div>
+        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
+            <div class="pl-2"> {{this.abPoints}} </div>
+            <img src="assets/icons/diamond.png" class="img-fluid px-2"
+                [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
+        </div>
+    </div>
+    <div class="py-2">
+        <h1 class="text-center heartbeat">НОВЫЙ УРОВЕНЬ!!!</h1>
+    </div>
 </div>

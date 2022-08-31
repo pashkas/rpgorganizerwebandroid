@@ -20,7 +20,7 @@
     <app-image-component [(data)]="qwest.image"></app-image-component>
 
     <div class="progress position-relative" style="height: 32px;">
-      <div class="progress-bar abprogr" role="progressbar" [style.width]="qwest.progressValue + '%'">
+      <div class="progress-bar attrprogr" role="progressbar" [style.width]="qwest.progressValue + '%'">
       </div>
       <div class="position-absolute w-100 px-1 text-center">
         <div class=" align-self-baseline">
@@ -119,20 +119,20 @@
       </div>
     </div>
 
+    <!-- Задачи -->
     <div *ngIf="qwest.tasks.length>0" class="pt-2">
-      <!-- Задачи -->
       <ul class="list-group p-0">
-        <li *ngFor="let tsk of qwest.tasks" class="list-group-item px-0 py-1 border-0">
+        <li *ngFor="let tsk of qwest.tasks" class="list-group-item px-0 py-0 border-0">
           <a class="align-self-center w-100" [routerLink]="['/pers/task', tsk.id, false]">
             <div class="d-flex">
               <div class="flex-grow-1 text-center align-self-baseline">
                 <ng-container *ngIf="tsk.isDone; else elseTemplate">
                   <del>
-                    <h6>{{tsk.name}}</h6>
+                    {{tsk.name}}
                   </del>
                 </ng-container>
                 <ng-template #elseTemplate>
-                  <h6>{{tsk.name}}</h6>
+                  {{tsk.name}}
                 </ng-template>
               </div>
             </div>

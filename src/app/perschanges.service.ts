@@ -50,9 +50,9 @@ export class PerschangesService {
     const isShowCharactChanges = true;
     const isShowAbChanges = true;
     const isShowAbActivate = false;
-    const isShowExpChanges = true;
+    const isShowExpChanges = false;
 
-    const isOpenPersAtNewLevel = true;
+    const isOpenPersAtNewLevel = false;
     const maxAttrLevel = 10;
 
 
@@ -293,11 +293,11 @@ export class PerschangesService {
     let combineChanges: ChangesModel[] = [];
     let unionChanges: ChangesModel[] = [];
 
-    if (!changes.length && this.afterPers.gold != this.beforePers.gold) {
-      changes.push(
-        new ChangesModel('Золото', 'qwest', 0, 0, 0, 1, null)
-      );
-    }
+    // if (!changes.length && this.afterPers.gold != this.beforePers.gold) {
+    //   changes.push(
+    //     new ChangesModel('Золото', 'qwest', 0, 0, 0, 1, null)
+    //   );
+    // }
 
     for (let index = 0; index < changes.length; index++) {
       let head;
@@ -319,7 +319,7 @@ export class PerschangesService {
       }
 
       // Добавляем золото к первому изменению
-      if (index == 0 && this.afterPers.gold != this.beforePers.gold) {
+      if (this.afterPers.gold != this.beforePers.gold) {
         gold = this.afterPers.gold - this.beforePers.gold;
         if (gold > 0) {
           gold = '+' + gold;
@@ -332,16 +332,6 @@ export class PerschangesService {
         changes[index].name = ' ';
       }
 
-      // if (changes[index].type == 'abil') {
-      //   combineChanges.push(changes[index]);
-      // } else if (changes[index].type == 'cha') {
-      //   combineChanges.push(changes[index]);
-      // } else if (changes[index].type == 'exp') {
-      //   combineChanges.push(changes[index]);
-      // } else {
-      //   unionChanges.push(changes[index]);
-      // }
-
       unionChanges.push(changes[index]);
 
       changes[index].head = head;
@@ -349,45 +339,6 @@ export class PerschangesService {
       changes[index].gold = gold;
       changes[index].goldTotal = goldTotal;
     }
-
-    // Объединенные изменения
-    // if (combineChanges.length) {
-    //   const head = combineChanges[0].head;
-    //   const abPoints = combineChanges[0].head;
-    //   const type = combineChanges[0].type;
-    //   const img = combineChanges[0].img;
-
-    //   combineChanges.sort((a, b) => {
-    //     return getChSort(a) - getChSort(b);
-
-    //     function getChSort(ch: ChangesModel): number {
-    //       if (ch.type == 'exp') { return 2; }
-    //       if (ch.type == 'abil') { return 1; }
-    //       if (ch.type == 'cha') { return 0; }
-
-    //       return 3;
-    //     }
-    //   });
-
-
-    //   let dialogRef = this.dialog.open(PersChangesComponent, {
-    //     panelClass: classPanel,
-    //     data: {
-    //       headText: head,
-    //       changes: combineChanges,
-    //       isGood: isGood,
-    //       abPoints: abPoints,
-    //       isTES: this.afterPers.isTES,
-    //       itemType: type,
-    //       img: img
-    //     },
-    //     backdropClass: 'backdrop'
-    //   });
-
-    //   await sleep(5500);
-
-    //   dialogRef.close();
-    // }
 
     // Отдельные изменения
     unionChanges.sort((a, b) => {
@@ -403,7 +354,7 @@ export class PerschangesService {
       }
     });
 
-    let wasGold = false;
+    let wasGold = true;
     for (const ch of unionChanges) {
       const head = ch.head;
       const abPoints = ch.head;
@@ -427,7 +378,7 @@ export class PerschangesService {
           headText: head,
           changes: [ch],
           isGood: isGood,
-          abPoints: abPoints,
+          abPoints: null,
           isTES: this.afterPers.isTES,
           itemType: type,
           img: img,
@@ -437,14 +388,7 @@ export class PerschangesService {
         backdropClass: 'backdrop-changes'
       });
 
-      // if (ch.type == 'abil'
-      //   || ch.type == 'cha') {
-      //   await sleep(5000);
-      // } else {
-      //   await sleep(2750);
-      // }
-
-      await sleep(3500);
+      await sleep(4500);
 
       dialogRef.close();
     }
@@ -452,25 +396,24 @@ export class PerschangesService {
     if (newLevel) {
       let dialogRefLvlUp = this.dialog.open(LevelUpMsgComponent, {
         panelClass: classPanel,
-        backdropClass: 'backdrop-changes'
+        backdropClass: 'backdrop-changes',
+        data: { 
+          abPoints: null
+        }
       });
 
-      await sleep(3500);
+      await sleep(4500);
 
       dialogRefLvlUp.close();
 
       if (isOpenPersAtNewLevel) {
         this.srvSt.selTabPersList = 0;
         this.srvSt.selInventoryList = 0;
-        if (this.afterPers.ON > 0) {
+        if (this.afterPers.ON >= 3) {
           this.router.navigate(['/pers']);
         }
       }
     }
-
-    // if (abToEdit != null) {
-    //   this.router.navigate(['pers/task', abToEdit, false]);
-    // }
 
     if (isDoneQwest && qwestToEdit != null) {
       this.router.navigate(['pers/qwest', qwestToEdit, true]);

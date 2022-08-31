@@ -19,7 +19,7 @@
     <app-image-component *ngIf="!tskAbility" [data]="'assets/img/'+ tsk.imageLvl + '/'+tsk.image+'.webp'">
     </app-image-component>
     <div class="progress position-relative" style="height: 32px;" *ngIf="tskAbility">
-      <div class="progress-bar abprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'">
+      <div class="progress-bar attrprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'">
       </div>
       <div class="d-flex position-absolute w-100 px-1">
         <div class="flex-grow-1 text-left align-self-baseline">
@@ -46,29 +46,30 @@
         <a [routerLink]="['/pers/characteristic', charact.id]">{{charact.name}}</a>
       </ng-container>
 
+
+      <div>
+        {{tsk.requrense|titlecase}}
+      </div>
+
       <div>
         {{tsk.date|datestring}}
-        ({{tsk.requrense|titlecase }})
       </div>
 
       <!-- <div>
         {{tsk.timeVal | timeVal}}
       </div> -->
 
-      <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px">
+      <!-- <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px">
         <button *ngIf="tsk.mayUp&& this.pers.ON>0" class="icon-small" mat-icon-button (click)="upAbil();">
           <img src="assets/icons/up.png" class="img-fluid">
         </button>
-        <!-- <button class="icon-small" *ngIf="tsk.value > 0" mat-icon-button (click)="downAbil();">
-          <img src="assets/icons/down.png" class="img-fluid">
-        </button> -->
         <span *ngIf="tsk.requrense != 'нет'">
           <img src="assets/icons/diamond.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
           <span [ngClass]="{'text-success': pers.ON>0, 'text-danger': pers.ON<0}">
             {{this.pers.ON}}
           </span>
         </span>
-      </div>
+      </div> -->
     </div>
 
     <!-- Описание -->
@@ -132,14 +133,18 @@
     <div fxLayout="row" xLayoutAlign="none center" fxLayoutGap='15px'>
       <mat-form-field>
         <input onfocus="this.select()" matInput autocomplete="off" placeholder="Название" [(ngModel)]="tsk.name"
-          name="tsk.name">
+          name="tsk.name" #nameEdt>
       </mat-form-field>
-
     </div>
-    <mat-form-field *ngIf="tskCharact$|async as charact">
-      <input class="pointer" (click)="changeCharact()" matInput readonly placeholder="Характеристика" name="tsk.charact"
-        value="{{charact.name}}">
-    </mat-form-field>
+    <div [formGroup]="charactGroup" *ngIf="tskAbility">
+      <mat-form-field fxFlex>
+        <mat-select formControlName="charact" panelClass="panel-override">
+          <mat-option *ngFor="let a of pers.characteristics" [value]="a">
+            {{a.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
 
     <!-- Описание -->
     <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px">
@@ -241,7 +246,8 @@
           <mat-chip (click)="tsk.aimUnit = 'Раз'" [selected]="tsk.aimUnit == 'Раз'" color="accent">Раз</mat-chip>
         </mat-chip-list>
 
-        <mat-slide-toggle *ngIf="tsk.aimUnit == 'Раз'" [(ngModel)]="tsk.isEven" name="tsk.isEven">Чет?</mat-slide-toggle>
+        <mat-slide-toggle *ngIf="tsk.aimUnit == 'Раз'" [(ngModel)]="tsk.isEven" name="tsk.isEven">Чет?
+        </mat-slide-toggle>
 
         <!-- <mat-form-field>
           <input matInput autocomplete="off" onfocus="this.select()" placeholder="Раз" [(ngModel)]="tsk.aimCounter"

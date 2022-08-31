@@ -40,7 +40,6 @@ export class RequirementsAddDialogComponent implements OnInit {
     this.initForm();
 
     if (this.data) {
-      debugger;
       let elements = this.revSrv.getElements(this.srv.pers$.value, this.data.type);
       this.elements$.next(elements);
       this.ReqForm.get('type').setValue(this.data.type);

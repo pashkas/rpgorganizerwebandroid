@@ -432,7 +432,7 @@ export class MainWindowComponent implements OnInit {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
     }
     else if (currentView == curpersview.QwestTasks || currentView == curpersview.QwestsGlobal) {
-      this.srv.pers$.value.currentQwestId = null;
+      // this.srv.pers$.value.currentQwestId = null;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     }
 

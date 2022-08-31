@@ -30,7 +30,7 @@
         <ng-container *ngFor="let t of data.pers.tasks; let i = index;">
           <div cdkDrag mat-list-item (click)="tskClick(i);" class="{{t| listBg:data.currentView:data.pers.isMegaPlan}}">
             <div class="d-flex align-items-center"
-              [ngClass]="{'py-2': data.currentView!='SkillsSort', 'py-0':  data.currentView=='SkillsSort'}">
+              [ngClass]="{'py-1': data.currentView!='SkillsSort', 'py-0':  data.currentView=='SkillsSort'}">
               <div class="flex-grow-1 text-center">
                 <div class="pointer">
                   <ng-container *ngIf="t.requrense != 'нет' && !data.pers.isMegaPlan && checkDate(t.date)"
