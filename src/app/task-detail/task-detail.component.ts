@@ -374,4 +374,8 @@ export class TaskDetailComponent implements OnInit {
     }
     this.linkQwests = linkQwests;
   }
+
+  requrenseChange() {
+    this.qwickSetDate('today');
+  }
 }

@@ -174,11 +174,11 @@ export class PersService {
       let bTask = b.tasks[0];
 
       // Макс?
-      let aMax = aTask.value == this._maxAbilLevel ? 1 : 0;
-      let bMax = bTask.value == this._maxAbilLevel ? 1 : 0;
-      if (aMax != bMax) {
-        return (aMax - bMax);
-      }
+      // let aMax = aTask.value == this._maxAbilLevel ? 1 : 0;
+      // let bMax = bTask.value == this._maxAbilLevel ? 1 : 0;
+      // if (aMax != bMax) {
+      //   return (aMax - bMax);
+      // }
 
       // Открыта?
       let aIsOpen = a.isOpen ? 1 : 0;
@@ -196,8 +196,8 @@ export class PersService {
       }
 
       // Значение
-      if (a.value != b.value) {
-        return (a.value - b.value);
+      if (a.progressValue != b.progressValue) {
+        return (a.progressValue - b.progressValue);
       }
 
       // Сложность
@@ -1621,7 +1621,7 @@ export class PersService {
             if (prs.isMegaPlan && prs.currentView == curpersview.SkillsSort) {
               if (tsk.states.length > 0 && !tsk.isStateInTitle) {
                 for (const st of tsk.states) {
-                  let stT = this.getTskFromState(tsk, st, false);
+                  let stT = this.getTaskFromState(tsk, st, false);
                   stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
                   tasks.push(stT);
                 }
@@ -1634,7 +1634,7 @@ export class PersService {
                   if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
                     for (const st of tsk.states) {
                       if ((prs.currentView == curpersview.SkillsSort && st.isActive) || (st.isActive && !st.isDone)) {
-                        let stT = this.getTskFromState(tsk, st, false);
+                        let stT = this.getTaskFromState(tsk, st, false);
                         stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
                         tasks.push(stT);
                       }
@@ -1750,9 +1750,13 @@ export class PersService {
         tsk.plusName = qw.name;
         tsk.plusToNames.push(new plusToName(qw.name, qw.id, '/pers/qwest', ''));
         if (qw.abilitiId) {
-          let abLink = this.allMap[qw.abilitiId].item;
-          if (abLink) {
-            tsk.plusToNames.push(new plusToName('🔗 ' + abLink.name, qw.id, '', 'abTask'));
+          if (this.allMap[qw.abilitiId]) {
+            let abLink = this.allMap[qw.abilitiId].item;
+            if (abLink) {
+              tsk.plusToNames.push(new plusToName('🔗 ' + abLink.name, qw.id, '', 'abTask'));
+            }
+          } else {
+            qw.abilitiId = null;
           }
         }
 
@@ -1768,7 +1772,7 @@ export class PersService {
           && (qw.id == prs.currentQwestId || !prs.currentQwestId)) {
           if (noDoneStates.length > 0 && prs.currentView != curpersview.QwestSort) {
             for (const st of noDoneStates) {
-              tasks.push(this.getTskFromState(tsk, st, false));
+              tasks.push(this.getTaskFromState(tsk, st, false));
               if (!prs.currentQwestId) {
                 prs.currentQwestId = qw.id;
               }
@@ -2247,6 +2251,26 @@ export class PersService {
     let tsk: Task = this.allMap[taskId].item;
     let subTask: taskState = this.allMap[subtaskId].item;
     subTask.lastDate = new Date().getTime();
+
+    // Проставляем время
+    if (this.pers$.value.isWriteTime && !subTask.isNotWriteTime) {
+      let curDateTime: moment.Moment = moment();
+      let tDate: moment.Moment = moment(tsk.date);
+      debugger;
+      if (curDateTime.isSameOrBefore(tDate)) {
+        let time = curDateTime.format("HH:mm");
+        subTask.time = time;
+      }
+    }
+
+    if (isDone) {
+      subTask.lastNotDone = false;
+      subTask.isDone = true;
+    } else {
+      subTask.lastNotDone = true;
+      subTask.isDone = false;
+    }
+
     if (this.isNullOrUndefined(subTask.failCounter)) {
       subTask.failCounter = 0;
     }
@@ -2347,38 +2371,48 @@ export class PersService {
     tsk.lastDate = new Date().getTime();
 
     if (tsk.requrense != 'нет') {
-      let task: Task;
+      let tsk: Task;
       let abil: Ability;
-      ({ task, abil } = this.findTaskAnAb(id, task, abil));
-      if (task) {
-        task.counterValue = 0;
-        task.timerValue = 0;
-        task.failCounter = 0;
+      ({ task: tsk, abil } = this.findTaskAnAb(id, tsk, abil));
+      if (tsk) {
+        tsk.counterValue = 0;
+        tsk.timerValue = 0;
+        tsk.failCounter = 0;
+
+        // Проставляем время
+        if (this.pers$.value.isWriteTime && !tsk.isNotWriteTime) {
+          let curDateTime: moment.Moment = moment();
+          let tDate: moment.Moment = moment(tsk.date);
+          if (curDateTime.isSameOrBefore(tDate)) {
+            let time = moment().format("HH:mm");
+            tsk.time = time;
+          }
+        }
 
         // Разыгрываем награды
-        this.CasinoRevards(task);
+        this.CasinoRevards(tsk);
 
         // Золото
-        this.CasinoGold(task.plusExp);
+        this.CasinoGold(tsk.plusExp);
 
         // Счетчик обновлений стейтов
-        if (task.isStateRefresh) {
-          if (task.refreshCounter == null || task.refreshCounter == undefined) {
-            task.refreshCounter = 0;
+        if (tsk.isStateRefresh) {
+          if (tsk.refreshCounter == null || tsk.refreshCounter == undefined) {
+            tsk.refreshCounter = 0;
           } else {
-            task.refreshCounter++;
+            tsk.refreshCounter++;
           }
         }
 
         // Следующая дата
-        this.setTaskNextDate(task, true);
-        this.setStatesNotDone(task);
+        this.setTaskNextDate(tsk, true);
+        this.setStatesNotDone(tsk);
 
         // Плюсуем значение
         this.changeTes(tsk, true);
         tsk.secondsDone = 0;
 
-        task.lastNotDone = false;
+        tsk.lastNotDone = false;
         this.setCurInd(0);
         this.changeExpKoef(true);
 
@@ -3139,11 +3173,12 @@ export class PersService {
     return 1 / tesValTen;
   }
 
-  private getTskFromState(tsk: Task, st: taskState, isAll: boolean): Task {
+  private getTaskFromState(tsk: Task, st: taskState, isAll: boolean): Task {
     let stT = new Task();
     let stateProgr;
     stT.failCounter = st.failCounter;
-    //stT.tittle = tsk.name + ': ' + st.name;
+    stT.lastNotDone = st.lastNotDone;
+    stT.isNotWriteTime = st.isNotWriteTime;
 
     let plusName = tsk.curLvlDescr3;
     if (tsk.requrense == 'нет') {
@@ -3195,7 +3230,6 @@ export class PersService {
     stT.image = st.image;
     stT.imageLvl = st.imageLvl;
     stT.parrentTask = tsk.id;
-    stT.lastNotDone = tsk.lastNotDone;
     stT.plusToNames = [...tsk.plusToNames];
     stT.nextAbVal = tsk.nextAbVal;
     stT.tesValue = tsk.tesValue;

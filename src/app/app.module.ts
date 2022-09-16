@@ -31,6 +31,7 @@ import { FailModPipe } from './fail-mod.pipe';
 import { MainProgrDescPipe } from './main-window/main-progr-desc.pipe';
 import { ListBgPipe } from './list-bg.pipe';
 import { TaskTimerComponentComponent } from './task-timer-component/task-timer-component.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 registerLocaleData(localeRu, 'ru');
 
@@ -53,6 +54,7 @@ registerLocaleData(localeRu, 'ru');
     TaskTimerComponentComponent,
   ],
   imports: [
+    MatCheckboxModule,
     NgxMaterialTimepickerModule,
     MatBadgeModule,
     MatDividerModule,

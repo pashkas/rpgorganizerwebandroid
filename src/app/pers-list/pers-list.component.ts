@@ -314,6 +314,7 @@ export class PersListComponent implements OnInit {
               st.prevId = null;
               st.nextId = null;
               // st.time = "00:00";
+              st.lastNotDone = true;
               this.srv.GetRndEnamy(st, 0, this.pers.maxPersLevel);
             });
             tsk.lastNotDone = false;

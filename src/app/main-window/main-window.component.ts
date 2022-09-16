@@ -113,6 +113,7 @@ export class MainWindowComponent implements OnInit {
       // Логика для подзадач
       else {
         const subTsk = this.srv.allMap[t.id].item;
+        // subTsk.lastNotDone = false;
         subTsk.isDone = true;
       }
     }
@@ -120,6 +121,7 @@ export class MainWindowComponent implements OnInit {
       this.srv.taskPlus(t.id);
       tskName = t.tittle;
     }
+
     if (tskName && !this.srv.pers$.value.isNoDiary) {
       this.srv.pers$.value.Diary[0].done += tskName + '; ';
     }
@@ -148,11 +150,13 @@ export class MainWindowComponent implements OnInit {
     let tskName = "";
 
     if (t.parrentTask) {
+      // Логика для подзадач
       tskName = this.srv.allMap[t.id].item.name;
       this.srv.subtaskDoneOrFail(t.parrentTask, t.id, false);
       this.srv.savePers(true, false);
     }
     else {
+      // Логика для задач
       tskName = t.tittle;
       this.srv.taskMinus(t.id);
     }
@@ -281,6 +285,11 @@ export class MainWindowComponent implements OnInit {
     this.srv.savePers(false);
   }
 
+  setIsNotWriteTime(ev: any, tsk: Task) {
+    this.srv.allMap[tsk.id].item.isNotWriteTime = ev.checked;
+    tsk.isNotWriteTime = ev.checked;
+  }
+
   openPersList() {
     this.srvSt.selTabPersList = 0;
     this.srvSt.selInventoryList = 0;
@@ -310,15 +319,15 @@ export class MainWindowComponent implements OnInit {
     dialogRef.afterClosed()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(n => {
-        let diffSecconds = n/1000;
+        let diffSecconds = n / 1000;
         let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
         let tt: number = tsk.secondsToDone - diffSecconds;
-        if (tt<0) {
-          tt=0;
+        if (tt < 0) {
+          tt = 0;
         }
 
-        if(tt>tsk.secondsToDone){
-          tt=tsk.secondsToDone;
+        if (tt > tsk.secondsToDone) {
+          tt = tsk.secondsToDone;
         }
 
         tsk.secondsDone = tt;
@@ -385,7 +394,12 @@ export class MainWindowComponent implements OnInit {
     }
   }
 
+
   setMegaPlan() {
+    this.srv.savePers(false);
+  }
+
+  setWriteTime() {
     this.srv.savePers(false);
   }
 
@@ -437,6 +451,7 @@ export class MainWindowComponent implements OnInit {
     }
 
     this.srv.savePers(false);
+    this.srv.setCurInd(0);
   }
 
   taskToEnd(tsk: Task) {

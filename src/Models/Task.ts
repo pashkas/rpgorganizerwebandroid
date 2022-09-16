@@ -34,6 +34,7 @@ export class Task implements IImg {
 
     tskWeekDays: string[] = []; //[...Task.weekDays];
     nextAbVal: number;
+    isNotWriteTime: boolean = false;
 
     aimCounter: number = 0;
     aimTimer: number = 0;
@@ -230,6 +231,7 @@ export class taskState implements IImg {
     nextId: any;
 
     chainIdx: number = -1;
+    isNotWriteTime: boolean = false;
 
     name: string;
 
@@ -247,6 +249,7 @@ export class taskState implements IImg {
     timeVal: number;
     failCounter: number;
     lastDate: number;
+    lastNotDone: boolean = false;
 }
 
 export interface IImg {

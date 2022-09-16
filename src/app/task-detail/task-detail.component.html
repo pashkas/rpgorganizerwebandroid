@@ -166,7 +166,7 @@
         <!-- Повторение -->
         <mat-form-field>
           <mat-label>Повторение</mat-label>
-          <mat-select [(ngModel)]="tsk.requrense" name="tsk.requrense">
+          <mat-select [(ngModel)]="tsk.requrense" name="tsk.requrense" (selectionChange)="requrenseChange()">
             <mat-option *ngFor="let req of requrenses" [value]="req">
               {{req}}
             </mat-option>
@@ -184,7 +184,7 @@
     <div fxLayout="row" fxLayoutGap="0.3em" fxLayoutAlign="center center" *ngIf="tsk.requrense == 'дни недели'">
       <div *ngFor="let wd of weekDays">
         <ng-container>
-          <mat-chip (click)="setWeekDays(wd)" [selected]="tsk.tskWeekDays.includes(wd)" color="accent">
+          <mat-chip (click)="setWeekDays(wd); requrenseChange()" [selected]="tsk.tskWeekDays.includes(wd)" color="accent">
             {{' ' + wd + ' '}}
           </mat-chip>
         </ng-container>

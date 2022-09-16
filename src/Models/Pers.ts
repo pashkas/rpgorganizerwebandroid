@@ -108,6 +108,7 @@ export class Pers {
     maxAttrLevel: number = 100;
 
     isMegaPlan: boolean = false;
+    isWriteTime: boolean = false;
 
     Monsters0Queue: number;
     Monsters1Queue: number;

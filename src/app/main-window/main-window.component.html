@@ -30,7 +30,7 @@
         <ng-container *ngFor="let t of data.pers.tasks; let i = index;">
           <div cdkDrag mat-list-item (click)="tskClick(i);" class="{{t| listBg:data.currentView:data.pers.isMegaPlan}}">
             <div class="d-flex align-items-center"
-              [ngClass]="{'py-1': data.currentView!='SkillsSort', 'py-0':  data.currentView=='SkillsSort'}">
+              [ngClass]="{'py-0': data.currentView!='SkillsSort', 'py-0':  data.currentView=='SkillsSort'}">
               <div class="flex-grow-1 text-center">
                 <div class="pointer">
                   <ng-container *ngIf="t.requrense != 'нет' && !data.pers.isMegaPlan && checkDate(t.date)"
@@ -53,6 +53,12 @@
                     {{t.plusToNames[0]?.name}}
                   </ng-template>
                 </div>
+              </div>
+              <div>
+                <mat-checkbox *ngIf="this.srv.pers$.value.isWriteTime && data.currentView=='SkillsSort'"
+                  (change)="setIsNotWriteTime($event, t)" [ngModel]="t.isNotWriteTime">
+                  ⌀
+                </mat-checkbox>
               </div>
               <div *ngIf="t.requrense != 'нет' && !data.pers.isAutofocus" class="px-2">
                 <ngx-material-timepicker-toggle [for]="pikTimeInList"></ngx-material-timepicker-toggle>
@@ -147,8 +153,12 @@
         <button (click)="setSort(data.currentView)" mat-icon-button style="width: 47px !important;">
           <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'3em'}">
         </button>
-        <mat-slide-toggle (change)="setMegaPlan()" [(ngModel)]="this.srv.pers$.value.isMegaPlan">Мега план
-        </mat-slide-toggle>
+        <div fxLayout="column" fxLayoutAlign="space-around center">
+          <mat-slide-toggle (change)="setMegaPlan()" [(ngModel)]="this.srv.pers$.value.isMegaPlan">Мега план
+          </mat-slide-toggle>
+          <mat-slide-toggle (change)="setWriteTime()" [(ngModel)]="this.srv.pers$.value.isWriteTime">Авто время
+          </mat-slide-toggle>
+        </div>
       </div>
       <!-- Сортировка квестов -->
       <div fxLayout="row" fxFlex fxLayoutAlign="end center" fxLayoutGap="0.6em" class="w-100 h-100 px-2"

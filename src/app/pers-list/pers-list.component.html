@@ -5,7 +5,7 @@
       <img src="assets/icons/left.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'2.5em'}">
     </button>
     <!-- Редактировать -->
-    <button mat-icon-button (click)="saveData()" *ngIf="this.srvSt.selTabPersList!=3">
+    <button mat-icon-button (click)="saveData()" *ngIf="this.srvSt && this.srvSt.selTabPersList!=3">
       <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'3em'}">
       <!-- <img *ngIf="isEditMode" src="assets/icons/create.png" class="img-fluid"
         [ngStyle]="{'object-fit': 'contain', 'height':'3em'}"> -->
@@ -73,7 +73,7 @@
             <div class="progress-bar attrprogr" role="progressbar" [style.width]="pers.totalProgress + '%'">
             </div>
             <div class="d-flex position-absolute w-100 px-1">
-              <div class="text-center text-dark h5 m-0 p-0" fxFlex>
+              <div class="text-center text-dark h5 mt-1 p-0 align-self-baseline" fxFlex>
                 {{pers.name + ', ' + pers.rangName+''}}
               </div>
             </div>
