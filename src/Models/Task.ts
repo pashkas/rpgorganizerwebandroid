@@ -111,6 +111,7 @@ export class Task implements IImg {
     secondsToDone: number = 0;
     secondsDone: number = 0;
     plusExp: number = 0;
+    autoTime: number = 0;
 
     static getHardness(tsk: Task): number {
         if (!tsk.hardnes) {
@@ -250,6 +251,7 @@ export class taskState implements IImg {
     failCounter: number;
     lastDate: number;
     lastNotDone: boolean = false;
+    autoTime: number = 0;
 }
 
 export interface IImg {

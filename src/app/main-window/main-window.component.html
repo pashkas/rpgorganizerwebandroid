@@ -54,21 +54,22 @@
                   </ng-template>
                 </div>
               </div>
-              <div>
+              <!-- <div>
                 <mat-checkbox *ngIf="this.srv.pers$.value.isWriteTime && data.currentView=='SkillsSort'"
                   (change)="setIsNotWriteTime($event, t)" [ngModel]="t.isNotWriteTime">
                   ⌀
                 </mat-checkbox>
-              </div>
-              <div *ngIf="t.requrense != 'нет' && !data.pers.isAutofocus" class="px-2">
+              </div> -->
+              <div *ngIf="t.requrense != 'нет' && !true" class="px-2">
                 <ngx-material-timepicker-toggle [for]="pikTimeInList"></ngx-material-timepicker-toggle>
                 <ngx-material-timepicker (timeSet)="onTimeChanged($event, t.id)" #pikTimeInList [format]="24"
                   [defaultTime]="t.time"></ngx-material-timepicker>
                 {{t.time}}
               </div>
               <mat-icon cdkDragHandle class="pointer pr-1"
-                [hidden]="!(data.currentView=='QwestSort' || (data.currentView == 'SkillsSort' && data.pers.isAutofocus))">
-                drag_handle</mat-icon>
+                [hidden]="!(data.currentView=='QwestSort') && !(data.currentView=='SkillsSort') && !(data.currentView=='SkillsGlobal')">
+                drag_handle
+              </mat-icon>
             </div>
           </div>
         </ng-container>
@@ -154,8 +155,8 @@
           <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'3em'}">
         </button>
         <div fxLayout="column" fxLayoutAlign="space-around center">
-          <mat-slide-toggle (change)="setMegaPlan()" [(ngModel)]="this.srv.pers$.value.isMegaPlan">Мега план
-          </mat-slide-toggle>
+          <!-- <mat-slide-toggle (change)="setMegaPlan()" [(ngModel)]="this.srv.pers$.value.isMegaPlan">Мега план
+          </mat-slide-toggle> -->
           <mat-slide-toggle (change)="setWriteTime()" [(ngModel)]="this.srv.pers$.value.isWriteTime">Авто время
           </mat-slide-toggle>
         </div>
@@ -193,7 +194,7 @@
               src="assets/icons/qwests.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'2.5em'}">
           </button>
           <button (click)="setSort(data.currentView)" mat-icon-button
-            [ngClass]="{'disabled': data.currentView == 'SkillsGlobal'||data.currentView == 'QwestsGlobal'}">
+            [ngClass]="{'disabled': data.currentView == 'QwestsGlobal'}">
             <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'3em'}">
           </button>
         </div>

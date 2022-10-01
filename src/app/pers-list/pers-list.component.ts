@@ -294,6 +294,7 @@ export class PersListComponent implements OnInit {
           ab.tasks.forEach(tsk => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
             tsk.order = -1;
+            tsk.autoTime = 0;
             tsk.plusExp = 0;
             tsk.lastDate = 0;
             tsk.prevId = null;
@@ -310,6 +311,7 @@ export class PersListComponent implements OnInit {
             this.srv.GetRndEnamy(tsk, 0, this.pers.maxPersLevel);
             tsk.states.forEach(st => {
               st.order = -1;
+              st.autoTime = 0;
               st.lastDate = 0;
               st.prevId = null;
               st.nextId = null;
@@ -408,9 +410,9 @@ export class PersListComponent implements OnInit {
   }
 
   quickAddCharact() {
-          let cha = this.srv.addCharact('Характеристика');
-          this.srv.savePers(false);
-          this.router.navigate(['pers/characteristic', cha.id, true], { queryParams: {isQuick: true}});
+    let cha = this.srv.addCharact('Характеристика');
+    this.srv.savePers(false);
+    this.router.navigate(['pers/characteristic', cha.id, true], { queryParams: { isQuick: true } });
 
     // this.srv.isDialogOpen = true;
     // const dialogRef = this.dialog.open(AddItemDialogComponent, {
@@ -433,7 +435,7 @@ export class PersListComponent implements OnInit {
   }
 
   quickAddAbil() {
-    if(this.pers.characteristics == null || !this.pers.characteristics.length){
+    if (this.pers.characteristics == null || !this.pers.characteristics.length) {
       return;
     }
 
@@ -444,7 +446,7 @@ export class PersListComponent implements OnInit {
 
     this.srv.savePers(false);
 
-    this.router.navigate(['pers/task', abilId, true], { queryParams: {isQuick: true}});
+    this.router.navigate(['pers/task', abilId, true], { queryParams: { isQuick: true } });
     // this.srv.isDialogOpen = true;
 
     // const dialogRef = this.dialog.open(QuickAddAbilityComponent, {

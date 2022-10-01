@@ -1406,6 +1406,11 @@ export class PersService {
 
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
+
+          if (tsk.autoTime == null) {
+            tsk.autoTime = 0;
+          }
+
           if (tsk.tesValue == null || tsk.tesValue == undefined || tsk.tesValue < 0) {
             tsk.tesValue = 0;
           }
@@ -1463,7 +1468,7 @@ export class PersService {
 
           this.setTaskTittle(tsk, prs.isMegaPlan);
 
-          if (tsk.requrense != 'нет') {
+          if (tsk.requrense != 'нет' && !true) {
             tsk.plusToNames.unshift(new plusToName('' + tsk.time, null, null, ''));
           }
 
@@ -1471,6 +1476,11 @@ export class PersService {
 
           for (const st of tsk.states) {
             st.parrentTask = tsk.id;
+
+            if (st.autoTime == null) {
+              st.autoTime = 0;
+            }
+
             if (this.isNullOrUndefined(st.time)) {
               st.time = "00:00";
             }
@@ -1619,9 +1629,9 @@ export class PersService {
             || prs.currentView == curpersview.SkillsSort
             || prs.currentView == curpersview.SkillsGlobal) {
             if (prs.isMegaPlan && prs.currentView == curpersview.SkillsSort) {
-              if (tsk.states.length > 0 && !tsk.isStateInTitle) {
+              if (tsk.states.length > 0 && !tsk.isStateInTitle && !tsk.isStateRefresh) {
                 for (const st of tsk.states) {
-                  let stT = this.getTaskFromState(tsk, st, false);
+                  let stT = this.getTaskFromState(tsk, st, false, prs);
                   stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
                   tasks.push(stT);
                 }
@@ -1634,7 +1644,7 @@ export class PersService {
                   if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
                     for (const st of tsk.states) {
                       if ((prs.currentView == curpersview.SkillsSort && st.isActive) || (st.isActive && !st.isDone)) {
-                        let stT = this.getTaskFromState(tsk, st, false);
+                        let stT = this.getTaskFromState(tsk, st, false, prs);
                         stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
                         tasks.push(stT);
                       }
@@ -1772,7 +1782,7 @@ export class PersService {
           && (qw.id == prs.currentQwestId || !prs.currentQwestId)) {
           if (noDoneStates.length > 0 && prs.currentView != curpersview.QwestSort) {
             for (const st of noDoneStates) {
-              tasks.push(this.getTaskFromState(tsk, st, false));
+              tasks.push(this.getTaskFromState(tsk, st, false, prs));
               if (!prs.currentQwestId) {
                 prs.currentQwestId = qw.id;
               }
@@ -2210,27 +2220,30 @@ export class PersService {
         return -(aType - bType);
       }
 
-      let bDate = new Date(b.date).setHours(0, 0, 0, 0);
-      let aDate = new Date(a.date).setHours(0, 0, 0, 0);
-      let aValDate = aDate.valueOf();
-      let bValDate = bDate.valueOf();
-
-      // По дате
       if (prs.currentView != curpersview.SkillsSort) {
-        if (aValDate != bValDate) {
+        let aDate = moment(a.date).startOf('day');
+        let bDate = moment(b.date).startOf('day');
+
+        // По дате
+        if (!aDate.isSame(bDate)) {
           return aDate.valueOf() - bDate.valueOf();
         }
       }
 
-      // Автофокус
-      if (prs.isAutofocus) {
-        return a.order - b.order;
+      // Автовремя
+      if (a.requrense != 'нет') {
+        return a.autoTime - b.autoTime;
       }
 
+      // Автофокус
+      // if (prs.isAutofocus) {
+      //   return a.order - b.order;
+      // }
+
       // По времени
-      if (a.time != b.time) {
-        return a.time.localeCompare(b.time)
-      }
+      // if (a.time != b.time) {
+      //   return a.time.localeCompare(b.time)
+      // }
 
       // По Order
       if (!a.order) {
@@ -2252,20 +2265,17 @@ export class PersService {
     let subTask: taskState = this.allMap[subtaskId].item;
     subTask.lastDate = new Date().getTime();
 
-    // Проставляем время
-    if (this.pers$.value.isWriteTime && !subTask.isNotWriteTime) {
-      let curDateTime: moment.Moment = moment();
-      let tDate: moment.Moment = moment(tsk.date);
-      debugger;
-      if (curDateTime.isSameOrBefore(tDate)) {
-        let time = curDateTime.format("HH:mm");
-        subTask.time = time;
-      }
+    // Авто время
+    if (this.pers$.value.isWriteTime) {
+      let autoCurDate: moment.Moment = moment();
+      let autoTDate: moment.Moment = moment(tsk.date).startOf('day');
+      subTask.lastNotDone = false;
+      subTask.isDone = true;
+      let autoDate = autoCurDate.diff(autoTDate);
+      subTask.autoTime = autoDate;
     }
 
     if (isDone) {
-      subTask.lastNotDone = false;
-      subTask.isDone = true;
     } else {
       subTask.lastNotDone = true;
       subTask.isDone = false;
@@ -2324,35 +2334,43 @@ export class PersService {
    */
   taskMinus(id: string, notClearTosts?: boolean) {
     // Находим задачу
-    let task: Task;
+    let tsk: Task;
     let abil: Ability;
 
-    ({ task, abil } = this.findTaskAnAb(id, task, abil));
-    if (task) {
-      task.lastDate = new Date().getTime();
-      task.counterValue = 0;
-      task.timerValue = 0;
-      if (this.isNullOrUndefined(task.failCounter)) {
-        task.failCounter = 0;
+    ({ task: tsk, abil } = this.findTaskAnAb(id, tsk, abil));
+    if (tsk) {
+      tsk.lastDate = new Date().getTime();
+      tsk.counterValue = 0;
+      tsk.timerValue = 0;
+      if (this.isNullOrUndefined(tsk.failCounter)) {
+        tsk.failCounter = 0;
+      }
+
+      // Авто время
+      if (this.pers$.value.isWriteTime) {
+        let autoCurDate: moment.Moment = moment();
+        let autoTDate: moment.Moment = moment(tsk.date).startOf('day');
+        let autoDate = autoCurDate.diff(autoTDate);
+        tsk.autoTime = autoDate;
       }
 
       // Следующая дата
-      this.setTaskNextDate(task, false);
-      this.setStatesNotDone(task);
+      this.setTaskNextDate(tsk, false);
+      this.setStatesNotDone(tsk);
 
       // Минусуем значение
       if (!this.pers$.value.isTES) {
-        this.pers$.value.exp -= this.getTaskChangesExp(task, false);
+        this.pers$.value.exp -= this.getTaskChangesExp(tsk, false);
         if (this.pers$.value.exp < 0) {
           this.pers$.value.exp = 0;
         }
       } else {
-        this.changeTes(task, false);
+        this.changeTes(tsk, false);
       }
 
-      task.lastNotDone = true;
-      task.secondsDone = 0;
-      task.failCounter++;
+      tsk.lastNotDone = true;
+      tsk.secondsDone = 0;
+      tsk.failCounter++;
 
       this.setCurInd(0);
       this.changeExpKoef(false);
@@ -2379,15 +2397,23 @@ export class PersService {
         tsk.timerValue = 0;
         tsk.failCounter = 0;
 
-        // Проставляем время
-        if (this.pers$.value.isWriteTime && !tsk.isNotWriteTime) {
-          let curDateTime: moment.Moment = moment();
-          let tDate: moment.Moment = moment(tsk.date);
-          if (curDateTime.isSameOrBefore(tDate)) {
-            let time = moment().format("HH:mm");
-            tsk.time = time;
-          }
+        // Авто время
+        if (this.pers$.value.isWriteTime) {
+          let autoCurDate: moment.Moment = moment();
+          let autoTDate: moment.Moment = moment(tsk.date).startOf('day');
+          let autoDate = autoCurDate.diff(autoTDate);
+          tsk.autoTime = autoDate;
         }
+
+        // Проставляем время
+        // if (this.pers$.value.isWriteTime && !tsk.isNotWriteTime) {
+        //   let curDateTime: moment.Moment = moment().startOf('day');
+        //   let tDate: moment.Moment = moment(tsk.date).startOf('day');
+        //   if (curDateTime.isSame(tDate)) {
+        //     let time = moment().format("HH:mm");
+        //     tsk.time = time;
+        //   }
+        // }
 
         // Разыгрываем награды
         this.CasinoRevards(tsk);
@@ -3173,12 +3199,13 @@ export class PersService {
     return 1 / tesValTen;
   }
 
-  private getTaskFromState(tsk: Task, st: taskState, isAll: boolean): Task {
+  private getTaskFromState(tsk: Task, st: taskState, isAll: boolean, prs: Pers): Task {
     let stT = new Task();
     let stateProgr;
     stT.failCounter = st.failCounter;
     stT.lastNotDone = st.lastNotDone;
     stT.isNotWriteTime = st.isNotWriteTime;
+    stT.autoTime = st.autoTime;
 
     let plusName = tsk.curLvlDescr3;
     if (tsk.requrense == 'нет') {
@@ -3234,7 +3261,7 @@ export class PersService {
     stT.nextAbVal = tsk.nextAbVal;
     stT.tesValue = tsk.tesValue;
 
-    if (stT.requrense != 'нет') {
+    if (stT.requrense != 'нет' && !true) {
       stT.plusToNames.shift();
     }
 
@@ -3242,7 +3269,7 @@ export class PersService {
       stT.plusToNames.unshift(new plusToName(stateProgr, null, null, ''));
     }
 
-    if (stT.requrense != 'нет') {
+    if (stT.requrense != 'нет' && !true) {
       stT.time = st.time;
       stT.plusToNames.unshift(new plusToName('' + st.time, null, null, ''));
     }

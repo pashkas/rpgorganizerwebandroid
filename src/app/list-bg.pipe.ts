@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Task } from 'src/Models/Task';
+import * as moment from 'moment';
 
 @Pipe({
   name: 'listBg'
@@ -23,28 +24,28 @@ export class ListBgPipe implements PipeTransform {
       // }
 
       // Новые задачи подсвечиваем
-      if (tsk.time == "00:00") {
-        return 'list-group-item-warning';
-      }
-
-      // if (tsk.requrense != 'нет' && check == 'later') {
-      //   return 'list-group-item-info';
+      // if (tsk.time == "00:00") {
+      //   return 'list-group-item-warning';
       // }
+
+      if (tsk.requrense != 'нет' && check != 'now') {
+        return 'list-group-item-info';
+      }
     }
 
     return '';
   }
 
   checkDate(date: Date): string {
-    let dt = new Date(date).setHours(0, 0, 0, 0);
-    let now = new Date().setHours(0, 0, 0, 0);
+    let dt = moment(date).startOf('day');
+    let now = moment().startOf('day');
 
-    if (dt.valueOf() < now.valueOf()) {
-      return 'back';
+    if (dt.isSame(now)) {
+      return 'now';
     }
 
-    if (dt.valueOf() == now.valueOf()) {
-      return 'now';
+    if (dt.isBefore(now)) {
+      return 'back';
     }
 
     return 'later';

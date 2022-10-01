@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { PersService } from '../pers.service';
-import { Task } from 'src/Models/Task';
+import { Task, taskState } from 'src/Models/Task';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
 import { Ability } from 'src/Models/Ability';
@@ -12,6 +12,7 @@ import { curpersview } from 'src/Models/curpersview';
 import { Qwest } from 'src/Models/Qwest';
 import { TaskTimerComponentComponent } from '../task-timer-component/task-timer-component.component';
 import { takeUntil } from 'rxjs/operators';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-main-window',
@@ -420,21 +421,48 @@ export class MainWindowComponent implements OnInit {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
     } else if (currentView == curpersview.SkillTasks) {
       this.srv.pers$.value.currentView = curpersview.SkillsSort;
-    } else if (currentView == curpersview.SkillsSort) {
-      for (let index = 0; index < this.srv.pers$.value.tasks.length; index++) {
-        if (this.srv.pers$.value.tasks[index].parrentTask) {
-          this.setIndForState(this.srv.pers$.value.tasks[index].parrentTask, this.srv.pers$.value.tasks[index].id, index);
-        } else {
-          this.srv.pers$.value.tasks[index].order = index;
-        }
+    } else if (currentView == curpersview.SkillsSort || currentView == curpersview.SkillsGlobal) {
+      this.sortSkills();
 
-        this.srv.pers$.value.isMegaPlan = false;
-      }
-
+      this.srv.pers$.value.isMegaPlan = false;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     }
 
     this.srv.savePers(false);
+  }
+
+  private sortSkills() {
+    const tasks = this.srv.pers$.value.tasks;
+
+    // Сортировка Order
+    for (let i = 0; i < tasks.length; i++) {
+      const tsk = tasks[i];
+      let tskPers: Task | taskState;
+      tskPers = this.srv.allMap[this.srv.pers$.value.tasks[i].id].item;
+
+      if (tskPers != null) {
+        tsk.order = i;
+        tskPers.order = i;
+      }
+    }
+
+    // Сортировка времени
+    let sortByAutoTime = tasks.map(task => task.autoTime).sort((a, b) => a - b);
+
+    tasks.sort((a, b) => a.order - b.order);
+
+    for (let i = 0; i < tasks.length; i++) {
+      const tskOrder = tasks[i];
+      const tskTime = sortByAutoTime[i];
+
+      let tskPersOrder: Task | taskState;
+      tskPersOrder = this.srv.allMap[tskOrder.id].item;
+
+      if (tskPersOrder != null) {
+        tskOrder.autoTime = tskTime;
+        tskPersOrder.autoTime = tskTime;
+      }
+    }
   }
 
   /**
