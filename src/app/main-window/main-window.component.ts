@@ -1,24 +1,24 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { PersService } from '../pers.service';
-import { Task, taskState } from 'src/Models/Task';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop'
-import { Ability } from 'src/Models/Ability';
-import { MatDialog } from '@angular/material';
-import { sortArr } from 'src/Models/sortArr';
-import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
-import { StatesService } from '../states.service';
-import { curpersview } from 'src/Models/curpersview';
-import { Qwest } from 'src/Models/Qwest';
-import { TaskTimerComponentComponent } from '../task-timer-component/task-timer-component.component';
-import { takeUntil } from 'rxjs/operators';
-import * as moment from 'moment';
+import { ChangeDetectionStrategy, Component, OnInit } from "@angular/core";
+import { PersService } from "../pers.service";
+import { Task, taskState } from "src/Models/Task";
+import { BehaviorSubject, Subject } from "rxjs";
+import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
+import { Ability } from "src/Models/Ability";
+import { MatDialog } from "@angular/material";
+import { sortArr } from "src/Models/sortArr";
+import { AddItemDialogComponent } from "../add-item-dialog/add-item-dialog.component";
+import { StatesService } from "../states.service";
+import { curpersview } from "src/Models/curpersview";
+import { Qwest } from "src/Models/Qwest";
+import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-component.component";
+import { takeUntil } from "rxjs/operators";
+import * as moment from "moment";
 
 @Component({
-  selector: 'app-main-window',
-  templateUrl: './main-window.component.html',
-  styleUrls: ['./main-window.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: "app-main-window",
+  templateUrl: "./main-window.component.html",
+  styleUrls: ["./main-window.component.css"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainWindowComponent implements OnInit {
   private unsubscribe$ = new Subject();
@@ -34,27 +34,25 @@ export class MainWindowComponent implements OnInit {
   pers$ = this.srv.pers$.asObservable();
   qwickSortVals: sortArr[] = [];
 
-  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService) {
-  }
+  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService) {}
 
   addToQwest() {
     let qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
 
     if (qwest) {
       const dialogRef = this.dialog.open(AddItemDialogComponent, {
-        panelClass: 'my-dialog',
-        data: { header: 'Добавить миссию', text: '' },
+        panelClass: "my-dialog",
+        data: { header: "Добавить миссию", text: "" },
 
-        backdropClass: 'backdrop'
+        backdropClass: "backdrop",
       });
 
-      dialogRef.afterClosed()
-        .subscribe(name => {
-          if (name) {
-            this.srv.addTskToQwest(qwest, name);
-            this.srv.savePers(false);
-          }
-        });
+      dialogRef.afterClosed().subscribe((name) => {
+        if (name) {
+          this.srv.addTskToQwest(qwest, name);
+          this.srv.savePers(false);
+        }
+      });
     }
   }
 
@@ -66,8 +64,7 @@ export class MainWindowComponent implements OnInit {
       this.isSucessShown$.next(true);
       await this.delay(500);
       this.isSucessShown$.next(false);
-    }
-    else {
+    } else {
       this.isFailShownOv$.next(true);
       await this.delay(250);
       this.isFailShownOv$.next(false);
@@ -93,7 +90,7 @@ export class MainWindowComponent implements OnInit {
   }
 
   delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async done(t: Task) {
@@ -107,7 +104,7 @@ export class MainWindowComponent implements OnInit {
 
     if (t.parrentTask) {
       // Логика для навыков
-      if (t.requrense != 'нет') {
+      if (t.requrense != "нет") {
         tskName = this.srv.allMap[t.id].item.name;
         this.srv.subtaskDoneOrFail(t.parrentTask, t.id, true);
       }
@@ -117,14 +114,13 @@ export class MainWindowComponent implements OnInit {
         // subTsk.lastNotDone = false;
         subTsk.isDone = true;
       }
-    }
-    else {
+    } else {
       this.srv.taskPlus(t.id);
       tskName = t.tittle;
     }
 
     if (tskName && !this.srv.pers$.value.isNoDiary) {
-      this.srv.pers$.value.Diary[0].done += tskName + '; ';
+      this.srv.pers$.value.Diary[0].done += tskName + "; ";
     }
 
     this.srv.savePers(true);
@@ -155,15 +151,14 @@ export class MainWindowComponent implements OnInit {
       tskName = this.srv.allMap[t.id].item.name;
       this.srv.subtaskDoneOrFail(t.parrentTask, t.id, false);
       this.srv.savePers(true, false);
-    }
-    else {
+    } else {
       // Логика для задач
       tskName = t.tittle;
       this.srv.taskMinus(t.id);
     }
 
     if (tskName && !this.srv.pers$.value.isNoDiary) {
-      this.srv.pers$.value.Diary[0].notDone += tskName + '; ';
+      this.srv.pers$.value.Diary[0].notDone += tskName + "; ";
     }
 
     this.srv.savePers(true);
@@ -173,20 +168,15 @@ export class MainWindowComponent implements OnInit {
   firstOrGlobal() {
     if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
       this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
-    }
-    else if (this.srv.pers$.value.currentView == curpersview.SkillsSort) {
+    } else if (this.srv.pers$.value.currentView == curpersview.SkillsSort) {
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
-    }
-    else if (this.srv.pers$.value.currentView == curpersview.SkillsGlobal) {
+    } else if (this.srv.pers$.value.currentView == curpersview.SkillsGlobal) {
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
-    }
-    else if (this.srv.pers$.value.currentView == curpersview.QwestTasks) {
+    } else if (this.srv.pers$.value.currentView == curpersview.QwestTasks) {
       this.srv.pers$.value.currentView = curpersview.QwestsGlobal;
-    }
-    else if (this.srv.pers$.value.currentView == curpersview.QwestsGlobal) {
+    } else if (this.srv.pers$.value.currentView == curpersview.QwestsGlobal) {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
-    }
-    else if (this.srv.pers$.value.currentView == curpersview.QwestSort) {
+    } else if (this.srv.pers$.value.currentView == curpersview.QwestSort) {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
     }
 
@@ -196,8 +186,7 @@ export class MainWindowComponent implements OnInit {
   focusFocus() {
     if (this.srv.pers$.value.currentTaskIndex) {
       this.srv.setCurInd(this.srv.pers$.value.currentTaskIndex);
-    }
-    else {
+    } else {
       this.srv.setCurInd(0);
     }
   }
@@ -241,7 +230,6 @@ export class MainWindowComponent implements OnInit {
     //                   const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
     //                     panelClass: 'custom-black'
     //                   });
-
     //                   dialogRef.afterClosed().subscribe(result => {
     //                     if (result) {
     //                       this.srv.setNewPers(this.srv.user.id);
@@ -297,16 +285,15 @@ export class MainWindowComponent implements OnInit {
   }
 
   openPlusType(linkId, linkType) {
-    if (linkType == 'qwestTask') {
+    if (linkType == "qwestTask") {
       this.srv.pers$.value.currentQwestId = linkId;
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
       this.srv.savePers(false);
-    }
-    else if (linkType == 'abTask') {
+    } else if (linkType == "abTask") {
       this.srv.pers$.value.currentQwestId = null;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
       this.srv.savePers(false);
-      let idx = this.srv.pers$.value.tasks.findIndex(n => n.plusToNames.filter(q => q.linkId == linkId).length > 0);
+      let idx = this.srv.pers$.value.tasks.findIndex((n) => n.plusToNames.filter((q) => q.linkId == linkId).length > 0);
       this.srv.setCurInd(idx);
     }
   }
@@ -314,12 +301,13 @@ export class MainWindowComponent implements OnInit {
   openTaskTimer() {
     let dialogRef = this.dialog.open(TaskTimerComponentComponent, {
       disableClose: true,
-      backdropClass: 'backdrop'
+      backdropClass: "backdrop",
     });
 
-    dialogRef.afterClosed()
+    dialogRef
+      .afterClosed()
       .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(n => {
+      .subscribe((n) => {
         let diffSecconds = n / 1000;
         let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
         let tt: number = tsk.secondsToDone - diffSecconds;
@@ -348,25 +336,24 @@ export class MainWindowComponent implements OnInit {
   qwickAddTask() {
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      panelClass: 'my-dialog',
-      data: { header: 'Добавить задачу', text: '' },
-      backdropClass: 'backdrop'
+      panelClass: "my-dialog",
+      data: { header: "Добавить задачу", text: "" },
+      backdropClass: "backdrop",
     });
 
-    dialogRef.afterClosed()
-      .subscribe(name => {
-        if (name) {
-          let dialQwest = this.srv.pers$.value.qwests.find(n => n.name == 'Дела');
-          if (dialQwest == null) {
-            this.srv.addQwest('Дела');
-          }
-          dialQwest = this.srv.pers$.value.qwests.find(n => n.name == 'Дела');
-          this.srv.addTskToQwest(dialQwest, name, true);
-
-          this.srv.savePers(false);
+    dialogRef.afterClosed().subscribe((name) => {
+      if (name) {
+        let dialQwest = this.srv.pers$.value.qwests.find((n) => n.name == "Дела");
+        if (dialQwest == null) {
+          this.srv.addQwest("Дела");
         }
-        this.srv.isDialogOpen = false;
-      });
+        dialQwest = this.srv.pers$.value.qwests.find((n) => n.name == "Дела");
+        this.srv.addTskToQwest(dialQwest, name, true);
+
+        this.srv.savePers(false);
+      }
+      this.srv.isDialogOpen = false;
+    });
   }
 
   setGlobalTaskView(b: boolean) {
@@ -375,9 +362,9 @@ export class MainWindowComponent implements OnInit {
 
   /**
    * Задаем ордер для "подзадачи" из статусов.
-   * @param tskId 
-   * @param stateId 
-   * @param idx 
+   * @param tskId
+   * @param stateId
+   * @param idx
    */
   setIndForState(tskId: string, stateId: any, idx: number) {
     // Находим задачу
@@ -394,7 +381,6 @@ export class MainWindowComponent implements OnInit {
       }
     }
   }
-
 
   setMegaPlan() {
     this.srv.savePers(false);
@@ -422,13 +408,37 @@ export class MainWindowComponent implements OnInit {
     } else if (currentView == curpersview.SkillTasks) {
       this.srv.pers$.value.currentView = curpersview.SkillsSort;
     } else if (currentView == curpersview.SkillsSort || currentView == curpersview.SkillsGlobal) {
-      this.sortSkills();
+      if (currentView == curpersview.SkillsSort) {
+        this.sortSkills();
+      } else {
+        this.sortSkillsGlobal();
+      }
 
       this.srv.pers$.value.isMegaPlan = false;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     }
 
     this.srv.savePers(false);
+  }
+
+  private sortSkillsGlobal() {
+    const tasks = this.srv.pers$.value.tasks;
+
+    // Сортировка по порядку
+    let sortByOrder = tasks.map((task) => task.order).sort((a, b) => a - b);
+
+    for (let i = 0; i < tasks.length; i++) {
+      const tsk = tasks[i];
+      const tskOrder = sortByOrder[i];
+
+      let tskPersOrder: Task | taskState;
+      tskPersOrder = this.srv.allMap[tsk.id].item;
+
+      if (tskPersOrder != null) {
+        tsk.order = tskOrder;
+        tskPersOrder.order = tskOrder;
+      }
+    }
   }
 
   private sortSkills() {
@@ -447,7 +457,7 @@ export class MainWindowComponent implements OnInit {
     }
 
     // Сортировка времени
-    let sortByAutoTime = tasks.map(task => task.autoTime).sort((a, b) => a - b);
+    let sortByAutoTime = tasks.map((task) => task.autoTime).sort((a, b) => a - b);
 
     tasks.sort((a, b) => a.order - b.order);
 
@@ -472,8 +482,7 @@ export class MainWindowComponent implements OnInit {
   setView(currentView) {
     if (currentView == curpersview.SkillTasks || currentView == curpersview.SkillsGlobal) {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
-    }
-    else if (currentView == curpersview.QwestTasks || currentView == curpersview.QwestsGlobal) {
+    } else if (currentView == curpersview.QwestTasks || currentView == curpersview.QwestsGlobal) {
       // this.srv.pers$.value.currentQwestId = null;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     }
@@ -493,8 +502,7 @@ export class MainWindowComponent implements OnInit {
       this.srv.setCurInd(i);
       if (this.srv.pers$.value.currentView == curpersview.SkillsGlobal) {
         this.srv.pers$.value.currentView = curpersview.SkillTasks;
-      }
-      else if (this.srv.pers$.value.currentView == curpersview.QwestsGlobal) {
+      } else if (this.srv.pers$.value.currentView == curpersview.QwestsGlobal) {
         this.srv.pers$.value.currentView = curpersview.QwestTasks;
       }
       this.srv.savePers(false);

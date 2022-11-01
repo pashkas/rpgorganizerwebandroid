@@ -49,11 +49,12 @@ export class PerschangesService {
 
     const isShowCharactChanges = true;
     const isShowAbChanges = true;
-    const isShowAbActivate = false;
+    const isShowAbActivate = true;
     const isShowExpChanges = false;
 
     const isOpenPersAtNewLevel = false;
-    const maxAttrLevel = 10;
+    const maxAttrLevel = 20;
+    const popupDuration = 2500;
 
 
     Object.keys(changesMap).forEach(n => {
@@ -65,7 +66,6 @@ export class PerschangesService {
             new ChangesModel('"' + changesMap[n].name + '" выполнен!', 'qwest', changesMap[n].before, changesMap[n].before, 0, changesMap[n].total, changesMap[n].img)
           );
           isDoneQwest = true;
-          // qwestToEdit = n;
         }
         else {
           if (changesMap[n].after > changesMap[n].before) {
@@ -113,57 +113,11 @@ export class PerschangesService {
           changes.push(
             chaChanges
           );
-
-          // let beforeVal = changesMap[n].before;
-          // let afterVal = changesMap[n].after;
-
-          // let abBeforePrevExp = Math.floor(beforeVal);
-          // let abBeforeNextExp = abBeforePrevExp + 1;
-
-          // let abAfterPrevExp = Math.floor(afterVal);
-          // let abAfterNextExp = abAfterPrevExp + 1;
-
-          // let abilChanges = new ChangesModel(changesMap[n].name, 'cha', beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, changesMap[n].img);
-
-          // let eCh: persExpChanges[] = [];
-          // let prevAbLvl = Math.floor(beforeVal);
-          // let afterAbLvl = Math.floor(afterVal);
-          // abilChanges.lvl = prevAbLvl;
-
-          // if (afterAbLvl > prevAbLvl) {
-          //   //1
-          //   eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
-          //   //2
-          //   eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
-          // } else if (afterAbLvl < prevAbLvl) {
-          //   //1
-          //   eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
-          //   //2
-          //   eCh.push(new persExpChanges(abAfterNextExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
-          // } else {
-          //   eCh.push(new persExpChanges(beforeVal, afterVal, abAfterPrevExp, abAfterNextExp, prevAbLvl));
-          // }
-
-          // abilChanges.abilChanges = eCh;
-
-          // changes.push(abilChanges);
         }
       }
       // Навыки
       else if (changesMap[n].type == 'abil') {
-        // if (isShowAbActivate && changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
-        //   isAbilActivated = true;
-        //   abToEdit = n;
-        //   let abChanges = new ChangesModel(`"${changesMap[n].name}" активирован`, 'abil', 0, 0, 0, maxAttrLevel, changesMap[n].img);
-
-        //   changes.push(
-        //     abChanges
-        //   );
-        // }
         if (isShowAbChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
-          // if (changesMap[n].after > changesMap[n].before && changesMap[n].after == 1) {
-          //   abToEdit = n;
-          // }
           let abChanges = new ChangesModel(changesMap[n].name, 'abil', changesMap[n].before, changesMap[n].after, 0, maxAttrLevel, changesMap[n].img);
           abChanges.lvl = changesMap[n].after;
 
@@ -171,53 +125,6 @@ export class PerschangesService {
             abChanges
           );
         }
-        // if (isShowAbChanges &&
-        //   (changesMap[n].after != changesMap[n].before && changesMap[n].after <= 90)
-        //   || (changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter)
-        // ) {
-        //   // if (changesMap[n].after > changesMap[n].before && changesMap[n].after == 1) {
-        //   //   abToEdit = n;
-        //   // }
-
-        //   let beforeVal = changesMap[n].before;
-        //   let afterVal = changesMap[n].after;
-
-        //   if (changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
-        //     beforeVal = 0;
-        //     afterVal = 10;
-        //   }
-
-        //   let abBeforePrevExp = Math.floor(beforeVal / 10) * 10;
-        //   let abBeforeNextExp = abBeforePrevExp + 10;
-
-        //   let abAfterPrevExp = Math.floor(afterVal / 10) * 10;
-        //   let abAfterNextExp = abAfterPrevExp + 10;
-
-        //   let abilChanges = new ChangesModel(changesMap[n].name, 'abil', beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, changesMap[n].img);
-
-        //   let eCh: persExpChanges[] = [];
-        //   let prevAbLvl = (Math.floor(beforeVal / 10) * 10) / 10;
-        //   let afterAbLvl = (Math.floor(afterVal / 10) * 10) / 10;
-        //   abilChanges.lvl = prevAbLvl;
-
-        //   if (afterAbLvl > prevAbLvl) {
-        //     //1
-        //     eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
-        //     //2
-        //     eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
-        //   } else if (afterAbLvl < prevAbLvl) {
-        //     //1
-        //     eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
-        //     //2
-        //     eCh.push(new persExpChanges(abAfterNextExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
-        //   } else {
-        //     eCh.push(new persExpChanges(beforeVal, afterVal, abAfterPrevExp, abAfterNextExp, prevAbLvl));
-        //   }
-
-        //   abilChanges.abilChanges = eCh;
-
-        //   changes.push(abilChanges);
-        // }
       }
       // Уровень
       else if (changesMap[n].type == 'lvl') {
@@ -388,7 +295,7 @@ export class PerschangesService {
         backdropClass: 'backdrop-changes'
       });
 
-      await sleep(4500);
+      await sleep(popupDuration);
 
       dialogRef.close();
     }
@@ -397,12 +304,12 @@ export class PerschangesService {
       let dialogRefLvlUp = this.dialog.open(LevelUpMsgComponent, {
         panelClass: classPanel,
         backdropClass: 'backdrop-changes',
-        data: { 
+        data: {
           abPoints: null
         }
       });
 
-      await sleep(4500);
+      await sleep(popupDuration);
 
       dialogRefLvlUp.close();
 
