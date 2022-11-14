@@ -36,6 +36,26 @@ export class MainWindowComponent implements OnInit {
 
   constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService) {}
 
+  /**
+   * Автовремя.
+   */
+  setAutoTime(tsk: Task) {
+    let prs = this.srv.pers$.value;
+
+    if (!prs.isWriteTime || prs.currentView != curpersview.SkillTasks) {
+      return;
+    }
+
+    const tsks = prs.tasks;
+    let idx = tsks.findIndex((q) => q.id === tsk.id);
+
+    if (idx != -1) {
+      tsks.unshift(tsks.splice(idx, 1)[0]);
+    }
+
+    this.sortSkillsGlobal();
+  }
+
   addToQwest() {
     let qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
 
@@ -102,6 +122,8 @@ export class MainWindowComponent implements OnInit {
 
     let tskName = "";
 
+    this.setAutoTime(t);
+
     if (t.parrentTask) {
       // Логика для навыков
       if (t.requrense != "нет") {
@@ -145,6 +167,8 @@ export class MainWindowComponent implements OnInit {
     this.srv.changesBefore();
 
     let tskName = "";
+
+    this.setAutoTime(t);
 
     if (t.parrentTask) {
       // Логика для подзадач
@@ -426,6 +450,9 @@ export class MainWindowComponent implements OnInit {
 
     // Сортировка по порядку
     let sortByOrder = tasks.map((task) => task.order).sort((a, b) => a - b);
+    if (!sortByOrder.length) {
+      return;
+    }
 
     for (let i = 0; i < tasks.length; i++) {
       const tsk = tasks[i];

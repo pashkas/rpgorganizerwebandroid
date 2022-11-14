@@ -1610,31 +1610,28 @@ export class PersService {
           ab.rang = rng;
 
           if (prs.currentView == curpersview.SkillTasks || prs.currentView == curpersview.SkillsSort || prs.currentView == curpersview.SkillsGlobal) {
-            if (prs.isMegaPlan && prs.currentView == curpersview.SkillsSort) {
-              if (tsk.states.length > 0 && !tsk.isStateInTitle && !tsk.isStateRefresh) {
+            if (prs.currentView == curpersview.SkillsSort) {
+              if (tsk.states.length > 0 && tsk.isSumStates) {
                 for (const st of tsk.states) {
                   let stT = this.getTaskFromState(tsk, st, false, prs);
-                  stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
                   tasks.push(stT);
                 }
               } else {
                 tasks.push(tsk);
               }
             } else {
-              if (doneReq && (tsk.value >= 1 || (prs.isTES && ab.isOpen))) {
+              if (doneReq && (tsk.value >= 1 || ab.isOpen)) {
                 if (tsk.states.length > 0 && !tsk.isStateInTitle && !tsk.isStateRefresh) {
-                  if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
+                  if (this.checkTask(tsk)) {
                     for (const st of tsk.states) {
-                      if ((prs.currentView == curpersview.SkillsSort && st.isActive) || (st.isActive && !st.isDone)) {
+                      if (st.isActive || (st.isActive && !st.isDone)) {
                         let stT = this.getTaskFromState(tsk, st, false, prs);
-                        stT.tittle = stT.tittle.replace(/___.*___/g, st.name);
                         tasks.push(stT);
                       }
                     }
                   }
                 } else {
-                  if (this.checkTask(tsk) || prs.currentView == curpersview.SkillsSort) {
-                    tsk.tittle = tsk.tittle.replace(/___/g, "");
+                  if (this.checkTask(tsk)) {
                     tasks.push(tsk);
                   }
                 }
@@ -1859,6 +1856,23 @@ export class PersService {
       this.chainOrganize(prs);
 
       this.sortPersTasks(prs);
+    }
+
+    // Если есть вчерашние задачи
+    if (prs.currentView == curpersview.SkillTasks && prs.tasks != null && prs.tasks[0] != null) {
+      let firstTsk = prs.tasks[0];
+      let today = moment().startOf("day");
+      let firstTaskDate = moment(firstTsk.date).startOf("day");
+
+      if (firstTaskDate.isBefore(today)) {
+        prs.tasks = prs.tasks.filter((q) => {
+          if (moment(q.date).startOf("day").isSameOrBefore(firstTaskDate)) {
+            return true;
+          }
+
+          return false;
+        });
+      }
     }
 
     this.setCurPersTask(prs);
@@ -2130,9 +2144,9 @@ export class PersService {
       }
 
       // Автовремя
-      if (a.requrense != "нет" && a.autoTime != b.autoTime) {
-        return a.autoTime - b.autoTime;
-      }
+      // if (a.requrense != "нет" && a.autoTime != b.autoTime) {
+      //   return a.autoTime - b.autoTime;
+      // }
 
       // По Order
       if (!a.order) {
@@ -2366,7 +2380,7 @@ export class PersService {
   tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number, isEven?: boolean) {
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
-    let value = Math.floor(progr * av);
+    let value = Math.ceil(progr * av);
 
     if (aimVal < 0) {
       value = Math.floor(progr * av);
@@ -2383,7 +2397,7 @@ export class PersService {
     }
 
     if (aimUnit == "Раз" && isEven == true) {
-      value = 2 * Math.floor(value / 2);
+      value = 2 * Math.ceil(value / 2);
       if (value < 2) value = 2;
     }
 
@@ -2392,7 +2406,7 @@ export class PersService {
     }
 
     if (aimDone != null) {
-      value = Math.floor(value - aimDone);
+      value = Math.ceil(value - aimDone);
     }
 
     return value;
@@ -2582,6 +2596,34 @@ export class PersService {
     prs.isAutoPumping = false;
     prs.isAutofocus = false;
     prs.Diary = [];
+
+    // Пересчитываем все задачи
+    let tasks = [];
+    if (prs.characteristics != null) {
+      for (const ch of prs.characteristics) {
+        if (ch.abilities != null) {
+          for (const ab of ch.abilities) {
+            if (ab.tasks != null) {
+              for (const tsk of ab.tasks) {
+                if (tsk.states != null && tsk.states.length && tsk.isSumStates) {
+                  for (const st of tsk.states) {
+                    tasks.push(st);
+                  }
+                } else {
+                  tasks.push(tsk);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    let sorted = tasks.sort((a, b) => a.order - b.order);
+
+    for (let i = 0; i < sorted.length; i++) {
+      sorted[i].order = i;
+    }
   }
 
   private countPersLevelAndOns(abTotalMax: number, prevOn: number, startExp: number, exp: number, ons: number, nextExp: number, prs: Pers, persLevel: number) {
@@ -2773,7 +2815,7 @@ export class PersService {
         const el = tsk.states[cVal].name;
 
         if (el) {
-          plusState += " " + "___" + el + "___";
+          plusState += el;
         }
       } else {
         if (tsk.isSumStates) {
@@ -2784,12 +2826,12 @@ export class PersService {
           for (let q = 0; q <= stateInd; q++) {
             const st = tsk.states[q];
 
-            plus.push("___" + st.name + "___");
+            plus.push(st.name);
           }
 
           plusState += plus.join("; ");
         } else {
-          plusState += "___" + tsk.states[stateInd].name + "___";
+          plusState += tsk.states[stateInd].name;
         }
       }
 
@@ -3143,7 +3185,7 @@ export class PersService {
     stT.lastDate = st.lastDate;
 
     if (!st.image) {
-      this.GetRndEnamy(st, this.pers$.value.level, this.pers$.value.maxPersLevel);
+      this.GetRndEnamy(st, prs.level, prs.maxPersLevel);
     }
 
     stT.id = st.id;
@@ -3281,7 +3323,7 @@ export class PersService {
           const progrSt = this.getProgrForTittle(i + 1, i, tsk.isPerk, isMegaPlan);
           const pSt = this.getPlusState(tsk, progrSt);
 
-          tsk.statesDescr.push(pSt.replace(/___/g, ""));
+          tsk.statesDescr.push(pSt);
         }
       }
 
