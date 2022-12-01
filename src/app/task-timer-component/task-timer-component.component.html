@@ -1,11 +1,9 @@
-<h1 mat-dialog-title>
-    Таймер
-</h1>
-<div mat-dialog-content>
-    <div class="timer" *ngIf="(timeLeft$ | async) as t">
-        {{t.hoursToDday | number: '2.0'}}:{{t.minutesToDday | number: '2.0'}}:{{t.secondsToDday | number: '2.0'}}
-    </div>
-</div>
-<div mat-dialog-actions [align]="'end'">
-    <button mat-button [mat-dialog-close]="dif">Ок</button>
+<div class="timer-background">
+  <h1 mat-dialog-title>Таймер</h1>
+  <div mat-dialog-content>
+    <div class="timer" *ngIf="timeLeft$ | async as t">{{ t.hoursToDday | number: "2.0" }}:{{ t.minutesToDday | number: "2.0" }}:{{ t.secondsToDday | number: "2.0" }}</div>
+  </div>
+  <div mat-dialog-actions [align]="'end'">
+    <button mat-raised-button color="accent" [mat-dialog-close]="dif">Ок</button>
+  </div>
 </div>

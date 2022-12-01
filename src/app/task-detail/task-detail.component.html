@@ -2,11 +2,11 @@
   <div class="d-flex w-100 justify-content-end px-2 py-2">
     <!-- Назад -->
     <button mat-icon-button (click)="goBack()" class="mx-2" *ngIf="!isEditMode">
-      <img src="assets/icons/left.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'2.5em'}">
+      <img src="assets/icons/left.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '2.5em' }" />
     </button>
     <!-- Редактировать -->
     <button mat-icon-button (click)="saveData()">
-      <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'3em'}">
+      <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
       <!-- <img *ngIf="isEditMode" src="assets/icons/create.png" class="img-fluid"
         [ngStyle]="{'object-fit': 'contain', 'height':'3em'}"> -->
     </button>
@@ -16,43 +16,39 @@
 <div class="container pt-2 pb-4" *ngIf="this.pers && tsk && !isEditMode">
   <form class="pb-4">
     <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image"></app-image-component>
-    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/'+ tsk.imageLvl + '/'+tsk.image+'.webp'">
-    </app-image-component>
-    <div class="progress position-relative" style="height: 32px;" *ngIf="tskAbility">
-      <div class="progress-bar attrprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'">
-      </div>
+    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"> </app-image-component>
+    <div class="progress position-relative" style="height: 32px" *ngIf="tskAbility">
+      <div class="progress-bar attrprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'"></div>
       <div class="d-flex position-absolute w-100 px-1">
         <div class="flex-grow-1 text-left align-self-baseline">
-          <h4>{{tsk| abHardness}}</h4>
+          <h4>{{ tsk | abHardness }}</h4>
         </div>
         <div class="text-right align-self-baseline">
-          <h4>{{tskAbility.rang.name}}</h4>
+          <h4>{{ tskAbility.rang.name }}</h4>
         </div>
       </div>
     </div>
     <div *ngIf="tskAbility" class="pt-1">
-      <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel">
-      </mat-progress-bar>
+      <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel"> </mat-progress-bar>
     </div>
 
     <div class="w-100 px-0 text-center" *ngIf="!tskAbility">
-      <h4>{{tsk.name}}</h4>
+      <h4>{{ tsk.name }}</h4>
     </div>
 
-    <br *ngIf="tskAbility">
+    <br *ngIf="tskAbility" />
     <!-- Дата и время, повтор -->
     <div fxLayout="row" fxLayoutAlign="space-between center" class="px-1" *ngIf="tskAbility">
-      <ng-container *ngIf="tskCharact$|async as charact">
-        <a [routerLink]="['/pers/characteristic', charact.id]">{{charact.name}}</a>
+      <ng-container *ngIf="tskCharact$ | async as charact">
+        <a [routerLink]="['/pers/characteristic', charact.id]">{{ charact.name }}</a>
       </ng-container>
 
-
       <div>
-        {{tsk.requrense|titlecase}}
+        {{ tsk.requrense | titlecase }}
       </div>
 
       <div>
-        {{tsk.date|datestring}}
+        {{ tsk.date | datestring }}
       </div>
 
       <!-- <div>
@@ -75,72 +71,67 @@
     <!-- Описание -->
     <div class="text-center pt-2 font-small text-secondary" *ngIf="tsk.descr">
       <i>
-        {{tsk.descr}}
+        {{ tsk.descr }}
       </i>
     </div>
 
     <!-- Связанные квесты -->
-    <div class="pt-2 text-center" *ngIf="linkQwests.length>0">
+    <div class="pt-2 text-center" *ngIf="linkQwests.length > 0">
       <div *ngFor="let qw of linkQwests">
-        <a skipLocationChange [routerLink]="['/pers/qwest', qw.id]">{{'🔗 '+qw.name+' 🔗'}}</a>
+        <a skipLocationChange [routerLink]="['/pers/qwest', qw.id]">{{ "🔗 " + qw.name + " 🔗" }}</a>
       </div>
     </div>
 
     <app-req-show *ngIf="tskAbility" [reqvirements]="tsk.reqvirements"></app-req-show>
 
-    <button *ngIf="tsk.isStateRefresh" class="my-1" style="width: 100%;" color="accent" mat-stroked-button
-      (click)="refrCounter()">
+    <button *ngIf="tsk.isStateRefresh" class="my-1" style="width: 100%" color="accent" mat-stroked-button (click)="refrCounter()">
       <mat-icon>refresh</mat-icon>
     </button>
 
-    <ng-container *ngIf="!tskAbility && tsk.states.length>0">
+    <ng-container *ngIf="!tskAbility && tsk.states.length > 0">
       <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="states" *ngIf="tsk.states.length > 0">
         <div mat-list-item *ngFor="let st of tsk.states; let i = index">
           <ng-container *ngIf="st.isDone">
             <del>
               <div class="text-center">
-                {{st.name}}
+                {{ st.name }}
               </div>
             </del>
           </ng-container>
           <ng-container *ngIf="!st.isDone">
             <div class="text-center">
-              {{st.name}}
+              {{ st.name }}
             </div>
           </ng-container>
         </div>
       </mat-list>
     </ng-container>
-    <br>
-    <ng-container *ngFor="let st of tsk.statesDescr; let i = index;">
-      <div *ngIf="st && i!= 0" class="text-center px-0 py-1 border-0"
-        [ngClass]="{'bg-success': i==tsk.value && tskAbility.isOpen}">
-        <b>{{i}} </b>{{st}}
+    <br />
+    <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
+      <div *ngIf="st && i != 0" class="text-center px-0 py-1 border-0" [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen }">
+        <b>{{ i }} </b>{{ st }}
       </div>
     </ng-container>
   </form>
-  <br>
-  <br>
+  <br />
+  <br />
 </div>
 <!-- Режим редактирования -->
 <div class="container pt-2 pb-4" *ngIf="this.pers && tsk && isEditMode">
   <form class="pb-4">
-    <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image" [isCanEdit]="true">
-    </app-image-component>
-    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/'+ tsk.imageLvl + '/'+tsk.image+'.webp'">
-    </app-image-component>
+    <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image" [isCanEdit]="true"> </app-image-component>
+    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"> </app-image-component>
     <!-- Название -->
-    <div fxLayout="row" xLayoutAlign="none center" fxLayoutGap='15px'>
+    <div fxLayout="row" xLayoutAlign="none center" fxLayoutGap="15px">
       <mat-form-field>
-        <input onfocus="this.select()" matInput autocomplete="off" placeholder="Название" [(ngModel)]="tsk.name"
-          name="tsk.name" #nameEdt>
+        <input onfocus="this.select()" matInput autocomplete="off" placeholder="Название" [(ngModel)]="tsk.name" name="tsk.name" #nameEdt />
       </mat-form-field>
     </div>
     <div [formGroup]="charactGroup" *ngIf="tskAbility">
       <mat-form-field fxFlex>
         <mat-select formControlName="charact" panelClass="panel-override">
           <mat-option *ngFor="let a of pers.characteristics" [value]="a">
-            {{a.name}}
+            {{ a.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -149,16 +140,24 @@
     <!-- Описание -->
     <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px">
       <mat-form-field>
-        <textarea matInput autosize minRows='1' maxRows='5' useImportant='true' onfocus="this.select()"
-          autocomplete="off" placeholder="Описание" [(ngModel)]="tsk.descr" name="tsk.descr"></textarea>
+        <textarea matInput autosize minRows="1" maxRows="5" useImportant="true" onfocus="this.select()" autocomplete="off" placeholder="Описание" [(ngModel)]="tsk.descr" name="tsk.descr"></textarea>
       </mat-form-field>
     </div>
 
     <!-- Дата, повторение -->
     <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
       <mat-form-field>
-        <input [readonly]="true" matInput autocomplete="off" placeholder="Дата" [ngModel]="tsk.date" name="tsk.date"
-          (ngModelChange)="onTskDateChange($event)" [owlDateTimeTrigger]="dt1" [owlDateTime]="dt1">
+        <input
+          [readonly]="true"
+          matInput
+          autocomplete="off"
+          placeholder="Дата"
+          [ngModel]="tsk.date"
+          name="tsk.date"
+          (ngModelChange)="onTskDateChange($event)"
+          [owlDateTimeTrigger]="dt1"
+          [owlDateTime]="dt1"
+        />
         <owl-date-time [pickerType]="'calendar'" #dt1></owl-date-time>
       </mat-form-field>
 
@@ -168,7 +167,7 @@
           <mat-label>Повторение</mat-label>
           <mat-select [(ngModel)]="tsk.requrense" name="tsk.requrense" (selectionChange)="requrenseChange()">
             <mat-option *ngFor="let req of requrenses" [value]="req">
-              {{req}}
+              {{ req }}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -185,24 +184,20 @@
       <div *ngFor="let wd of weekDays">
         <ng-container>
           <mat-chip (click)="setWeekDays(wd); requrenseChange()" [selected]="tsk.tskWeekDays.includes(wd)" color="accent">
-            {{' ' + wd + ' '}}
+            {{ " " + wd + " " }}
           </mat-chip>
         </ng-container>
       </div>
     </div>
 
-
     <!-- Сложность -->
     <ng-container *ngIf="tsk.requrense != 'нет'">
       <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px" class="pb-3">
         <mat-form-field fxFlex>
-          <input onfocus="this.pers" matInput autocomplete="off" placeholder="Постфикс" [(ngModel)]="tsk.postfix"
-            name="tsk.postfix">
+          <input onfocus="this.pers" matInput autocomplete="off" placeholder="Постфикс" [(ngModel)]="tsk.postfix" name="tsk.postfix" />
         </mat-form-field>
         <mat-chip-list selectable multiple>
-          <mat-chip (click)="tsk.isPerk=!tsk.isPerk" [selected]="tsk.isPerk" color="accent">
-            &nbsp;Перк?&nbsp;
-          </mat-chip>
+          <mat-chip (click)="tsk.isPerk = !tsk.isPerk" [selected]="tsk.isPerk" color="accent"> &nbsp;Перк?&nbsp; </mat-chip>
 
           <!-- <ng-container>
             <mat-divider vertical class="vertdiv"></mat-divider>
@@ -216,16 +211,10 @@
 
           <!-- <mat-divider vertical class="vertdiv"></mat-divider> -->
 
-          <mat-chip [selected]="tsk.isStatePlusTitle" color="accent"
-            (click)="tsk.isStatePlusTitle=!tsk.isStatePlusTitle">
-            Название</mat-chip>
-          <mat-chip [selected]="tsk.isStateInTitle" color="accent" (click)="tsk.isStateInTitle=!tsk.isStateInTitle">
-            Заголовок
-          </mat-chip>
+          <mat-chip [selected]="tsk.isStatePlusTitle" color="accent" (click)="tsk.isStatePlusTitle = !tsk.isStatePlusTitle"> Название</mat-chip>
+          <mat-chip [selected]="tsk.isStateInTitle" color="accent" (click)="tsk.isStateInTitle = !tsk.isStateInTitle"> Заголовок </mat-chip>
           <mat-chip color="accent" (click)="setSumStates()" [selected]="tsk.isSumStates">&nbsp;∑&nbsp;</mat-chip>
-          <mat-chip [selected]="tsk.isStateRefresh" color="accent" (click)="tsk.isStateRefresh=!tsk.isStateRefresh">
-            &nbsp;⟳&nbsp;
-          </mat-chip>
+          <mat-chip [selected]="tsk.isStateRefresh" color="accent" (click)="tsk.isStateRefresh = !tsk.isStateRefresh"> &nbsp;⟳&nbsp; </mat-chip>
         </mat-chip-list>
       </div>
     </ng-container>
@@ -234,29 +223,24 @@
       <!-- Таймер, счетчик -->
       <div fxLayoutGap="8px" fxLayout="row" fxLayoutAlign="space-between center">
         <mat-form-field fxFlex>
-          <input matInput autocomplete="off" onfocus="this.select()" placeholder="Цель" [(ngModel)]="tsk.aimTimer"
-            name="tsk.aimTimer">
+          <input matInput autocomplete="off" onfocus="this.select()" placeholder="Цель" [(ngModel)]="tsk.aimTimer" name="tsk.aimTimer" />
         </mat-form-field>
 
         <mat-chip-list [selectable]="true">
           <mat-chip (click)="tsk.aimUnit = 'Часов'" [selected]="tsk.aimUnit == 'Часов'" color="accent">Часов</mat-chip>
           <mat-chip (click)="tsk.aimUnit = 'Минут'" [selected]="tsk.aimUnit == 'Минут'" color="accent">Минут</mat-chip>
-          <mat-chip (click)="tsk.aimUnit = 'Секунд'" [selected]="tsk.aimUnit == 'Секунд'" color="accent">Секунд
-          </mat-chip>
+          <mat-chip (click)="tsk.aimUnit = 'Секунд'" [selected]="tsk.aimUnit == 'Секунд'" color="accent">Секунд </mat-chip>
           <mat-chip (click)="tsk.aimUnit = 'Раз'" [selected]="tsk.aimUnit == 'Раз'" color="accent">Раз</mat-chip>
         </mat-chip-list>
 
-        <mat-slide-toggle *ngIf="tsk.aimUnit == 'Раз'" [(ngModel)]="tsk.isEven" name="tsk.isEven">Чет?
-        </mat-slide-toggle>
+        <mat-slide-toggle *ngIf="tsk.aimUnit == 'Раз'" [(ngModel)]="tsk.isEven" name="tsk.isEven">Чет? </mat-slide-toggle>
 
         <!-- <mat-form-field>
           <input matInput autocomplete="off" onfocus="this.select()" placeholder="Раз" [(ngModel)]="tsk.aimCounter"
             name="tsk.aimCounter">
         </mat-form-field> -->
-
       </div>
     </ng-container>
-
 
     <!-- Состояния -->
     <!-- <h5>Состояния:</h5> -->
@@ -267,8 +251,8 @@
       <ng-container *ngIf="tsk.requrense === 'нет'">
         <h5>Подзадачи:</h5>
       </ng-container>
-      <button class="icon-small" (click)="addStateToTask();" mat-icon-button>
-        <img src="assets/icons/create.png" class="img-fluid">
+      <button class="icon-small" (click)="addStateToTask()" mat-icon-button>
+        <img src="assets/icons/create.png" class="img-fluid" />
       </button>
     </div>
 
@@ -278,37 +262,34 @@
           <div class="flex-grow-1 align-self-center">
             <a class="text-primary">
               <ng-container *ngIf="tsk.requrense != 'нет' || st.isDone == false">
-                {{st.name}}
+                {{ st.name }}
               </ng-container>
               <ng-container *ngIf="tsk.requrense === 'нет' && st.isDone == true">
                 <del>
-                  {{st.name}}
+                  {{ st.name }}
                 </del>
               </ng-container>
             </a>
           </div>
           <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
-
             <button class="icon-small" (click)="addStateToTask(st)" mat-icon-button>
-              <img src="assets/icons/edit.png" class="img-fluid">
+              <img src="assets/icons/edit.png" class="img-fluid" />
             </button>
 
             <button class="icon-small" (click)="delState(st.id)" mat-icon-button>
-              <img src="assets/icons/del.png" class="img-fluid">
+              <img src="assets/icons/del.png" class="img-fluid" />
             </button>
 
             <button class="icon-small" mat-icon-button cdkDragHandle>
-              <img src="assets/icons/right.png" class="img-fluid">
+              <img src="assets/icons/right.png" class="img-fluid" />
             </button>
           </div>
         </div>
       </div>
     </mat-list>
 
-    <app-req-edit *ngIf="tskAbility" [reqvirements]="tsk.reqvirements" (reqvirementsChange)="tsk.reqvirements=$event">
-    </app-req-edit>
-
+    <app-req-edit *ngIf="tskAbility" [reqvirements]="tsk.reqvirements" (reqvirementsChange)="tsk.reqvirements = $event"> </app-req-edit>
   </form>
-  <br>
-  <br>
+  <br />
+  <br />
 </div>

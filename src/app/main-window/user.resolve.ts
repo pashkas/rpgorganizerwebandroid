@@ -1,17 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 import { Resolve, ActivatedRouteSnapshot, Router } from "@angular/router";
-import { Pers } from 'src/Models/Pers';
-import { FirebaseUserModel } from 'src/Models/User';
-import { PersService } from '../pers.service';
-import { UserService } from '../user.service';
-
+import { Pers } from "src/Models/Pers";
+import { FirebaseUserModel } from "src/Models/User";
+import { PersService } from "../pers.service";
+import { UserService } from "../user.service";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class UserResolver implements Resolve<any> {
-
-  constructor(public userService: UserService, private router: Router, private srv: PersService) { }
+  constructor(public userService: UserService, private router: Router, private srv: PersService) {}
 
   async resolve(route: ActivatedRouteSnapshot): Promise<any> {
     let prsJson = localStorage.getItem("pers");
@@ -23,41 +21,25 @@ export class UserResolver implements Resolve<any> {
     } else {
       let user = new FirebaseUserModel();
       return await new Promise((resolve, reject) => {
-        this.userService.getCurrentUser()
-          .then(res => {
+        this.userService.getCurrentUser().then(
+          (res) => {
             user.name = res.displayName;
             user.provider = res.providerData[0].providerId;
             user.id = res.uid;
 
             return resolve(user);
-          }, err => {
-            this.router.navigate(['/login']);
-            
+          },
+          (err) => {
+            this.router.navigate(["/pers/login"], {
+              queryParams: {
+                frome: "/main",
+              },
+            });
+
             return reject(err);
-          });
-      })
+          }
+        );
+      });
     }
-
-    // if (!this.srv.isOffline) {
-    //   let user = new FirebaseUserModel();
-
-    //   return await new Promise((resolve, reject) => {
-    //     this.userService.getCurrentUser()
-    //       .then(res => {
-    //         user.name = res.displayName;
-    //         user.provider = res.providerData[0].providerId;
-    //         user.id = res.uid;
-
-    //         return resolve(user);
-    //       }, err => {
-    //         this.router.navigate(['/login']);
-
-    //         return reject(err);
-    //       })
-    //   })
-    // }
-    // else {
-
-    // }
   }
 }

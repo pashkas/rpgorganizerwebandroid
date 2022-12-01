@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore } from 'angularfire2/firestore';
-import { AngularFireAuth } from 'angularfire2/auth';
-import * as firebase from 'firebase/app';
+import { AngularFirestore } from "angularfire2/firestore";
+import { AngularFireAuth } from "angularfire2/auth";
+import * as firebase from "firebase/app";
 import { PersModule } from "./pers/pers.module";
 import { Pers } from "src/Models/Pers";
 import { map, share, take } from "rxjs/operators";
@@ -13,17 +13,10 @@ import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class UserService {
-  constructor(
-    public db: AngularFirestore,
-    public afAuth: AngularFireAuth,
-    private srv: PersService,
-    public dialog: MatDialog,
-    private router: Router,
-  ) {
-  }
+  constructor(public db: AngularFirestore, public afAuth: AngularFireAuth, private srv: PersService, public dialog: MatDialog, private router: Router) {}
 
   async getCurrentUser() {
     return await new Promise<any>((resolve, reject) => {
@@ -31,22 +24,27 @@ export class UserService {
         if (user) {
           resolve(user);
         } else {
-          reject('No user logged in');
+          reject("No user logged in");
         }
-      })
-    })
+      });
+    });
   }
 
   updateCurrentUser(value) {
     return new Promise<any>((resolve, reject) => {
       var user = firebase.auth().currentUser;
-      user.updateProfile({
-        displayName: value.name,
-        photoURL: user.photoURL
-      }).then(res => {
-        resolve(res)
-      }, err => reject(err))
-    })
+      user
+        .updateProfile({
+          displayName: value.name,
+          photoURL: user.photoURL,
+        })
+        .then(
+          (res) => {
+            resolve(res);
+          },
+          (err) => reject(err)
+        );
+    });
   }
 
   /**
@@ -54,20 +52,22 @@ export class UserService {
    * @param userId Идентификатор пользователя
    */
   loadPers(userId: string) {
-    return this.db.collection<Pers>('pers').doc(userId).valueChanges().pipe(take(1), share());
+    return this.db.collection<Pers>("pers").doc(userId).valueChanges().pipe(take(1), share());
   }
 
   /**
    * Загрузить персонажей с уровнем, большим чем 0;
    */
   getChampions(): Observable<any> {
-    return this.db.collection<Pers>('/pers', ref => ref.where('level', '>=', 1)
-      .orderBy('level', 'desc'))
+    return this.db
+      .collection<Pers>("/pers", (ref) => ref.where("level", ">=", 1).orderBy("level", "desc"))
       .valueChanges()
       .pipe(
-        map(champ => champ.map(n => {
-          return { Name: n.name, Level: n.level, Pic: n.image ? n.image : n.rang.img, Id: n.id, date: new Date(n.dateLastUse) };
-        })),
+        map((champ) =>
+          champ.map((n) => {
+            return { Name: n.name, Level: n.level, Pic: n.image ? n.image : n.rang.img, Id: n.id, date: new Date(n.dateLastUse) };
+          })
+        ),
         take(1),
         share()
       );
@@ -78,7 +78,7 @@ export class UserService {
       // download
       this.loadPers(this.srv.pers$.value.userId)
         .pipe(take(1))
-        .subscribe(n => {
+        .subscribe((n) => {
           let prs: Pers = n as Pers;
           prs.currentView = curpersview.SkillTasks;
           this.srv.savePers(false, null, prs);
@@ -88,8 +88,7 @@ export class UserService {
       this.srv.savePers(false);
       let prs = this.srv.pers$.value;
       const persJson = JSON.parse(JSON.stringify(prs));
-      this.db.collection('pers').doc(prs.id)
-        .set(persJson);
+      this.db.collection("pers").doc(prs.id).set(persJson);
     }
   }
 
@@ -105,31 +104,43 @@ export class UserService {
     this.srv.setPers(JSON.stringify(prs));
   }
 
-  getPers() {
-    this.getCurrentUser()
-      .then(res => {
+  getPers(type: string) {
+    this.getCurrentUser().then(
+      (res) => {
         this.loadPers(res.uid)
           .pipe(take(1))
-          .subscribe(n => {
-            let prs: Pers = n as Pers;
-            if (prs != null) {
-              this.srv.setPers(JSON.stringify(prs));
+          .subscribe((n) => {
+            if (type == "setUserId" && this.srv.pers$ != null && this.srv.pers$.value != null) {
+              this.srv.pers$.value.userId = res.uid;
+              this.srv.savePers(false);
             } else {
-              const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-                panelClass: 'custom-black'
-              });
-
-              dialogRef.afterClosed()
-                .pipe(take(1))
-                .subscribe(result => {
-                  if (result) {
-                    this.setNewPers(res.uid);
-                  }
+              let prs: Pers = n as Pers;
+              if (prs != null) {
+                this.srv.setPers(JSON.stringify(prs));
+              } else {
+                const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+                  panelClass: "custom-black",
                 });
+
+                dialogRef
+                  .afterClosed()
+                  .pipe(take(1))
+                  .subscribe((result) => {
+                    if (result) {
+                      this.setNewPers(res.uid);
+                    }
+                  });
+              }
             }
           });
-      }, err => {
-        this.router.navigate(['/login']);
-      });
+      },
+      (err) => {
+        this.router.navigate(["/pers/login"], {
+          queryParams: {
+            frome: "/main",
+          },
+        });
+      }
+    );
   }
 }

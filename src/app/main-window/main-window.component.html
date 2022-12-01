@@ -43,18 +43,13 @@
                   </ng-template>
                 </div>
               </div>
-              <!-- <div>
-                <mat-checkbox *ngIf="this.srv.pers$.value.isWriteTime && data.currentView=='SkillsSort'"
-                  (change)="setIsNotWriteTime($event, t)" [ngModel]="t.isNotWriteTime">
-                  ⌀
-                </mat-checkbox>
-              </div> -->
-              <div *ngIf="t.requrense != 'нет' && !true" class="px-2">
+              <mat-checkbox class="my-checkbox" *ngIf="this.srv.pers$.value.isWriteTime && data.currentView == 'SkillsSort'" (change)="setIsNotWriteTime($event, t)" [ngModel]="t.isNotWriteTime"> </mat-checkbox>
+              <!-- <div *ngIf="t.requrense != 'нет' && !true" class="px-2">
                 <ngx-material-timepicker-toggle [for]="pikTimeInList"></ngx-material-timepicker-toggle>
                 <ngx-material-timepicker (timeSet)="onTimeChanged($event, t.id)" #pikTimeInList [format]="24" [defaultTime]="t.time"></ngx-material-timepicker>
                 {{ t.time }}
-              </div>
-              <mat-icon cdkDragHandle class="pointer pr-1" [hidden]="!(data.currentView == 'QwestSort') && !(data.currentView == 'SkillsSort') && !(data.currentView == 'SkillsGlobal')">
+              </div> -->
+              <mat-icon cdkDragHandle class="pointer mr-2" [hidden]="!(data.currentView == 'QwestSort') && !(data.currentView == 'SkillsSort') && !(data.currentView == 'SkillsGlobal')">
                 drag_handle
               </mat-icon>
             </div>
@@ -123,7 +118,13 @@
               </ng-template>
             </ng-template>
           </ng-container>
-          <a *ngIf="data?.currentTask?.aimTimer && data?.currentTask?.aimUnit != 'Раз'" class="text-secondary pointer" (click)="openTaskTimer()"> | ⌛&nbsp; </a>
+          <a
+            *ngIf="data?.currentTask?.aimTimer && data?.currentTask?.aimTimer != 0 && data?.currentTask?.aimUnit != null && data?.currentTask?.aimUnit != 'Раз'"
+            class="text-secondary pointer"
+            (click)="openTaskTimer()"
+          >
+            | ⌛&nbsp;
+          </a>
         </small>
       </div>
     </ng-container>

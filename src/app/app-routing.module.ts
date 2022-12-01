@@ -8,6 +8,7 @@ const routes: Routes = [
   { path: 'main', component: MainWindowComponent },
   { path: 'pers', loadChildren: () => import('./pers/pers.module').then(m => m.PersModule) },
   { path: 'mind-map', loadChildren: () => import('./mind-map/mind-map.module').then(m => m.MindMapModule) },
+  { path: 'sync', loadChildren: () => import('./sync-module/sync-module.module').then(m => m.SyncModuleModule) },
 ];
 
 @NgModule({

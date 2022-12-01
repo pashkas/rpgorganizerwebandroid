@@ -1,4 +1,9 @@
 .timer{
     text-align: center;
     font-size: 3em;
+    color: green;
+}
+
+.timer-background{
+    background-color: black;
 }

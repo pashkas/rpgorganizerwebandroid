@@ -42,7 +42,7 @@ export class MainWindowComponent implements OnInit {
   setAutoTime(tsk: Task) {
     let prs = this.srv.pers$.value;
 
-    if (!prs.isWriteTime || prs.currentView != curpersview.SkillTasks) {
+    if (!prs.isWriteTime || prs.currentView != curpersview.SkillTasks || tsk.isNotWriteTime) {
       return;
     }
 
@@ -122,6 +122,8 @@ export class MainWindowComponent implements OnInit {
 
     let tskName = "";
 
+    let tskIndex = this.srv.pers$.value.tasks.indexOf(t);
+
     this.setAutoTime(t);
 
     if (t.parrentTask) {
@@ -132,9 +134,10 @@ export class MainWindowComponent implements OnInit {
       }
       // Логика для подзадач
       else {
-        const subTsk = this.srv.allMap[t.id].item;
-        // subTsk.lastNotDone = false;
+        const subTsk: taskState = this.srv.allMap[t.id].item;
+        subTsk.lastNotDone = false;
         subTsk.isDone = true;
+        subTsk.secondsDone = 0;
       }
     } else {
       this.srv.taskPlus(t.id);
@@ -146,6 +149,8 @@ export class MainWindowComponent implements OnInit {
     }
 
     this.srv.savePers(true);
+
+    this.srv.setCurInd(tskIndex);
 
     this.srv.changesAfter(true);
   }
@@ -168,10 +173,16 @@ export class MainWindowComponent implements OnInit {
 
     let tskName = "";
 
+    let tskIndex = this.srv.pers$.value.tasks.indexOf(t);
+
     this.setAutoTime(t);
 
     if (t.parrentTask) {
       // Логика для подзадач
+      const tsk: Task = this.srv.allMap[t.parrentTask].item;
+      for (const st of tsk.states) {
+        st.secondsDone = 0;
+      }
       tskName = this.srv.allMap[t.id].item.name;
       this.srv.subtaskDoneOrFail(t.parrentTask, t.id, false);
       this.srv.savePers(true, false);
@@ -186,6 +197,9 @@ export class MainWindowComponent implements OnInit {
     }
 
     this.srv.savePers(true);
+
+    this.srv.setCurInd(tskIndex);
+
     this.srv.changesAfter(false);
   }
 
@@ -229,55 +243,6 @@ export class MainWindowComponent implements OnInit {
   }
 
   ngOnInit() {
-    // if (!this.pers) {
-    //   this.route.data.pipe(take(1))
-    //     .subscribe(routeData => {
-    //       let data = routeData['data'];
-    //       if (!this.srv.isOffline) {
-    //         // Оналайн
-    //         if (data) {
-    //           this.srv.user = data;
-    //           // Пользователь пустой
-    //           if (!this.srv.user || !this.srv.user.id) {
-    //             this.router.navigate(['/login']);
-    //           }
-    //           else {
-    //             this.srv.loadPers(this.srv.user.id)
-    //               .pipe(takeUntil(this.unsubscribe$))
-    //               .subscribe(prsInDb => {
-    //                 // Если перс есть
-    //                 if (prsInDb) {
-    //                   this.srv.setPers(prsInDb);
-    //                 }
-    //                 // Если перса пока что не было
-    //                 else if (!prsInDb) {
-    //                   const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-    //                     panelClass: 'custom-black'
-    //                   });
-    //                   dialogRef.afterClosed().subscribe(result => {
-    //                     if (result) {
-    //                       this.srv.setNewPers(this.srv.user.id);
-    //                     }
-    //                   });
-    //                 }
-    //               });
-    //           }
-    //         }
-    //       }
-    //       else {
-    //         // Оффлайн
-    //         let prs = JSON.parse(data);
-    //         if (prs) {
-    //           this.srv.setPers(data);
-    //         }
-    //         else {
-    //           // Сбрасывем оффлайн
-    //           localStorage.setItem("isOffline", JSON.stringify(false));
-    //           localStorage.setItem("pers", JSON.stringify(null));
-    //         }
-    //       }
-    //     });
-    // }
   }
 
   onLongPress(e) {
@@ -325,6 +290,7 @@ export class MainWindowComponent implements OnInit {
   openTaskTimer() {
     let dialogRef = this.dialog.open(TaskTimerComponentComponent, {
       disableClose: true,
+      panelClass: "backdrop-timer",
       backdropClass: "backdrop",
     });
 
@@ -333,17 +299,33 @@ export class MainWindowComponent implements OnInit {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((n) => {
         let diffSecconds = n / 1000;
-        let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
-        let tt: number = tsk.secondsToDone - diffSecconds;
-        if (tt < 0) {
-          tt = 0;
-        }
+        let current = this.srv.currentTask$.value;
+        if (current.parrentTask) {
+          let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.parrentTask].item;
+          let st: taskState = this.srv.allMap[this.srv.currentTask$.value.id].item;
+          let tt: number = tsk.secondsToDone - diffSecconds;
+          if (tt < 0) {
+            tt = 0;
+          }
 
-        if (tt > tsk.secondsToDone) {
-          tt = tsk.secondsToDone;
-        }
+          if (tt > tsk.secondsToDone) {
+            tt = tsk.secondsToDone;
+          }
 
-        tsk.secondsDone = tt;
+          st.secondsDone = tt;
+        } else {
+          let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
+          let tt: number = tsk.secondsToDone - diffSecconds;
+          if (tt < 0) {
+            tt = 0;
+          }
+
+          if (tt > tsk.secondsToDone) {
+            tt = tsk.secondsToDone;
+          }
+
+          tsk.secondsDone = tt;
+        }
 
         this.srv.savePers(false);
       });

@@ -1,28 +1,26 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { PersService } from '../pers.service';
-import { Pers } from 'src/Models/Pers';
-import { Characteristic } from 'src/Models/Characteristic';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Location } from '@angular/common';
-import { Reward } from 'src/Models/Reward';
-import { Subject } from 'rxjs';
-import { Ability } from 'src/Models/Ability';
-import { MatDialog } from '@angular/material';
-import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
-import { AddOrEditRevardComponent } from '../add-or-edit-revard/add-or-edit-revard.component';
-import { Qwest } from 'src/Models/Qwest';
-import { StatesService } from '../states.service';
-import { takeUntil } from 'rxjs/operators';
-import { PersImportExportDialogComponent } from '../pers-import-export-dialog/pers-import-export-dialog.component';
-import { QuickAddAbilityComponent } from '../pers/quick-add-ability/quick-add-ability.component';
-import { RevardDialogData } from 'src/Models/RevardDialogData';
-import { UserService } from '../user.service';
+import { ChangeDetectionStrategy, Component, OnInit } from "@angular/core";
+import { PersService } from "../pers.service";
+import { Pers } from "src/Models/Pers";
+import { Characteristic } from "src/Models/Characteristic";
+import { ActivatedRoute, Router } from "@angular/router";
+import { Location } from "@angular/common";
+import { Reward } from "src/Models/Reward";
+import { Subject } from "rxjs";
+import { Ability } from "src/Models/Ability";
+import { MatDialog } from "@angular/material";
+import { AddItemDialogComponent } from "../add-item-dialog/add-item-dialog.component";
+import { AddOrEditRevardComponent } from "../add-or-edit-revard/add-or-edit-revard.component";
+import { Qwest } from "src/Models/Qwest";
+import { StatesService } from "../states.service";
+import { takeUntil } from "rxjs/operators";
+import { PersImportExportDialogComponent } from "../pers-import-export-dialog/pers-import-export-dialog.component";
+import { RevardDialogData } from "src/Models/RevardDialogData";
 
 @Component({
-  selector: 'app-pers-list',
-  templateUrl: './pers-list.component.html',
-  styleUrls: ['./pers-list.component.css'],
-  changeDetection: ChangeDetectionStrategy.Default
+  selector: "app-pers-list",
+  templateUrl: "./pers-list.component.html",
+  styleUrls: ["./pers-list.component.css"],
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class PersListComponent implements OnInit {
   private unsubscribe$ = new Subject();
@@ -34,48 +32,7 @@ export class PersListComponent implements OnInit {
   selAb: Ability;
   selCha: Characteristic;
 
-  constructor(private location: Location, public srvSt: StatesService, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, private usrSrv: UserService) { }
-
-
-  /**
-   * Экспорт персонажа - в виде текста.
-   *
-   */
-  exportPers() {
-    this.srv.isDialogOpen = true;
-    const dialogRef = this.dialog.open(PersImportExportDialogComponent, {
-      data: { isImport: false },
-      backdropClass: 'backdrop'
-    });
-
-    dialogRef.afterClosed()
-      .subscribe(n => {
-        this.srv.isDialogOpen = false;
-      });
-  }
-
-  /**
-   * Импорт персонажа - из текстового файла.
-   *
-   */
-  importPers() {
-    this.srv.isDialogOpen = true;
-    const dialogRef = this.dialog.open(PersImportExportDialogComponent, {
-      data: { isImport: true },
-      backdropClass: 'backdrop'
-    });
-
-    dialogRef.afterClosed()
-      .subscribe(n => {
-        if (n) {
-          let newPers: Pers = JSON.parse(n);
-          newPers.id = this.srv.pers$.value.id;
-          newPers.userId = this.srv.pers$.value.userId;
-          this.srv.setPers(JSON.stringify(newPers));
-        }
-        this.srv.isDialogOpen = false;
-      });
-  }
+  constructor(private location: Location, public srvSt: StatesService, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) {}
 
   /**
    * Добавление навыка.
@@ -83,18 +40,17 @@ export class PersListComponent implements OnInit {
   addAbil(charactId: string) {
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      panelClass: 'my-dialog',
-      data: { header: 'Добавить навык', text: '' },
-      backdropClass: 'backdrop'
+      panelClass: "my-dialog",
+      data: { header: "Добавить навык", text: "" },
+      backdropClass: "backdrop",
     });
 
-    dialogRef.afterClosed()
-      .subscribe(name => {
-        if (name) {
-          this.srv.addAbil(charactId, name);
-        }
-        this.srv.isDialogOpen = false;
-      });
+    dialogRef.afterClosed().subscribe((name) => {
+      if (name) {
+        this.srv.addAbil(charactId, name);
+      }
+      this.srv.isDialogOpen = false;
+    });
   }
 
   /**
@@ -103,18 +59,17 @@ export class PersListComponent implements OnInit {
   addCharact() {
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      panelClass: 'my-dialog',
-      data: { header: 'Добавить характеристику', text: '' },
-      backdropClass: 'backdrop'
+      panelClass: "my-dialog",
+      data: { header: "Добавить характеристику", text: "" },
+      backdropClass: "backdrop",
     });
 
-    dialogRef.afterClosed()
-      .subscribe(name => {
-        if (name) {
-          this.srv.addCharact(name);
-        }
-        this.srv.isDialogOpen = false;
-      });
+    dialogRef.afterClosed().subscribe((name) => {
+      if (name) {
+        this.srv.addCharact(name);
+      }
+      this.srv.isDialogOpen = false;
+    });
   }
 
   /**
@@ -123,68 +78,79 @@ export class PersListComponent implements OnInit {
   addNewQwest() {
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      panelClass: 'my-dialog',
-      data: { header: 'Добавить квест', text: '' },
-      backdropClass: 'backdrop'
+      panelClass: "my-dialog",
+      data: { header: "Добавить квест", text: "" },
+      backdropClass: "backdrop",
     });
 
-    dialogRef.afterClosed()
-      .subscribe(name => {
-        if (name) {
-          this.srv.addQwest(name);
-        }
-        this.srv.isDialogOpen = false;
-      });
+    dialogRef.afterClosed().subscribe((name) => {
+      if (name) {
+        this.srv.addQwest(name);
+      }
+      this.srv.isDialogOpen = false;
+    });
   }
 
   /**
- * Добавить награду.
- */
+   * Добавить награду.
+   */
   addNewRevard(r) {
     let header, isEdit;
 
     if (r) {
-      header = 'Редактировать трофей';
+      header = "Редактировать трофей";
       isEdit = true;
     } else {
-      header = 'Добавить трофей';
+      header = "Добавить трофей";
       isEdit = false;
       r = new Reward();
       r.isArtefact = true;
-      r.image = 'assets/icons/tresure.png';
+      r.image = "assets/icons/tresure.png";
     }
 
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddOrEditRevardComponent, {
-      panelClass: 'my-dialog',
+      panelClass: "my-dialog",
       data: <RevardDialogData>{ header: header, rev: r },
-      backdropClass: 'backdrop'
+      backdropClass: "backdrop",
     });
 
-    dialogRef.afterClosed()
-      .subscribe(rev => {
-        if (rev) {
-          if (!isEdit) {
-            this.srv.AddRevard(rev);
-          }
-
-          this.srv.recountRewards(this.srv.pers$.value);
+    dialogRef.afterClosed().subscribe((rev) => {
+      if (rev) {
+        if (!isEdit) {
+          this.srv.AddRevard(rev);
         }
-        this.srv.isDialogOpen = false;
-      });
+
+        this.srv.recountRewards(this.srv.pers$.value);
+      }
+      this.srv.isDialogOpen = false;
+    });
   }
 
   addOnlyAb() {
     let firstCharact: Characteristic;
     if (this.pers.characteristics.length > 0) {
       firstCharact = this.pers.characteristics[0];
-    }
-    else {
-      this.srv.addCharact('');
+    } else {
+      this.srv.addCharact("");
       firstCharact = this.pers.characteristics[0];
     }
 
     this.addAbil(firstCharact.id);
+  }
+
+  buyRevard(rev: Reward) {
+    this.srv.changesBefore();
+
+    this.pers.gold -= rev.cost;
+    this.srv.addToInventory(rev);
+    if (rev.isArtefact) {
+      this.srv.pers$.value.rewards = this.srv.pers$.value.rewards.filter((r) => r.id != rev.id);
+    }
+
+    this.srv.savePers(true);
+
+    this.srv.changesAfter(null);
   }
 
   /**
@@ -196,9 +162,9 @@ export class PersListComponent implements OnInit {
   }
 
   /**
- * Удаляем характеристику.
- * @param uuid Идентификатор.
- */
+   * Удаляем характеристику.
+   * @param uuid Идентификатор.
+   */
   delCharact(uuid) {
     this.srv.DeleteCharact(uuid);
   }
@@ -233,28 +199,66 @@ export class PersListComponent implements OnInit {
     this.srv.changesAfter(true);
   }
 
+  /**
+   * Экспорт персонажа - в виде текста.
+   *
+   */
+  exportPers() {
+    this.srv.isDialogOpen = true;
+    const dialogRef = this.dialog.open(PersImportExportDialogComponent, {
+      data: { isImport: false },
+      backdropClass: "backdrop",
+    });
+
+    dialogRef.afterClosed().subscribe((n) => {
+      this.srv.isDialogOpen = false;
+    });
+  }
+
   goBack() {
     if (this.isEditMode) {
       this.isEditMode = false;
-    }
-    else {
+    } else {
       // this.location.back();
-      this.router.navigate(['/main']);
+      this.router.navigate(["/main"]);
     }
   }
 
+  /**
+   * Импорт персонажа - из текстового файла.
+   *
+   */
+  importPers() {
+    this.srv.isDialogOpen = true;
+    const dialogRef = this.dialog.open(PersImportExportDialogComponent, {
+      data: { isImport: true },
+      backdropClass: "backdrop",
+    });
+
+    dialogRef.afterClosed().subscribe((n) => {
+      if (n) {
+        let newPers: Pers = JSON.parse(n);
+        newPers.id = this.srv.pers$.value.id;
+        newPers.userId = this.srv.pers$.value.userId;
+        this.srv.setPers(JSON.stringify(newPers));
+      }
+      this.srv.isDialogOpen = false;
+    });
+  }
+
   loadSamplePers() {
-    if (window.confirm('Вы уверены, что хотите загрузить тренировочного перса?')) {
+    if (window.confirm("Вы уверены, что хотите загрузить тренировочного перса?")) {
       this.srv.setLearningPers(this.pers.userId);
       this.saveData();
     }
   }
 
   newgame() {
-    if (window.confirm('Вы уверены, что хотите очистить все данные?')) {
-      this.usrSrv.setNewPers(this.pers.userId);
-      this.saveData();
-    }
+    this.router.navigate(["sync"], {
+      queryParams: {
+        type: "newGame",
+      },
+    });
   }
 
   ngOnDestroy(): void {
@@ -264,36 +268,88 @@ export class PersListComponent implements OnInit {
 
   ngOnInit() {
     if (!this.srv.pers$.value) {
-      this.router.navigate(['/main']);
+      this.router.navigate(["/main"]);
     }
 
-    const id = this.route.snapshot.paramMap.get('isFirst');
+    const id = this.route.snapshot.paramMap.get("isFirst");
     if (id) {
       this.srvSt.selTabPersList = 0;
       this.srvSt.selInventoryList = 0;
     }
 
-    this.srv.pers$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(n => {
-        this.pers = n;
-      });
+    this.srv.pers$.pipe(takeUntil(this.unsubscribe$)).subscribe((n) => {
+      this.pers = n;
+    });
+  }
+
+  openShop() {
+    this.srvSt.selTabPersList = 2;
+    this.srvSt.selInventoryList = 1;
+  }
+
+  quickAddAbil() {
+    if (this.pers.characteristics == null || !this.pers.characteristics.length) {
+      return;
+    }
+
+    let abilId = this.srv.addAbil(this.pers.characteristics[0].id, "Навык");
+
+    this.srv.savePers(false);
+
+    this.router.navigate(["pers/task", abilId, true], { queryParams: { isQuick: true } });
+    // this.srv.isDialogOpen = true;
+
+    // const dialogRef = this.dialog.open(QuickAddAbilityComponent, {
+    //   panelClass: 'my-middle',
+    //   data: { isImport: false },
+    //   backdropClass: 'backdrop'
+    // });
+
+    // dialogRef.afterClosed()
+    //   .subscribe(n => {
+    //     this.srv.isDialogOpen = false;
+    //   });
+  }
+
+  quickAddCharact() {
+    let cha = this.srv.addCharact("Характеристика");
+    this.srv.savePers(false);
+    this.router.navigate(["pers/characteristic", cha.id, true], { queryParams: { isQuick: true } });
+
+    // this.srv.isDialogOpen = true;
+    // const dialogRef = this.dialog.open(AddItemDialogComponent, {
+    //   panelClass: 'my-dialog',
+    //   data: { header: 'Добавить характеристику', text: '' },
+    //   backdropClass: 'backdrop'
+    // });
+
+    // dialogRef.afterClosed()
+    //   .subscribe(name => {
+    //     if (name) {
+    //       let cha = this.srv.addCharact(name);
+
+    //       this.srv.savePers(false);
+
+    //       this.router.navigate(['pers/characteristic', cha.id, true]);
+    //     }
+    //     this.srv.isDialogOpen = false;
+    //   });
   }
 
   /**
    * Респаун.
    */
   resp() {
-    if (window.confirm('Вы уверены?')) {
+    if (window.confirm("Вы уверены?")) {
       this.pers.lastTaskId = null;
       this.pers.isOffline = true;
       this.pers.gold = 0;
-      this.pers.characteristics.forEach(cha => {
-        cha.abilities.forEach(ab => {
-          ab.isOpen = false;
-          ab.tasks.forEach(tsk => {
+      this.pers.characteristics.forEach((cha) => {
+        cha.abilities.forEach((ab) => {
+          ab.isOpen = true;
+          ab.tasks.forEach((tsk) => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
-            tsk.order = -1;
+            // tsk.order = -1;
             tsk.autoTime = 0;
             tsk.plusExp = 0;
             tsk.lastDate = 0;
@@ -301,7 +357,7 @@ export class PersListComponent implements OnInit {
             tsk.nextId = null;
             tsk.failCounter = 0;
             // tsk.time = "00:00";
-            tsk.value = 0;
+            tsk.value = 1;
             tsk.tesValue = 0;
             tsk.tesAbValue = 0;
             tsk.refreshCounter = 0;
@@ -309,16 +365,18 @@ export class PersListComponent implements OnInit {
             tsk.secondsDone = 0;
             tsk.nextAbVal = 0;
             this.srv.GetRndEnamy(tsk, 0, this.pers.maxPersLevel);
-            tsk.states.forEach(st => {
-              st.order = -1;
+            tsk.states.forEach((st) => {
+              // st.order = -1;
               st.autoTime = 0;
               st.lastDate = 0;
               st.prevId = null;
               st.nextId = null;
               // st.time = "00:00";
               st.lastNotDone = true;
+              st.secondsDone = 0;
               this.srv.GetRndEnamy(st, 0, this.pers.maxPersLevel);
             });
+            tsk.secondsDone = 0;
             tsk.lastNotDone = false;
             this.srv.setStatesNotDone(tsk);
           });
@@ -342,7 +400,7 @@ export class PersListComponent implements OnInit {
   rest() {
     this.pers.isRest = true;
     this.srv.savePers(false);
-    this.router.navigate(['/main']);
+    this.router.navigate(["/main"]);
   }
 
   /**
@@ -352,8 +410,7 @@ export class PersListComponent implements OnInit {
     if (this.isEditMode) {
       this.srv.savePers(false);
       this.isEditMode = false;
-    }
-    else {
+    } else {
       this.isEditMode = true;
     }
   }
@@ -363,7 +420,22 @@ export class PersListComponent implements OnInit {
   }
 
   sync(isDownload) {
-    this.usrSrv.sync(isDownload);
+    if (this.pers.userId == null) {
+      window.alert("Сначала войди в систему...");
+      this.router.navigate(["/pers/login"], {
+        queryParams: {
+          frome: "/pers",
+          type: "setUserId",
+        },
+      });
+    } else {
+      this.router.navigate(["sync"], {
+        queryParams: {
+          frome: "/pers",
+          type: isDownload ? "load" : "upload",
+        },
+      });
+    }
   }
 
   upAbil(ab: Ability) {
@@ -372,20 +444,6 @@ export class PersListComponent implements OnInit {
     this.srv.upAbility(ab);
 
     this.srv.changesAfter(true);
-  }
-
-  buyRevard(rev: Reward) {
-    this.srv.changesBefore();
-
-    this.pers.gold -= rev.cost;
-    this.srv.addToInventory(rev);
-    if (rev.isArtefact) {
-      this.srv.pers$.value.rewards = this.srv.pers$.value.rewards.filter(r => r.id != rev.id);
-    }
-
-    this.srv.savePers(true);
-
-    this.srv.changesAfter(null);
   }
 
   /**
@@ -398,8 +456,7 @@ export class PersListComponent implements OnInit {
     // Уменьшаем количество если их больше чем 1
     if (rev.count >= 2) {
       rev.count = rev.count - 1;
-    }
-    else {
+    } else {
       // Удаляем из инвентаря
       this.srv.delInventoryItem(rev);
     }
@@ -407,62 +464,5 @@ export class PersListComponent implements OnInit {
     this.srv.savePers(true);
 
     this.srv.changesAfter(null);
-  }
-
-  quickAddCharact() {
-    let cha = this.srv.addCharact('Характеристика');
-    this.srv.savePers(false);
-    this.router.navigate(['pers/characteristic', cha.id, true], { queryParams: { isQuick: true } });
-
-    // this.srv.isDialogOpen = true;
-    // const dialogRef = this.dialog.open(AddItemDialogComponent, {
-    //   panelClass: 'my-dialog',
-    //   data: { header: 'Добавить характеристику', text: '' },
-    //   backdropClass: 'backdrop'
-    // });
-
-    // dialogRef.afterClosed()
-    //   .subscribe(name => {
-    //     if (name) {
-    //       let cha = this.srv.addCharact(name);
-
-    //       this.srv.savePers(false);
-
-    //       this.router.navigate(['pers/characteristic', cha.id, true]);
-    //     }
-    //     this.srv.isDialogOpen = false;
-    //   });
-  }
-
-  quickAddAbil() {
-    if (this.pers.characteristics == null || !this.pers.characteristics.length) {
-      return;
-    }
-
-    let abilId = this.srv.addAbil(
-      this.pers.characteristics[0].id,
-      'Навык'
-    );
-
-    this.srv.savePers(false);
-
-    this.router.navigate(['pers/task', abilId, true], { queryParams: { isQuick: true } });
-    // this.srv.isDialogOpen = true;
-
-    // const dialogRef = this.dialog.open(QuickAddAbilityComponent, {
-    //   panelClass: 'my-middle',
-    //   data: { isImport: false },
-    //   backdropClass: 'backdrop'
-    // });
-
-    // dialogRef.afterClosed()
-    //   .subscribe(n => {
-    //     this.srv.isDialogOpen = false;
-    //   });
-  }
-
-  openShop() {
-    this.srvSt.selTabPersList = 2;
-    this.srvSt.selInventoryList = 1;
   }
 }
