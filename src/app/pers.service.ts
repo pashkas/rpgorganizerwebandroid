@@ -937,7 +937,7 @@ export class PersService {
       this.router.navigate(["sync"], {
         queryParams: {
           type: "newGame",
-          frome: "/pers/login"
+          frome: "/pers/login",
         },
       });
     }
@@ -955,11 +955,11 @@ export class PersService {
     nextExp: number;
     expDirect: number;
   } {
-    if (tesMax < this._tesMaxLvl * 10) {
-      tesMax = this._tesMaxLvl * 10;
-    }
+    // if (tesMax < this._tesMaxLvl * 10) {
+    //   tesMax = this._tesMaxLvl * 10;
+    // }
 
-    // tesMax = this._tesMaxLvl * 20;
+    tesMax = this._tesMaxLvl * 20;
 
     // 40 очков за уровень
     // tesMax = 40 * 100;
@@ -1520,14 +1520,14 @@ export class PersService {
           tesAbCur += tesV;
           abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
 
-          const start = ab.isOpen ? 10 : 0;
-          let left = this._tesMaxLvl + 10 - start;
-          let t = tsk.tesValue <= this._tesMaxLvl ? tsk.tesValue : this._tesMaxLvl;
           let progr = tsk.tesValue / this._tesMaxLvl;
-          let v = start + left * progr;
-          tsk.progressValue = (v / (this._tesMaxLvl + 10)) * 100;
+          let v = this._tesMaxLvl * progr;
+          tsk.progressValue = (v / this._tesMaxLvl) * 100;
 
-          if (tsk.value <= 9 && doneReq) {
+          ab.value = tsk.value;
+          ab.progressValue = tsk.progressValue;
+
+          if (doneReq) {
             tsk.mayUp = true;
           } else {
             tsk.mayUp = false;
@@ -1535,9 +1535,6 @@ export class PersService {
           if (prs.isTES && ab.isOpen) {
             tsk.mayUp = false;
           }
-
-          ab.value = tsk.value;
-          ab.progressValue = tsk.progressValue;
 
           const rng = new Rangse();
 
@@ -1620,8 +1617,8 @@ export class PersService {
       tesAbTotalCur += tesAbCur;
       abExpPointsTotalCur += abExpPointsCur;
 
-      if (abMax < 30) {
-        abMax = 30;
+      if (abMax < (this._maxAbilLevel - 1) * 1) {
+        abMax = (this._maxAbilLevel - 1) * 1;
       }
 
       const start = ch.startRang.val + 1;
@@ -1629,8 +1626,8 @@ export class PersService {
       let progr = abCur / abMax;
       ch.value = start + left * progr;
       const chaCeilProgr = Math.floor(ch.value);
-      ch.progressValue = (ch.value / this._maxCharactLevel) * 100;
 
+      ch.progressValue = ((ch.value - 1) / (this._maxCharactLevel - 1)) * 100;
       ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
       // let chaProgr = ((ch.value) - Math.floor(ch.value)) * 100;
       // if (ch.value >= this._maxCharactLevel) {

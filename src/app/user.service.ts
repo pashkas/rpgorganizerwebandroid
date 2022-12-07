@@ -73,6 +73,21 @@ export class UserService {
       );
   }
 
+  async syncDownload() {
+    let observable$ = this.loadPers(this.srv.pers$.value.userId).pipe(take(1)).toPromise();
+    let n = await observable$;
+    let prs: Pers = n as Pers;
+    prs.currentView = curpersview.SkillTasks;
+    this.srv.savePers(false, null, prs);
+  }
+
+  async syncUpload() {
+    this.srv.savePers(false);
+    let prs = this.srv.pers$.value;
+    const persJson = JSON.parse(JSON.stringify(prs));
+    await this.db.collection("pers").doc(prs.id).set(persJson);
+  }
+
   sync(isDownload) {
     if (isDownload) {
       // download
@@ -143,4 +158,7 @@ export class UserService {
       }
     );
   }
+}
+function firstValueFrom(observable: Observable<unknown>) {
+  throw new Error("Function not implemented.");
 }
