@@ -1,29 +1,28 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { Pers } from "src/Models/Pers";
-import { Task, taskState, Reqvirement } from "src/Models/Task";
-import { ActivatedRoute, Router } from "@angular/router";
-import { PersService } from "../pers.service";
-import { Location } from "@angular/common";
-import { BehaviorSubject, Observable, Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
-import { Ability } from "src/Models/Ability";
-import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
-import { MatDialog } from "@angular/material";
-import { AddItemDialogComponent } from "../add-item-dialog/add-item-dialog.component";
-import { Characteristic } from "src/Models/Characteristic";
-import { ChangeCharactComponent } from "../pers/change-charact/change-charact.component";
-import { Qwest } from "src/Models/Qwest";
-import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
-import { GameSettings } from "../GameSettings";
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Pers } from 'src/Models/Pers';
+import { Task, taskState, Reqvirement } from 'src/Models/Task';
+import { ActivatedRoute, Router } from '@angular/router';
+import { PersService } from '../pers.service';
+import { Location } from '@angular/common';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { Ability } from 'src/Models/Ability';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { MatDialog } from '@angular/material';
+import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
+import { Characteristic } from 'src/Models/Characteristic';
+import { ChangeCharactComponent } from '../pers/change-charact/change-charact.component';
+import { Qwest } from 'src/Models/Qwest';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 @Component({
-  selector: "app-task-detail",
-  templateUrl: "./task-detail.component.html",
-  styleUrls: ["./task-detail.component.css"],
-  changeDetection: ChangeDetectionStrategy.Default,
+  selector: 'app-task-detail',
+  templateUrl: './task-detail.component.html',
+  styleUrls: ['./task-detail.component.css'],
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class TaskDetailComponent implements OnInit {
-  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
+  @ViewChild('nameEdt', { static: false }) nameEdt: ElementRef;
 
   private unsubscribe$ = new Subject();
 
@@ -39,13 +38,11 @@ export class TaskDetailComponent implements OnInit {
   isQuick: any;
   charactCntrl: FormControl;
   charactGroup: FormGroup;
-  isShowAbProgrTable = GameSettings.isShowAbProgrTable;
-  percSymbol = GameSettings.isShowPercentageInAb ? "%" : "";
 
   constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, fb: FormBuilder) {
-    this.charactCntrl = fb.control("");
+    this.charactCntrl = fb.control('');
     this.charactGroup = fb.group({
-      charact: this.charactCntrl,
+      charact: this.charactCntrl
     });
   }
 
@@ -62,7 +59,7 @@ export class TaskDetailComponent implements OnInit {
       isEdit = false;
     }
 
-    let header = "";
+    let header = '';
     let time = null;
     // if (this.tsk.requrense == 'нет') {
     //   time = null;
@@ -79,37 +76,38 @@ export class TaskDetailComponent implements OnInit {
     //   }
     // }
 
-    header += isEdit ? "Редактировать" : "Добавить";
-    header += this.tsk.requrense == "нет" ? " подзадачу" : " подзадачу";
+    header += isEdit ? 'Редактировать' : 'Добавить';
+    header += this.tsk.requrense == 'нет' ? ' подзадачу' : ' подзадачу';
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      panelClass: "my-dialog",
-      data: { header: header, text: isEdit ? st.name : "", timeVal: st ? st.timeVal : null },
-      backdropClass: "backdrop",
+      panelClass: 'my-dialog',
+      data: { header: header, text: isEdit ? st.name : '', timeVal: st ? st.timeVal : null },
+      backdropClass: 'backdrop'
     });
 
-    dialogRef.afterClosed().subscribe((stt) => {
-      if (stt) {
-        if (!isEdit) {
-          let state = new taskState();
-          state.value = this.tsk.value;
-          state.requrense = this.tsk.requrense;
-          state.image = this.srv.GetRndEnamy(state, this.pers.level, this.pers.maxPersLevel);
-          state.name = stt;
-          //state.time = stt.time;
-          this.tsk.states.push(state);
+    dialogRef.afterClosed()
+      .subscribe(stt => {
+        if (stt) {
+          if (!isEdit) {
+            let state = new taskState();
+            state.value = this.tsk.value;
+            state.requrense = this.tsk.requrense;
+            state.image = this.srv.GetRndEnamy(state, this.pers.level, this.pers.maxPersLevel);
+            state.name = stt;
+            //state.time = stt.time;
+            this.tsk.states.push(state);
 
-          if (this.tsk.requrense == "нет") {
-            this.tsk.states = this.tsk.states.sort((a, b) => {
-              return a.isDone === b.isDone ? 0 : b.isDone ? -1 : 1;
-            });
+            if (this.tsk.requrense == 'нет') {
+              this.tsk.states = this.tsk.states.sort((a, b) => {
+                return a.isDone === b.isDone ? 0 : b.isDone ? -1 : 1;
+              });
+            }
+          } else {
+            st.name = stt;
+            //st.time = stt.time;
           }
-        } else {
-          st.name = stt;
-          //st.time = stt.time;
         }
-      }
-      this.srv.isDialogOpen = false;
-    });
+        this.srv.isDialogOpen = false;
+      });
   }
 
   changeCharact() {
@@ -119,30 +117,31 @@ export class TaskDetailComponent implements OnInit {
 
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(ChangeCharactComponent, {
-      panelClass: "my-big",
-      data: { characteristic: this.tskCharact$.value, allCharacts: this.pers.characteristics.sort((a, b) => a.name.localeCompare(b.name)), tittle: "Выберите квест" },
-      backdropClass: "backdrop",
+      panelClass: 'my-big',
+      data: { characteristic: this.tskCharact$.value, allCharacts: this.pers.characteristics.sort((a, b) => a.name.localeCompare(b.name)), tittle: 'Выберите квест' },
+      backdropClass: 'backdrop'
     });
 
-    dialogRef.afterClosed().subscribe((n) => {
-      if (n) {
-        if (n.id != this.tskCharact$.value.id) {
-          for (const ch of this.pers.characteristics) {
-            if (ch.id == n.id) {
-              ch.abilities.push(this.tskAbility);
+    dialogRef.afterClosed()
+      .subscribe(n => {
+        if (n) {
+          if (n.id != this.tskCharact$.value.id) {
+            for (const ch of this.pers.characteristics) {
+              if (ch.id == n.id) {
+                ch.abilities.push(this.tskAbility);
 
-              break;
+                break;
+              }
             }
+
+            // Перемещаем
+            this.tskCharact$.value.abilities = this.tskCharact$.value.abilities.filter(n => n.id !== this.tskAbility.id);
+
+            this.tskCharact$.next(n);
           }
-
-          // Перемещаем
-          this.tskCharact$.value.abilities = this.tskCharact$.value.abilities.filter((n) => n.id !== this.tskAbility.id);
-
-          this.tskCharact$.next(n);
         }
-      }
-      this.srv.isDialogOpen = false;
-    });
+        this.srv.isDialogOpen = false;
+      });
   }
 
   /**
@@ -150,9 +149,7 @@ export class TaskDetailComponent implements OnInit {
    * @param id Идентификатор задачи.
    */
   delState(id: string) {
-    this.tsk.states = this.tsk.states.filter((n) => {
-      return n.id != id;
-    });
+    this.tsk.states = this.tsk.states.filter(n => { return n.id != id; });
   }
 
   /**
@@ -168,35 +165,46 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
+  downAbil() {
+    if (this.tskAbility) {
+      this.srv.changesBefore();
+
+      this.srv.downAbility(this.tskAbility);
+
+      this.srv.changesAfter(false);
+    }
+  }
+
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.tsk.states, event.previousIndex, event.currentIndex);
   }
 
   findTask() {
     if (!this.pers) {
-      this.router.navigate(["/main"]);
+      this.router.navigate(['/main']);
     }
 
-    const id = this.route.snapshot.paramMap.get("id");
+    const id = this.route.snapshot.paramMap.get('id');
 
     this.tsk = this.srv.allMap[id].item;
 
     if (this.tsk) {
-      if (this.tsk.requrense == "нет") {
-        this.requrenses = Task.requrenses.filter((n) => {
-          return n === "нет";
+      if (this.tsk.requrense == 'нет') {
+        this.requrenses = Task.requrenses.filter(n => {
+          return n === 'нет';
         });
-      } else {
+      }
+      else {
         this.tskAbility = this.srv.allMap[id].link;
         this.tskCharact$.next(this.srv.allMap[this.srv.allMap[id].link.id].link);
-        this.requrenses = Task.requrenses.filter((n) => {
-          return n != "нет";
+        this.requrenses = Task.requrenses.filter(n => {
+          return n != 'нет';
         });
       }
     }
 
-    const isEdit = this.route.snapshot.paramMap.get("isEdit");
-    if (isEdit == "true") {
+    const isEdit = this.route.snapshot.paramMap.get('isEdit');
+    if (isEdit == 'true') {
       this.isEditMode = true;
     }
 
@@ -214,7 +222,8 @@ export class TaskDetailComponent implements OnInit {
   goBack() {
     if (this.isEditMode) {
       this.isEditMode = false;
-    } else {
+    }
+    else {
       this.location.back();
     }
   }
@@ -232,18 +241,20 @@ export class TaskDetailComponent implements OnInit {
       }
     });
 
-    this.srv.pers$.pipe(takeUntil(this.unsubscribe$)).subscribe((n) => {
-      this.pers = n;
-      this.findTask();
-    });
+    this.srv.pers$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(n => {
+        this.pers = n;
+        this.findTask();
+      });
 
-    this.tskCharact$.subscribe((n) => {
+    this.tskCharact$.subscribe(n => {
       if (this.charactCntrl.value != null && n.id != this.charactCntrl.value.id) {
         this.charactCntrl.setValue(n);
       }
     });
 
-    this.charactCntrl.valueChanges.subscribe((n) => {
+    this.charactCntrl.valueChanges.subscribe(n => {
       if (this.tskCharact$.value != null && n.id != this.tskCharact$.value.id) {
         for (const ch of this.pers.characteristics) {
           if (ch.id == n.id) {
@@ -254,7 +265,7 @@ export class TaskDetailComponent implements OnInit {
         }
 
         // Перемещаем
-        this.tskCharact$.value.abilities = this.tskCharact$.value.abilities.filter((n) => n.id !== this.tskAbility.id);
+        this.tskCharact$.value.abilities = this.tskCharact$.value.abilities.filter(n => n.id !== this.tskAbility.id);
 
         this.tskCharact$.next(n);
       }
@@ -264,7 +275,7 @@ export class TaskDetailComponent implements OnInit {
   onTskDateChange(ev) {
     this.tsk.date = ev;
 
-    this.tsk.states.forEach((el) => {
+    this.tsk.states.forEach(el => {
       el.isDone = false;
     });
   }
@@ -272,15 +283,16 @@ export class TaskDetailComponent implements OnInit {
   qwickSetDate(v) {
     let date = new Date();
     date.setHours(0, 0, 0, 0);
-    if (v == "today") {
+    if (v == 'today') {
       this.tsk.date = date;
-    } else {
+    }
+    else {
       date.setDate(date.getDate() + 1);
       this.tsk.date = date;
     }
     this.srv.CheckSetTaskDate(this.tsk);
 
-    this.tsk.states.forEach((el) => {
+    this.tsk.states.forEach(el => {
       el.isDone = false;
     });
   }
@@ -291,17 +303,18 @@ export class TaskDetailComponent implements OnInit {
   }
 
   /**
-   * Сохранить данные.
-   */
+  * Сохранить данные.
+  */
   saveData() {
     if (this.isEditMode) {
       this.srv.savePers(false);
       this.findLinks();
       this.isEditMode = false;
       if (this.isQuick) {
-        this.router.navigate(["/pers"]);
+        this.router.navigate(['/pers'])
       }
-    } else {
+    }
+    else {
       this.isEditMode = true;
     }
   }
@@ -319,7 +332,8 @@ export class TaskDetailComponent implements OnInit {
 
     if (idx == -1) {
       this.tsk.tskWeekDays.push(wd);
-    } else {
+    }
+    else {
       this.tsk.tskWeekDays.splice(idx, 1);
     }
   }
@@ -337,6 +351,18 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
+  upAbil() {
+    if (this.tskAbility) {
+      this.srv.changesBefore();
+
+      this.srv.upAbility(this.tskAbility);
+
+      this.srv.changesAfter(true);
+
+      this.isEditMode = false;
+    }
+  }
+
   private findLinks() {
     let linkQwests = [];
     if (this.tskAbility) {
@@ -350,6 +376,6 @@ export class TaskDetailComponent implements OnInit {
   }
 
   requrenseChange() {
-    this.qwickSetDate("today");
+    this.qwickSetDate('today');
   }
 }

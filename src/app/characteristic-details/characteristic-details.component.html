@@ -57,7 +57,7 @@
               </div>
             </div>
           </div>
-          <a *ngIf="ab.tasks[0]?.mayUp && pers.ON>0" class="ml-0 px-1 mr-0 pointer" >
+          <a *ngIf="ab.tasks[0]?.mayUp && pers.ON>0" class="ml-0 px-1 mr-0 pointer" (click)="upAbil(ab)">
             <img src="assets/icons/up.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
           </a>
         </div>

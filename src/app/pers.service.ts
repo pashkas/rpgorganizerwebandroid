@@ -17,7 +17,6 @@ import { SamplePers } from "src/Models/SamplePers";
 import { curpersview } from "src/Models/curpersview";
 import { MatDialog } from "@angular/material";
 import { ReqItemType } from "src/Models/ReqItem";
-import { GameSettings } from "./GameSettings";
 
 @Injectable({
   providedIn: "root",
@@ -51,6 +50,18 @@ export class PersService {
   constructor(private router: Router, private changes: PerschangesService, public dialog: MatDialog) {
     this.isOffline = true;
     this.getPers();
+  }
+
+  get _maxCharactLevel(): number {
+    return 20;
+  }
+
+  get _maxAbilLevel(): number {
+    return this._maxCharactLevel;
+  }
+
+  get _tesMaxLvl(): number {
+    return this._maxCharactLevel * 10 - 10;
   }
 
   get baseTaskPoints(): number {
@@ -137,6 +148,18 @@ export class PersService {
   }
 
   GetRndEnamy(tsk: IImg, lvl: number, maxlvl: number): string {
+    // if (this.pers$.value.isTES && tsk.requrense != 'нет') {
+    //   if (tsk.parrentTask) {
+    //     if (this.allMap[tsk.parrentTask] && this.allMap[tsk.parrentTask].item) {
+    //       lvl = Math.floor(this.allMap[tsk.parrentTask].item.value);
+    //     }
+    //   }
+    //   else {
+    //     lvl = Math.floor(tsk.value);
+    //   }
+    //   maxlvl = this._maxAbilLevel;
+    // }
+
     let mnstrLvl = this.getMonsterLevel(lvl, maxlvl);
 
     tsk.imageLvl = "" + mnstrLvl;
@@ -154,8 +177,8 @@ export class PersService {
       let bTask = b.tasks[0];
 
       // Макс?
-      // let aMax = aTask.value == GameSettings.maxAbilLvl ? 1 : 0;
-      // let bMax = bTask.value == GameSettings.maxAbilLvl ? 1 : 0;
+      // let aMax = aTask.value == this._maxAbilLevel ? 1 : 0;
+      // let bMax = bTask.value == this._maxAbilLevel ? 1 : 0;
       // if (aMax != bMax) {
       //   return (aMax - bMax);
       // }
@@ -168,8 +191,8 @@ export class PersService {
       }
 
       // Можно открыть
-      let aMayUp = aTask.mayUp || aTask.value == GameSettings.maxAbilLvl ? 1 : 0;
-      let bMayUp = bTask.mayUp || bTask.value == GameSettings.maxAbilLvl ? 1 : 0;
+      let aMayUp = aTask.mayUp || aTask.value == this._maxAbilLevel ? 1 : 0;
+      let bMayUp = bTask.mayUp || bTask.value == this._maxAbilLevel ? 1 : 0;
 
       if (aMayUp != bMayUp) {
         return -(aMayUp - bMayUp);
@@ -536,6 +559,16 @@ export class PersService {
     this.pers$.value.Diary.unshift(new Diary(moment().startOf("day").toDate(), []));
   }
 
+  // checkTaskStates(tsk: Task) {
+  //   tsk.statesDescr = [];
+  //   // Ability.rangse.forEach(rang => {
+  //   //   // Последний ранг не добавляем
+  //   //   // if (rang.val < Ability.maxValue) {
+  //   //   this.addTaskDescrState(rang, tsk);
+  //   //   //}
+  //   // });
+  // }
+
   /**
    * Расчет таблицы для кумулятивных расчетов получения наград.
    */
@@ -628,6 +661,75 @@ export class PersService {
     });
   }
 
+  downAbility(ab: Ability) {
+    let isOpen: Boolean = true;
+
+    for (let i = 0; i < ab.tasks.length; i++) {
+      const tsk: Task = ab.tasks[i];
+
+      // Обнуляем фэйлы
+      tsk.failCounter = 0;
+      for (let j = 0; j < tsk.states.length; j++) {
+        const st = tsk.states[j];
+        st.failCounter = 0;
+      }
+
+      if (tsk.value < 1) {
+        continue;
+      }
+
+      if (tsk.value == 1) {
+        isOpen = false;
+      }
+
+      let prevTaskVal = tsk.value;
+
+      let curTaskValue = tsk.value;
+
+      if (tsk.isPerk) {
+        tsk.value = 0;
+      } else {
+        let tskDescr = tsk.statesDescr[tsk.value];
+        for (let i = tsk.value; i > 0; i--) {
+          if (i == 0) {
+            tsk.value = 0;
+          } else {
+            if (tsk.hardnes == 0.5) {
+              tsk.value -= 2;
+            } else {
+              tsk.value -= 1;
+            }
+            if (tsk.value < 0) {
+              tsk.value = 0;
+            }
+            if (tsk.statesDescr[tsk.value] != tskDescr) {
+              break;
+            }
+          }
+        }
+      }
+
+      this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+      tsk.states.forEach((st) => {
+        st.value = tsk.value;
+        this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+      });
+
+      this.changeLvlAbLogic(tsk, prevTaskVal, curTaskValue);
+    }
+
+    //todo
+    if (isOpen == false) {
+      ab.isOpen = false;
+    }
+
+    this.savePers(true, "minus");
+
+    // if (this.pers$.value.ON > 0) {
+    //   this.router.navigate(['/pers']);
+    // }
+  }
+
   /**
    * Поиск задачи и навыка по идентификатору у персонажа.
    * @param id Идентификатор задачи.
@@ -643,6 +745,56 @@ export class PersService {
 
   getAbExpPointsFromTes(tesValue: number): number {
     return tesValue;
+    // let expPoints: number = 0;
+    // let floorTes = Math.floor(tesValue / 10);
+
+    // for (let i = 0; i < floorTes; i++) {
+    //   let multi = (i + 1);
+    //   if (i > 9) {
+    //     i = 10;
+    //   }
+
+    //   expPoints += (i + 1) * multi;
+    // }
+
+    // let left = (tesValue / 10) - floorTes;
+    // if (left > 0) {
+    //   let multi = floorTes + 1;
+
+    //   if (floorTes > 9) {
+    //     multi = 10;
+    //   }
+
+    //   expPoints += left * (floorTes + 1) * multi;
+    // }
+
+    // return expPoints;
+  }
+
+  getAbTesLvl(tesValue: number): number {
+    let levels: number = this._maxAbilLevel + 1;
+    let xp_for_first_level: number = 0.7;
+    let xp_for_last_level: number = this._tesMaxLvl;
+
+    let B: number = Math.log(xp_for_last_level / xp_for_first_level) / (levels - 1);
+    let A: number = xp_for_first_level / (Math.exp(B) - 1.0);
+
+    let abTesLvl = 0;
+
+    for (let i = 1; i <= levels; i++) {
+      let old_xp: number = A * Math.exp(B * (i - 1));
+      let new_xp: number = A * Math.exp(B * i);
+
+      let lvlExp = new_xp - old_xp;
+
+      if (lvlExp > tesValue) {
+        abTesLvl = i - 1;
+
+        break;
+      }
+    }
+
+    return abTesLvl;
   }
 
   getAimString(aimVal: number, aimUnit: string): string {
@@ -803,20 +955,17 @@ export class PersService {
     nextExp: number;
     expDirect: number;
   } {
-    // if (tesMax < GameSettings.tesMaxVal * 10) {
-    //   tesMax = GameSettings.tesMaxVal * 10;
+    // if (tesMax < this._tesMaxLvl * 10) {
+    //   tesMax = this._tesMaxLvl * 10;
     // }
 
-    // tesMax = GameSettings.tesMaxVal * 20;
+    tesMax = this._tesMaxLvl * 20;
 
-    // N уровней
-    // tesMax = 10 * 10 * this.maxPersLevel;
-
-    // Очков за уровень
-    tesMax = GameSettings.maxPersLevel *  GameSettings.abLvlForPersLvl * 10 * 10;
+    // 40 очков за уровень
+    // tesMax = 40 * 100;
 
     let progress = tesCur / tesMax;
-    let exp = GameSettings.maxPersLevel * progress;
+    let exp = 100 * progress;
     let expDirect = exp;
     let persLevel = Math.floor(exp);
     let startExp = persLevel;
@@ -846,6 +995,35 @@ export class PersService {
         break;
     }
     return expChange;
+  }
+
+  getSet(tsk: Task, aim: number, aimUnit: string): number[] {
+    let result: number[] = [];
+
+    let av = this.getAimValueWithUnit(aim, aimUnit);
+
+    // this.getSetMaxNeatEnd(aim, result, tsk);
+
+    if (av > this.pers$.value.maxAttrLevel) {
+      this.getSetMaxNeatEnd(av, result, tsk);
+    } else {
+      this.getSetLinear(av, result, tsk);
+    }
+
+    if (tsk.hardnes == 0.5) {
+      let prev = result[result.length - 1];
+      for (let i = result.length - 1; i > 0; i--) {
+        if (i % 2 != 0) {
+          let tmp = result[i];
+          result[i] = prev;
+          prev = tmp;
+        } else {
+          result[i] = prev;
+        }
+      }
+    }
+
+    return result;
   }
 
   getTskValForState(value: number, maxValue: number) {
@@ -1247,8 +1425,8 @@ export class PersService {
           if (tsk.value < 0) {
             tsk.value = 0;
           }
-          if (tsk.value > GameSettings.maxAbilLvl) {
-            tsk.value = GameSettings.maxAbilLvl;
+          if (tsk.value > this._maxAbilLevel) {
+            tsk.value = this._maxAbilLevel;
           }
 
           tsk.isCounter = false;
@@ -1318,33 +1496,33 @@ export class PersService {
           if (tsk.value < 0) {
             tsk.value = 0;
           }
-          if (tsk.value > GameSettings.maxAbilLvl) {
-            tsk.value = GameSettings.maxAbilLvl;
+          if (tsk.value > this._maxAbilLevel) {
+            tsk.value = this._maxAbilLevel;
           }
 
           let progressNextLevel = (tsk.tesValue / 10.0 - Math.floor(tsk.tesValue / 10.0)) * 100;
-          if (tsk.tesValue > GameSettings.tesMaxVal) {
+          if (tsk.tesValue > this._tesMaxLvl) {
             progressNextLevel = 100;
           }
           tsk.progresNextLevel = progressNextLevel;
           tsk.progressValue = tsk.progresNextLevel;
-          tsk.progressValue = (tsk.value / GameSettings.maxAbilLvl) * 100;
+          tsk.progressValue = (tsk.value / this._maxAbilLevel) * 100;
 
-          abMax += GameSettings.maxAbilLvl - 1;
+          abMax += this._maxAbilLevel - 1;
           abCur += tsk.value - 1 >= 0 ? tsk.value - 1 : 0;
-          tesAbMax += GameSettings.tesMaxVal;
+          tesAbMax += this._tesMaxLvl;
 
           let tesV = tsk.tesValue;
-          // if (tesV > GameSettings.tesMaxVal) {
-          //   tesV = GameSettings.tesMaxVal;
+          // if (tesV > this._tesMaxLvl) {
+          //   tesV = this._tesMaxLvl;
           // }
 
           tesAbCur += tesV;
           abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
 
-          let progr = tsk.tesValue / GameSettings.tesMaxVal;
-          let v = GameSettings.tesMaxVal * progr;
-          tsk.progressValue = (v / GameSettings.tesMaxVal) * 100;
+          let progr = tsk.tesValue / this._tesMaxLvl;
+          let v = this._tesMaxLvl * progr;
+          tsk.progressValue = (v / this._tesMaxLvl) * 100;
 
           ab.value = tsk.value;
           ab.progressValue = tsk.progressValue;
@@ -1360,12 +1538,25 @@ export class PersService {
 
           const rng = new Rangse();
 
-          if (ab.isOpen == false) {
-            rng.name = "-";
+          if (!prs.isTES) {
+            if (tsk.isPerk) {
+              if (tsk.value == 0) {
+                rng.name = "-";
+              } else {
+                rng.name = "👍";
+              }
+            } else {
+              if (tsk.value == 10) {
+                rng.name = "👍";
+              } else {
+                rng.name = tsk.value + "";
+              }
+            }
           } else {
-            rng.name = tsk.value + "";
-            if(GameSettings.isShowPercentageInAb){
-              rng.name+="%";
+            if (ab.isOpen == false) {
+              rng.name = "-";
+            } else {
+              rng.name = tsk.value + "";
             }
           }
 
@@ -1426,18 +1617,23 @@ export class PersService {
       tesAbTotalCur += tesAbCur;
       abExpPointsTotalCur += abExpPointsCur;
 
-      if (abMax < (GameSettings.maxAbilLvl - 1) * 1) {
-        abMax = (GameSettings.maxAbilLvl - 1) * 1;
+      if (abMax < (this._maxAbilLevel - 1) * 1) {
+        abMax = (this._maxAbilLevel - 1) * 1;
       }
 
       const start = ch.startRang.val + 1;
-      let left = GameSettings.maxChaLvl - start;
+      let left = this._maxCharactLevel - start;
       let progr = abCur / abMax;
       ch.value = start + left * progr;
       const chaCeilProgr = Math.floor(ch.value);
 
-      ch.progressValue = ((ch.value - 1) / (GameSettings.maxChaLvl - 1)) * 100;
+      ch.progressValue = ((ch.value - 1) / (this._maxCharactLevel - 1)) * 100;
       ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
+      // let chaProgr = ((ch.value) - Math.floor(ch.value)) * 100;
+      // if (ch.value >= this._maxCharactLevel) {
+      //   chaProgr = 100;
+      // }
+      // ch.progressValue = chaProgr;
 
       const rng = new Rangse();
       rng.val = chaCeilProgr;
@@ -1648,13 +1844,10 @@ export class PersService {
     prs.ON = ons;
     prs.exp = exp;
     // prs.maxPersLevel = maxLevel;
-    prs.totalProgress = (prs.level / GameSettings.maxPersLevel) * 100;
-
-    let stage = (prs.level / GameSettings.maxPersLevel) * (GameSettings.rangsCount - 1);
-    let rangStartProgress = Math.floor(stage);
-    let rangProgress = stage - rangStartProgress;
-
-    if (prs.level >= GameSettings.maxPersLevel) {
+    prs.totalProgress = (prs.level / prs.maxPersLevel) * 100;
+    let rangStartProgress = Math.floor(prs.level / 20) * 20;
+    let rangProgress = (prs.level - rangStartProgress) / 20;
+    if (prs.level >= prs.maxPersLevel) {
       rangProgress = 1;
     }
     prs.rangProgress = rangProgress * 100;
@@ -2189,6 +2382,87 @@ export class PersService {
     return value;
   }
 
+  upAbility(ab: Ability) {
+    // let isOpenForEdit = false;
+
+    for (let i = 0; i < ab.tasks.length; i++) {
+      const tsk: Task = ab.tasks[i];
+
+      // Обнуляем фэйлы
+      tsk.failCounter = 0;
+      for (let j = 0; j < tsk.states.length; j++) {
+        const st = tsk.states[j];
+        st.failCounter = 0;
+      }
+
+      if (tsk.value < 1) {
+        tsk.date = new Date();
+        tsk.order = -1;
+        tsk.states.forEach((st) => {
+          st.order = -1;
+        });
+        // isOpenForEdit = true;
+      }
+      if (!ab.isOpen) {
+        tsk.date = new Date();
+        tsk.order = -1;
+        tsk.states.forEach((st) => {
+          st.order = -1;
+        });
+        // isOpenForEdit = true;
+      }
+
+      let prevTaskVal = tsk.value;
+      if (!this.pers$.value.isTES) {
+        if (tsk.isPerk) {
+          tsk.value = 10;
+        } else {
+          if (tsk.hardnes == 0.5) {
+            tsk.value += 2;
+          } else {
+            tsk.value += 1;
+          }
+          if (tsk.value > 10) {
+            tsk.value = 10;
+          }
+        }
+
+        // Чтобы с каждым уровнем в задаче что-то менялось
+        if (tsk.value < 10 && tsk.value > 0) {
+          for (let i = tsk.value + 1; i <= 10; i++) {
+            const cur = tsk.statesDescr[tsk.value];
+            const next = tsk.statesDescr[i];
+            if (next != cur) {
+              break;
+            }
+            tsk.value = i;
+          }
+        }
+
+        let curTaskValue = tsk.value;
+
+        this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+        tsk.states.forEach((st) => {
+          st.value = tsk.value;
+          this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+        });
+
+        this.changeLvlAbLogic(tsk, curTaskValue, prevTaskVal);
+      }
+    }
+
+    if (!ab.isOpen) {
+      ab.isOpen = true;
+    }
+
+    this.savePers(true, "plus");
+
+    // Переходим в настройку навыка, если это первый уровень
+    // if (false && isOpenForEdit && !this.pers$.value.isAutoPumping) {
+    //   this.showAbility(ab);
+    // }
+  }
+
   updateAbTasksImages(prs: Pers) {
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
@@ -2238,6 +2512,23 @@ export class PersService {
 
     if (rev) {
       this.addToInventory(rev);
+    }
+  }
+
+  private changeLvlAbLogic(tsk: Task, curTaskValue: number, prevTaskVal: number) {
+    if (tsk.value >= 2 && !tsk.isSumStates && tsk.states.length > 0) {
+      try {
+        let nms: number[] = this.getSet(tsk, tsk.states.length, "State");
+        let index;
+        let prevIdx;
+
+        index = nms[Math.floor(curTaskValue)] - 1;
+        prevIdx = nms[Math.floor(prevTaskVal)] - 1;
+
+        if (prevIdx >= 0) {
+          tsk.states[index].order = tsk.states[prevIdx].order;
+        }
+      } catch (error) {}
     }
   }
 
@@ -2366,7 +2657,7 @@ export class PersService {
     let val = Math.floor(tesVal / 10.0);
 
     if (isOpen) {
-      val = val + GameSettings.minAbilLvl;
+      val = val + 1;
     }
 
     return val;
@@ -2442,14 +2733,25 @@ export class PersService {
   }
 
   private getMonsterLevel(prsLvl: number, maxLevel: number): number {
-    let stage = (prsLvl / GameSettings.maxPersLevel) * (GameSettings.rangsCount - 1);
-    stage = Math.floor(stage) + 1;
-
-    if (stage > GameSettings.rangsCount + 1) {
-      stage = GameSettings.rangsCount + 1;
+    if (prsLvl < 20) {
+      // Обыватель
+      return 1;
+    } else if (prsLvl < 40) {
+      // Авантюрист
+      return 2;
+    } else if (prsLvl < 60) {
+      // Охотник
+      return 3;
+    } else if (prsLvl < 80) {
+      // Воин
+      return 4;
+    } else if (prsLvl < 100) {
+      // Герой
+      return 5;
+    } else {
+      // Легенда
+      return 6;
     }
-
-    return stage;
   }
 
   private getPersAbPoints(abCount: number, persLevel: number, abOpenned: number, prs: Pers) {
@@ -2554,8 +2856,8 @@ export class PersService {
   }
 
   private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean) {
-    let start = 0;
-    let progr = start + tskVal / GameSettings.maxAbilLvl;
+    let start = 0; //(nextAbVal - tskVal) / (this._maxAbilLevel);
+    let progr = start + tskVal / this._maxAbilLevel;
 
     if (progr < 0.01) {
       progr = 0.01;
@@ -2569,6 +2871,135 @@ export class PersService {
     }
 
     return Math.round(progr * 100) / 100;
+  }
+
+  private getRewsOfType(revType: any) {
+    let revsOfType = this.filterRevs(revType);
+
+    if (revsOfType.length == 0 && revType == Pers.legendaryRevSet.name) {
+      revType = Pers.epicRevSet.name;
+      revsOfType = this.filterRevs(revType);
+    }
+
+    if (revsOfType.length == 0 && revType == Pers.epicRevSet.name) {
+      revType = Pers.rareRevSet.name;
+      revsOfType = this.filterRevs(revType);
+    }
+
+    if (revsOfType.length == 0 && revType == Pers.rareRevSet.name) {
+      revType = Pers.uncommonRevSet.name;
+      revsOfType = this.filterRevs(revType);
+    }
+
+    if (revsOfType.length == 0 && revType == Pers.uncommonRevSet.name) {
+      revType = Pers.commonRevSet.name;
+      revsOfType = this.filterRevs(revType);
+    }
+
+    return revsOfType;
+  }
+
+  /**
+   * Получает равномерный набор.
+   * @param aim
+   * @param result
+   */
+  private getSetLinear(aim: number, result: number[], tsk: Task) {
+    if (aim == 2) {
+      result.push(1); // 0
+      result.push(1); // 1
+      result.push(1); // 2
+      result.push(1); // 3
+      result.push(1); // 4
+      result.push(1); // 5
+      result.push(2); // 6
+      result.push(2); // 7
+      result.push(2); // 8
+      result.push(2); // 9
+      result.push(2); // 10
+    } else if (aim == 3) {
+      result.push(1); // 0
+      result.push(1); // 1
+      result.push(1); // 2
+      result.push(1); // 3
+      result.push(1); // 4
+      result.push(2); // 5
+      result.push(2); // 6
+      result.push(2); // 7
+      result.push(3); // 8
+      result.push(3); // 9
+      result.push(3); // 10
+    } else if (aim == 4) {
+      result.push(1); // 0
+      result.push(1); // 1
+      result.push(1); // 2
+      result.push(1); // 3
+      result.push(2); // 4
+      result.push(2); // 5
+      result.push(2); // 6
+      result.push(3); // 7
+      result.push(3); // 8
+      result.push(4); // 9
+      result.push(4); // 10
+    } else {
+      for (let i = 0; i <= 10; i++) {
+        let q = i;
+
+        let progr = q / 10;
+
+        let val = progr * aim;
+
+        val = Math.ceil(val);
+        if (val < 1) {
+          val = 1;
+        }
+
+        result.push(val);
+      }
+    }
+  }
+
+  /**
+   * Получает набор с более плавным концом.
+   * @param aim
+   * @param result
+   */
+  private getSetMaxNeatEnd(aim: number, result: number[], tsk: Task) {
+    let max = aim;
+
+    let step = Math.floor(aim / Task.maxValue);
+    if (step < 1) {
+      step = 1;
+    }
+
+    let left = max - step * Task.maxValue;
+    if (left < 0) {
+      left = 0;
+    }
+    max = max - left;
+
+    // Основное..
+    for (let i = Task.maxValue; i >= 1; i--) {
+      result.unshift(max);
+
+      max -= step;
+
+      if (max < step) {
+        max = step;
+      }
+    }
+
+    // Остатки..
+    for (let i = 0; i < result.length; i++) {
+      let v = i + 1;
+      if (v > left) {
+        v = left;
+      }
+
+      result[i] += v;
+    }
+
+    result.unshift(0);
   }
 
   private getSubtaskExpChange(tsk: Task, isDone: boolean, subTask: taskState) {
@@ -2613,7 +3044,7 @@ export class PersService {
     }
 
     while (true) {
-      let tesKoef = GameSettings.getTesChangeKoef(tesVal);
+      let tesKoef = this.getTesChangeKoef(tesVal);
 
       let tesLeft = 1;
       if (isPlus) {
@@ -2656,6 +3087,43 @@ export class PersService {
     }
 
     return change;
+  }
+
+  private getTesChangeKoef(tesVal: number): number {
+    let skillMult = 0.54386;
+    let skillOffcet = 1 - skillMult;
+
+    let level = 1 + Math.floor(tesVal / 10.0);
+    let result = level * skillMult + skillOffcet;
+
+    return 1 / result;
+
+    // let levels: number = this._tesMaxLvl;
+    // let xp_for_first_level: number = 1;
+    // let xp_for_last_level: number = 10;
+
+    // let B: number = Math.log(xp_for_last_level / xp_for_first_level) / (levels - 1);
+    // let A: number = xp_for_first_level / (Math.exp(B) - 1.0);
+
+    // let i = Math.floor(tesVal) + 1;
+
+    // let old_xp: number = A * Math.exp(B * (i - 1));
+    // let new_xp: number = A * Math.exp(B * (i));
+
+    // let multi = new_xp - old_xp;
+
+    // return 1 / multi;
+
+    // return (1 / (2 + Math.floor(tesVal) / 10.0));
+
+    // let tesValTen = 1 + Math.floor(tesVal / 10.0);
+    // tesValTen = tesValTen + (tesValTen - 1);
+
+    // return 1 / tesValTen;
+
+    // let tesValTen = 1 + Math.floor(tesVal / 10.0);
+
+    // return 1 / tesValTen;
   }
 
   private getTaskFromState(tsk: Task, st: taskState, isAll: boolean, prs: Pers): Task {
@@ -2858,8 +3326,8 @@ export class PersService {
       tsk.nextAbVal = tsk.value + 1;
 
       // По уровням
-      if (GameSettings.isShowAbProgrTable) {
-        for (let i = GameSettings.minAbilLvl; i <= GameSettings.maxAbilLvl; i++) {
+      if (!isMegaPlan) {
+        for (let i = 0; i <= this._maxAbilLevel; i++) {
           const progrSt = this.getProgrForTittle(i + 1, i, tsk.isPerk, isMegaPlan);
           const pSt = this.getPlusState(tsk, progrSt);
 
@@ -2875,10 +3343,6 @@ export class PersService {
       }
 
       const plusState = this.getPlusState(tsk, progr, true);
-
-      if (!GameSettings.isShowAbProgrTable) {
-        tsk.statesDescr.push(plusState);
-      }
 
       if (plusState) {
         if (tsk.states.length > 0 && !tsk.isSumStates) {
@@ -2906,7 +3370,7 @@ export class PersService {
       tsk.curLvlDescr2 = " (" + plusState.trim() + ")";
       tsk.curLvlDescr3 = plusState.trim();
     } else {
-      for (let i = 0; i <= GameSettings.maxAbilLvl; i++) {
+      for (let i = 0; i <= this._maxAbilLevel; i++) {
         tsk.statesDescr.push(tsk.tittle);
       }
 

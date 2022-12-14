@@ -4,8 +4,8 @@ import { AngularFireAuth } from "angularfire2/auth";
 import * as firebase from "firebase/app";
 import { PersModule } from "./pers/pers.module";
 import { Pers } from "src/Models/Pers";
-import { map, share, take, tap } from "rxjs/operators";
-import { from, Observable } from "rxjs";
+import { map, share, take } from "rxjs/operators";
+import { Observable } from "rxjs";
 import { PersService } from "./pers.service";
 import { curpersview } from "src/Models/curpersview";
 import { ConfirmationDialogComponent } from "./confirmation-dialog/confirmation-dialog.component";
@@ -73,23 +73,19 @@ export class UserService {
       );
   }
 
-  syncDownload():Observable<any> {
-    return this.loadPers(this.srv.pers$.value.userId)
-      .pipe(take(1))
-      .pipe(
-        tap((n) => {
-          let prs: Pers = n as Pers;
-          prs.currentView = curpersview.SkillTasks;
-          this.srv.savePers(false, null, prs);
-        })
-      );
+  async syncDownload() {
+    let observable$ = this.loadPers(this.srv.pers$.value.userId).pipe(take(1)).toPromise();
+    let n = await observable$;
+    let prs: Pers = n as Pers;
+    prs.currentView = curpersview.SkillTasks;
+    this.srv.savePers(false, null, prs);
   }
 
-  syncUpload(): Observable<any>{
+  async syncUpload() {
     this.srv.savePers(false);
     let prs = this.srv.pers$.value;
     const persJson = JSON.parse(JSON.stringify(prs));
-    return from(this.db.collection("pers").doc(prs.id).set(persJson));
+    await this.db.collection("pers").doc(prs.id).set(persJson);
   }
 
   sync(isDownload) {
