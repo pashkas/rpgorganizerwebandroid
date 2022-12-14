@@ -438,14 +438,6 @@ export class PersListComponent implements OnInit {
     }
   }
 
-  upAbil(ab: Ability) {
-    this.srv.changesBefore();
-
-    this.srv.upAbility(ab);
-
-    this.srv.changesAfter(true);
-  }
-
   /**
    * Использование награды.
    * @param rev Награда.

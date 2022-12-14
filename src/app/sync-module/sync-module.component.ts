@@ -6,7 +6,6 @@ import { Location } from "@angular/common";
 import { take } from "rxjs/operators";
 import { ConfirmationDialogComponent } from "../confirmation-dialog/confirmation-dialog.component";
 import { MatDialog } from "@angular/material";
-import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
   selector: "app-sync-module",
@@ -21,11 +20,10 @@ export class SyncModuleComponent implements OnInit {
     private router: Router,
     private _location: Location,
     private dialog: MatDialog,
-    private spinner: NgxSpinnerService
   ) {}
 
   ngOnInit() {
-    this.activatedRoute.queryParams.subscribe(async (q) => {
+    this.activatedRoute.queryParams.subscribe((q) => {
       let type = q["type"];
       let frome = q["frome"];
 
@@ -35,17 +33,15 @@ export class SyncModuleComponent implements OnInit {
       }
 
       if (type == "load") {
-        this.spinner.show();
         // Скачивание
-        await this.usrSrv.syncDownload();
-        this.router.navigate([frome]);
-        this.spinner.hide();
+        this.usrSrv.syncDownload().subscribe((q) => {
+          this.router.navigate([frome]);
+        });
       } else if (type == "upload") {
-        this.spinner.show();
         // Загрузка
-        await this.usrSrv.syncUpload();
-        this.router.navigate([frome]);
-        this.spinner.hide();
+        this.usrSrv.syncUpload().subscribe((q) => {
+          this.router.navigate([frome]);
+        });
       } else if (type == "newGame") {
         // Новая игра
         const dialogRef = this.dialog.open(ConfirmationDialogComponent, {

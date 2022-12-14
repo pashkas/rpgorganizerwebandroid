@@ -1,5 +1,13 @@
-.sync-container{
-    width: 100wv;
-    height: 100vh;
-    background: white;
+.sync-container {
+  width: 100wv;
+  height: 100vh;
+  background: white;
+  position: relative;
+}
+
+.sync-container .element {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
