@@ -39,7 +39,7 @@ export class MainWindowComponent implements OnInit {
   /**
    * Автовремя.
    */
-  setAutoTime(tsk: Task) {
+  setAutoTime(tsk: Task, isDone: boolean) {
     let prs = this.srv.pers$.value;
 
     if (!prs.isWriteTime || prs.currentView != curpersview.SkillTasks || tsk.isNotWriteTime) {
@@ -50,7 +50,11 @@ export class MainWindowComponent implements OnInit {
     let idx = tsks.findIndex((q) => q.id === tsk.id);
 
     if (idx != -1) {
-      tsks.unshift(tsks.splice(idx, 1)[0]);
+      if (isDone) {
+        tsks.unshift(tsks.splice(idx, 1)[0]);
+      } else {
+        tsks.push(tsks.splice(idx, 1)[0]);
+      }
     }
 
     this.sortSkillsGlobal();
@@ -124,7 +128,7 @@ export class MainWindowComponent implements OnInit {
 
     let tskIndex = this.srv.pers$.value.tasks.indexOf(t);
 
-    this.setAutoTime(t);
+    this.setAutoTime(t, true);
 
     if (t.parrentTask) {
       // Логика для навыков
@@ -175,7 +179,7 @@ export class MainWindowComponent implements OnInit {
 
     let tskIndex = this.srv.pers$.value.tasks.indexOf(t);
 
-    this.setAutoTime(t);
+    this.setAutoTime(t, false);
 
     if (t.parrentTask) {
       // Логика для подзадач
@@ -242,8 +246,7 @@ export class MainWindowComponent implements OnInit {
     this.unsubscribe$.complete();
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   onLongPress(e) {
     this.srv.setCurInd(0);

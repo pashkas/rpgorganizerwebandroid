@@ -9,6 +9,7 @@ import { ChangesModel, persExpChanges } from "src/Models/ChangesModel";
 import { Characteristic } from "src/Models/Characteristic";
 import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
 import { StatesService } from "./states.service";
+import { GameSettings } from "./GameSettings";
 
 @Injectable({
   providedIn: "root",
@@ -47,13 +48,7 @@ export class PerschangesService {
     // Произошло открытие навыка
     let isAbilActivated = false;
 
-    const isShowCharactChanges = true;
-    const isShowAbChanges = true;
-    const isShowAbActivate = true;
-    const isShowExpChanges = false;
-
     const isOpenPersAtNewLevel = false;
-    const maxAttrLevel = 20;
     const popupDuration = 2500;
 
     Object.keys(changesMap).forEach((n) => {
@@ -90,22 +85,30 @@ export class PerschangesService {
       }
       // Характеристики
       else if (changesMap[n].type == "cha") {
-        if (isShowCharactChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
-          let chaChanges = new ChangesModel(changesMap[n].name, "cha", this.moreThenThero(changesMap[n].before - 1), this.moreThenThero(changesMap[n].after - 1), 0, maxAttrLevel, changesMap[n].img);
+        if (GameSettings.isShowCharactChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxChaLvl) {
+          let chaChanges = new ChangesModel(
+            changesMap[n].name,
+            "cha",
+            this.moreThenThero(changesMap[n].before - 1),
+            this.moreThenThero(changesMap[n].after - 1),
+            0,
+            GameSettings.maxChaLvl,
+            changesMap[n].img
+          );
           chaChanges.lvl = changesMap[n].after;
           changes.push(chaChanges);
         }
       }
       // Навыки
       else if (changesMap[n].type == "abil") {
-        if (isShowAbChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= maxAttrLevel) {
+        if (GameSettings.isShowAbChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxAbilLvl) {
           let abChanges = new ChangesModel(
             changesMap[n].name,
             "abil",
             this.moreThenThero(changesMap[n].before - 1),
             this.moreThenThero(changesMap[n].after - 1),
             0,
-            maxAttrLevel - 1,
+            GameSettings.maxAbilLvl,
             changesMap[n].img
           );
           abChanges.lvl = changesMap[n].after;
@@ -132,7 +135,7 @@ export class PerschangesService {
     Object.keys(changesMap).forEach((n) => {
       // Опыт
       if (changesMap[n].type == "exp") {
-        let isShowBySettings = isDoneQwest || isShowExpChanges;
+        let isShowBySettings = isDoneQwest || GameSettings.isShowExpChanges;
 
         if (isShowBySettings) {
           if (changesMap[n].after != changesMap[n].before) {
@@ -163,7 +166,7 @@ export class PerschangesService {
 
             expChanges.expChanges = eCh;
 
-            if (isDoneQwest || isShowExpChanges) {
+            if (isDoneQwest || GameSettings.isShowExpChanges) {
               changes.push(expChanges);
             } else {
               changes.unshift(expChanges);
@@ -364,26 +367,16 @@ export class PerschangesService {
           }
 
           let abVal = Math.floor(tsk.value);
-          if (abVal > 10) {
-            abVal = 10;
+          if (abVal > GameSettings.maxAbilLvl) {
+            abVal = GameSettings.maxAbilLvl;
           }
           changesMap[tsk.id][chType] = abVal;
-          // changesMap[tsk.id][chType] = tsk.value;
-          // let abVal = tsk.tesValue;
-          // if(abVal > 90){
-          //   abVal = 90;
-          // }
-          // changesMap[tsk.id][chType] = abVal;
 
           if (chType == "before") {
             changesMap[tsk.id]["abIsOpenBefore"] = ab.isOpen;
           } else {
             changesMap[tsk.id]["abIsOpenAfter"] = ab.isOpen;
           }
-
-          // if (tsk.isSumStates) {
-          //   this.tskStatesProgress(tsk, chType, changesMap, true);
-          // }
         });
       });
     });
@@ -395,8 +388,8 @@ export class PerschangesService {
       }
 
       let chaVal = Math.floor(ch.value);
-      if (chaVal > 10) {
-        chaVal = 10;
+      if (chaVal > GameSettings.maxChaLvl) {
+        chaVal = GameSettings.maxChaLvl;
       }
 
       changesMap[ch.id][chType] = chaVal;

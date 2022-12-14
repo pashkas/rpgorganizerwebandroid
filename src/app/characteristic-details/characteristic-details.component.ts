@@ -1,24 +1,25 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { PersService } from '../pers.service';
-import { Pers } from 'src/Models/Pers';
-import { Characteristic } from 'src/Models/Characteristic';
-import { Rangse } from 'src/Models/Rangse';
-import { Location } from '@angular/common';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { Ability } from 'src/Models/Ability';
-import { MatDialog } from '@angular/material';
-import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { PersService } from "../pers.service";
+import { Pers } from "src/Models/Pers";
+import { Characteristic } from "src/Models/Characteristic";
+import { Rangse } from "src/Models/Rangse";
+import { Location } from "@angular/common";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { Ability } from "src/Models/Ability";
+import { MatDialog } from "@angular/material";
+import { AddItemDialogComponent } from "../add-item-dialog/add-item-dialog.component";
+import { GameSettings } from "../GameSettings";
 
 @Component({
-  selector: 'app-characteristic-details',
-  templateUrl: './characteristic-details.component.html',
-  styleUrls: ['./characteristic-details.component.css'],
-  changeDetection: ChangeDetectionStrategy.Default
+  selector: "app-characteristic-details",
+  templateUrl: "./characteristic-details.component.html",
+  styleUrls: ["./characteristic-details.component.css"],
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class CharacteristicDetailsComponent implements OnInit {
-  @ViewChild('nameEdt', { static: false }) nameEdt: ElementRef;
+  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
   private unsubscribe$ = new Subject();
 
   charact: Characteristic;
@@ -29,7 +30,7 @@ export class CharacteristicDetailsComponent implements OnInit {
   isQuick: any;
 
   //  = Characteristic.rangse;
-  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) { }
+  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) {}
 
   /**
    * Добавление навыка.
@@ -37,18 +38,17 @@ export class CharacteristicDetailsComponent implements OnInit {
   addAbil() {
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      panelClass: 'my-dialog',
-      data: { header: 'Добавить навык', text: '' },
-      backdropClass: 'backdrop'
+      panelClass: "my-dialog",
+      data: { header: "Добавить навык", text: "" },
+      backdropClass: "backdrop",
     });
 
-    dialogRef.afterClosed()
-      .subscribe(name => {
-        if (name) {
-          this.srv.addAbil(this.charact.id, name);
-        }
-        this.srv.isDialogOpen = false;
-      });
+    dialogRef.afterClosed().subscribe((name) => {
+      if (name) {
+        this.srv.addAbil(this.charact.id, name);
+      }
+      this.srv.isDialogOpen = false;
+    });
   }
 
   /**
@@ -62,8 +62,7 @@ export class CharacteristicDetailsComponent implements OnInit {
   goBack() {
     if (this.isEditMode) {
       this.isEditMode = false;
-    }
-    else {
+    } else {
       this.location.back();
     }
   }
@@ -81,38 +80,28 @@ export class CharacteristicDetailsComponent implements OnInit {
       }
     });
 
-    this.srv.pers$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(n => {
-        this.pers = n;
-        const id = this.route.snapshot.paramMap.get('id');
-        this.charact = this.srv.allMap[id].item;
-        const isEdit = this.route.snapshot.paramMap.get('isEdit');
-        if (isEdit == 'true') {
-          this.isEditMode = true;
-        }
-      });
+    this.srv.pers$.pipe(takeUntil(this.unsubscribe$)).subscribe((n) => {
+      this.pers = n;
+      const id = this.route.snapshot.paramMap.get("id");
+      this.charact = this.srv.allMap[id].item;
+      const isEdit = this.route.snapshot.paramMap.get("isEdit");
+      if (isEdit == "true") {
+        this.isEditMode = true;
+      }
+    });
 
     if (!this.srv.pers$.value) {
-      this.router.navigate(['/main']);
+      this.router.navigate(["/main"]);
     }
 
     this.rangse = [];
-    for (let index = 0; index <= this.srv._maxCharactLevel - 1; index++) {
+    for (let index = GameSettings.minChaLvl - 1; index <= GameSettings.maxChaLvl - 1; index++) {
       let rng = new Rangse();
       rng.val = index;
-      rng.img = '';
-      rng.name = '' + index;
+      rng.img = "";
+      rng.name = "" + index;
       this.rangse.push(rng);
     }
-  }
-
-  upAbil(ab: Ability) {
-    this.srv.changesBefore();
-
-    this.srv.upAbility(ab);
-
-    this.srv.changesAfter(true);
   }
 
   /**
@@ -123,10 +112,9 @@ export class CharacteristicDetailsComponent implements OnInit {
       this.srv.savePers(false);
       this.isEditMode = false;
       if (this.isQuick) {
-        this.router.navigate(['/pers'])
+        this.router.navigate(["/pers"]);
       }
-    }
-    else {
+    } else {
       this.isEditMode = true;
     }
   }
@@ -134,7 +122,7 @@ export class CharacteristicDetailsComponent implements OnInit {
   showAbility(ab: Ability) {
     let tsk = ab.tasks[0];
     if (tsk) {
-      this.router.navigate(['/pers/task', tsk.id, false]);
+      this.router.navigate(["/pers/task", tsk.id, false]);
     }
   }
 }
