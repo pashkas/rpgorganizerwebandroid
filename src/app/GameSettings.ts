@@ -7,7 +7,13 @@ export class GameSettings {
   /**
    * Очков за уровень.
    */
-  static abLvlForPersLvl: number = 5;
+  static abLvlForPersLvl: number = 50;
+
+  /**
+   * Плюс к прогрессу для задания в задаче.
+   *
+   */
+  static plusAbProgrForTitle: number = 4;
 
   /**
    * Число рангов.
@@ -59,7 +65,7 @@ export class GameSettings {
   /**
    * Показывать полный список требований навыка, по уровням.
    */
-  static isShowAbProgrTable: boolean = false;
+  static isShowAbProgrTable: boolean = true;
 
   /**
    * Показывать изменения характеристик.

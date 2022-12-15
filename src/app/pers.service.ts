@@ -813,7 +813,7 @@ export class PersService {
     // tesMax = 10 * 10 * this.maxPersLevel;
 
     // Очков за уровень
-    tesMax = GameSettings.maxPersLevel *  GameSettings.abLvlForPersLvl * 10 * 10;
+    tesMax = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl * 10;
 
     let progress = tesCur / tesMax;
     let exp = GameSettings.maxPersLevel * progress;
@@ -1364,8 +1364,8 @@ export class PersService {
             rng.name = "-";
           } else {
             rng.name = tsk.value + "";
-            if(GameSettings.isShowPercentageInAb){
-              rng.name+="%";
+            if (GameSettings.isShowPercentageInAb) {
+              rng.name += "%";
             }
           }
 
@@ -2554,8 +2554,8 @@ export class PersService {
   }
 
   private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean) {
-    let start = 0;
-    let progr = start + tskVal / GameSettings.maxAbilLvl;
+    let start = GameSettings.plusAbProgrForTitle;
+    let progr = (start + tskVal) / (GameSettings.maxAbilLvl + start);
 
     if (progr < 0.01) {
       progr = 0.01;
