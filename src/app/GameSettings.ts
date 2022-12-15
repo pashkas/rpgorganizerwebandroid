@@ -65,7 +65,7 @@ export class GameSettings {
   /**
    * Показывать полный список требований навыка, по уровням.
    */
-  static isShowAbProgrTable: boolean = true;
+  static isShowAbProgrTable: boolean = false;
 
   /**
    * Показывать изменения характеристик.
