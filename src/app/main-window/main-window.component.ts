@@ -50,11 +50,12 @@ export class MainWindowComponent implements OnInit {
     let idx = tsks.findIndex((q) => q.id === tsk.id);
 
     if (idx != -1) {
-      if (isDone) {
-        tsks.unshift(tsks.splice(idx, 1)[0]);
-      } else {
-        tsks.push(tsks.splice(idx, 1)[0]);
-      }
+      tsks.unshift(tsks.splice(idx, 1)[0]);
+      // if (isDone) {
+      //   tsks.unshift(tsks.splice(idx, 1)[0]);
+      // } else {
+      //   tsks.push(tsks.splice(idx, 1)[0]);
+      // }
     }
 
     this.sortSkillsGlobal();

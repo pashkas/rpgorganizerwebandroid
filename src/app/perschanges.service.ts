@@ -49,7 +49,6 @@ export class PerschangesService {
     let isAbilActivated = false;
 
     const isOpenPersAtNewLevel = false;
-    const popupDuration = 2500;
 
     Object.keys(changesMap).forEach((n) => {
       // Квесты
@@ -85,7 +84,7 @@ export class PerschangesService {
       }
       // Характеристики
       else if (changesMap[n].type == "cha") {
-        if (GameSettings.isShowCharactChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxChaLvl) {
+        if (GameSettings.changesIsChowCha && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxChaLvl) {
           let chaChanges = new ChangesModel(
             changesMap[n].name,
             "cha",
@@ -101,7 +100,8 @@ export class PerschangesService {
       }
       // Навыки
       else if (changesMap[n].type == "abil") {
-        if (GameSettings.isShowAbChanges && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxAbilLvl) {
+        if (GameSettings.changesIsShowAb && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxAbilLvl) {
+          debugger;
           let abChanges = new ChangesModel(
             changesMap[n].name,
             "abil",
@@ -135,7 +135,7 @@ export class PerschangesService {
     Object.keys(changesMap).forEach((n) => {
       // Опыт
       if (changesMap[n].type == "exp") {
-        let isShowBySettings = isDoneQwest || GameSettings.isShowExpChanges;
+        let isShowBySettings = isDoneQwest || GameSettings.changesIsShowExp;
 
         if (isShowBySettings) {
           if (changesMap[n].after != changesMap[n].before) {
@@ -166,7 +166,7 @@ export class PerschangesService {
 
             expChanges.expChanges = eCh;
 
-            if (isDoneQwest || GameSettings.isShowExpChanges) {
+            if (isDoneQwest || GameSettings.changesIsShowExp) {
               changes.push(expChanges);
             } else {
               changes.unshift(expChanges);
@@ -292,7 +292,7 @@ export class PerschangesService {
         backdropClass: "backdrop-changes",
       });
 
-      await sleep(popupDuration);
+      await sleep(GameSettings.changesPopupDuration);
 
       dialogRef.close();
     }
@@ -306,7 +306,7 @@ export class PerschangesService {
         },
       });
 
-      await sleep(popupDuration);
+      await sleep(GameSettings.changesPopupDuration);
 
       dialogRefLvlUp.close();
 
@@ -363,8 +363,15 @@ export class PerschangesService {
       ch.abilities.forEach((ab) => {
         ab.tasks.forEach((tsk) => {
           if (!changesMap[tsk.id]) {
-            changesMap[tsk.id] = this.getChItem("abil", ab.name, ab.image);
+            changesMap[tsk.id] = this.getChItem("abil", "", ab.image);
           }
+
+          let name = ab.name;
+          if (GameSettings.changesIsShowAbDescrInChanges && tsk.curLvlDescr3 != null && tsk.curLvlDescr3 != ab.name) {
+            name += " (" + tsk.curLvlDescr3 + ")";
+          }
+
+          changesMap[tsk.id].name = name;
 
           let abVal = Math.floor(tsk.value);
           if (abVal > GameSettings.maxAbilLvl) {

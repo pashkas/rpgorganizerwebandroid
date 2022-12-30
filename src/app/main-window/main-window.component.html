@@ -43,7 +43,7 @@
                   </ng-template>
                 </div>
               </div>
-              <mat-checkbox class="my-checkbox" *ngIf="this.srv.pers$.value.isWriteTime && data.currentView == 'SkillsSort'" (change)="setIsNotWriteTime($event, t)" [ngModel]="t.isNotWriteTime"> </mat-checkbox>
+              <!-- <mat-checkbox class="my-checkbox" *ngIf="this.srv.pers$.value.isWriteTime && data.currentView == 'SkillsSort'" (change)="setIsNotWriteTime($event, t)" [ngModel]="t.isNotWriteTime"> </mat-checkbox> -->
               <!-- <div *ngIf="t.requrense != 'нет' && !true" class="px-2">
                 <ngx-material-timepicker-toggle [for]="pikTimeInList"></ngx-material-timepicker-toggle>
                 <ngx-material-timepicker (timeSet)="onTimeChanged($event, t.id)" #pikTimeInList [format]="24" [defaultTime]="t.time"></ngx-material-timepicker>
@@ -150,7 +150,7 @@
         <div fxLayout="column" fxLayoutAlign="space-around center">
           <!-- <mat-slide-toggle (change)="setMegaPlan()" [(ngModel)]="this.srv.pers$.value.isMegaPlan">Мега план
           </mat-slide-toggle> -->
-          <mat-slide-toggle (change)="setWriteTime()" [(ngModel)]="this.srv.pers$.value.isWriteTime">Автосортировка </mat-slide-toggle>
+          <mat-slide-toggle (change)="setWriteTime()" [(ngModel)]="this.srv.pers$.value.isWriteTime">Автосорт </mat-slide-toggle>
         </div>
       </div>
       <!-- Сортировка квестов -->

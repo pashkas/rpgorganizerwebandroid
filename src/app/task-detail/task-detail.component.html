@@ -92,7 +92,7 @@
     </ng-container>
     <br />
     <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
-      <div *ngIf="st" class="text-center px-0 py-1 border-0" [ngClass]="{ 'bg-success': (i == tsk.value && tskAbility.isOpen) || !isShowAbProgrTable }">
+      <div *ngIf="st" class="text-center px-0 py-1 border-0" [ngClass]="{ 'bg-success': (i == tsk.value && tskAbility.isOpen) && isShowAbProgrTable }">
         <b>
           <ng-container *ngIf="isShowAbProgrTable">
             {{ i + percSymbol + ": " }}

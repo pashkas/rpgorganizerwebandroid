@@ -40,7 +40,7 @@ export class TaskDetailComponent implements OnInit {
   charactCntrl: FormControl;
   charactGroup: FormGroup;
   isShowAbProgrTable = GameSettings.isShowAbProgrTable;
-  percSymbol = GameSettings.isShowPercentageInAb ? "%" : "";
+  percSymbol = GameSettings.changesIsShowPercentageInAb ? "%" : "";
 
   constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, fb: FormBuilder) {
     this.charactCntrl = fb.control("");

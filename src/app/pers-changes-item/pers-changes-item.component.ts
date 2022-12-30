@@ -88,8 +88,16 @@ export class PersChangesItemComponent implements OnInit {
       player.play();
     }
 
-    if (this.item.type == "abil" && GameSettings.isShowPercentageInAb) {
+    if (this.item.type == "abil" && GameSettings.changesIsShowPercentageInAb) {
       this.plusName += "%";
+    }
+
+    if(this.item.type == 'abil' && !GameSettings.changesIsShowValueInAb){
+      this.plusName = '';
+    }
+
+    if(this.item.type == 'cha' && !GameSettings.changesIsShowValueInCha){
+      this.plusName = '';
     }
   }
 }

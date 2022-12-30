@@ -65,7 +65,7 @@ export class Task implements IImg {
   timeForSort: number = 200000000;
   tittle: string;
   value: number = 0;
-  order: number = -1;
+  order: number = 9999;
   lastNotDone: boolean = false;
   isfrstqwtsk: boolean;
   isHard: boolean = false;
@@ -221,7 +221,7 @@ export class taskState implements IImg {
   parrentTask: string;
   isActive: boolean = false;
   startLvl: number = 999;
-  order: number = -1;
+  order: number = 9999;
   img: string;
   image: string;
   imageLvl: string = "0";

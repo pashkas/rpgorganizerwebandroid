@@ -71,7 +71,6 @@ export class ChangesModel {
             this.valChange = '';
         }
 
-
         // if (type == 'abil' || type == 'cha') {
         //     this.valChange = '';
         // }

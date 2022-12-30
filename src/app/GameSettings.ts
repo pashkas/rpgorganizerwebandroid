@@ -7,13 +7,13 @@ export class GameSettings {
   /**
    * Очков за уровень.
    */
-  static abLvlForPersLvl: number = 50;
+  static abLvlForPersLvl: number = 7.6;
 
   /**
    * Плюс к прогрессу для задания в задаче.
    *
    */
-  static plusAbProgrForTitle: number = 4;
+  static plusAbProgrForTitle: number = 0;
 
   /**
    * Число рангов.
@@ -23,7 +23,7 @@ export class GameSettings {
   /**
    * Максимальный уровень характеристик.
    */
-  static maxChaLvl: number = 10;
+  static maxChaLvl: number = 20;
   /**
    * Минимальный уровень характеристик.
    */
@@ -32,17 +32,12 @@ export class GameSettings {
   /**
    * Максимальный уровень навыков.
    */
-  static maxAbilLvl: number = 100;
+  static maxAbilLvl: number = 20;
 
   /**
    * Минимальный уровень навыка.
    */
-  static minAbilLvl: number = 0;
-
-  /**
-   * Показывать процент в прогрессе навыка.
-   */
-  static isShowPercentageInAb: boolean = true;
+  static minAbilLvl: number = 1;
 
   /**
    * Максимальное значение очков в задаче.
@@ -53,8 +48,8 @@ export class GameSettings {
    * Формула прогресса навыка.
    */
   static getTesChangeKoef(tesVal: number): number {
-    let skillMult = 0.0206556;
-    let skillOffcet = 0.2 - skillMult;
+    let skillMult = 0.48;
+    let skillOffcet = 2 - skillMult;
 
     let level = 1 + Math.floor(tesVal / 10.0);
     let result = level * skillMult + skillOffcet;
@@ -70,13 +65,38 @@ export class GameSettings {
   /**
    * Показывать изменения характеристик.
    */
-  static isShowCharactChanges: boolean = true;
+  static changesIsChowCha: boolean = true;
   /**
    * Показывать изменения навыков.
    */
-  static isShowAbChanges: boolean = false;
+  static changesIsShowAb: boolean = true;
   /**
    * Показывать изменение опыта.
    */
-  static isShowExpChanges: boolean = false;
+  static changesIsShowExp: boolean = false;
+
+  /**
+   * Длительность показа попапа с изменениями.
+   */
+  static changesPopupDuration: number = 5000;
+
+  /**
+   * Показывать процент в прогрессе навыка.
+   */
+  static changesIsShowPercentageInAb: boolean = false;
+
+  /**
+   * Показывать значение в изменениях навыка.
+   */
+  static changesIsShowValueInAb: boolean = false;
+
+  /**
+   * Показывать значения в изменениях характеристик.
+   */
+  static changesIsShowValueInCha: boolean = false;
+
+  /**
+   * Показывать описание нового уровня навыка в изменениях.
+   */
+  static changesIsShowAbDescrInChanges: boolean = false;
 }

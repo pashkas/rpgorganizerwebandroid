@@ -1364,7 +1364,7 @@ export class PersService {
             rng.name = "-";
           } else {
             rng.name = tsk.value + "";
-            if (GameSettings.isShowPercentageInAb) {
+            if (GameSettings.changesIsShowPercentageInAb) {
               rng.name += "%";
             }
           }
@@ -2677,7 +2677,6 @@ export class PersService {
     }
     if (tsk.isSumStates) {
       plusName = st.name;
-      // let pattern = /\d+[⧖|✓].*/;
       let pattern = /‪.*/;
 
       let plusTimerOrCounter = pattern.exec(tsk.curLvlDescr3);
@@ -2907,7 +2906,9 @@ export class PersService {
       tsk.curLvlDescr3 = plusState.trim();
     } else {
       for (let i = 0; i <= GameSettings.maxAbilLvl; i++) {
-        tsk.statesDescr.push(tsk.tittle);
+        if (GameSettings.isShowAbProgrTable || i == tsk.value) {
+          tsk.statesDescr.push(tsk.tittle);
+        }
       }
 
       tsk.tittle = tsk.name;
