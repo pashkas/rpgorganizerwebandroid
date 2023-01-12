@@ -28,9 +28,12 @@ export class CharacteristicDetailsComponent implements OnInit {
   rangse: Rangse[];
   pers: Pers;
   isQuick: any;
+  GameSettings: typeof GameSettings;
 
   //  = Characteristic.rangse;
-  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) {}
+  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) {
+    this.GameSettings = GameSettings;
+  }
 
   /**
    * Добавление навыка.
@@ -102,6 +105,10 @@ export class CharacteristicDetailsComponent implements OnInit {
       rng.name = "" + index;
       this.rangse.push(rng);
     }
+  }
+
+  upAbil(ab: Ability) {
+    this.srv.upAbility(ab);
   }
 
   /**

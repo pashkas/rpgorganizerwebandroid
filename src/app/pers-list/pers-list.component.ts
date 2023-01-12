@@ -15,6 +15,7 @@ import { StatesService } from "../states.service";
 import { takeUntil } from "rxjs/operators";
 import { PersImportExportDialogComponent } from "../pers-import-export-dialog/pers-import-export-dialog.component";
 import { RevardDialogData } from "src/Models/RevardDialogData";
+import { GameSettings } from "../GameSettings";
 
 @Component({
   selector: "app-pers-list",
@@ -25,14 +26,16 @@ import { RevardDialogData } from "src/Models/RevardDialogData";
 export class PersListComponent implements OnInit {
   private unsubscribe$ = new Subject();
 
-  GameSettings = Pers.GameSettings;
   chaArea: string = "";
   isEditMode: boolean = false;
   pers: Pers;
   selAb: Ability;
   selCha: Characteristic;
+  GameSettings: typeof GameSettings;
 
-  constructor(private location: Location, public srvSt: StatesService, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) {}
+  constructor(private location: Location, public srvSt: StatesService, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) {
+    this.GameSettings = GameSettings;
+  }
 
   /**
    * Добавление навыка.
@@ -336,6 +339,10 @@ export class PersListComponent implements OnInit {
     //   });
   }
 
+  upAbil(ab: Ability) {
+    this.srv.upAbility(ab);
+  }
+
   /**
    * Респаун.
    */
@@ -346,7 +353,7 @@ export class PersListComponent implements OnInit {
       this.pers.gold = 0;
       this.pers.characteristics.forEach((cha) => {
         cha.abilities.forEach((ab) => {
-          ab.isOpen = true;
+          ab.isOpen = GameSettings.isNewAbOpened;
           ab.tasks.forEach((tsk) => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
             // tsk.order = -1;

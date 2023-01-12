@@ -15,6 +15,7 @@ import { ChangeCharactComponent } from "../pers/change-charact/change-charact.co
 import { Qwest } from "src/Models/Qwest";
 import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { GameSettings } from "../GameSettings";
+import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
 
 @Component({
   selector: "app-task-detail",
@@ -41,12 +42,18 @@ export class TaskDetailComponent implements OnInit {
   charactGroup: FormGroup;
   isShowAbProgrTable = GameSettings.isShowAbProgrTable;
   percSymbol = GameSettings.changesIsShowPercentageInAb ? "%" : "";
+  GameSettings: typeof GameSettings;
 
   constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, fb: FormBuilder) {
     this.charactCntrl = fb.control("");
     this.charactGroup = fb.group({
       charact: this.charactCntrl,
     });
+    this.GameSettings = GameSettings;
+  }
+
+  upAbil() {
+    this.srv.upAbility(this.tskAbility);
   }
 
   /**

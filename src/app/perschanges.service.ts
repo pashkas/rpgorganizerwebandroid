@@ -100,8 +100,14 @@ export class PerschangesService {
       }
       // Навыки
       else if (changesMap[n].type == "abil") {
+         if (GameSettings.changesIsShowAbActivate && changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
+          isAbilActivated = true;
+          abToEdit = n;
+          changes.push(
+            new ChangesModel(`"${changesMap[n].name}" активирован`, 'abil', 0, 0, 0, GameSettings.maxAbilLvl, changesMap[n].img)
+          );
+        }
         if (GameSettings.changesIsShowAb && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxAbilLvl) {
-          debugger;
           let abChanges = new ChangesModel(
             changesMap[n].name,
             "abil",

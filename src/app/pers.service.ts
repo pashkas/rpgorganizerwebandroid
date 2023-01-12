@@ -208,7 +208,7 @@ export class PersService {
     if (charact != null && charact != undefined) {
       let abil = new Ability();
       abil.name = name;
-      abil.isOpen = true;
+      abil.isOpen = GameSettings.isNewAbOpened;
 
       let tsk = this.addTsk(abil, name);
 
@@ -1149,6 +1149,28 @@ export class PersService {
     this.pers$.value.isGlobalView = b;
   }
 
+  upAbility(ab: Ability) {
+    this.changesBefore();
+    ab.isOpen = true;
+
+    // Обновляем дату
+    let date = new Date();
+    date.setHours(0, 0, 0, 0);
+
+    for (const tsk of ab.tasks) {
+      tsk.date = date;
+
+      this.CheckSetTaskDate(tsk);
+
+      tsk.states.forEach((el) => {
+        el.isDone = false;
+      });
+    }
+
+    this.savePers(false);
+    this.changesAfter(true);
+  }
+
   /**
    * Записать персонажа в БД.
    */
@@ -1430,14 +1452,7 @@ export class PersService {
         abMax = (GameSettings.maxAbilLvl - 1) * 1;
       }
 
-      const start = ch.startRang.val + 1;
-      let left = GameSettings.maxChaLvl - start;
-      let progr = abCur / abMax;
-      ch.value = start + left * progr;
-      const chaCeilProgr = Math.floor(ch.value);
-
-      ch.progressValue = ((ch.value - 1) / (GameSettings.maxChaLvl - 1)) * 100;
-      ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
+      const chaCeilProgr = this.countCharacteristicValue(ch, abCur, abMax);
 
       const rng = new Rangse();
       rng.val = chaCeilProgr;
@@ -1620,7 +1635,7 @@ export class PersService {
     }
 
     // Если есть вчерашние задачи
-    if (prs.currentView == curpersview.SkillTasks && prs.tasks != null && prs.tasks[0] != null) {
+    if ((prs.currentView == curpersview.SkillTasks || prs.currentView == curpersview.SkillsGlobal) && prs.tasks != null && prs.tasks[0] != null) {
       let firstTsk = prs.tasks[0];
       let today = moment().startOf("day");
       let firstTaskDate = moment(firstTsk.date).startOf("day");
@@ -1752,6 +1767,19 @@ export class PersService {
 
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
+  }
+
+  private countCharacteristicValue(ch: Characteristic, abCur: number, abMax: number) {
+    const start = ch.startRang.val + 1;
+    let left = GameSettings.maxChaLvl - start;
+    let progr = abCur / abMax;
+    ch.value = start + left * progr;
+    const chaCeilProgr = Math.floor(ch.value);
+
+    ch.progressValue = ((chaCeilProgr - 1) / (GameSettings.maxChaLvl - 1)) * 100;
+    ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
+
+    return chaCeilProgr;
   }
 
   setCurInd(i: number): any {
@@ -1948,13 +1976,13 @@ export class PersService {
     if (this.pers$.value.isWriteTime) {
       let autoCurDate: moment.Moment = moment();
       let autoTDate: moment.Moment = moment(tsk.date).startOf("day");
-      subTask.lastNotDone = false;
-      subTask.isDone = true;
       let autoDate = autoCurDate.diff(autoTDate);
       subTask.autoTime = autoDate;
     }
 
     if (isDone) {
+      subTask.lastNotDone = false;
+      subTask.isDone = true;
     } else {
       subTask.lastNotDone = true;
       subTask.isDone = false;
@@ -1989,12 +2017,6 @@ export class PersService {
       subTask.failCounter++;
     }
 
-    // if (subTask.failCounter >= 3) {
-    //   let ab: Ability = this.allMap[taskId].link;
-    //   this.downAbility(ab);
-    // }
-
-    //tsk.states.find(n => n.id == subtaskId);
     subTask.isDone = true;
 
     let allIsDone = tsk.states.filter((n) => n.isActive && !n.isDone).length;
@@ -2157,10 +2179,10 @@ export class PersService {
   tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number, isEven?: boolean) {
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
-    let value = Math.ceil(progr * av);
+    let value = Math.round(progr * av);
 
     if (aimVal < 0) {
-      value = Math.floor(progr * av);
+      value = Math.round(progr * av);
     }
 
     if (moreThenOne) {
@@ -2174,7 +2196,7 @@ export class PersService {
     }
 
     if (aimUnit == "Раз" && isEven == true) {
-      value = 2 * Math.ceil(value / 2);
+      value = 2 * Math.round(value / 2);
       if (value < 2) value = 2;
     }
 
@@ -2183,7 +2205,7 @@ export class PersService {
     }
 
     if (aimDone != null && aimUnit != "Раз") {
-      value = Math.ceil(value - aimDone);
+      value = Math.round(value - aimDone);
     }
 
     return value;
@@ -2464,18 +2486,19 @@ export class PersService {
 
     let gainedOns = Math.floor(persLevel / onEveryLevel);
 
-    let startOn = 9;
+    let startOn = GameSettings.startAbPoints;
 
     const totalGained = startOn + gainedOns;
 
-    ons = 3;
-    // ons = totalGained - (abOpenned * 3);
-    // if (startOn + gainedOns > abs) {
-    //   ons = (abs - abOpenned) + 1;
-    // }
+    ons = totalGained - abOpenned * 1;
+    if (startOn + gainedOns > abs) {
+      ons = abs - abOpenned + 1;
+    }
 
-    // prs.mayAddAbils = (totalGained - (abCount * 3)) >= 3;
-    prs.mayAddAbils = true;
+    prs.mayAddAbils = totalGained - abCount * 1 >= 1;
+
+    // ons = 3;
+    // prs.mayAddAbils = true;
 
     return ons;
   }
@@ -2555,10 +2578,15 @@ export class PersService {
 
   private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean) {
     let start = GameSettings.plusAbProgrForTitle;
+    // if (start < 1) {
+    //   start = 1;
+    // }
+
     let progr = (start + tskVal) / (GameSettings.maxAbilLvl + start);
 
-    if (progr < 0.01) {
-      progr = 0.01;
+    let min = 1 / GameSettings.maxAbilLvl;
+    if (progr < min) {
+      progr = min;
     }
     if (progr > 1) {
       progr = 1;

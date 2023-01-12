@@ -50,6 +50,18 @@
       <div>
         {{ tsk.date | datestring }}
       </div>
+
+      <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px" *ngIf="GameSettings.isAbPointsEnabled && tsk.mayUp && this.pers.ON > 0">
+        <button class="icon-small" mat-icon-button (click)="upAbil()">
+          <img src="assets/icons/up.png" class="img-fluid" />
+        </button>
+        <span *ngIf="tsk.requrense != 'нет'">
+          <img src="assets/icons/diamond.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+          <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }">
+            {{ this.pers.ON }}
+          </span>
+        </span>
+      </div>
     </div>
 
     <!-- Описание -->
@@ -92,7 +104,7 @@
     </ng-container>
     <br />
     <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
-      <div *ngIf="st" class="text-center px-0 py-1 border-0" [ngClass]="{ 'bg-success': (i == tsk.value && tskAbility.isOpen) && isShowAbProgrTable }">
+      <div *ngIf="st" class="text-center px-0 py-1 border-0" [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }">
         <b>
           <ng-container *ngIf="isShowAbProgrTable">
             {{ i + percSymbol + ": " }}

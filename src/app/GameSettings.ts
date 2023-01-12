@@ -2,12 +2,12 @@ export class GameSettings {
   /**
    * Максимальный уровень персонажа.
    */
-  static maxPersLevel: number = 50;
+  static maxPersLevel: number = 100;
 
   /**
    * Очков за уровень.
    */
-  static abLvlForPersLvl: number = 7.6;
+  static abLvlForPersLvl: number = 20;
 
   /**
    * Плюс к прогрессу для задания в задаче.
@@ -23,7 +23,7 @@ export class GameSettings {
   /**
    * Максимальный уровень характеристик.
    */
-  static maxChaLvl: number = 20;
+  static maxChaLvl: number = 10;
   /**
    * Минимальный уровень характеристик.
    */
@@ -32,12 +32,12 @@ export class GameSettings {
   /**
    * Максимальный уровень навыков.
    */
-  static maxAbilLvl: number = 20;
+  static maxAbilLvl: number = 100;
 
   /**
    * Минимальный уровень навыка.
    */
-  static minAbilLvl: number = 1;
+  static minAbilLvl: number = 0;
 
   /**
    * Максимальное значение очков в задаче.
@@ -48,8 +48,8 @@ export class GameSettings {
    * Формула прогресса навыка.
    */
   static getTesChangeKoef(tesVal: number): number {
-    let skillMult = 0.48;
-    let skillOffcet = 2 - skillMult;
+    let skillMult = 0.021;
+    let skillOffcet = 0.2 - skillMult;
 
     let level = 1 + Math.floor(tesVal / 10.0);
     let result = level * skillMult + skillOffcet;
@@ -69,7 +69,11 @@ export class GameSettings {
   /**
    * Показывать изменения навыков.
    */
-  static changesIsShowAb: boolean = true;
+  static changesIsShowAb: boolean = false;
+  /**
+   * Показывать открытие навыка.
+   */
+  static changesIsShowAbActivate: boolean = true;
   /**
    * Показывать изменение опыта.
    */
@@ -83,7 +87,7 @@ export class GameSettings {
   /**
    * Показывать процент в прогрессе навыка.
    */
-  static changesIsShowPercentageInAb: boolean = false;
+  static changesIsShowPercentageInAb: boolean = true;
 
   /**
    * Показывать значение в изменениях навыка.
@@ -99,4 +103,19 @@ export class GameSettings {
    * Показывать описание нового уровня навыка в изменениях.
    */
   static changesIsShowAbDescrInChanges: boolean = false;
+
+  /**
+   * Новый навык открыт?
+   */
+  static isNewAbOpened: boolean = false;
+
+  /**
+   * ОН активны.
+   */
+  static isAbPointsEnabled: boolean = true;
+
+  /**
+   * Начальное ОН.
+   */
+  static startAbPoints: number = 4;
 }
