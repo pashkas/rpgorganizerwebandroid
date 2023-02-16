@@ -56,7 +56,7 @@ export class PersChangesItemComponent implements OnInit {
         let player2 = factory2.create(this.progress.nativeElement, {});
         player2.play();
       }, firstTime);
-    } else if (false && (this.item.type == "abil" || this.item.type == "cha") && this.item.abilChanges.length > 1) {
+    } else if ((this.item.type == "abil" || this.item.type == "cha") && this.item.abilChanges.length > 1) {
       let firstPerc = this.item.abilChanges[0].valTo - this.item.abilChanges[0].valFrom;
       let secondPerc = this.item.abilChanges[1].valTo - this.item.abilChanges[1].valFrom;
 
@@ -92,12 +92,12 @@ export class PersChangesItemComponent implements OnInit {
       this.plusName += "%";
     }
 
-    if(this.item.type == 'abil' && !GameSettings.changesIsShowValueInAb){
-      this.plusName = '';
+    if (this.item.type == "abil" && !GameSettings.changesIsShowValueInAb) {
+      this.plusName = "";
     }
 
-    if(this.item.type == 'cha' && !GameSettings.changesIsShowValueInCha){
-      this.plusName = '';
+    if (this.item.type == "cha" && !GameSettings.changesIsShowValueInCha) {
+      this.plusName = "";
     }
   }
 }

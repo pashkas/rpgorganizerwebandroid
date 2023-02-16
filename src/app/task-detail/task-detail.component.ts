@@ -25,6 +25,7 @@ import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
 })
 export class TaskDetailComponent implements OnInit {
   @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
+  @ViewChild("goUp", { static: false }) goUp: ElementRef;
 
   private unsubscribe$ = new Subject();
 
@@ -53,7 +54,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   upAbil() {
-    this.srv.upAbility(this.tskAbility);
+    this.srv.activateAbility(this.tskAbility);
   }
 
   /**
@@ -234,7 +235,7 @@ export class TaskDetailComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe((queryParams: any) => {
       this.isQuick = queryParams.isQuick;
-      if (this.isQuick) {
+      if (this.isQuick && !queryParams.isActivate) {
         setTimeout(() => this.nameEdt.nativeElement.focus());
       }
     });

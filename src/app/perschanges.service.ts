@@ -51,82 +51,156 @@ export class PerschangesService {
     const isOpenPersAtNewLevel = false;
 
     Object.keys(changesMap).forEach((n) => {
+      const el = changesMap[n];
       // Квесты
-      if (changesMap[n].type == "qwest") {
+      if (el.type == "qwest") {
         // Квест выполнен
-        if (changesMap[n].after === null || changesMap[n].after === undefined) {
-          changes.push(new ChangesModel('"' + changesMap[n].name + '" выполнен!', "qwest", changesMap[n].before, changesMap[n].before, 0, changesMap[n].total, changesMap[n].img));
+        if (el.after === null || el.after === undefined) {
+          changes.push(new ChangesModel('"' + el.name + '" выполнен!', "qwest", el.before, el.before, 0, el.total, el.img));
           isDoneQwest = true;
         } else {
-          if (changesMap[n].after > changesMap[n].before) {
-            changes.push(new ChangesModel(changesMap[n].name, "qwest", changesMap[n].before, changesMap[n].after, 0, changesMap[n].total, changesMap[n].img));
+          if (el.after > el.before) {
+            changes.push(new ChangesModel(el.name, "qwest", el.before, el.after, 0, el.total, el.img));
           }
-          if (changesMap[n].after > changesMap[n].before && changesMap[n].after == changesMap[n].total) {
-            changes.push(new ChangesModel('"' + changesMap[n].name + '" задания выполнены!', "qwest", changesMap[n].after, changesMap[n].after, 0, changesMap[n].total, changesMap[n].img));
+          if (el.after > el.before && el.after == el.total) {
+            changes.push(new ChangesModel('"' + el.name + '" задания выполнены!', "qwest", el.after, el.after, 0, el.total, el.img));
             isDoneQwest = true;
             qwestToEdit = n;
           }
         }
       }
       // Награды
-      else if (changesMap[n].type == "inv") {
-        if (changesMap[n].after === null || changesMap[n].after === undefined) {
+      else if (el.type == "inv") {
+        if (el.after === null || el.after === undefined) {
           // Использован больше нет
-          changes.push(new ChangesModel('Использован "' + changesMap[n].name + '"', "inv", 0, 0, 0, 1, changesMap[n].img));
-        } else if (changesMap[n].before === null || changesMap[n].before === undefined) {
+          changes.push(new ChangesModel('Использован "' + el.name + '"', "inv", 0, 0, 0, 1, el.img));
+        } else if (el.before === null || el.before === undefined) {
           // Получен новый
-          changes.push(new ChangesModel('Получен "' + changesMap[n].name + '"', "inv", 1, 1, 0, 1, changesMap[n].img));
-        } else if (changesMap[n].after > changesMap[n].before) {
-          changes.push(new ChangesModel('Получен "' + changesMap[n].name + '"', "inv", changesMap[n].after, changesMap[n].after, 0, changesMap[n].after, changesMap[n].img));
-        } else if (changesMap[n].after < changesMap[n].before) {
-          changes.push(new ChangesModel('Использован "' + changesMap[n].name + '"', "inv", changesMap[n].before, changesMap[n].before, 0, changesMap[n].before, changesMap[n].img));
+          changes.push(new ChangesModel('Получен "' + el.name + '"', "inv", 1, 1, 0, 1, el.img));
+        } else if (el.after > el.before) {
+          changes.push(new ChangesModel('Получен "' + el.name + '"', "inv", el.after, el.after, 0, el.after, el.img));
+        } else if (el.after < el.before) {
+          changes.push(new ChangesModel('Использован "' + el.name + '"', "inv", el.before, el.before, 0, el.before, el.img));
         }
       }
       // Характеристики
-      else if (changesMap[n].type == "cha") {
-        if (GameSettings.changesIsChowCha && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxChaLvl) {
+      else if (el.type == "cha") {
+        // Изменение уровня
+        if (GameSettings.changesIsChowChaLevels && el.after != el.before && el.after <= GameSettings.maxChaLvl && el.after > GameSettings.minChaLvl) {
           let chaChanges = new ChangesModel(
-            changesMap[n].name,
+            el.name,
             "cha",
-            this.moreThenThero(changesMap[n].before - 1),
-            this.moreThenThero(changesMap[n].after - 1),
+            this.moreThenThero(el.before - GameSettings.minChaLvl),
+            this.moreThenThero(el.after - GameSettings.minChaLvl),
             0,
-            GameSettings.maxChaLvl,
-            changesMap[n].img
+            GameSettings.maxChaLvl - GameSettings.minChaLvl,
+            el.img
           );
-          chaChanges.lvl = changesMap[n].after;
+          chaChanges.lvl = el.after;
           changes.push(chaChanges);
+        }
+        // Изменение значения
+        if (GameSettings.changesIsChowChaValues && el.after_chaVal != el.before_chaVal && el.after_chaVal <= GameSettings.maxChaLvl) {
+          let beforeVal = el.before_chaVal;
+          let afterVal = el.after_chaVal;
+
+          let abBeforePrevExp = Math.floor(beforeVal);
+          let abBeforeNextExp = abBeforePrevExp + 1;
+
+          let abAfterPrevExp = Math.floor(afterVal);
+          let abAfterNextExp = abAfterPrevExp + 1;
+
+          let abilChanges = new ChangesModel(el.name, "cha", beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, el.img);
+
+          let eCh: persExpChanges[] = [];
+          let prevChaLvl = Math.floor(beforeVal);
+          let afterChaLvl = Math.floor(afterVal);
+          abilChanges.lvl = prevChaLvl;
+
+          if (afterChaLvl > prevChaLvl) {
+            //1
+            eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevChaLvl));
+            //2
+            eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterChaLvl));
+          } else if (afterChaLvl < prevChaLvl) {
+            //1
+            eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevChaLvl));
+            //2
+            eCh.push(new persExpChanges(abAfterNextExp, afterVal, abAfterPrevExp, abAfterNextExp, afterChaLvl));
+          } else {
+            eCh.push(new persExpChanges(beforeVal, afterVal, abAfterPrevExp, abAfterNextExp, prevChaLvl));
+          }
+
+          abilChanges.abilChanges = eCh;
+
+          changes.push(abilChanges);
         }
       }
       // Навыки
-      else if (changesMap[n].type == "abil") {
-         if (GameSettings.changesIsShowAbActivate && changesMap[n].abIsOpenBefore != changesMap[n].abIsOpenAfter) {
+      else if (el.type == "abil") {
+        // Активирован
+        if (GameSettings.changesIsShowAbActivate && el.abIsOpenBefore != el.abIsOpenAfter) {
           isAbilActivated = true;
           abToEdit = n;
-          changes.push(
-            new ChangesModel(`"${changesMap[n].name}" активирован`, 'abil', 0, 0, 0, GameSettings.maxAbilLvl, changesMap[n].img)
-          );
+          changes.push(new ChangesModel(`${el.name} активирован`, "abil", 0, 0, 0, GameSettings.maxAbilLvl, el.img));
         }
-        if (GameSettings.changesIsShowAb && changesMap[n].after != changesMap[n].before && changesMap[n].after <= GameSettings.maxAbilLvl) {
+        // Иземенение уровня
+        if (GameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= GameSettings.maxAbilLvl && el.after > GameSettings.minAbilLvl) {
           let abChanges = new ChangesModel(
-            changesMap[n].name,
+            el.name,
             "abil",
-            this.moreThenThero(changesMap[n].before - 1),
-            this.moreThenThero(changesMap[n].after - 1),
+            this.moreThenThero(el.before - GameSettings.minAbilLvl),
+            this.moreThenThero(el.after - GameSettings.minAbilLvl),
             0,
-            GameSettings.maxAbilLvl,
-            changesMap[n].img
+            GameSettings.maxAbilLvl - GameSettings.minAbilLvl,
+            el.img
           );
-          abChanges.lvl = changesMap[n].after;
+          abChanges.lvl = el.after;
 
           changes.push(abChanges);
         }
+        // Изменение значения
+        if (GameSettings.changesIsShowAbValues && el.after_abVal != el.before_abVal && el.after_abVal <= GameSettings.tesMaxVal) {
+          let beforeVal = el.before_abVal;
+          let afterVal = el.after_abVal;
+
+          let abBeforePrevExp = Math.floor(beforeVal / 10) * 10;
+          let abBeforeNextExp = abBeforePrevExp + 10;
+
+          let abAfterPrevExp = Math.floor(afterVal / 10) * 10;
+          let abAfterNextExp = abAfterPrevExp + 10;
+
+          let abilChanges = new ChangesModel(el.name, "abil", beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, el.img);
+
+          let eCh: persExpChanges[] = [];
+          let prevAbLvl = GameSettings.minAbilLvl + (Math.floor(beforeVal / 10) * 10) / 10;
+          let afterAbLvl = GameSettings.minAbilLvl + (Math.floor(afterVal / 10) * 10) / 10;
+          abilChanges.lvl = prevAbLvl;
+
+          if (afterAbLvl > prevAbLvl) {
+            //1
+            eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
+            //2
+            eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+          } else if (afterAbLvl < prevAbLvl) {
+            //1
+            eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
+            //2
+            eCh.push(new persExpChanges(abAfterNextExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+          } else {
+            eCh.push(new persExpChanges(beforeVal, afterVal, abAfterPrevExp, abAfterNextExp, prevAbLvl));
+          }
+
+          abilChanges.abilChanges = eCh;
+
+          changes.push(abilChanges);
+        }
       }
       // Уровень
-      else if (changesMap[n].type == "lvl") {
-        if (changesMap[n].after > changesMap[n].before) {
+      else if (el.type == "lvl") {
+        if (el.after > el.before) {
           newLevel = true;
-        } else if (changesMap[n].after < changesMap[n].before) {
+        } else if (el.after < el.before) {
         }
       }
       // Ранг
@@ -247,20 +321,14 @@ export class PerschangesService {
       return getChSort(a) - getChSort(b);
 
       function getChSort(ch: ChangesModel): number {
-        if (ch.type == "exp") {
-          return 0;
-        }
-        if (ch.type == "qwest") {
-          return 1;
-        }
-        if (ch.type == "abil") {
-          return 2;
-        }
-        if (ch.type == "cha") {
-          return 3;
-        }
+        const sort = ["qwest", "abil", "cha", "exp"];
 
-        return 4;
+        const idx = sort.findIndex((q) => q == ch.type);
+        if (idx != -1) {
+          return idx;
+        } else {
+          return sort.length;
+        }
       }
     });
 
@@ -298,7 +366,11 @@ export class PerschangesService {
         backdropClass: "backdrop-changes",
       });
 
-      await sleep(GameSettings.changesPopupDuration);
+      if (ch.type == "qwest") {
+        await sleep(GameSettings.changesPopupDurationQwest);
+      } else {
+        await sleep(GameSettings.changesPopupDuration);
+      }
 
       dialogRef.close();
     }
@@ -385,6 +457,7 @@ export class PerschangesService {
           }
           changesMap[tsk.id][chType] = abVal;
 
+          changesMap[tsk.id][chType + "_abVal"] = tsk.tesValue;
           if (chType == "before") {
             changesMap[tsk.id]["abIsOpenBefore"] = ab.isOpen;
           } else {
@@ -406,6 +479,7 @@ export class PerschangesService {
       }
 
       changesMap[ch.id][chType] = chaVal;
+      changesMap[ch.id][chType + "_chaVal"] = ch.value;
     });
 
     // Квесты

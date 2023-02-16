@@ -49,7 +49,7 @@
                 <ngx-material-timepicker (timeSet)="onTimeChanged($event, t.id)" #pikTimeInList [format]="24" [defaultTime]="t.time"></ngx-material-timepicker>
                 {{ t.time }}
               </div> -->
-              <mat-icon cdkDragHandle class="pointer mr-2" [hidden]="!(data.currentView == 'QwestSort') && !(data.currentView == 'SkillsSort') && !(data.currentView == 'SkillsGlobal')">
+              <mat-icon cdkDragHandle class="pointer mr-2" [hidden]="!(data.currentView == 'QwestSort') && !(data.currentView == 'SkillsSort')" >
                 drag_handle
               </mat-icon>
             </div>
@@ -150,7 +150,7 @@
         <div fxLayout="column" fxLayoutAlign="space-around center">
           <!-- <mat-slide-toggle (change)="setMegaPlan()" [(ngModel)]="this.srv.pers$.value.isMegaPlan">Мега план
           </mat-slide-toggle> -->
-          <mat-slide-toggle (change)="setWriteTime()" [(ngModel)]="this.srv.pers$.value.isWriteTime">Автосорт </mat-slide-toggle>
+          <!-- <mat-slide-toggle (change)="setWriteTime()" [(ngModel)]="this.srv.pers$.value.isWriteTime">Автосорт </mat-slide-toggle> -->
         </div>
       </div>
       <!-- Сортировка квестов -->

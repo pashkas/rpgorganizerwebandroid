@@ -1,47 +1,42 @@
 <div fxLayout="column" fxFill fxLayoutAlign="space-around center" class="text-light">
-    <div fxLayout="row" fxLayoutAlign="space-evenly end" fxLayoutGap="15px">
-        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null" class="m-2">
-            <div class="pl-2">
-                {{this.abPoints}}
-            </div>
-            <img src="assets/icons/diamond.png" class="img-fluid px-2"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-        </div>
-        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.gold != null">
-            <div class="pl-2"> {{this.gold}} </div>
-            <img src="assets/icons/gold.png" class="img-fluid px-2"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-        </div>
-        <div>
-            <img *ngIf="isGood && !img" class="img-fluid" style='max-height: 128px' src="assets/img/good.png"
-                [ngStyle]="{'object-fit': 'contain'}">
-            <img *ngIf="!isGood && !img" class="img-fluid" style='max-height: 128px' src="assets/img/bad.png"
-                [ngStyle]="{'object-fit': 'contain'}">
-            <img appImgBroken *ngIf="img" class="img-fluid" style='max-height: 128px' src="{{img}}"
-                [ngStyle]="{'object-fit': 'contain'}">
-        </div>
-        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null" class="m-2">
-            <img src="assets/icons/diamond.png" class="img-fluid"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-            <span>
-                {{this.abPoints}}
-            </span>
-        </div>
-        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.goldTotal != null">
-            <div class="pl-2"> {{this.goldTotal}} </div>
-            <img src="assets/icons/gold.png" class="img-fluid px-2"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.5em'}">
-        </div>
+  <div fxLayout="row" fxLayoutAlign="space-evenly end" fxLayoutGap="15px">
+    <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null" class="m-2">
+      <div class="pl-2">
+        {{ this.abPoints }}
+      </div>
+      <img src="assets/icons/diamond.png" class="img-fluid px-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
     </div>
+    <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.gold != null">
+      <div class="pl-2">{{ this.gold }}</div>
+      <img src="assets/icons/gold.png" class="img-fluid px-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+    </div>
+    <div>
+      <img *ngIf="isGood && !img" class="img-fluid" style="max-height: 128px" src="assets/img/good.png" [ngStyle]="{ 'object-fit': 'contain' }" />
+      <img *ngIf="!isGood && !img" class="img-fluid" style="max-height: 128px" src="assets/img/bad.png" [ngStyle]="{ 'object-fit': 'contain' }" />
+      <img appImgBroken *ngIf="img" class="img-fluid" style="max-height: 128px" src="{{ img }}" [ngStyle]="{ 'object-fit': 'contain' }" />
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null" class="m-2">
+      <img src="assets/icons/diamond.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+      <span>
+        {{ this.abPoints }}
+      </span>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.goldTotal != null">
+      <div class="pl-2">{{ this.goldTotal }}</div>
+      <img src="assets/icons/gold.png" class="img-fluid px-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+    </div>
+  </div>
 
-    <div fxFlex class="px-0 py-1 text-center" style="width: 100%;">
-        <mat-list class="p-1">
-            <div mat-list-item *ngIf="headText" class="py-2">
-                <h5 style="color: white;">{{headText|uppercase}}</h5>
-            </div>
-            <div class="pb-1" mat-list-item *ngFor="let item of this.changes; let i = index">
-                <app-pers-changes-item [item]="item"></app-pers-changes-item>
-            </div>
-        </mat-list>
-    </div>
+  <div fxFlex class="px-0 py-1 text-center" style="width: 100%">
+    <mat-list class="p-1">
+      <div mat-list-item *ngIf="headText" class="py-2">
+        <h5 style="color: white">{{ headText | uppercase }}</h5>
+      </div>
+      <ng-container>
+        <div class="pb-1" mat-list-item *ngFor="let item of this.changes; let i = index">
+          <app-pers-changes-item [item]="item"></app-pers-changes-item>
+        </div>
+      </ng-container>
+    </mat-list>
+  </div>
 </div>

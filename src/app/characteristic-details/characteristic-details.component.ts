@@ -108,7 +108,7 @@ export class CharacteristicDetailsComponent implements OnInit {
   }
 
   upAbil(ab: Ability) {
-    this.srv.upAbility(ab);
+    this.srv.activateAbility(ab);
   }
 
   /**

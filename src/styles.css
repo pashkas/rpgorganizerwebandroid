@@ -14,13 +14,26 @@
   background-color: #69f0ae !important;
   /* background-image: linear-gradient(to right, #FFF, #00F); */
   box-shadow: 0 5px 4px -6px #aaa;
-  border-radius: 5px 5px 5px 5px;
+  /* border-radius: 5px 5px 5px 5px; */
+}
+
+.attrprogr-val {
+  background-color: #b5efd3 !important;
+  /* background-image: linear-gradient(to right, #FFF, #00F); */
+  box-shadow: 0 5px 4px -6px #aaa;
+  /* border-radius: 5px 5px 5px 5px; */
 }
 
 .abprogr {
   background-color: #ffff5c !important;
   box-shadow: 0 5px 4px -6px #aaa;
-  border-radius: 5px 5px 5px 5px;
+  /* border-radius: 5px 5px 5px 5px; */
+}
+
+.abprogr-val {
+  background-color: #fafad4 !important;
+  box-shadow: 0 5px 4px -6px #aaa;
+  /* border-radius: 5px 5px 5px 5px; */
 }
 
 .progress {
@@ -101,6 +114,18 @@ button:focus {
 
 .myprogr .mat-progress-bar-buffer {
   background-color: white !important;
+}
+
+.abNextLevProgrPersList .mat-progress-bar-buffer {
+  background-color: transparent !important;
+}
+
+.abNextLevProgrPersList .mat-progress-bar-fill::after {
+  background-color: #ffff5c !important;
+}
+
+.abNextLevProgrPersList defs {
+  display: none;
 }
 
 .abNextLevProgr .mat-progress-bar-buffer {

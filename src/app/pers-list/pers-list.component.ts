@@ -340,7 +340,7 @@ export class PersListComponent implements OnInit {
   }
 
   upAbil(ab: Ability) {
-    this.srv.upAbility(ab);
+    this.srv.activateAbility(ab);
   }
 
   /**
@@ -353,17 +353,16 @@ export class PersListComponent implements OnInit {
       this.pers.gold = 0;
       this.pers.characteristics.forEach((cha) => {
         cha.abilities.forEach((ab) => {
-          ab.isOpen = GameSettings.isNewAbOpened;
+          ab.isOpen = false;
           ab.tasks.forEach((tsk) => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
-            // tsk.order = -1;
+            tsk.order = 9999;
             tsk.autoTime = 0;
             tsk.plusExp = 0;
             tsk.lastDate = 0;
             tsk.prevId = null;
             tsk.nextId = null;
             tsk.failCounter = 0;
-            // tsk.time = "00:00";
             tsk.value = 1;
             tsk.tesValue = 0;
             tsk.tesAbValue = 0;
@@ -373,13 +372,12 @@ export class PersListComponent implements OnInit {
             tsk.nextAbVal = 0;
             this.srv.GetRndEnamy(tsk, 0, this.pers.maxPersLevel);
             tsk.states.forEach((st) => {
-              // st.order = -1;
+              st.order = 9999;
               st.autoTime = 0;
               st.lastDate = 0;
               st.prevId = null;
               st.nextId = null;
-              // st.time = "00:00";
-              st.lastNotDone = true;
+              st.lastNotDone = false;
               st.secondsDone = 0;
               this.srv.GetRndEnamy(st, 0, this.pers.maxPersLevel);
             });

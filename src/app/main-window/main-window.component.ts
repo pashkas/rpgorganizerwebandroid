@@ -153,9 +153,11 @@ export class MainWindowComponent implements OnInit {
       this.srv.pers$.value.Diary[0].done += tskName + "; ";
     }
 
-    this.srv.savePers(true);
+    if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
+      this.srv.setCurInd(tskIndex);
+    }
 
-    this.srv.setCurInd(tskIndex);
+    this.srv.savePers(true);
 
     this.srv.changesAfter(true);
   }
@@ -190,7 +192,6 @@ export class MainWindowComponent implements OnInit {
       }
       tskName = this.srv.allMap[t.id].item.name;
       this.srv.subtaskDoneOrFail(t.parrentTask, t.id, false);
-      this.srv.savePers(true, false);
     } else {
       // Логика для задач
       tskName = t.tittle;
@@ -203,7 +204,9 @@ export class MainWindowComponent implements OnInit {
 
     this.srv.savePers(true);
 
-    this.srv.setCurInd(tskIndex);
+    if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
+      this.srv.setCurInd(tskIndex);
+    }
 
     this.srv.changesAfter(false);
   }
@@ -495,13 +498,11 @@ export class MainWindowComponent implements OnInit {
   setView(currentView) {
     if (currentView == curpersview.SkillTasks || currentView == curpersview.SkillsGlobal) {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
+      this.srv.savePers(false);
     } else if (currentView == curpersview.QwestTasks || currentView == curpersview.QwestsGlobal) {
-      // this.srv.pers$.value.currentQwestId = null;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
+      this.srv.savePers(false);
     }
-
-    this.srv.savePers(false);
-    this.srv.setCurInd(0);
   }
 
   taskToEnd(tsk: Task) {
