@@ -21,10 +21,11 @@
     <div class="progress position-relative" style="height: 32px">
       <div style="height: 32px; z-index: 1" class="position-absolute progress-bar attrprogr" role="progressbar" [style.width]="charact.progressValue + '%'"></div>
       <div
-        class="position-absolute progress-bar attrprogr-val"
+        class="position-absolute progress-bar"
         role="progressbar"
         style="height: 32px"
         [style.width]="charact.progresNextLevel + '%'"
+        [ngClass]="{ 'progr-val-less': charact.progresNextLevel <= charact.progressValue, 'progr-val-more': charact.progresNextLevel > charact.progressValue }"
         [style.z-index]="charact.progressValue > charact.progresNextLevel ? 2 : 0"
       ></div>
       <div style="z-index: 2" class="d-flex position-absolute w-100 px-1">
@@ -49,18 +50,19 @@
     <ul class="list-group p-0 pt-1" *ngIf="charact.abilities.length > 0">
       <ng-container *ngFor="let ab of charact.abilities; let even = even; let odd = odd">
         <ng-container *ngIf="(GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp && pers.ON > 0) || (!GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp) || {} as mayUp">
-          <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped" [ngClass]="{ even: mayUp == true }">
+          <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped">
             <div class="align-self-center w-100 d-flex">
               <div class="flex-grow-1 progress position-relative" style="height: 20px">
-                <div style="height: 20px; z-index: 1;" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'"></div>
+                <div style="height: 20px; z-index: 1" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'"></div>
                 <div
-                  class="position-absolute progress-bar abprogr-val"
+                  class="position-absolute progress-bar"
                   role="progressbar"
+                  [ngClass]="{ 'progr-val-less': ab.tasks[0].progresNextLevel <= ab.progressValue, 'progr-val-more': ab.tasks[0].progresNextLevel > ab.progressValue }"
                   [style.width]="ab.tasks[0].progresNextLevel + '%'"
                   style="height: 20px"
                   [style.z-index]="ab.progressValue > ab.tasks[0].progresNextLevel ? 2 : 0"
                 ></div>
-                <div style="z-index: 3;" class="d-flex position-absolute w-100 px-1 abText text-primary">
+                <div style="z-index: 3" class="d-flex position-absolute w-100 px-1 abText text-primary">
                   <div class="flex-grow-1 text-left align-self-baseline pointer">
                     <a (click)="showAbility(ab)">{{ ab.name }}</a>
                   </div>

@@ -142,58 +142,62 @@ export class PerschangesService {
         if (GameSettings.changesIsShowAbActivate && el.abIsOpenBefore != el.abIsOpenAfter) {
           isAbilActivated = true;
           abToEdit = n;
-          changes.push(new ChangesModel(`${el.name} активирован`, "abil", 0, 0, 0, GameSettings.maxAbilLvl, el.img));
-        }
-        // Иземенение уровня
-        if (GameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= GameSettings.maxAbilLvl && el.after > GameSettings.minAbilLvl) {
-          let abChanges = new ChangesModel(
-            el.name,
-            "abil",
-            this.moreThenThero(el.before - GameSettings.minAbilLvl),
-            this.moreThenThero(el.after - GameSettings.minAbilLvl),
-            0,
-            GameSettings.maxAbilLvl - GameSettings.minAbilLvl,
-            el.img
-          );
-          abChanges.lvl = el.after;
 
-          changes.push(abChanges);
-        }
-        // Изменение значения
-        if (GameSettings.changesIsShowAbValues && el.after_abVal != el.before_abVal && el.after_abVal <= GameSettings.tesMaxVal) {
-          let beforeVal = el.before_abVal;
-          let afterVal = el.after_abVal;
+          let txt = el.abIsOpenAfter == true ? "активирован" : "сброшен";
 
-          let abBeforePrevExp = Math.floor(beforeVal / 10) * 10;
-          let abBeforeNextExp = abBeforePrevExp + 10;
+          changes.push(new ChangesModel(`${el.name} ${txt}`, "abil", 0, 0, 0, GameSettings.maxAbilLvl, el.img));
+        } else {
+          // Иземенение уровня
+          if (GameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= GameSettings.maxAbilLvl && el.after > GameSettings.minAbilLvl) {
+            let abChanges = new ChangesModel(
+              el.name,
+              "abil",
+              this.moreThenThero(el.before - GameSettings.minAbilLvl),
+              this.moreThenThero(el.after - GameSettings.minAbilLvl),
+              0,
+              GameSettings.maxAbilLvl - GameSettings.minAbilLvl,
+              el.img
+            );
+            abChanges.lvl = el.after;
 
-          let abAfterPrevExp = Math.floor(afterVal / 10) * 10;
-          let abAfterNextExp = abAfterPrevExp + 10;
-
-          let abilChanges = new ChangesModel(el.name, "abil", beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, el.img);
-
-          let eCh: persExpChanges[] = [];
-          let prevAbLvl = GameSettings.minAbilLvl + (Math.floor(beforeVal / 10) * 10) / 10;
-          let afterAbLvl = GameSettings.minAbilLvl + (Math.floor(afterVal / 10) * 10) / 10;
-          abilChanges.lvl = prevAbLvl;
-
-          if (afterAbLvl > prevAbLvl) {
-            //1
-            eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
-            //2
-            eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
-          } else if (afterAbLvl < prevAbLvl) {
-            //1
-            eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
-            //2
-            eCh.push(new persExpChanges(abAfterNextExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
-          } else {
-            eCh.push(new persExpChanges(beforeVal, afterVal, abAfterPrevExp, abAfterNextExp, prevAbLvl));
+            changes.push(abChanges);
           }
+          // Изменение значения
+          if (GameSettings.changesIsShowAbValues && el.after_abVal != el.before_abVal && el.after_abVal <= GameSettings.tesMaxVal) {
+            let beforeVal = el.before_abVal;
+            let afterVal = el.after_abVal;
 
-          abilChanges.abilChanges = eCh;
+            let abBeforePrevExp = Math.floor(beforeVal / 10) * 10;
+            let abBeforeNextExp = abBeforePrevExp + 10;
 
-          changes.push(abilChanges);
+            let abAfterPrevExp = Math.floor(afterVal / 10) * 10;
+            let abAfterNextExp = abAfterPrevExp + 10;
+
+            let abilChanges = new ChangesModel(el.name, "abil", beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, el.img);
+
+            let eCh: persExpChanges[] = [];
+            let prevAbLvl = GameSettings.minAbilLvl + (Math.floor(beforeVal / 10) * 10) / 10;
+            let afterAbLvl = GameSettings.minAbilLvl + (Math.floor(afterVal / 10) * 10) / 10;
+            abilChanges.lvl = prevAbLvl;
+
+            if (afterAbLvl > prevAbLvl) {
+              //1
+              eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
+              //2
+              eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+            } else if (afterAbLvl < prevAbLvl) {
+              //1
+              eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
+              //2
+              eCh.push(new persExpChanges(abAfterNextExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+            } else {
+              eCh.push(new persExpChanges(beforeVal, afterVal, abAfterPrevExp, abAfterNextExp, prevAbLvl));
+            }
+
+            abilChanges.abilChanges = eCh;
+
+            changes.push(abilChanges);
+          }
         }
       }
       // Уровень

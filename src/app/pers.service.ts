@@ -822,9 +822,9 @@ export class PersService {
       persLevel = Math.floor(exp);
       startExp = persLevel;
       nextExp = persLevel + 1;
-    } 
-    else if(GameSettings.expFotmulaType == "abLvl"){
-      let max = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl;
+    } else if (GameSettings.expFotmulaType == "abLvl") {
+      // let max = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl;
+      let max = abCount * (GameSettings.maxAbilLvl - GameSettings.minAbilLvl);
       let progress = abTotalCur / max;
 
       exp = GameSettings.maxPersLevel * progress;
@@ -832,8 +832,7 @@ export class PersService {
       persLevel = Math.floor(exp);
       startExp = persLevel;
       nextExp = persLevel + 1;
-    }
-    else if (GameSettings.expFotmulaType == "dynamic") {
+    } else if (GameSettings.expFotmulaType == "dynamic") {
       // Динамический расчет
       let tsks: Task[] = [];
 
@@ -1201,6 +1200,32 @@ export class PersService {
     this.pers$.value.isGlobalView = b;
   }
 
+  deActivateAbility(tskAbility: Ability) {
+    let ab = this.allMap[tskAbility.id].item;
+    this.changesBefore();
+    ab.isOpen = false;
+
+    for (const tsk of ab.tasks) {
+      tsk.value = 0;
+      tsk.tesValue = 0;
+      tsk.tesAbValue = 0;
+      tsk.progresNextLevel = 0;
+      tsk.progressValue = 0;
+    }
+
+    ab.value = 0;
+    ab.progressValue = 0;
+
+    // Обновляем дату
+    let date = new Date();
+    date.setHours(0, 0, 0, 0);
+
+    setTimeout(() => {
+      this.savePers(false);
+      this.changesAfter(false);
+    }, 50);
+  }
+
   activateAbility(ab: Ability) {
     this.changesBefore();
     ab.isOpen = true;
@@ -1221,13 +1246,14 @@ export class PersService {
       });
     }
 
-    this.savePers(false);
-
     if (GameSettings.isOpenAbWhenActivate) {
       this.router.navigate(["pers/task", ab.tasks[0].id, true], { queryParams: { isQuick: true, isActivate: true } });
     }
 
-    setTimeout(() => this.changesAfter(true), 50);
+    setTimeout(() => {
+      this.savePers(false);
+      this.changesAfter(true);
+    }, 50);
   }
 
   /**
@@ -1398,7 +1424,7 @@ export class PersService {
             ab.isNotDoneReqvirements = true;
           }
 
-          if (tsk.value < 0) {
+          if (tsk.value < 0 || ab.isOpen == false) {
             tsk.value = 0;
           }
           if (tsk.value > GameSettings.maxAbilLvl) {
@@ -1862,7 +1888,6 @@ export class PersService {
     // }
     // let tsksV = tsks.reduce((a, b) => a + b.tesValue / 10, 0);
     // debugger;
-
     // Тест прокачки навыка
     // let tsk = new Task();
     // tsk.name = "test";

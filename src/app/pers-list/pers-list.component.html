@@ -67,7 +67,8 @@
           <div class="progress position-relative" style="height: 32px">
             <div style="z-index: 1; height: 32px" class="position-absolute progress-bar attrprogr" role="progressbar" [style.width]="pers.totalProgress + '%'"></div>
             <div
-              class="position-absolute progress-bar attrprogr-val"
+              class="position-absolute progress-bar"
+              [ngClass]="{'progr-val-less': pers.rangProgress <= pers.totalProgress, 'progr-val-more':pers.rangProgress > pers.totalProgress}"
               role="progressbar"
               style="height: 32px"
               [style.width]="pers.rangProgress + '%'"
@@ -99,8 +100,9 @@
                   <div class="progress position-relative" style="height: 28px">
                     <div class="progress-bar attrprogr" role="progressbar" [style.width]="item.progressValue + '%'" style="height: 28px; z-index: 1"></div>
                     <div
-                      class="position-absolute progress-bar attrprogr-val"
+                      class="position-absolute progress-bar"
                       role="progressbar"
+                      [ngClass]="{'progr-val-less': item.progresNextLevel <= item.progressValue, 'progr-val-more':item.progresNextLevel > item.progressValue}"
                       [style.width]="item.progresNextLevel + '%'"
                       style="height: 28px"
                       [style.z-index]="item.progressValue > item.progresNextLevel ? 2 : 0"
@@ -120,12 +122,13 @@
                     <ul class="list-group py-0" *ngIf="item.abilities.length > 0">
                       <ng-container *ngFor="let ab of item.abilities">
                         <ng-container *ngIf="(GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp && pers.ON > 0) || (!GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp) || {} as mayUp">
-                          <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped" [ngClass]="{ even: mayUp == true }">
+                          <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped">
                             <div class="align-self-center w-100 d-flex">
                               <div class="flex-grow-1 progress position-relative" style="height: 20px">
-                                <div class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'" style="height: 20px; z-index: 1"></div>
-                                <div
-                                  class="position-absolute progress-bar abprogr-val"
+                                <div class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'" style="height: 20px; z-index: 1" *ngIf="ab.isOpen"></div>
+                                <div *ngIf="ab.isOpen"
+                                  class="position-absolute progress-bar"
+                                  [ngClass]="{'progr-val-less': ab.tasks[0].progresNextLevel <= ab.progressValue, 'progr-val-more':ab.tasks[0].progresNextLevel > ab.progressValue}"
                                   role="progressbar"
                                   [style.width]="ab.tasks[0].progresNextLevel + '%'"
                                   style="height: 20px"

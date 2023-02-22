@@ -18,12 +18,13 @@
     <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image"></app-image-component>
     <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"> </app-image-component>
     <div class="progress position-relative" style="height: 32px" *ngIf="tskAbility">
-      <div style="z-index: 1; height: 32px" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'"></div>
-      <div
-        class="position-absolute progress-bar abprogr-val"
+      <div *ngIf="tskAbility.isOpen" style="z-index: 1; height: 32px" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'"></div>
+      <div *ngIf="tskAbility.isOpen"
+        class="position-absolute progress-bar"
         role="progressbar"
         [style.width]="tskAbility.tasks[0].progresNextLevel + '%'"
         style="height: 32px"
+        [ngClass]="{'progr-val-less': tskAbility.tasks[0].progresNextLevel <= tskAbility.progressValue, 'progr-val-more':tskAbility.tasks[0].progresNextLevel > tskAbility.progressValue}"
         [style.z-index]="tskAbility.progressValue > tskAbility.tasks[0].progresNextLevel ? 2 : 0"
       ></div>
       <div style="z-index: 3" class="d-flex position-absolute w-100 px-1">
@@ -35,9 +36,6 @@
         </div>
       </div>
     </div>
-    <!-- <div *ngIf="tskAbility" class="pt-1">
-      <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel"> </mat-progress-bar>
-    </div> -->
 
     <div class="w-100 px-0 text-center" *ngIf="!tskAbility">
       <h4>{{ tsk.name }}</h4>
@@ -58,6 +56,7 @@
         {{ tsk.date | datestring }}
       </div>
 
+      <!-- Открыть навык -->
       <div
         fxLayout="row"
         fxLayoutAlign="space-between center"
@@ -66,6 +65,23 @@
       >
         <button class="icon-small" mat-icon-button (click)="upAbil()">
           <img src="assets/icons/up.png" class="img-fluid" />
+        </button>
+        <span *ngIf="tsk.requrense != 'нет' && GameSettings.isAbPointsEnabled">
+          <img src="assets/icons/diamond.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+          <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }">
+            {{ this.pers.ON }}
+          </span>
+        </span>
+      </div>
+      <!-- Закрыть навык -->
+      <div
+        fxLayout="row"
+        fxLayoutAlign="space-between center"
+        fxLayoutGap="5px"
+        *ngIf="tskAbility?.isOpen"
+      >
+        <button class="icon-small" mat-icon-button (click)="downAbil()">
+          <img src="assets/icons/down.png" class="img-fluid" />
         </button>
         <span *ngIf="tsk.requrense != 'нет' && GameSettings.isAbPointsEnabled">
           <img src="assets/icons/diamond.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />

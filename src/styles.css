@@ -18,7 +18,7 @@
 }
 
 .attrprogr-val {
-  background-color: #b5efd3 !important;
+  background-color: #f9f9e09c !important;
   /* background-image: linear-gradient(to right, #FFF, #00F); */
   box-shadow: 0 5px 4px -6px #aaa;
   /* border-radius: 5px 5px 5px 5px; */
@@ -30,8 +30,16 @@
   /* border-radius: 5px 5px 5px 5px; */
 }
 
+.progr-val-less{
+  background-color: #f8f8d2e1 !important;
+}
+
+.progr-val-more{
+  background-color: #fdfd7f37 !important;
+}
+
 .abprogr-val {
-  background-color: #fafad4 !important;
+  background-color: #f8f8c8cc !important;
   box-shadow: 0 5px 4px -6px #aaa;
   /* border-radius: 5px 5px 5px 5px; */
 }

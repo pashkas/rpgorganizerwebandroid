@@ -49,8 +49,8 @@ export class GameSettings {
 
     if (isTES) {
       // В стиле TES
-      let skillMult = 1.85;
-      let skillOffcet = 4 - skillMult;
+      let skillMult = 2.06;
+      let skillOffcet = 3 - skillMult;
 
       let result = level * skillMult + skillOffcet;
 

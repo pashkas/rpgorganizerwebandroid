@@ -57,6 +57,10 @@ export class TaskDetailComponent implements OnInit {
     this.srv.activateAbility(this.tskAbility);
   }
 
+  downAbil(){
+    this.srv.deActivateAbility(this.tskAbility);
+  }
+
   /**
    * Добавить состояние к задаче.
    */
