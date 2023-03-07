@@ -1312,16 +1312,10 @@ export class PersService {
 
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
+          this.normalizeTskAbilityValue(tsk, ab);
+
           if (tsk.autoTime == null) {
             tsk.autoTime = 0;
-          }
-
-          if (tsk.tesValue == null || tsk.tesValue == undefined || tsk.tesValue < 0) {
-            tsk.tesValue = 0;
-          }
-
-          if (tsk.tesAbValue == null || tsk.tesAbValue == undefined || tsk.tesAbValue < 0) {
-            tsk.tesAbValue = 0;
           }
 
           tsk.hardnes = 1;
@@ -1347,17 +1341,6 @@ export class PersService {
 
           if (this.isNullOrUndefined(tsk.time)) {
             tsk.time = "00:00";
-          }
-
-          tsk.tesValue = Math.ceil(tsk.tesValue * 100) / 100;
-
-          tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen);
-
-          if (tsk.value < 0) {
-            tsk.value = 0;
-          }
-          if (tsk.value > GameSettings.maxAbilLvl) {
-            tsk.value = GameSettings.maxAbilLvl;
           }
 
           tsk.isCounter = false;
@@ -1424,13 +1407,6 @@ export class PersService {
             ab.isNotDoneReqvirements = true;
           }
 
-          if (tsk.value < 0 || ab.isOpen == false) {
-            tsk.value = 0;
-          }
-          if (tsk.value > GameSettings.maxAbilLvl) {
-            tsk.value = GameSettings.maxAbilLvl;
-          }
-
           let progressNextLevel = (tsk.tesValue / 10.0 - Math.floor(tsk.tesValue / 10.0)) * 100;
           if (tsk.tesValue > GameSettings.tesMaxVal) {
             progressNextLevel = 100;
@@ -1438,26 +1414,14 @@ export class PersService {
           tsk.progresNextLevel = progressNextLevel;
           tsk.progressValue = tsk.progresNextLevel;
           tsk.progressValue = (tsk.value / GameSettings.maxAbilLvl) * 100;
+          tsk.progressValue = ((tsk.value - GameSettings.minAbilLvl) / (GameSettings.maxAbilLvl - GameSettings.minAbilLvl)) * 100;
+          ab.progressValue = tsk.progressValue;
 
           abMax += GameSettings.maxAbilLvl - 1;
           abCur += tsk.value - GameSettings.minAbilLvl >= 0 ? tsk.value - GameSettings.minAbilLvl : 0;
           tesAbMax += GameSettings.tesMaxVal;
-
-          let tesV = tsk.tesValue;
-          // if (tesV > GameSettings.tesMaxVal) {
-          //   tesV = GameSettings.tesMaxVal;
-          // }
-
-          tesAbCur += tesV;
+          tesAbCur += tsk.tesValue;
           abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
-
-          // let progr = tsk.tesValue / GameSettings.tesMaxVal;
-          // let v = GameSettings.tesMaxVal * progr;
-          // tsk.progressValue = (v / GameSettings.tesMaxVal) * 100;
-          tsk.progressValue = ((tsk.value - GameSettings.minAbilLvl) / (GameSettings.maxAbilLvl - GameSettings.minAbilLvl)) * 100;
-
-          ab.value = tsk.value;
-          ab.progressValue = tsk.progressValue;
 
           if (doneReq) {
             tsk.mayUp = true;
@@ -1865,6 +1829,31 @@ export class PersService {
     this.currentTask$.next(prs.currentTask);
   }
 
+  normalizeTskAbilityValue(tsk: Task, ab: Ability) {
+    if (tsk.tesValue == null || tsk.tesValue == undefined || tsk.tesValue < 0) {
+      tsk.tesValue = 0;
+    }
+
+    if (tsk.tesAbValue == null || tsk.tesAbValue == undefined || tsk.tesAbValue < 0) {
+      tsk.tesAbValue = 0;
+    }
+
+    if (tsk.tesValue < 0 || ab.isOpen == false) {
+      tsk.tesValue = 0;
+    }
+
+    tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen);
+
+    if (tsk.value < 0) {
+      tsk.value = 0;
+    }
+    if (tsk.value > GameSettings.maxAbilLvl) {
+      tsk.value = GameSettings.maxAbilLvl;
+    }
+
+    ab.value = tsk.value;
+  }
+
   testAbFormula() {
     // Тест опыта
     // let tsks: Task[] = [];
@@ -2117,6 +2106,7 @@ export class PersService {
     this.changeTes(tsk, isDone, subTask.lastNotDone, activeSubtasksCount);
 
     subTask.lastDate = new Date().getTime();
+    subTask.secondsDone = 0;
 
     // Авто время
     if (this.pers$.value.isWriteTime) {
@@ -2731,10 +2721,6 @@ export class PersService {
 
     if (task.tesAbValue == null || task.tesAbValue == undefined) {
       task.tesAbValue = 0;
-    }
-
-    if (task.tesValue == null || task.tesValue == undefined) {
-      task.tesValue = 0;
     }
 
     // Расчет для ТЕС

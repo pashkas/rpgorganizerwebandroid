@@ -100,7 +100,7 @@ export class PerschangesService {
           changes.push(chaChanges);
         }
         // Изменение значения
-        if (GameSettings.changesIsChowChaValues && el.after_chaVal != el.before_chaVal && el.after_chaVal <= GameSettings.maxChaLvl) {
+        if (GameSettings.changesIsChowChaValues && this.NE(el.before_chaVal, el.after_chaVal) && el.after_chaVal <= GameSettings.maxChaLvl) {
           let beforeVal = el.before_chaVal;
           let afterVal = el.after_chaVal;
 
@@ -163,7 +163,7 @@ export class PerschangesService {
             changes.push(abChanges);
           }
           // Изменение значения
-          if (GameSettings.changesIsShowAbValues && el.after_abVal != el.before_abVal && el.after_abVal <= GameSettings.tesMaxVal) {
+          if (GameSettings.changesIsShowAbValues && this.NE(el.before_abVal, el.after_abVal) && el.after_abVal <= GameSettings.tesMaxVal) {
             let beforeVal = el.before_abVal;
             let afterVal = el.after_abVal;
 
@@ -404,6 +404,12 @@ export class PerschangesService {
     if (isDoneQwest && qwestToEdit != null) {
       this.router.navigate(["pers/qwest", qwestToEdit, true]);
     }
+  }
+
+  private NE(a: number, b: number): boolean {
+    let diff = Math.abs(b - a);
+
+    return diff >= 0.01;
   }
 
   private GetHead(isGood: boolean, congrantMsg: string, failMsg: string) {
