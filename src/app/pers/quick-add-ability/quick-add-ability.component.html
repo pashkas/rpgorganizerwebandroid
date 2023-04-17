@@ -1,23 +1,20 @@
-<h1 mat-dialog-title>
-    Добавить новый навык
-</h1>
+<h1 mat-dialog-title>Добавить новый навык</h1>
 <div mat-dialog-content>
-    <div [formGroup]="myForm" fxLayout="column" fxLayoutAlign="space-around center">
-        <mat-form-field fxFlex>
-            <input cdkFocusInitial placeholder="Навык" type="text" formControlName="abilName" matInput
-                autocomplete="off" name="abilName" />
-        </mat-form-field>
-        <mat-form-field fxFlex>
-            <mat-label>Характеристика</mat-label>
-            <mat-select panelClass="panel-override" formControlName="charact">
-                <mat-option *ngFor="let ch of characts$|async" [value]="ch.id">
-                    {{ch.name}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-    </div>
+  <div [formGroup]="myForm" fxLayout="column" fxLayoutAlign="space-around center">
+    <mat-form-field fxFlex>
+      <input cdkFocusInitial placeholder="Навык" type="text" formControlName="abilName" matInput autocomplete="off" name="abilName" />
+    </mat-form-field>
+    <mat-form-field fxFlex>
+      <mat-label>Характеристика</mat-label>
+      <mat-select panelClass="panel-override" formControlName="charact">
+        <mat-option *ngFor="let ch of characts$ | async" [value]="ch.id">
+          {{ ch.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 </div>
 <div mat-dialog-actions [align]="'end'">
-    <button mat-button mat-dialog-close>Отмена</button>
-    <button (click)="ok()" [disabled]="!myForm.valid" mat-button>Ok</button>
+  <button mat-button mat-dialog-close>Отмена</button>
+  <button (click)="ok()" [disabled]="!myForm.valid" mat-button>Ok</button>
 </div>

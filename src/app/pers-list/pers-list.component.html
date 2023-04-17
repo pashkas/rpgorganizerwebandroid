@@ -67,7 +67,7 @@
           <div class="progress position-relative" style="height: 32px">
             <div style="z-index: 1; height: 32px" class="position-absolute progress-bar attrprogr" role="progressbar" [style.width]="pers.totalProgress + '%'"></div>
             <div
-              class="position-absolute progress-bar"
+              class="position-absolute progress-bar attr"
               [ngClass]="{'progr-val-less': pers.rangProgress <= pers.totalProgress, 'progr-val-more':pers.rangProgress > pers.totalProgress}"
               role="progressbar"
               style="height: 32px"
@@ -100,7 +100,7 @@
                   <div class="progress position-relative" style="height: 28px">
                     <div class="progress-bar attrprogr" role="progressbar" [style.width]="item.progressValue + '%'" style="height: 28px; z-index: 1"></div>
                     <div
-                      class="position-absolute progress-bar"
+                      class="position-absolute progress-bar attr"
                       role="progressbar"
                       [ngClass]="{'progr-val-less': item.progresNextLevel <= item.progressValue, 'progr-val-more':item.progresNextLevel > item.progressValue}"
                       [style.width]="item.progresNextLevel + '%'"

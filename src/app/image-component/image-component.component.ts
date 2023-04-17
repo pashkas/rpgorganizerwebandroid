@@ -3,6 +3,7 @@ import { PersService } from '../pers.service';
 import { MatDialog } from '@angular/material';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import { Overlay } from '@angular/cdk/overlay';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-image-component',
@@ -11,6 +12,7 @@ import { Overlay } from '@angular/cdk/overlay';
 })
 export class ImageComponentComponent implements OnInit {
   @Input() data: any;
+  @Input() dataForm: FormControl;
   @Output() dataChange = new EventEmitter<any>();
   @Input() isCanEdit;
   @Input() isPers: boolean = false;

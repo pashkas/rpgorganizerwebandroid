@@ -222,7 +222,7 @@ export class PersService {
    * Добавление новой характеристики.
    * @param newCharact Название.
    */
-  addCharact(newCharact: string): any {
+  addCharact(newCharact: string): Characteristic {
     var cha = new Characteristic();
     cha.name = newCharact;
     this.pers$.value.characteristics.push(cha);
@@ -1236,13 +1236,13 @@ export class PersService {
 
     for (const tsk of ab.tasks) {
       tsk.date = date;
-      tsk.order = 9999;
+      tsk.order = GameSettings.tskOrderDefault;
 
       this.CheckSetTaskDate(tsk);
 
       tsk.states.forEach((el) => {
         el.isDone = false;
-        el.order = 9999;
+        el.order = GameSettings.tskOrderDefault;
       });
     }
 

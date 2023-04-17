@@ -27,7 +27,7 @@ export class GameSettings {
   /**
    * Открывать навык при активации.
    */
-  static isOpenAbWhenActivate: boolean = false;
+  static isOpenAbWhenActivate: boolean = true;
 
   /**
    * Начальное ОН.
@@ -111,12 +111,14 @@ export class GameSettings {
   /**
    * Длительность показа попапа с изменениями.
    */
-  static changesPopupDuration: number = 3000;
+  static changesPopupDuration: number = 2250;
 
   /**
    * Длительность попапа изменений квестов.
    */
-  static changesPopupDurationQwest: number = 3000;
+  static changesPopupDurationQwest: number = 2000;
+
+  static animationSpeed: number = 1000;
 
   /**
    * Показывать процент в прогрессе навыка.
@@ -166,4 +168,6 @@ export class GameSettings {
    * Максимальное значение очков в задаче.
    */
   static tesMaxVal: number = GameSettings.maxAbilLvl * 10 - GameSettings.minAbilLvl * 10;
+
+  static tskOrderDefault: number = -1;
 }

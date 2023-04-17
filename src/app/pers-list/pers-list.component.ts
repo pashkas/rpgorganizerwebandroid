@@ -257,6 +257,7 @@ export class PersListComponent implements OnInit {
   }
 
   newgame() {
+    this.isEditMode = false;
     this.router.navigate(["sync"], {
       queryParams: {
         type: "newGame",
@@ -356,7 +357,7 @@ export class PersListComponent implements OnInit {
           ab.isOpen = false;
           ab.tasks.forEach((tsk) => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
-            tsk.order = 9999;
+            tsk.order = GameSettings.tskOrderDefault;
             tsk.autoTime = 0;
             tsk.plusExp = 0;
             tsk.lastDate = 0;
@@ -372,7 +373,7 @@ export class PersListComponent implements OnInit {
             tsk.nextAbVal = 0;
             this.srv.GetRndEnamy(tsk, 0, this.pers.maxPersLevel);
             tsk.states.forEach((st) => {
-              st.order = 9999;
+              st.order = GameSettings.tskOrderDefault;
               st.autoTime = 0;
               st.lastDate = 0;
               st.prevId = null;

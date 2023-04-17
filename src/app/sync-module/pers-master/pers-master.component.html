@@ -1,0 +1,83 @@
+<div class="container pt-2 pb-4">
+  <mat-vertical-stepper [linear]="true" #stepper [formGroup]="persForm">
+    <mat-step label="Основная информация">
+      <app-image-component [data]="persForm.get('img').value" (dataChange)="persForm.get('img').setValue($event)" [isCanEdit]="true" [isPers]="true"></app-image-component>
+      <mat-form-field class="w-100">
+        <input formControlName="persName" placeholder="Имя" onfocus="this.select()" matInput autocomplete="off" />
+      </mat-form-field>
+      <div class="d-flex justify-content-end pt-2">
+        <button mat-button matStepperNext>Вперед</button>
+      </div>
+    </mat-step>
+    <mat-step label="Характеристики">
+      <div formArrayName="characts">
+        <div *ngFor="let cha of getCharactControls().controls; let i = index" [formGroupName]="i">
+          <div class="d-flex align-items-center">
+            <mat-form-field class="w-100 flex-grow-1">
+              <input formControlName="chaName" [value]="cha.value.chaName" onfocus="this.select()" matInput autocomplete="off" />
+            </mat-form-field>
+            <button mat-icon-button color="primary" *ngIf="i != 0" (click)="deleteCha(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button color="primary" (click)="addCharact()">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end pt-2">
+        <button mat-button matStepperPrevious>Назад</button>
+        <button mat-button matStepperNext>Вперед</button>
+      </div>
+    </mat-step>
+    <mat-step label="...Характеристики">
+      <div formArrayName="characts">
+        <div *ngFor="let cha of getCharactControls().controls; let i = index" [formGroupName]="i">
+          <div class="d-flex align-items-center">
+            <app-image-component [(data)]="cha.get('img').value" [isCanEdit]="true" [isPers]="false"></app-image-component>
+            <div class="d-flex flex-column w-100">
+              <h4>{{ cha.value.chaName }}</h4>
+              <mat-form-field class="w-100">
+                <mat-select formControlName="val">
+                  <mat-option *ngFor="let rang of rangse" [value]="rang.val">
+                    {{ +rang.name + 1 }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end pt-2">
+        <button mat-button matStepperPrevious>Назад</button>
+        <button mat-button matStepperNext>Вперед</button>
+      </div>
+    </mat-step>
+    <mat-step label="Навыки">
+      <div formArrayName="characts">
+        <div *ngFor="let cha of getCharactControls().controls; let i = index" [formGroupName]="i" class="d-flex flex-column">
+          <h4>{{ cha.value.chaName }}</h4>
+          <div formArrayName="abils" class="pt-1">
+            <div *ngFor="let ab of cha.get('abils').controls; let j = index" [formGroupName]="j" class="d-flex flex-row w-100 align-items-center">
+              <mat-form-field class="flex-grow-1 no-padding">
+                <input formControlName="abName" onfocus="this.select()" matInput autocomplete="off" type="text"/>
+              </mat-form-field>
+              <div class="d-flex align-items-end">
+                <button mat-icon-button color="primary" *ngIf="j != 0" (click)="deleteAbil(i, j)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+                <button mat-icon-button color="primary" (click)="addAbil(i)">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end pt-2">
+        <button mat-button matStepperPrevious>Назад</button>
+        <button mat-flat-button color="accent" (click)="finish()">Готово!</button>
+      </div>
+    </mat-step>
+  </mat-vertical-stepper>
+</div>

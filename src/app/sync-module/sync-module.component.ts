@@ -54,7 +54,8 @@ export class SyncModuleComponent implements OnInit {
           .subscribe((result) => {
             if (result) {
               this.usrSrv.setNewPers(userId);
-              this.router.navigate(["/main"]);
+              // this.router.navigate(["/main"]);
+              this.router.navigate(["/pers/master"]);
             } else {
               this.router.navigate([frome]);
             }

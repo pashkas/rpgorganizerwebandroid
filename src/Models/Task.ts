@@ -4,6 +4,7 @@ import { Rangse } from "./Rangse";
 import { Pers } from "./Pers";
 import { plusToName } from "./plusToName";
 import { ReqItemType } from "./ReqItem";
+import { GameSettings } from "src/app/GameSettings";
 export class Task implements IImg {
   reqvirements: Reqvirement[] = [];
   prefix: string = "";
@@ -65,7 +66,7 @@ export class Task implements IImg {
   timeForSort: number = 200000000;
   tittle: string;
   value: number = 0;
-  order: number = 9999;
+  order: number = GameSettings.tskOrderDefault;
   lastNotDone: boolean = false;
   isfrstqwtsk: boolean;
   isHard: boolean = false;
@@ -221,7 +222,7 @@ export class taskState implements IImg {
   parrentTask: string;
   isActive: boolean = false;
   startLvl: number = 999;
-  order: number = 9999;
+  order: number = GameSettings.tskOrderDefault;
   img: string;
   image: string;
   imageLvl: string = "0";

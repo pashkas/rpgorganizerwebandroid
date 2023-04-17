@@ -41,8 +41,8 @@ export class PersChangesItemComponent implements OnInit {
 
       let total = firstPerc + secondPerc;
 
-      let firstTime = (firstPerc / total) * 2000;
-      let secondTime = (secondPerc / total) * 2000;
+      let firstTime = (firstPerc / total) * GameSettings.animationSpeed;
+      let secondTime = (secondPerc / total) * GameSettings.animationSpeed;
 
       //1
       let factory1 = this.builder.build([style({ width: this.item.expChanges[0].valFrom + "%" }), animate(firstTime + "ms", style({ width: this.item.expChanges[0].valTo + "%" }))]);
@@ -62,8 +62,8 @@ export class PersChangesItemComponent implements OnInit {
 
       let total = firstPerc + secondPerc;
 
-      let firstTime = (firstPerc / total) * 2000;
-      let secondTime = (secondPerc / total) * 2000;
+      let firstTime = (firstPerc / total) * GameSettings.animationSpeed;
+      let secondTime = (secondPerc / total) * GameSettings.animationSpeed;
 
       //1
       let factory1 = this.builder.build([style({ width: this.item.abilChanges[0].valFrom + "%" }), animate(firstTime + "ms", style({ width: this.item.abilChanges[0].valTo + "%" }))]);
@@ -78,7 +78,7 @@ export class PersChangesItemComponent implements OnInit {
         player2.play();
       }, firstTime);
     } else {
-      let factory = this.builder.build([style({ width: this.item.valFrom + "%" }), animate("2000ms", style({ width: this.item.valTo + "%" }))]);
+      let factory = this.builder.build([style({ width: this.item.valFrom + "%" }), animate(GameSettings.animationSpeed + "ms", style({ width: this.item.valTo + "%" }))]);
 
       let player = factory.create(this.progress.nativeElement, {});
       if (this.item.lvl != null) {
