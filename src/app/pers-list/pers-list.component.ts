@@ -107,7 +107,7 @@ export class PersListComponent implements OnInit {
       header = "Добавить трофей";
       isEdit = false;
       r = new Reward();
-      r.isArtefact = true;
+      r.isArtefact = false;
       r.image = "assets/icons/tresure.png";
     }
 
@@ -341,7 +341,7 @@ export class PersListComponent implements OnInit {
   }
 
   upAbil(ab: Ability) {
-    this.srv.activateAbility(ab);
+    this.srv.activateAbility(ab, true);
   }
 
   /**
@@ -462,5 +462,18 @@ export class PersListComponent implements OnInit {
     this.srv.savePers(true);
 
     this.srv.changesAfter(null);
+  }
+
+  qwickAddQwest() {
+    let qwestId = this.srv.addQwest("Квест");
+
+    this.srv.savePers(false);
+
+    this.router.navigate(["pers/qwest", qwestId], { queryParams: { isQuick: true } });
+  }
+
+  qwickAddReward() {
+    this.addNewRevard(null);
+    this.srv.savePers(false);
   }
 }

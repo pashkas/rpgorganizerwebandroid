@@ -7,18 +7,14 @@
     <!-- Редактировать -->
     <button mat-icon-button (click)="saveData()">
       <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
-      <!-- <img *ngIf="isEditMode" src="assets/icons/create.png" class="img-fluid"
-        [ngStyle]="{'object-fit': 'contain', 'height':'3em'}"> -->
     </button>
   </div>
 </nav>
 
 <!-- Просмотр -->
 <div class="container pt-2 pb-4" *ngIf="this.pers && qwest && !isEditMode">
-  <div class="pb-4">
-    <!-- Картинка -->
+  <form class="pb-4">
     <app-image-component [(data)]="qwest.image"></app-image-component>
-
     <div class="progress position-relative" style="height: 32px">
       <div class="progress-bar attrprogr" role="progressbar" [style.width]="qwest.progressValue + '%'"></div>
       <div class="position-absolute w-100 px-1 text-center">
@@ -46,11 +42,11 @@
     </div>
 
     <!-- Награды -->
-    <ng-container *ngIf="qwestRewards?.length > 0|| qwest.rewards?.length > 0 || qwest.exp > 0 || qwest.gold > 0">
-      <div class="mt-2" style="padding-left: 10px" xFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="20px grid">
-        <div  *ngIf="qwest.gold > 0">
+    <ng-container *ngIf="qwestRewards?.length > 0 || qwest.rewards?.length > 0 || qwest.exp > 0 || qwest.gold > 0">
+      <div class="mt-2 mx-0 mb-0" xFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="20px grid">
+        <div *ngIf="qwest.gold > 0">
           <div fxLayout="column" fxLayoutAlign="space-around center">
-            <img src="assets/icons/gold.png" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '60px' }" />
+            <img src="assets/icons/gold.png" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '50px' }" />
             <div fxLayout="row" fxLayoutAlign="space-evenly center">
               <div>
                 <small>+{{ qwest.gold }}</small>
@@ -58,9 +54,9 @@
             </div>
           </div>
         </div>
-        <div  *ngIf="qwest.exp > 0">
+        <div *ngIf="qwest.exp > 0">
           <div fxLayout="column" fxLayoutAlign="space-around center">
-            <img src="assets/icons/опыт.png" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '60px' }" />
+            <img src="assets/icons/опыт.png" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '50px' }" />
             <div fxLayout="row" fxLayoutAlign="space-evenly center">
               <div>
                 <small>+{{ qwest.exp }} exp;</small>
@@ -68,7 +64,7 @@
             </div>
           </div>
         </div>
-        <div  *ngFor="let rev of qwestRewards">
+        <div *ngFor="let rev of qwestRewards">
           <div fxLayout="column" fxLayoutAlign="space-around center">
             <img src="{{ rev.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '60px' }" />
             <div fxLayout="row" fxLayoutAlign="space-evenly center">
@@ -79,22 +75,9 @@
           </div>
         </div>
       </div>
-
-      <!-- <div fxLayout="row wrap" fxLayoutAlign="center center" class="pt-2">
-        <div *ngIf="qwest.exp > 0">
-          <span class="text-success">
-            +{{qwest.exp}} exp;&nbsp;
-          </span>
-        </div>
-        <div *ngFor="let inv of qwest.rewards">
-          <span class="text-success">
-            {{inv.name}};&nbsp;
-          </span>
-        </div>
-      </div> -->
     </ng-container>
 
-    <!-- Связанные навыки -->
+    <!-- Навык -->
     <div class="pt-2 text-center" *ngIf="linkAbs.length > 0">
       <div *ngFor="let ab of linkAbs">
         <a skipLocationChange [routerLink]="['/pers/task', ab.id, false]">{{ "🔗 " + ab.name + " 🔗" }}</a>
@@ -103,12 +86,7 @@
 
     <!-- Требования предыдущих -->
     <div class="pt-2 text-center" *ngIf="prevQwest">
-      <a class="text-danger" [routerLink]="['/pers/qwest', prevQwest.id]">{{
-        '"' +
-          prevQwest.name +
-          '" должен быть
-        выполнен!'
-      }}</a>
+      <a class="text-danger" [routerLink]="['/pers/qwest', prevQwest.id]">{{ '"' + prevQwest.name + '" должен быть выполнен!' }}</a>
     </div>
 
     <!-- Следующий квест -->
@@ -139,11 +117,10 @@
         </li>
       </ul>
     </div>
-  </div>
+  </form>
   <br />
   <br />
 </div>
-<!-- Редактирование -->
 <div class="container pt-2 pb-4" *ngIf="this.pers && qwest && isEditMode">
   <div class="pb-4">
     <!-- Изображение -->
@@ -151,7 +128,7 @@
 
     <!-- Название -->
     <mat-form-field class="w-100">
-      <input onfocus="this.select()" matInput autocomplete="off" placeholder="Название" [(ngModel)]="qwest.name" name="qwest.name" />
+      <input #nameEdt onfocus="this.select()" matInput autocomplete="off" placeholder="Название" [(ngModel)]="qwest.name" name="qwest.name" />
     </mat-form-field>
 
     <!-- Описание -->
@@ -160,12 +137,18 @@
     </mat-form-field>
 
     <!-- Золото -->
-    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="8px">
-      <div style="width: 100%">
-        <mat-form-field class="w-100">
-          <input matInput type="number" onfocus="this.select()" autocomplete="off" placeholder="Золото" [(ngModel)]="qwest.gold" name="gold" />
-        </mat-form-field>
-      </div>
+    <div class="flex">
+      <mat-form-field>
+        <mat-label>Сложность</mat-label>
+        <mat-select [formControl]="qwestHardnessControll">
+          <mat-option *ngFor="let h of gameSettings.qwestHardneses" [value]="h">
+            {{ h.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field style="flex-basis: 33%">
+        <input matInput type="number" onfocus="this.select()" autocomplete="off" placeholder="Золото" [(ngModel)]="qwest.gold" name="gold" />
+      </mat-form-field>
     </div>
     <!-- Опыт -->
     <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="8px" *ngIf="!pers.isTES">
@@ -183,124 +166,125 @@
         </mat-chip-list>
       </div>
     </div>
-
     <!-- Задачи -->
-    <div fxLayout="row" fxLayoutAlign="space-between center">
-      <h5>Миссии:</h5>
-      <button class="icon-small" (click)="addTask()" mat-icon-button>
-        <img src="assets/icons/create.png" class="img-fluid" />
-      </button>
-    </div>
-    <!-- Задачи -->
-    <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="tsks" *ngIf="qwest.tasks.length > 0">
-      <div mat-list-item cdkDrag *ngFor="let tsk of qwest.tasks; let i = index">
-        <div class="d-flex">
-          <div class="flex-grow-1 align-self-center">
-            <ng-container *ngIf="tsk.isDone; else elseTemplate">
-              <del>
-                <h6>{{ tsk.name }}</h6>
-              </del>
-            </ng-container>
-            <ng-template #elseTemplate>
-              <h6>{{ tsk.name }}</h6>
-            </ng-template>
-          </div>
-          <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
-            <button class="icon-small" (click)="delTask(tsk.id)" mat-icon-button>
-              <img src="assets/icons/del.png" class="img-fluid" />
-            </button>
-            <button class="icon-small" (click)="moveTaskToAnotherQwest(tsk)" mat-icon-button cdkDragHandle>
-              <img src="assets/icons/up.png" class="img-fluid" />
-            </button>
-            <button class="icon-small" mat-icon-button cdkDragHandle>
-              <img src="assets/icons/right.png" class="img-fluid" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </mat-list>
-
-    <!-- Следующие квесты -->
-    <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-2">
-      <h5>Следующий квест:</h5>
-      <div>
-        <button class="icon-small" (click)="chooseNextQwest()" mat-icon-button *ngIf="nextQwests.length == 0">
-          <img src="assets/icons/edit.png" class="img-fluid" />
-        </button>
-
-        <button class="icon-small" (click)="addNextQwest()" mat-icon-button *ngIf="nextQwests.length == 0">
+    <ng-container>
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <h5>Миссии:</h5>
+        <button class="icon-small" (click)="addTask()" mat-icon-button>
           <img src="assets/icons/create.png" class="img-fluid" />
         </button>
       </div>
-    </div>
-    <mat-list *ngIf="nextQwests.length > 0">
-      <div mat-list-item *ngFor="let q of nextQwests; let i = index">
-        <div class="d-flex">
-          <div class="flex-grow-1 align-self-center">
-            <h6>{{ q.name }}</h6>
-          </div>
-          <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
-            <button class="icon-small" (click)="delNextQwest(q.id)" mat-icon-button>
-              <img src="assets/icons/del.png" class="img-fluid" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </mat-list>
-
-    <!-- Добавить награду -->
-    <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-2">
-      <h5>Награды:</h5>
-      <button class="icon-small" (click)="addNewRevard(null)" mat-icon-button>
-        <img src="assets/icons/create.png" class="img-fluid" />
-      </button>
-    </div>
-    <!-- Список наград -->
-    <mat-list *ngIf="qwestRewards.length > 0">
-      <div mat-list-item *ngFor="let rev of qwestRewards; let i = index">
-        <div class="d-flex">
-          <div class="flex-grow-1 align-self-center">
-            {{ rev.name }}
-          </div>
+      <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="tsks" *ngIf="qwest.tasks.length > 0">
+        <div mat-list-item cdkDrag *ngFor="let tsk of qwest.tasks; let i = index">
           <div class="d-flex">
-            <!-- Удалить -->
+            <div class="flex-grow-1 align-self-center">
+              <ng-container *ngIf="tsk.isDone; else elseTemplate">
+                <del>
+                  <h6>{{ tsk.name }}</h6>
+                </del>
+              </ng-container>
+              <ng-template #elseTemplate>
+                <h6>{{ tsk.name }}</h6>
+              </ng-template>
+            </div>
             <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
-              <!-- Редактировать -->
-              <button class="icon-small" (click)="addNewRevard(rev)" mat-icon-button>
-                <img src="assets/icons/edit.png" class="img-fluid" />
-              </button>
-              <button class="icon-small" (click)="delReward(rev.id)" mat-icon-button>
+              <button class="icon-small" (click)="delTask(tsk.id)" mat-icon-button>
                 <img src="assets/icons/del.png" class="img-fluid" />
+              </button>
+              <button class="icon-small" (click)="moveTaskToAnotherQwest(tsk)" mat-icon-button cdkDragHandle>
+                <img src="assets/icons/up.png" class="img-fluid" />
+              </button>
+              <button class="icon-small" mat-icon-button cdkDragHandle>
+                <img src="assets/icons/right.png" class="img-fluid" />
               </button>
             </div>
           </div>
         </div>
+      </mat-list>
+    </ng-container>
+    <!-- Награды -->
+    <ng-container>
+      <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-2">
+        <h5>Награды:</h5>
+        <button class="icon-small" (click)="addNewRevard(null)" mat-icon-button>
+          <img src="assets/icons/create.png" class="img-fluid" />
+        </button>
       </div>
-    </mat-list>
+      <mat-list *ngIf="qwestRewards.length > 0">
+        <div mat-list-item *ngFor="let rev of qwestRewards; let i = index">
+          <div class="d-flex">
+            <div class="flex-grow-1 align-self-center">
+              {{ rev.name }}
+            </div>
+            <div class="d-flex">
+              <!-- Удалить -->
+              <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
+                <!-- Редактировать -->
+                <button class="icon-small" (click)="addNewRevard(rev)" mat-icon-button>
+                  <img src="assets/icons/edit.png" class="img-fluid" />
+                </button>
+                <button class="icon-small" (click)="delReward(rev.id)" mat-icon-button>
+                  <img src="assets/icons/del.png" class="img-fluid" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-list>
+    </ng-container>
     <!-- Навык -->
-    <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-2">
-      <h5>Навык:</h5>
-      <button (click)="setAbil()" class="icon-small" mat-icon-button *ngIf="!qwest.abilitiId">
-        <img src="assets/icons/edit.png" class="img-fluid" />
-      </button>
-    </div>
-    <!-- Связанный навык -->
-    <mat-list>
-      <div mat-list-item *ngIf="qwestAbiliti">
-        <div class="d-flex">
-          <div class="flex-grow-1 align-self-center">
-            {{ qwestAbiliti.name }}
-          </div>
+    <ng-container>
+      <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-2">
+        <h5>Навык:</h5>
+        <button (click)="setAbil()" class="icon-small" mat-icon-button *ngIf="!qwest.abilitiId">
+          <img src="assets/icons/edit.png" class="img-fluid" />
+        </button>
+      </div>
+      <mat-list>
+        <div mat-list-item *ngIf="qwestAbiliti">
           <div class="d-flex">
+            <div class="flex-grow-1 align-self-center">
+              {{ qwestAbiliti.name }}
+            </div>
+            <div class="d-flex">
+              <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
+                <button class="icon-small" mat-icon-button (click)="delAb()">
+                  <img src="assets/icons/del.png" class="img-fluid" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-list>
+    </ng-container>
+    <!-- Следующие квесты -->
+    <ng-container>
+      <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-2">
+        <h5>Следующий квест:</h5>
+        <div>
+          <button class="icon-small" (click)="chooseNextQwest()" mat-icon-button *ngIf="nextQwests.length == 0">
+            <img src="assets/icons/edit.png" class="img-fluid" />
+          </button>
+          <button class="icon-small" (click)="addNextQwest()" mat-icon-button *ngIf="nextQwests.length == 0">
+            <img src="assets/icons/create.png" class="img-fluid" />
+          </button>
+        </div>
+      </div>
+      <mat-list *ngIf="nextQwests.length > 0">
+        <div mat-list-item *ngFor="let q of nextQwests; let i = index">
+          <div class="d-flex">
+            <div class="flex-grow-1 align-self-center">
+              <h6>{{ q.name }}</h6>
+            </div>
             <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
-              <button class="icon-small" mat-icon-button (click)="delAb()">
+              <button class="icon-small" (click)="delNextQwest(q.id)" mat-icon-button>
                 <img src="assets/icons/del.png" class="img-fluid" />
               </button>
             </div>
           </div>
         </div>
-      </div>
-    </mat-list>
+      </mat-list>
+    </ng-container>
   </div>
   <br />
   <br />

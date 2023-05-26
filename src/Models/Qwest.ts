@@ -1,6 +1,6 @@
-import { Task } from './Task';
-import { v4 as uuid } from 'uuid';
-import { Reward } from './Reward';
+import { Task } from "./Task";
+import { v4 as uuid } from "uuid";
+import { Reward } from "./Reward";
 export class Qwest {
   id: any = uuid();
   name: string = "";
@@ -16,4 +16,5 @@ export class Qwest {
   abilitiId: any;
   hardnes: number;
   isNoActive: boolean;
+  hardnessId: number;
 }

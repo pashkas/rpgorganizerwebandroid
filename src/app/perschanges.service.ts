@@ -148,7 +148,7 @@ export class PerschangesService {
           changes.push(new ChangesModel(`${el.name} ${txt}`, "abil", 0, 0, 0, GameSettings.maxAbilLvl, el.img));
         } else {
           // Иземенение уровня
-          if (GameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= GameSettings.maxAbilLvl && el.after > GameSettings.minAbilLvl) {
+          if (GameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= GameSettings.maxAbilLvl) {
             let abChanges = new ChangesModel(
               el.name,
               "abil",
@@ -158,6 +158,7 @@ export class PerschangesService {
               GameSettings.maxAbilLvl - GameSettings.minAbilLvl,
               el.img
             );
+
             abChanges.lvl = el.after;
 
             changes.push(abChanges);
@@ -336,7 +337,7 @@ export class PerschangesService {
       }
     });
 
-    let wasGold = true;
+    let wasGold = false;
     for (const ch of unionChanges) {
       const head = ch.head;
       const abPoints = ch.head;

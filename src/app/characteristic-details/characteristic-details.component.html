@@ -50,7 +50,7 @@
     <ul class="list-group p-0 pt-1" *ngIf="charact.abilities.length > 0">
       <ng-container *ngFor="let ab of charact.abilities; let even = even; let odd = odd">
         <ng-container *ngIf="(GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp && pers.ON > 0) || (!GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp) || {} as mayUp">
-          <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped">
+          <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped" [ngClass]="{ even: even && mayUp == true }">
             <div class="align-self-center w-100 d-flex">
               <div class="flex-grow-1 progress position-relative" style="height: 20px">
                 <div style="height: 20px; z-index: 1" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'"></div>
@@ -126,8 +126,8 @@
     <!-- Добавить навык -->
     <div fxLayout="row" fxLayoutAlign="space-between center">
       <h5>Навыки:</h5>
-      <button class="icon-small" *ngIf="false && pers.ON >= 1" (click)="addAbil()" mat-icon-button>
-        <img src="assets/icons/create.png" *ngIf="!this.srv.isGlobalTaskView" class="img-fluid" />
+      <button class="icon-small" (click)="addAbil()" mat-icon-button>
+        <img src="assets/icons/create.png" class="img-fluid" />
       </button>
     </div>
     <!-- Навыки -->
@@ -142,7 +142,7 @@
           <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
             <!-- Удалить -->
             <button class="icon-small" (click)="delAbil(ab.id)" mat-icon-button>
-              <img src="assets/icons/del.png" *ngIf="!this.srv.isGlobalTaskView" class="img-fluid" />
+              <img src="assets/icons/del.png" class="img-fluid" />
             </button>
           </div>
         </div>

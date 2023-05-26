@@ -37,7 +37,14 @@ export class PersChangesItemComponent implements OnInit {
 
     if (this.item.type == "exp" && this.item.expChanges.length > 1) {
       let firstPerc = this.item.expChanges[0].valTo - this.item.expChanges[0].valFrom;
+      if (firstPerc < 0.01) {
+        firstPerc = 0.01;
+      }
+
       let secondPerc = this.item.expChanges[1].valTo - this.item.expChanges[1].valFrom;
+      if (secondPerc < 0.01) {
+        secondPerc = 0.01;
+      }
 
       let total = firstPerc + secondPerc;
 
@@ -58,7 +65,14 @@ export class PersChangesItemComponent implements OnInit {
       }, firstTime);
     } else if ((this.item.type == "abil" || this.item.type == "cha") && this.item.abilChanges.length > 1) {
       let firstPerc = this.item.abilChanges[0].valTo - this.item.abilChanges[0].valFrom;
+      if (firstPerc < 0.01) {
+        firstPerc = 0.01;
+      }
+
       let secondPerc = this.item.abilChanges[1].valTo - this.item.abilChanges[1].valFrom;
+      if (secondPerc < 0.01) {
+        secondPerc = 0.01;
+      }
 
       let total = firstPerc + secondPerc;
 

@@ -18,6 +18,7 @@ import { curpersview } from "src/Models/curpersview";
 import { MatDialog } from "@angular/material";
 import { ReqItemType } from "src/Models/ReqItem";
 import { GameSettings } from "./GameSettings";
+import { Settings } from "luxon";
 
 @Injectable({
   providedIn: "root",
@@ -65,12 +66,15 @@ export class PersService {
   }
 
   CasinoGold(tskExp: number) {
-    let gold = Math.round(tskExp * Math.random());
-    if (gold < 1) {
-      gold = 1;
-    }
+    // let gold = Math.round(tskExp * Math.random());
+    // if (gold < 1) {
+    //   gold = 1;
+    // }
+    let gold = Math.round(GameSettings.baseTskGold * Math.random());
 
-    this.pers$.value.gold += gold;
+    if (gold >= 1) {
+      this.pers$.value.gold += gold;
+    }
   }
 
   /**
@@ -248,6 +252,8 @@ export class PersService {
     }
 
     this.pers$.value.qwests.push(qwest);
+
+    return qwest.id;
   }
 
   addToInventory(rev: Reward, prs: Pers = null) {
@@ -648,7 +654,7 @@ export class PersService {
   }
 
   getAimString(aimVal: number, aimUnit: string): string {
-    if (aimUnit == "Раз") {
+    if (aimUnit == "Раз" || aimUnit == "Раз чет" || aimUnit == "Раз нечет") {
       return "‪" + aimVal + "✓";
     }
 
@@ -814,8 +820,7 @@ export class PersService {
 
     if (GameSettings.expFotmulaType == "abVal") {
       // По значению навыка
-      tesMax = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl * 10;
-
+      // tesMax = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl * 10;
       let progress = tesCur / tesMax;
       exp = GameSettings.maxPersLevel * progress;
       expDirect = exp;
@@ -1185,10 +1190,11 @@ export class PersService {
     for (const ch of this.pers$.value.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
-          let tskDate: moment.Moment = moment(tsk.date);
-          if (tskDate.isBefore(moment(new Date()), "d")) {
-            tsk.date = new Date();
-          }
+          tsk.date = new Date();
+          // let tskDate: moment.Moment = moment(tsk.date);
+          // if (tskDate.isBefore(moment(new Date()), "d")) {
+          //   tsk.date = new Date();
+          // }
         }
       }
     }
@@ -1226,7 +1232,7 @@ export class PersService {
     }, 50);
   }
 
-  activateAbility(ab: Ability) {
+  activateAbility(ab: Ability, isFromMain: boolean = false) {
     this.changesBefore();
     ab.isOpen = true;
 
@@ -1247,7 +1253,7 @@ export class PersService {
     }
 
     if (GameSettings.isOpenAbWhenActivate) {
-      this.router.navigate(["pers/task", ab.tasks[0].id, true], { queryParams: { isQuick: true, isActivate: true } });
+      this.router.navigate(["pers/task", ab.tasks[0].id, true], { queryParams: { isQuick: true, isActivate: true, isFromMain: isFromMain } });
     }
 
     setTimeout(() => {
@@ -1814,7 +1820,6 @@ export class PersService {
     localStorage.setItem("isOffline", JSON.stringify(true));
     localStorage.setItem("pers", JSON.stringify(prs));
 
-    this.refreshTaskOrders(prs);
     this.pers$.next(prs);
 
     if (prs.currentView == curpersview.QwestTasks && prs.tasks.length == 0) {
@@ -1946,7 +1951,12 @@ export class PersService {
 
   setPers(data: string) {
     let prs: Pers = JSON.parse(data);
-    prs.currentView = curpersview.SkillTasks;
+
+    if (prs.isWriteTime) {
+      prs.currentView = curpersview.SkillsGlobal;
+    } else {
+      prs.currentView = curpersview.SkillTasks;
+    }
 
     if (prs.tasks && prs.tasks.length > 0) {
       prs.currentTaskIndex = 0;
@@ -2010,10 +2020,6 @@ export class PersService {
    * @param isToEnd В конец списка?
    */
   setTaskOrder(task: Task, isPlus: boolean, isToEnd: boolean) {
-    // if (!isPlus && task.lastNotDone) {
-    //   task.order = 9999;
-    // }
-    // else {
     if (isToEnd) {
       task.order = this.pers$.value.curEndOfListSeq;
       this.pers$.value.curEndOfListSeq++;
@@ -2031,7 +2037,6 @@ export class PersService {
         this.pers$.value.curOrderSeq++;
       }
     }
-    // }
   }
 
   showAbility(ab: Ability) {
@@ -2072,11 +2077,6 @@ export class PersService {
         }
       }
 
-      // Автовремя
-      // if (a.requrense != "нет" && a.autoTime != b.autoTime) {
-      //   return a.autoTime - b.autoTime;
-      // }
-
       // По Order
       if (!a.order) {
         a.order = 0;
@@ -2084,16 +2084,7 @@ export class PersService {
       if (!b.order) {
         b.order = 0;
       }
-      // if (a.order != b.order) {
       return a.order - b.order;
-      // }
-
-      // По времени
-      // if (a.time != b.time) {
-      //   return a.time.localeCompare(b.time)
-      // }
-
-      // return a.name.localeCompare(b.name);
     });
   }
 
@@ -2295,16 +2286,21 @@ export class PersService {
       value = av;
     }
 
-    if (aimUnit == "Раз" && isEven == true) {
+    if (aimUnit == "Раз чет") {
       value = 2 * Math.ceil(value / 2);
       if (value < 2) value = 2;
+    }
+
+    if (aimUnit == "Раз нечет") {
+      value = 2 * Math.ceil(value / 2) - 1;
+      if (value < 1) value = 1;
     }
 
     if (aimVal < 0) {
       value = av - value;
     }
 
-    if (aimDone != null && aimUnit != "Раз") {
+    if (aimDone != null && aimUnit != "Раз" && aimUnit != "Раз чет" && aimUnit != "Раз нечет") {
       value = Math.ceil(value - aimDone);
     }
 
@@ -2345,21 +2341,11 @@ export class PersService {
       return;
     }
 
-    let total: number = 0;
-    let start: number = 0;
-
     for (const rev of revards) {
-      total = total + 100;
-      rev.startProbability = start;
-      start = start + rev.ludProbability;
-      rev.endProbability = start;
-    }
-
-    let rnd = Math.random() * total;
-    var rev = revards.find((q) => rnd > q.startProbability && rnd <= q.endProbability);
-
-    if (rev) {
-      this.addToInventory(rev);
+      let rnd = Math.random() * 100;
+      if (rnd <= rev.ludProbability) {
+        this.addToInventory(rev);
+      }
     }
   }
 
@@ -2397,47 +2383,6 @@ export class PersService {
     prs.isAutoPumping = false;
     prs.isAutofocus = false;
     prs.Diary = [];
-  }
-
-  /**
-   * Пересчитываем порядок для всех задач.
-   */
-  private refreshTaskOrders(prs: Pers) {
-    if (!prs.isWriteTime) {
-      return;
-    }
-    let tasks = [];
-    if (prs.characteristics != null) {
-      for (const ch of prs.characteristics) {
-        if (ch.abilities != null) {
-          for (const ab of ch.abilities) {
-            if (ab.tasks != null) {
-              for (const tsk of ab.tasks) {
-                if (tsk.value >= 1 || ab.isOpen) {
-                  if (tsk.states != null && tsk.states.length && tsk.isSumStates && !tsk.isStateRefresh && !tsk.isStateInTitle) {
-                    for (const st of tsk.states) {
-                      if (st.isActive) {
-                        tasks.push(st);
-                      }
-                    }
-                  } else {
-                    tasks.push(tsk);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    let sorted = tasks.sort((a, b) => {
-      return a.order - b.order;
-    });
-
-    for (let i = 0; i < sorted.length; i++) {
-      sorted[i].order = i;
-    }
   }
 
   private countPersLevelAndOns(abTotalMax: number, prevOn: number, startExp: number, exp: number, ons: number, nextExp: number, prs: Pers, persLevel: number) {
@@ -2661,7 +2606,7 @@ export class PersService {
       }
       plusState += " " + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit);
 
-      if (tsk.aimUnit == "Раз") {
+      if (tsk.aimUnit == "Раз" || tsk.aimUnit == "Раз чет" || tsk.aimUnit == "Раз нечет") {
         if (tsk.postfix && tsk.postfix.length > 0) {
           plusState = plusState.replace("✓", "");
         }

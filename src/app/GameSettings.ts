@@ -116,8 +116,11 @@ export class GameSettings {
   /**
    * Длительность попапа изменений квестов.
    */
-  static changesPopupDurationQwest: number = 2000;
+  static changesPopupDurationQwest: number = 2250;
 
+  /**
+   * Длительность самой анимации.
+   */
   static animationSpeed: number = 1000;
 
   /**
@@ -169,5 +172,34 @@ export class GameSettings {
    */
   static tesMaxVal: number = GameSettings.maxAbilLvl * 10 - GameSettings.minAbilLvl * 10;
 
-  static tskOrderDefault: number = -1;
+  static tskOrderDefault: number = 9999;
+
+  static baseTskGold: number = 1;
+  static qwestHardneses: qwestHardness[] = [
+    { id: 5, name: "оч. легко", gold: 25 },
+    { id: 4, name: "легко", gold: 50 },
+    { id: 3, name: "норм", gold: 100 },
+    { id: 2, name: "сложно", gold: 500 },
+    { id: 1, name: "оч. сложно", gold: 2000 },
+  ];
+  static revProbs: taskProb[] = [
+    { id: 5, name: "оч. распространенный", prob: 5, gold: 25 },
+    { id: 4, name: "распространенный", prob: 3, gold: 50 },
+    { id: 3, name: "обычный", prob: 2, gold: 100 },
+    { id: 2, name: "редкий", prob: 0.5, gold: 500 },
+    { id: 1, name: "оч. редкий", prob: 0.1, gold: 2000 },
+  ];
+}
+
+export class qwestHardness {
+  id: number;
+  name: string;
+  gold: number;
+}
+
+export class taskProb {
+  id: number;
+  name: string;
+  prob: number;
+  gold: number;
 }

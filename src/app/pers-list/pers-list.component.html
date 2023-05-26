@@ -68,7 +68,7 @@
             <div style="z-index: 1; height: 32px" class="position-absolute progress-bar attrprogr" role="progressbar" [style.width]="pers.totalProgress + '%'"></div>
             <div
               class="position-absolute progress-bar attr"
-              [ngClass]="{'progr-val-less': pers.rangProgress <= pers.totalProgress, 'progr-val-more':pers.rangProgress > pers.totalProgress}"
+              [ngClass]="{ 'progr-val-less': pers.rangProgress <= pers.totalProgress, 'progr-val-more': pers.rangProgress > pers.totalProgress }"
               role="progressbar"
               style="height: 32px"
               [style.width]="pers.rangProgress + '%'"
@@ -102,7 +102,7 @@
                     <div
                       class="position-absolute progress-bar attr"
                       role="progressbar"
-                      [ngClass]="{'progr-val-less': item.progresNextLevel <= item.progressValue, 'progr-val-more':item.progresNextLevel > item.progressValue}"
+                      [ngClass]="{ 'progr-val-less': item.progresNextLevel <= item.progressValue, 'progr-val-more': item.progresNextLevel > item.progressValue }"
                       [style.width]="item.progresNextLevel + '%'"
                       style="height: 28px"
                       [style.z-index]="item.progressValue > item.progresNextLevel ? 2 : 0"
@@ -120,15 +120,16 @@
                 <div class="d-flex flex-column w-100">
                   <div>
                     <ul class="list-group py-0" *ngIf="item.abilities.length > 0">
-                      <ng-container *ngFor="let ab of item.abilities">
+                      <ng-container *ngFor="let ab of item.abilities; let even = even; let odd = odd">
                         <ng-container *ngIf="(GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp && pers.ON > 0) || (!GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp) || {} as mayUp">
-                          <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped">
+                          <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped" [ngClass]="{ even: even && mayUp == true }">
                             <div class="align-self-center w-100 d-flex">
                               <div class="flex-grow-1 progress position-relative" style="height: 20px">
                                 <div class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'" style="height: 20px; z-index: 1" *ngIf="ab.isOpen"></div>
-                                <div *ngIf="ab.isOpen"
+                                <div
+                                  *ngIf="ab.isOpen"
                                   class="position-absolute progress-bar"
-                                  [ngClass]="{'progr-val-less': ab.tasks[0].progresNextLevel <= ab.progressValue, 'progr-val-more':ab.tasks[0].progresNextLevel > ab.progressValue}"
+                                  [ngClass]="{ 'progr-val-less': ab.tasks[0].progresNextLevel <= ab.progressValue, 'progr-val-more': ab.tasks[0].progresNextLevel > ab.progressValue }"
                                   role="progressbar"
                                   [style.width]="ab.tasks[0].progresNextLevel + '%'"
                                   style="height: 20px"
@@ -217,9 +218,9 @@
           <ng-container>
             <div fxLayout="row" fxLayoutAlign="space-between center">
               <h5>Атрибуты:</h5>
-              <!-- <button class="icon-small" mat-icon-button (click)="addCharact()">
+              <button class="icon-small" mat-icon-button (click)="addCharact()">
                 <img src="assets/icons/create.png" class="img-fluid" />
-              </button> -->
+              </button>
             </div>
             <mat-list>
               <div mat-list-item *ngFor="let item of pers.characteristics; let i = index" class="p-0">
@@ -231,7 +232,7 @@
                     </div>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
                       <!-- Добавить навык -->
-                      <button *ngIf="false && pers.ON >= 1" class="icon-small" id="cha{{ i }}" (click)="addAbil(item?.id); selCha = item" mat-icon-button>
+                      <button class="icon-small" id="cha{{ i }}" (click)="addAbil(item?.id); selCha = item" mat-icon-button>
                         <img src="assets/icons/create.png" class="img-fluid" />
                       </button>
                       <!-- Удалить -->
@@ -317,8 +318,13 @@
       <!-- Просмотр -->
       <div *ngIf="!isEditMode" class="pt-2 pb-4 w-100">
         <div class="p-3">
-          <div fxFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="3px grid" style="padding-left: 3px">
-            <div [fxFlex]="100 / 3 + '%'" *ngFor="let qwest of pers.qwests">
+          <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="15px">
+            <button class="icon-small" mat-icon-button (click)="qwickAddQwest()">
+              <img src="assets/icons/create.png" class="img-fluid" />
+            </button>
+          </div>
+          <div class="flex" style="flex-wrap: wrap; justify-content: center;">
+            <div class="flexitem" *ngFor="let qwest of pers.qwests">
               <button
                 mat-stroked-button
                 mat-stroked-button
@@ -381,6 +387,7 @@
       </div>
     </mat-tab>
 
+    <!-- Награды -->
     <mat-tab>
       <ng-template mat-tab-label>
         <img src="assets/icons/tresure.png" class="tabimg img-fluid" />
@@ -391,8 +398,8 @@
           <mat-tab label="Инвентарь">
             <!-- Инвентарь -->
             <div class="p-3">
-              <div fxFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="3px grid" style="padding-left: 3px">
-                <div [fxFlex]="100 / 3 + '%'" *ngFor="let rev of pers.inventory">
+              <div class="flex" style="flex-wrap: wrap; justify-content: center;">
+                <div class="flexitem"  *ngFor="let rev of pers.inventory">
                   <button mat-stroked-button mat-stroked-button class="w-100 h-100 revBtn" (click)="useRevard(rev)">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                       <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '95px' }" />
@@ -411,24 +418,39 @@
           <mat-tab label="Магазин">
             <!-- Магазин -->
             <div class="p-3">
-              <button mat-button class="float-right">
-                <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
-                <span>
-                  <span class="text-success">{{ pers.gold }}</span>
-                </span>
-              </button>
-              <div fxFlexFill fxLayout="row wrap" fxLayoutAlign="center stretch" fxLayoutGap="3px grid" style="padding-left: 3px">
-                <div [fxFlex]="100 / 3 + '%'" *ngFor="let rev of pers.rewards | shop">
-                  <button (click)="buyRevard(rev)" mat-stroked-button class="w-100 h-100 revBtn" [disabled]="!rev.isAviable">
-                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+              <div fxLayout="row" fxLayoutAlign="end center">
+                <button mat-button class="icon-small">
+                  <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                  <span>
+                    <span class="text-success">{{ pers.gold }}</span>
+                  </span>
+                </button>
+                <button class="icon-small mr-2" mat-icon-button (click)="qwickAddReward()">
+                  <img src="assets/icons/create.png" class="img-fluid" />
+                </button>
+              </div>
+              <div class="flex" style="flex-wrap: wrap; justify-content: center;">
+                <div class="flexitem" *ngFor="let rev of pers.rewards | shop">
+                  <div class="w-100 h-100 revBtn border border-second">
+                    <div class="flex p-2 h-100" style="flex-direction: column; justify-content: space-between; align-items: center;">
                       <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '95px' }" />
-                      <div class="text-wrap py-2">
+                      <div class="text-wrap" *ngIf="rev.name">
                         {{ rev.name }}
                       </div>
+                      <div *ngIf="rev.isLud">
+                        <small class="text-secondary">
+                        {{rev.ludProbability + '%'}}
+                        </small>
+                      </div>
                       <ng-container *ngIf="!rev.isReward; else isReward">
-                        <div style="color: gold">
-                          <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1em' }" />
-                          <small>{{ rev.cost }}</small>
+                        <div class="flex w-100" style="justify-content: space-between">
+                          <button (click)="addNewRevard(rev)" mat-stroked-button style="color: gold">
+                            <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1em' }" />
+                          </button>
+                          <button (click)="buyRevard(rev)" mat-stroked-button [disabled]="!rev.isAviable" style="color: gold">
+                            <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1em' }" />
+                            <small>{{ rev.cost }}</small>
+                          </button>
                         </div>
                       </ng-container>
                       <ng-template #isReward>
@@ -443,7 +465,7 @@
                         </div>
                       </ng-template>
                     </div>
-                  </button>
+                  </div>
                 </div>
               </div>
             </div>

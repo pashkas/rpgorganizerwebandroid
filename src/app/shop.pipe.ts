@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Reward } from 'src/Models/Reward';
 
 @Pipe({
-  name: 'shop'
+  name: 'shop',
+  pure: false
 })
 export class ShopPipe implements PipeTransform {
 

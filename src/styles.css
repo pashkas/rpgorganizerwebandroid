@@ -253,7 +253,7 @@ button:focus {
 
 .my-middle .mat-dialog-container {
   width: 95vw;
-  max-width: 600px;
+  max-width: 900px;
 }
 
 h5 {
@@ -372,4 +372,23 @@ body {
   flex: auto;
   padding: 0;
   border-top: 0px solid transparent !important;
+}
+
+.gap{
+  gap: 10px;
+}
+
+.flex{
+  display: flex;
+  gap: 8px;
+}
+
+.flexitem {
+  flex-basis: calc(33.33% - 8px);
+}
+
+@media only screen and (max-width: 768px) {
+  .flexitem {
+    flex-basis: calc(50% - 8px);
+  }
 }

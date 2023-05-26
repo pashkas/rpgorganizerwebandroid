@@ -13,6 +13,7 @@ import { Qwest } from "src/Models/Qwest";
 import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-component.component";
 import { takeUntil } from "rxjs/operators";
 import * as moment from "moment";
+import { GameSettings } from "../GameSettings";
 
 @Component({
   selector: "app-main-window",
@@ -39,26 +40,54 @@ export class MainWindowComponent implements OnInit {
   /**
    * Автовремя.
    */
-  setAutoTime(tsk: Task, isDone: boolean) {
+  autoSort(tsk: Task, isDone: boolean) {
     let prs = this.srv.pers$.value;
 
-    if (!prs.isWriteTime || prs.currentView != curpersview.SkillTasks || tsk.isNotWriteTime) {
+    if (!prs.isWriteTime || prs.currentView != curpersview.SkillTasks) {
       return;
     }
 
-    const tsks = prs.tasks;
-    let idx = tsks.findIndex((q) => q.id === tsk.id);
+    let tsks: Task[] = prs.tasks;
 
-    if (idx != -1) {
-      tsks.unshift(tsks.splice(idx, 1)[0]);
-      // if (isDone) {
-      //   tsks.unshift(tsks.splice(idx, 1)[0]);
-      // } else {
-      //   tsks.push(tsks.splice(idx, 1)[0]);
+    if (tsks.length > 0 && tsks.find((q) => q.order == GameSettings.tskOrderDefault) != null) {
+      this.srv.pers$.value.currentView = curpersview.SkillsSort;
+      this.srv.savePers(false);
+
+      tsks = this.srv.pers$.value.tasks;
+      this.sortSkillsGlobal();
+
+      // // Лог
+      // for (const tsk of tsks) {
+      //   console.log(tsk.order + ": " + tsk.name);
       // }
+
+      this.srv.pers$.value.currentView = curpersview.SkillTasks;
+      this.srv.savePers(false);
+
+      tsks = this.srv.pers$.value.tasks;
     }
 
-    this.sortSkillsGlobal();
+    const orders = tsks.map((q) => q.order);
+
+    tsks.unshift(
+      tsks.splice(
+        tsks.findIndex((q) => q.id == tsk.id),
+        1
+      )[0]
+    );
+
+    for (let i = 0; i < tsks.length; i++) {
+      let t = tsks[i];
+      let tskPers: Task | taskState = this.srv.allMap[t.id].item;
+
+      if (tskPers != null) {
+        tskPers.order = orders[i];
+      }
+    }
+
+    if (prs.isWriteTime) {
+      prs.currentView = curpersview.SkillsGlobal;
+    }
   }
 
   addToQwest() {
@@ -84,18 +113,18 @@ export class MainWindowComponent implements OnInit {
   async animate(isDone: boolean) {
     if (isDone) {
       this.isSucessShownOv$.next(true);
-      await this.delay(100);
-      this.isSucessShownOv$.next(false);
-      this.isSucessShown$.next(true);
       await this.delay(300);
-      this.isSucessShown$.next(false);
+      this.isSucessShownOv$.next(false);
+      // this.isSucessShown$.next(true);
+      // await this.delay(500);
+      // this.isSucessShown$.next(false);
     } else {
       this.isFailShownOv$.next(true);
-      await this.delay(100);
-      this.isFailShownOv$.next(false);
-      this.isFailShown$.next(true);
       await this.delay(300);
-      this.isFailShown$.next(false);
+      this.isFailShownOv$.next(false);
+      // this.isFailShown$.next(true);
+      // await this.delay(500);
+      // this.isFailShown$.next(false);
     }
   }
 
@@ -127,9 +156,11 @@ export class MainWindowComponent implements OnInit {
 
     let tskName = "";
 
-    let tskIndex = this.srv.pers$.value.tasks.indexOf(t);
+    const prs = this.srv.pers$.value;
 
-    this.setAutoTime(t, true);
+    let tskIndex = prs.tasks.indexOf(t);
+
+    this.autoSort(t, true);
 
     if (t.parrentTask) {
       // Логика для навыков
@@ -149,13 +180,13 @@ export class MainWindowComponent implements OnInit {
       tskName = t.tittle;
     }
 
-    if (tskName && !this.srv.pers$.value.isNoDiary) {
-      this.srv.pers$.value.Diary[0].done += tskName + "; ";
+    if (tskName && !prs.isNoDiary) {
+      prs.Diary[0].done += tskName + "; ";
     }
 
-    if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
-      this.srv.setCurInd(tskIndex);
-    }
+    // if (prs.isWriteTime != true && prs.currentView == curpersview.SkillTasks) {
+    //   this.srv.setCurInd(tskIndex);
+    // }
 
     this.srv.savePers(true);
 
@@ -180,9 +211,11 @@ export class MainWindowComponent implements OnInit {
 
     let tskName = "";
 
-    let tskIndex = this.srv.pers$.value.tasks.indexOf(t);
+    let prs = this.srv.pers$.value;
 
-    this.setAutoTime(t, false);
+    let tskIndex = prs.tasks.indexOf(t);
+
+    this.autoSort(t, false);
 
     if (t.parrentTask) {
       // Логика для подзадач
@@ -198,15 +231,15 @@ export class MainWindowComponent implements OnInit {
       this.srv.taskMinus(t.id);
     }
 
-    if (tskName && !this.srv.pers$.value.isNoDiary) {
-      this.srv.pers$.value.Diary[0].notDone += tskName + "; ";
+    if (tskName && !prs.isNoDiary) {
+      prs.Diary[0].notDone += tskName + "; ";
     }
 
     this.srv.savePers(true);
 
-    if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
-      this.srv.setCurInd(tskIndex);
-    }
+    // if (prs.currentView == curpersview.SkillTasks) {
+    //   this.srv.setCurInd(tskIndex);
+    // }
 
     this.srv.changesAfter(false);
   }
@@ -400,6 +433,7 @@ export class MainWindowComponent implements OnInit {
   }
 
   setWriteTime() {
+    this.srv.pers$.value.isWriteTime = !this.srv.pers$.value.isWriteTime;
     this.srv.savePers(false);
   }
 
@@ -421,11 +455,7 @@ export class MainWindowComponent implements OnInit {
     } else if (currentView == curpersview.SkillTasks) {
       this.srv.pers$.value.currentView = curpersview.SkillsSort;
     } else if (currentView == curpersview.SkillsSort || currentView == curpersview.SkillsGlobal) {
-      if (currentView == curpersview.SkillsSort) {
-        this.sortSkills();
-      } else {
-        this.sortSkillsGlobal();
-      }
+      this.sortSkillsGlobal();
 
       this.srv.pers$.value.isMegaPlan = false;
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
@@ -437,56 +467,15 @@ export class MainWindowComponent implements OnInit {
   private sortSkillsGlobal() {
     const tasks = this.srv.pers$.value.tasks;
 
-    // Сортировка по порядку
-    let sortByOrder = tasks.map((task) => task.order).sort((a, b) => a - b);
-    if (!sortByOrder.length) {
-      return;
-    }
-
     for (let i = 0; i < tasks.length; i++) {
       const tsk = tasks[i];
-      const tskOrder = sortByOrder[i];
 
       let tskPersOrder: Task | taskState;
       tskPersOrder = this.srv.allMap[tsk.id].item;
 
       if (tskPersOrder != null) {
-        tsk.order = tskOrder;
-        tskPersOrder.order = tskOrder;
-      }
-    }
-  }
-
-  private sortSkills() {
-    const tasks = this.srv.pers$.value.tasks;
-
-    // Сортировка Order
-    for (let i = 0; i < tasks.length; i++) {
-      const tsk = tasks[i];
-      let tskPers: Task | taskState;
-      tskPers = this.srv.allMap[this.srv.pers$.value.tasks[i].id].item;
-
-      if (tskPers != null) {
         tsk.order = i;
-        tskPers.order = i;
-      }
-    }
-
-    // Сортировка времени
-    let sortByAutoTime = tasks.map((task) => task.autoTime).sort((a, b) => a - b);
-
-    tasks.sort((a, b) => a.order - b.order);
-
-    for (let i = 0; i < tasks.length; i++) {
-      const tskOrder = tasks[i];
-      const tskTime = sortByAutoTime[i];
-
-      let tskPersOrder: Task | taskState;
-      tskPersOrder = this.srv.allMap[tskOrder.id].item;
-
-      if (tskPersOrder != null) {
-        tskOrder.autoTime = tskTime;
-        tskPersOrder.autoTime = tskTime;
+        tskPersOrder.order = i;
       }
     }
   }

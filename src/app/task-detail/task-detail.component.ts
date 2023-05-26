@@ -24,13 +24,19 @@ import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class TaskDetailComponent implements OnInit {
-  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
-  @ViewChild("goUp", { static: false }) goUp: ElementRef;
-
   private unsubscribe$ = new Subject();
 
+  GameSettings: typeof GameSettings;
+  charactCntrl: FormControl;
+  charactGroup: FormGroup;
+  @ViewChild("goUp", { static: false }) goUp: ElementRef;
   isEditMode: boolean = false;
+  isQuick: any;
+  isFromMain: any;
+  isShowAbProgrTable = GameSettings.isShowAbProgrTable;
   linkQwests: Qwest[] = [];
+  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
+  percSymbol = GameSettings.changesIsShowPercentageInAb ? "%" : "";
   pers: Pers;
   requrenses: string[] = Task.requrenses;
   times = [1, 2, 3, 4, 5];
@@ -38,12 +44,10 @@ export class TaskDetailComponent implements OnInit {
   tskAbility: Ability;
   tskCharact$ = new BehaviorSubject<Characteristic>(undefined);
   weekDays: string[] = Task.weekDays;
-  isQuick: any;
-  charactCntrl: FormControl;
-  charactGroup: FormGroup;
-  isShowAbProgrTable = GameSettings.isShowAbProgrTable;
-  percSymbol = GameSettings.changesIsShowPercentageInAb ? "%" : "";
-  GameSettings: typeof GameSettings;
+  aimUnits = [{ name: "Минут" }, { name: "Секунд" }, { name: "Часов" }, { name: "Раз" }, { name: "Раз чет" }, { name: "Раз нечет" }];
+  trackByIdx(index: number, name: any): any {
+    return name;
+  }
 
   constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, fb: FormBuilder) {
     this.charactCntrl = fb.control("");
@@ -51,14 +55,6 @@ export class TaskDetailComponent implements OnInit {
       charact: this.charactCntrl,
     });
     this.GameSettings = GameSettings;
-  }
-
-  upAbil() {
-    this.srv.activateAbility(this.tskAbility);
-  }
-
-  downAbil(){
-    this.srv.deActivateAbility(this.tskAbility);
   }
 
   /**
@@ -180,6 +176,10 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
+  downAbil() {
+    this.srv.deActivateAbility(this.tskAbility);
+  }
+
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.tsk.states, event.previousIndex, event.currentIndex);
   }
@@ -239,6 +239,7 @@ export class TaskDetailComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe((queryParams: any) => {
       this.isQuick = queryParams.isQuick;
+      this.isFromMain = queryParams.isFromMain;
       if (this.isQuick && !queryParams.isActivate) {
         setTimeout(() => this.nameEdt.nativeElement.focus());
       }
@@ -302,6 +303,10 @@ export class TaskDetailComponent implements OnInit {
     this.srv.savePers(false);
   }
 
+  requrenseChange() {
+    this.qwickSetDate("today");
+  }
+
   /**
    * Сохранить данные.
    */
@@ -311,7 +316,8 @@ export class TaskDetailComponent implements OnInit {
       this.findLinks();
       this.isEditMode = false;
       if (this.isQuick) {
-        this.router.navigate(["/pers"]);
+        this.location.back();
+        // this.router.navigate(["/pers"]);
       }
     } else {
       this.isEditMode = true;
@@ -349,6 +355,10 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
+  upAbil() {
+    this.srv.activateAbility(this.tskAbility);
+  }
+
   private findLinks() {
     let linkQwests = [];
     if (this.tskAbility) {
@@ -359,9 +369,5 @@ export class TaskDetailComponent implements OnInit {
       }
     }
     this.linkQwests = linkQwests;
-  }
-
-  requrenseChange() {
-    this.qwickSetDate("today");
   }
 }
