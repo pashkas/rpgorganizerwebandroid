@@ -16,6 +16,7 @@ import { takeUntil } from "rxjs/operators";
 import { PersImportExportDialogComponent } from "../pers-import-export-dialog/pers-import-export-dialog.component";
 import { RevardDialogData } from "src/Models/RevardDialogData";
 import { GameSettings } from "../GameSettings";
+import { QuickAddAbilityComponent } from "../pers/quick-add-ability/quick-add-ability.component";
 
 @Component({
   selector: "app-pers-list",
@@ -296,23 +297,23 @@ export class PersListComponent implements OnInit {
       return;
     }
 
-    let abilId = this.srv.addAbil(this.pers.characteristics[0].id, "Навык");
+    // let abilId = this.srv.addAbil(this.pers.characteristics[0].id, "Навык");
 
-    this.srv.savePers(false);
+    // this.srv.savePers(false);
 
-    this.router.navigate(["pers/task", abilId, true], { queryParams: { isQuick: true } });
-    // this.srv.isDialogOpen = true;
+    // this.router.navigate(["pers/task", abilId, true], { queryParams: { isQuick: true } });
 
-    // const dialogRef = this.dialog.open(QuickAddAbilityComponent, {
-    //   panelClass: 'my-middle',
-    //   data: { isImport: false },
-    //   backdropClass: 'backdrop'
-    // });
+    this.srv.isDialogOpen = true;
 
-    // dialogRef.afterClosed()
-    //   .subscribe(n => {
-    //     this.srv.isDialogOpen = false;
-    //   });
+    const dialogRef = this.dialog.open(QuickAddAbilityComponent, {
+      panelClass: "my-dialog",
+      data: { isImport: false },
+      backdropClass: "backdrop",
+    });
+
+    dialogRef.afterClosed().subscribe((n) => {
+      this.srv.isDialogOpen = false;
+    });
   }
 
   quickAddCharact() {

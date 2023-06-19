@@ -41,7 +41,7 @@ export class QuickAddAbilityComponent implements OnInit {
 
     this.srv.savePers(false);
 
-    this.router.navigate(['pers/task', abilId, true]);
+    // this.router.navigate(['pers/task', abilId, true]);
 
     this.dialogRef.close();
   }

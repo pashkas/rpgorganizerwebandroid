@@ -323,7 +323,7 @@
               <img src="assets/icons/create.png" class="img-fluid" />
             </button>
           </div>
-          <div class="flex" style="flex-wrap: wrap; justify-content: center;">
+          <div class="flex" style="flex-wrap: wrap; justify-content: center">
             <div class="flexitem" *ngFor="let qwest of pers.qwests">
               <button
                 mat-stroked-button
@@ -398,19 +398,19 @@
           <mat-tab label="Инвентарь">
             <!-- Инвентарь -->
             <div class="p-3">
-              <div class="flex" style="flex-wrap: wrap; justify-content: center;">
-                <div class="flexitem"  *ngFor="let rev of pers.inventory">
-                  <button mat-stroked-button mat-stroked-button class="w-100 h-100 revBtn" (click)="useRevard(rev)">
-                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+              <div class="flex" style="flex-wrap: wrap; justify-content: center">
+                <div class="flexitem" *ngFor="let rev of pers.inventory">
+                  <div class="w-100 h-100 revBtn border border-second">
+                    <div class="flex p-2 h-100" style="flex-direction: column; justify-content: space-between; align-items: center">
                       <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '95px' }" />
-                      <div class="text-wrap py-2">
+                      <div class="text-wrap">
                         {{ rev.name }}
                       </div>
-                      <div>
-                        <small *ngIf="rev.count > 1">x{{ rev.count }}</small>
-                      </div>
+                      <button (click)="useRevard(rev)" mat-stroked-button style="color: gold">
+                        <small>x{{ rev.count }}</small>
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -429,17 +429,17 @@
                   <img src="assets/icons/create.png" class="img-fluid" />
                 </button>
               </div>
-              <div class="flex" style="flex-wrap: wrap; justify-content: center;">
+              <div class="flex" style="flex-wrap: wrap; justify-content: center">
                 <div class="flexitem" *ngFor="let rev of pers.rewards | shop">
                   <div class="w-100 h-100 revBtn border border-second">
-                    <div class="flex p-2 h-100" style="flex-direction: column; justify-content: space-between; align-items: center;">
+                    <div class="flex p-2 h-100" style="flex-direction: column; justify-content: space-between; align-items: center">
                       <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '95px' }" />
                       <div class="text-wrap" *ngIf="rev.name">
                         {{ rev.name }}
                       </div>
                       <div *ngIf="rev.isLud">
                         <small class="text-secondary">
-                        {{rev.ludProbability + '%'}}
+                          {{ rev.ludProbability + "%" }}
                         </small>
                       </div>
                       <ng-container *ngIf="!rev.isReward; else isReward">

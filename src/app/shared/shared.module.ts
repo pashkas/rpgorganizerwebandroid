@@ -17,6 +17,7 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { DatestringPipe } from './datestring.pipe';
 import { AbHardnessPipe } from '../ab-hardness.pipe';
 import { ImgBrokenDirective } from '../img-broken.directive';
+import { RequrencePipe } from './requrence.pipe';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { ImgBrokenDirective } from '../img-broken.directive';
     TimeValPipe,
     DatestringPipe,
     AbHardnessPipe,
-    ImgBrokenDirective
+    ImgBrokenDirective,
+    RequrencePipe
   ],
   imports: [
     NgxMaterialTimepickerModule,
@@ -70,6 +72,7 @@ import { ImgBrokenDirective } from '../img-broken.directive';
     MatSelectModule,
     DatestringPipe,
     AbHardnessPipe,
+    RequrencePipe
   ]
 })
 export class SharedModule {

@@ -184,11 +184,15 @@ export class MainWindowComponent implements OnInit {
       prs.Diary[0].done += tskName + "; ";
     }
 
-    // if (prs.isWriteTime != true && prs.currentView == curpersview.SkillTasks) {
-    //   this.srv.setCurInd(tskIndex);
-    // }
+    if (t.requrense == "нет") {
+      this.srv.upQwest(t.id);
+    }
 
     this.srv.savePers(true);
+
+    if (prs.currentView == curpersview.SkillTasks) {
+      this.srv.setCurInd(tskIndex);
+    }
 
     this.srv.changesAfter(true);
   }
@@ -237,9 +241,9 @@ export class MainWindowComponent implements OnInit {
 
     this.srv.savePers(true);
 
-    // if (prs.currentView == curpersview.SkillTasks) {
-    //   this.srv.setCurInd(tskIndex);
-    // }
+    if (prs.currentView == curpersview.SkillTasks) {
+      this.srv.setCurInd(tskIndex);
+    }
 
     this.srv.changesAfter(false);
   }

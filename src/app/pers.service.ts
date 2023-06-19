@@ -1634,61 +1634,53 @@ export class PersService {
       }
     }
 
-    if (prs.currentQwestId && prs.currentView == curpersview.QwestTasks && tasks.length) {
-      let curQwestTask = tasks.find((q) => q.qwestId == prs.currentQwestId);
-      if (curQwestTask) {
-        let idx = tasks.indexOf(curQwestTask);
-        this.setCurInd(idx);
-      }
-    }
+    // let root = prs.qwests.filter((q) => !q.parrentId);
+    // .sort((a, b) => {
+    //   let aIsDeal = a.name == "Дела" ? 1 : 0;
+    //   let bIsDeal = b.name == "Дела" ? 1 : 0;
+    //   if (aIsDeal != bIsDeal) {
+    //     return aIsDeal - bIsDeal;
+    //   }
 
-    let root = prs.qwests
-      .filter((q) => !q.parrentId)
-      .sort((a, b) => {
-        let aIsDeal = a.name == "Дела" ? 1 : 0;
-        let bIsDeal = b.name == "Дела" ? 1 : 0;
-        if (aIsDeal != bIsDeal) {
-          return aIsDeal - bIsDeal;
-        }
+    //   if (a.progressValue != b.progressValue) {
+    //     return a.progressValue - b.progressValue;
+    //   }
 
-        if (a.progressValue != b.progressValue) {
-          return a.progressValue - b.progressValue;
-        }
+    //   return a.name.localeCompare(b.name);
+    // });
 
-        return a.name.localeCompare(b.name);
-      });
+    // let child = prs.qwests
+    // .sort((a, b) => {
+    //   if (a.progressValue != b.progressValue) {
+    //     return a.progressValue - b.progressValue;
+    //   }
 
-    let child = prs.qwests
-      .sort((a, b) => {
-        if (a.progressValue != b.progressValue) {
-          return a.progressValue - b.progressValue;
-        }
+    //   return a.name.localeCompare(b.name);
+    // })
+    // .filter((q) => q.parrentId);
 
-        return a.name.localeCompare(b.name);
-      })
-      .filter((q) => q.parrentId);
-    let ordered: Qwest[] = [];
+    // let ordered: Qwest[] = [];
 
-    while (root.length > 0) {
-      let r = root.pop();
-      let stack: Qwest[] = [];
-      stack.push(r);
-      while (stack.length > 0) {
-        let cur = stack.pop();
-        ordered.push(cur);
-        let nextIdx = child.findIndex((n) => n.parrentId == cur.id);
-        if (nextIdx != -1) {
-          stack.push(child[nextIdx]);
-          child.splice(nextIdx, 1);
-        }
-      }
-    }
+    // while (root.length > 0) {
+    //   let r = root.pop();
+    //   let stack: Qwest[] = [];
+    //   stack.push(r);
+    //   while (stack.length > 0) {
+    //     let cur = stack.pop();
+    //     ordered.push(cur);
+    //     let nextIdx = child.findIndex((n) => n.parrentId == cur.id);
+    //     if (nextIdx != -1) {
+    //       stack.push(child[nextIdx]);
+    //       child.splice(nextIdx, 1);
+    //     }
+    //   }
+    // }
 
-    ordered = ordered.sort((a, b) => {
-      return +a.isNoActive - +b.isNoActive;
-    });
+    // ordered = ordered.sort((a, b) => {
+    //   return +a.isNoActive - +b.isNoActive;
+    // });
 
-    prs.qwests = ordered;
+    // prs.qwests = ordered;
 
     prs.Diary = [];
 
@@ -1698,6 +1690,14 @@ export class PersService {
       this.chainOrganize(prs);
 
       this.sortPersTasks(prs);
+    }
+
+    if (prs.currentQwestId && prs.currentView == curpersview.QwestTasks && tasks.length) {
+      let curQwestTask = tasks.find((q) => q.qwestId == prs.currentQwestId);
+      if (curQwestTask) {
+        let idx = tasks.indexOf(curQwestTask);
+        this.setCurInd(idx);
+      }
     }
 
     // Если есть вчерашние задачи
@@ -1846,6 +1846,8 @@ export class PersService {
     if (tsk.tesValue < 0 || ab.isOpen == false) {
       tsk.tesValue = 0;
     }
+
+    tsk.tesValue = Math.ceil(tsk.tesValue * 1000) / 1000;
 
     tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen);
 
@@ -2186,6 +2188,17 @@ export class PersService {
     }
   }
 
+  upQwest(tskId: string) {
+    let qwest = this.allMap[tskId].link;
+    let qwId = qwest.id;
+    this.pers$.value.currentQwestId = qwId;
+
+    const index = this.pers$.value.qwests.findIndex((qw) => qw.id === qwId);
+    if (index !== -1) {
+      this.pers$.value.qwests.unshift(this.pers$.value.qwests.splice(index, 1)[0]);
+    }
+  }
+
   /**
    * Клик плюс по задаче.
    * @param id Идентификатор задачи.
@@ -2255,7 +2268,7 @@ export class PersService {
         } else {
           tsk.isDone = true;
         }
-        if (this.pers$.value.currentView != curpersview.QwestTasks) {
+        if (this.pers$.value.currentView == curpersview.QwestTasks) {
           this.setCurInd(0);
         }
 

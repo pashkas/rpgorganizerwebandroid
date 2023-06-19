@@ -49,8 +49,8 @@ export class GameSettings {
 
     if (isTES) {
       // В стиле TES
-      let skillMult = 2.06;
-      let skillOffcet = 3 - skillMult;
+      let skillMult = 1;
+      let skillOffcet = 3 - skillMult - 0.001;
 
       let result = level * skillMult + skillOffcet;
 
@@ -172,22 +172,22 @@ export class GameSettings {
    */
   static tesMaxVal: number = GameSettings.maxAbilLvl * 10 - GameSettings.minAbilLvl * 10;
 
-  static tskOrderDefault: number = 9999;
+  static tskOrderDefault: number = -1;
 
   static baseTskGold: number = 1;
   static qwestHardneses: qwestHardness[] = [
-    { id: 5, name: "оч. легко", gold: 25 },
-    { id: 4, name: "легко", gold: 50 },
-    { id: 3, name: "норм", gold: 100 },
+    { id: 5, name: "оч. легко", gold: 30 },
+    { id: 4, name: "легко", gold: 60 },
+    { id: 3, name: "норм", gold: 125 },
     { id: 2, name: "сложно", gold: 500 },
-    { id: 1, name: "оч. сложно", gold: 2000 },
+    { id: 1, name: "оч. сложно", gold: 2500 },
   ];
   static revProbs: taskProb[] = [
-    { id: 5, name: "оч. распространенный", prob: 5, gold: 25 },
-    { id: 4, name: "распространенный", prob: 3, gold: 50 },
-    { id: 3, name: "обычный", prob: 2, gold: 100 },
-    { id: 2, name: "редкий", prob: 0.5, gold: 500 },
-    { id: 1, name: "оч. редкий", prob: 0.1, gold: 2000 },
+    { id: 5, name: "оч. распространенный", prob: 3, gold: 75 },
+    { id: 4, name: "распространенный", prob: 2, gold: 125 },
+    { id: 3, name: "обычный", prob: 1, gold: 250 },
+    { id: 2, name: "редкий", prob: 0.25, gold: 1000 },
+    { id: 1, name: "оч. редкий", prob: 0.05, gold: 5000 },
   ];
 }
 
