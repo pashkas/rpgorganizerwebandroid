@@ -14,6 +14,9 @@ import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-
 import { takeUntil } from "rxjs/operators";
 import * as moment from "moment";
 import { GameSettings } from "../GameSettings";
+// import { Vibration } from "@awesome-cordova-plugins/vibration";
+// import { BackgroundMode } from "@awesome-cordova-plugins/background-mode";
+import { Vibration } from "@awesome-cordova-plugins/vibration";
 
 @Component({
   selector: "app-main-window",
@@ -207,6 +210,8 @@ export class MainWindowComponent implements OnInit {
   }
 
   async fail(t: Task) {
+    // Vibration.vibrate(250);
+
     await this.animate(false);
 
     this.changeEnamyImageForItem(t.id);

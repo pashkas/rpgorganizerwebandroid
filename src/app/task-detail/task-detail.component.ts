@@ -3,7 +3,7 @@ import { Pers } from "src/Models/Pers";
 import { Task, taskState, Reqvirement } from "src/Models/Task";
 import { ActivatedRoute, Router } from "@angular/router";
 import { PersService } from "../pers.service";
-import { Location } from "@angular/common";
+import { Location, PlatformLocation } from "@angular/common";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { Ability } from "src/Models/Ability";
@@ -15,7 +15,6 @@ import { ChangeCharactComponent } from "../pers/change-charact/change-charact.co
 import { Qwest } from "src/Models/Qwest";
 import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { GameSettings } from "../GameSettings";
-import { THIS_EXPR } from "@angular/compiler/src/output/output_ast";
 
 @Component({
   selector: "app-task-detail",
@@ -49,7 +48,7 @@ export class TaskDetailComponent implements OnInit {
     return name;
   }
 
-  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, fb: FormBuilder) {
+  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, fb: FormBuilder, private platformLocation: PlatformLocation) {
     this.charactCntrl = fb.control("");
     this.charactGroup = fb.group({
       charact: this.charactCntrl,

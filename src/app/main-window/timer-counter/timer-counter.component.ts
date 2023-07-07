@@ -14,7 +14,6 @@ export class TimerCounterComponent implements OnInit {
   isTimerStart: boolean;
   timerSubscr: any;
   starttime: Date;
-  timeSteal: number = 0;
   persTask: Task;
 
   constructor(private srv: PersService) { }
