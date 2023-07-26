@@ -12,7 +12,7 @@ export class GameSettings {
   /**
    * Очков за уровень.
    */
-  static abLvlForPersLvl: number = 2;
+  static abLvlForPersLvl: number = 3;
 
   /**
    * ОН активны.
@@ -53,6 +53,7 @@ export class GameSettings {
       let skillOffcet = 3 - skillMult;
 
       let result = level * skillMult + skillOffcet;
+      result = Math.ceil(result);
 
       return 1 / result;
     } else {
@@ -146,7 +147,7 @@ export class GameSettings {
   /**
    * Число рангов.
    */
-  static rangsCount: number = 6;
+  static rangsCount: number = 11;
 
   /**
    * Максимальный уровень характеристик.

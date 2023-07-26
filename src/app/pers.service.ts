@@ -18,7 +18,6 @@ import { curpersview } from "src/Models/curpersview";
 import { MatDialog } from "@angular/material";
 import { ReqItemType } from "src/Models/ReqItem";
 import { GameSettings } from "./GameSettings";
-import { Settings } from "luxon";
 
 @Injectable({
   providedIn: "root",
@@ -818,6 +817,10 @@ export class PersService {
     let nextExp = 0;
     let expDirect = 0;
 
+    if (abCount < 10) {
+      abCount = 10;
+    }
+
     if (GameSettings.expFotmulaType == "abVal") {
       // По значению навыка
       // tesMax = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl * 10;
@@ -828,8 +831,10 @@ export class PersService {
       startExp = persLevel;
       nextExp = persLevel + 1;
     } else if (GameSettings.expFotmulaType == "abLvl") {
-      // let max = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl;
-      let max = abCount * (GameSettings.maxAbilLvl - GameSettings.minAbilLvl);
+      let max = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl;
+      // abCount = 20;
+
+      // let max = abCount * (GameSettings.maxAbilLvl - GameSettings.minAbilLvl);
       let progress = abTotalCur / max;
 
       exp = GameSettings.maxPersLevel * progress;
@@ -844,10 +849,6 @@ export class PersService {
       let i = 0;
       let curLvlExp = 0;
       let nextLvlExp = 0;
-
-      if (abCount < 20) {
-        abCount = 20;
-      }
 
       while (true) {
         if (i < abCount) {
@@ -1413,10 +1414,12 @@ export class PersService {
             ab.isNotDoneReqvirements = true;
           }
 
-          let progressNextLevel = (tsk.tesValue / 10.0 - Math.floor(tsk.tesValue / 10.0)) * 100;
-          if (tsk.tesValue > GameSettings.tesMaxVal) {
-            progressNextLevel = 100;
+          // Ограничение по макс
+          if (tsk.tesValue > GameSettings.tesMaxVal + 9.99) {
+            tsk.tesValue = GameSettings.tesMaxVal + 9.99;
           }
+
+          let progressNextLevel = (tsk.tesValue / 10.0 - Math.floor(tsk.tesValue / 10.0)) * 100;
           tsk.progresNextLevel = progressNextLevel;
           tsk.progressValue = tsk.progresNextLevel;
           tsk.progressValue = (tsk.value / GameSettings.maxAbilLvl) * 100;
@@ -1425,6 +1428,11 @@ export class PersService {
 
           abMax += GameSettings.maxAbilLvl - 1;
           abCur += tsk.value - GameSettings.minAbilLvl >= 0 ? tsk.value - GameSettings.minAbilLvl : 0;
+
+          if (abMax < (GameSettings.maxAbilLvl - 1) * 1) {
+            abMax = (GameSettings.maxAbilLvl - 1) * 1;
+          }
+
           tesAbMax += GameSettings.tesMaxVal;
           tesAbCur += tsk.tesValue;
           abExpPointsCur += this.getAbExpPointsFromTes(tsk.tesValue);
@@ -1505,10 +1513,6 @@ export class PersService {
       abTotalCur += abCur;
       tesAbTotalCur += tesAbCur;
       abExpPointsTotalCur += abExpPointsCur;
-
-      if (abMax < (GameSettings.maxAbilLvl - 1) * 1) {
-        abMax = (GameSettings.maxAbilLvl - 1) * 1;
-      }
 
       const chaCeilProgr = this.countCharacteristicValue(ch, abCur, abMax);
 
@@ -1887,15 +1891,23 @@ export class PersService {
     // Тест прокачки навыка
     // let tsk = new Task();
     // tsk.name = "test";
-    // tsk.tesValue = GameSettings.minAbilLvl * 10;
-    // let day = 1;
+    // tsk.tesValue = 0;
+    // let day = 0;
     // let perc50 = 0;
     // let perc100 = 0;
+    // let prevAbVal = GameSettings.minAbilLvl;
+    // let prevDay = 0;
     // while (true) {
     //   this.changeTes(tsk, true, false, 1);
     //   day++;
+    //   tsk.tesValue = Math.ceil(tsk.tesValue * 1000) / 1000;
     //   const abVal = this.getAbVal(tsk.tesValue, true);
-    //   if (abVal >= (GameSettings.maxAbilLvl/2) && perc50 == 0) {
+    //   if (abVal != prevAbVal) {
+    //     console.log(day - prevDay);
+    //     prevAbVal = abVal;
+    //     prevDay = day;
+    //   }
+    //   if (abVal >= GameSettings.maxAbilLvl / 2 && perc50 == 0) {
     //     perc50 = day;
     //   }
     //   if (abVal >= GameSettings.maxAbilLvl) {
@@ -1915,6 +1927,9 @@ export class PersService {
 
     ch.progressValue = ((chaCeilProgr - GameSettings.minChaLvl) / (GameSettings.maxChaLvl - GameSettings.minChaLvl)) * 100;
     ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
+    if (chaCeilProgr >= GameSettings.maxChaLvl) {
+      ch.progresNextLevel = 100;
+    }
 
     return chaCeilProgr;
   }
@@ -2522,14 +2537,32 @@ export class PersService {
   }
 
   private getMonsterLevel(prsLvl: number, maxLevel: number): number {
-    let stage = (prsLvl / GameSettings.maxPersLevel) * (GameSettings.rangsCount - 1);
-    stage = Math.floor(stage) + 1;
-
-    if (stage > GameSettings.rangsCount) {
-      stage = GameSettings.rangsCount;
+    if (prsLvl < 20) {
+      return 1;
+    }
+    if (prsLvl < 40) {
+      return 2;
+    }
+    if (prsLvl < 60) {
+      return 3;
+    }
+    if (prsLvl < 80) {
+      return 4;
+    }
+    if (prsLvl < 100) {
+      return 5;
     }
 
-    return stage;
+    return 6;
+
+    // let stage = (prsLvl / GameSettings.maxPersLevel) * (GameSettings.rangsCount - 1);
+    // stage = Math.floor(stage) + 1;
+
+    // if (stage > GameSettings.rangsCount) {
+    //   stage = GameSettings.rangsCount;
+    // }
+
+    // return stage;
   }
 
   private getPersAbPoints(abCount: number, persLevel: number, abOpenned: number, prs: Pers) {
@@ -2670,6 +2703,11 @@ export class PersService {
     // if (!isPlus && task.failCounter > 0) {
     //   koef = koef * (task.failCounter + 1);
     // }
+
+    // При пропуске штраф больше в 2 раза
+    if (!isPlus) {
+      koef = koef * 2;
+    }
 
     if (isChangeAb) {
       subTasksCoef = subTasksCoef * task.hardnes;

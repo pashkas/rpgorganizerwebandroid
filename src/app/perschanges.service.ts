@@ -164,7 +164,7 @@ export class PerschangesService {
             changes.push(abChanges);
           }
           // Изменение значения
-          if (GameSettings.changesIsShowAbValues && this.NE(el.before_abVal, el.after_abVal) && el.after_abVal <= GameSettings.tesMaxVal) {
+          if (GameSettings.changesIsShowAbValues && this.NE(el.before_abVal, el.after_abVal) && el.after_abVal <= GameSettings.tesMaxVal + 9.99) {
             let beforeVal = el.before_abVal;
             let afterVal = el.after_abVal;
 
