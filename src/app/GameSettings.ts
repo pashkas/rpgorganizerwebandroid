@@ -17,7 +17,7 @@ export class GameSettings {
   /**
    * ОН активны.
    */
-  static isAbPointsEnabled: boolean = false;
+  static isAbPointsEnabled: boolean = true;
 
   /**
    * Новый навык открыт?
