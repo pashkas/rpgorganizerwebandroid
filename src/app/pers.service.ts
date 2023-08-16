@@ -1464,7 +1464,7 @@ export class PersService {
               if (tsk.value >= 1 || ab.isOpen) {
                 if (tsk.states.length > 0 && tsk.isSumStates && !tsk.isStateInTitle && !tsk.isStateRefresh) {
                   for (const st of tsk.states) {
-                    if (st.isActive) {
+                    if (st.isActive || prs.currentView == curpersview.SkillsSort) {
                       let stT = this.getTaskFromState(tsk, st, false, prs);
                       tasks.push(stT);
                     }
@@ -2985,7 +2985,8 @@ export class PersService {
       }
 
       // Текущий уровень
-      const progr = this.getProgrForTittle(tsk.value + 1, tsk.value, tsk.isPerk, isMegaPlan);
+      const cur = 1 + tsk.tesValue / 10;
+      const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, isMegaPlan);
 
       if (tsk.aimTimer && tsk.aimUnit != "Раз") {
         tsk.secondsToDone = this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit);

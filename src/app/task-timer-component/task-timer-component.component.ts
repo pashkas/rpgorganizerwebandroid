@@ -1,11 +1,10 @@
-import { AfterViewInit, Component, OnInit } from "@angular/core";
-import { interval, Observable, Subject, timer } from "rxjs";
+import { Component, OnInit } from "@angular/core";
+import { Observable, Subject, timer } from "rxjs";
 import { map, shareReplay, takeUntil } from "rxjs/operators";
 import { PersService } from "../pers.service";
-import { Calendar } from "@awesome-cordova-plugins/calendar";
-import { Vibration } from "@awesome-cordova-plugins/vibration";
-import { BackgroundMode } from "@awesome-cordova-plugins/background-mode";
-import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { MatDialogRef } from "@angular/material/dialog";
+import { CancelOptions, LocalNotifications } from "@capacitor/local-notifications";
+import { Task } from "src/Models/Task";
 
 @Component({
   templateUrl: "./task-timer-component.component.html",
@@ -19,6 +18,7 @@ export class TaskTimerComponentComponent implements OnInit {
   event: { title: string; location: string; notes: string; startDate: Date; endDate: Date; reminders: { minutes: number }[] };
   calendarId: any;
   isDelEv: boolean;
+  notification: any;
 
   constructor(private srv: PersService, private dialogRef: MatDialogRef<TaskTimerComponentComponent>) {}
 
@@ -68,7 +68,8 @@ export class TaskTimerComponentComponent implements OnInit {
     let endTime = new Date().valueOf();
     endTime += leftSeconds * 1000;
 
-    this.setCalendar(leftSeconds);
+    // this.setCalendar(leftSeconds);
+    this.sheduleNotification(tsk, leftSeconds);
 
     // Получаем текущую дату и время
 
@@ -87,44 +88,34 @@ export class TaskTimerComponentComponent implements OnInit {
     );
   }
 
-  private setCalendar(leftSeconds: number) {
-    const event = {
-      title: "Таймер!",
-      location: "",
-      notes: "",
-      startDate: new Date(new Date().getTime() + leftSeconds * 1000),
-      endDate: new Date(new Date().getTime() + leftSeconds * 1000 + 1000),
-      reminders: [{ minutes: 0 }],
+  private sheduleNotification(tsk: Task, leftSeconds: number) {
+    const randomId = Math.floor(Math.random() * 10000) + 1;
+    this.notification = {
+      title: "Таймер",
+      body: tsk.tittle,
+      id: randomId,
+      schedule: {
+        at: new Date(Date.now() + leftSeconds * 1000),
+      },
     };
 
-    this.event = event;
-
     try {
-      Calendar.createEventWithOptions(event.title, event.location, event.notes, event.startDate, event.endDate, {
-        firstReminderMinutes: 0,
-      })
-        .then((q) => {
-          this.isDelEv = false;
-        })
-        .catch((err) => {});
-    } catch (err) {}
+      LocalNotifications.schedule({
+        notifications: [this.notification],
+      }).then(() => {});
+    } catch {}
   }
 
   close() {
-    if (this.isDelEv == false) {
-      this.deleteEvent()
-        .then(() => {
-          this.isDelEv = true;
-        })
-        .catch((err) => {})
-        .finally(() => this.dialogRef.close(this.dif));
-    } else {
-      this.dialogRef.close(this.dif);
-    }
-  }
+    try {
+      if (this.notification) {
+        LocalNotifications.cancel({
+          notifications: [this.notification],
+        }).then(() => {});
+      }
+    } catch {}
 
-  private deleteEvent() {
-    return Calendar.deleteEvent(this.event.title, this.event.location, this.event.notes, this.event.startDate, this.event.endDate);
+    this.dialogRef.close(this.dif);
   }
 }
 

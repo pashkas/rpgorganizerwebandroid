@@ -116,14 +116,14 @@ export class MainWindowComponent implements OnInit {
   async animate(isDone: boolean) {
     if (isDone) {
       this.isSucessShownOv$.next(true);
-      await this.delay(300);
+      await this.delay(GameSettings.flashDelay);
       this.isSucessShownOv$.next(false);
       // this.isSucessShown$.next(true);
       // await this.delay(500);
       // this.isSucessShown$.next(false);
     } else {
       this.isFailShownOv$.next(true);
-      await this.delay(300);
+      await this.delay(GameSettings.flashDelay);
       this.isFailShownOv$.next(false);
       // this.isFailShown$.next(true);
       // await this.delay(500);

@@ -77,7 +77,7 @@ export class GameSettings {
   /**
    * Показывать полный список требований навыка, по уровням.
    */
-  static isShowAbProgrTable: boolean = true;
+  static isShowAbProgrTable: boolean = false;
 
   /**
    * Показывать изменения уровней характеристик.
@@ -122,7 +122,11 @@ export class GameSettings {
   /**
    * Длительность самой анимации.
    */
-  static animationSpeed: number = 1000;
+  static animationDelay: number = 700;
+  /**
+   * Анимация вспышки задачи.
+   */
+  static flashDelay: number = 150;
 
   /**
    * Показывать процент в прогрессе навыка.
