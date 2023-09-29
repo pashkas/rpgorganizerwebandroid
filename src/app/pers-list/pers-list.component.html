@@ -65,15 +65,15 @@
           </div>
           <!-- Имя -->
           <div class="progress position-relative" style="height: 32px">
-            <div style="z-index: 1; height: 32px" class="position-absolute progress-bar attrprogr" role="progressbar" [style.width]="pers.totalProgress + '%'"></div>
-            <div
+            <!-- <div style="z-index: 1; height: 32px" class="position-absolute progress-bar attrprogr" role="progressbar" [style.width]="pers.totalProgress + '%'"></div> -->
+            <!-- <div
               class="position-absolute progress-bar attr"
               [ngClass]="{ 'progr-val-less': pers.rangProgress <= pers.totalProgress, 'progr-val-more': pers.rangProgress > pers.totalProgress }"
               role="progressbar"
               style="height: 32px"
               [style.width]="pers.rangProgress + '%'"
               [style.z-index]="pers.totalProgress > pers.rangProgress ? 2 : 0"
-            ></div>
+            ></div> -->
             <div style="z-index: 3" class="d-flex position-absolute w-100">
               <div class="text-center text-dark h5 mt-1 p-0 align-self-baseline" fxFlex>
                 {{ pers.name + ", " + pers.rangName + "" }}
@@ -99,14 +99,14 @@
                 <a class="align-self-center w-100" [routerLink]="['/pers/characteristic', item.id]">
                   <div class="progress position-relative" style="height: 28px">
                     <div class="progress-bar attrprogr" role="progressbar" [style.width]="item.progressValue + '%'" style="height: 28px; z-index: 1"></div>
-                    <div
+                    <!-- <div
                       class="position-absolute progress-bar attr"
                       role="progressbar"
                       [ngClass]="{ 'progr-val-less': item.progresNextLevel <= item.progressValue, 'progr-val-more': item.progresNextLevel > item.progressValue }"
                       [style.width]="item.progresNextLevel + '%'"
                       style="height: 28px"
                       [style.z-index]="item.progressValue > item.progresNextLevel ? 2 : 0"
-                    ></div>
+                    ></div> -->
                     <div class="d-flex align-items-center position-absolute w-100 h-100 px-1" style="z-index: 3">
                       <div class="flex-grow-1 text-left">
                         <h4 class="my-0">{{ item.name }}</h4>
@@ -126,7 +126,7 @@
                             <div class="align-self-center w-100 d-flex">
                               <div class="flex-grow-1 progress position-relative" style="height: 20px">
                                 <div class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'" style="height: 20px; z-index: 1" *ngIf="ab.isOpen"></div>
-                                <div
+                                <!-- <div
                                   *ngIf="ab.isOpen"
                                   class="position-absolute progress-bar"
                                   [ngClass]="{ 'progr-val-less': ab.tasks[0].progresNextLevel <= ab.progressValue, 'progr-val-more': ab.tasks[0].progresNextLevel > ab.progressValue }"
@@ -134,7 +134,7 @@
                                   [style.width]="ab.tasks[0].progresNextLevel + '%'"
                                   style="height: 20px"
                                   [style.z-index]="ab.progressValue > ab.tasks[0].progresNextLevel ? 2 : 0"
-                                ></div>
+                                ></div> -->
                                 <div class="d-flex align-items-center position-absolute w-100 h-100 px-1 abText text-primary" style="z-index: 3">
                                   <div class="flex-grow-1 text-left pointer">
                                     <a (click)="showAbility(ab)">{{ ab.tasks[0] | abHardness }}</a>

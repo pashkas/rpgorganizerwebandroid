@@ -832,12 +832,11 @@ export class PersService {
       nextExp = persLevel + 1;
     } else if (GameSettings.expFotmulaType == "abLvl") {
       let max = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl;
-      // abCount = 20;
 
-      // let max = abCount * (GameSettings.maxAbilLvl - GameSettings.minAbilLvl);
       let progress = abTotalCur / max;
 
       exp = GameSettings.maxPersLevel * progress;
+
       expDirect = exp;
       persLevel = Math.floor(exp);
       startExp = persLevel;
@@ -877,6 +876,20 @@ export class PersService {
       persLevel = i;
       startExp = curLvlExp;
       nextExp = nextLvlExp;
+    } else if (GameSettings.expFotmulaType == "abLvl2") {
+      if (abTotalCur < 2) {
+        let progress = abTotalCur / 2;
+        exp = 2 * progress;
+      } else {
+        let max = (GameSettings.maxPersLevel - 2) * GameSettings.abLvlForPersLvl;
+        let progress = (abTotalCur - 2) / max;
+        exp = 2 + (GameSettings.maxPersLevel - 2) * progress;
+      }
+
+      expDirect = exp;
+      persLevel = Math.floor(exp);
+      startExp = persLevel;
+      nextExp = persLevel + 1;
     }
 
     return { persLevel, exp, startExp, nextExp, expDirect };
@@ -1421,9 +1434,13 @@ export class PersService {
 
           let progressNextLevel = (tsk.tesValue / 10.0 - Math.floor(tsk.tesValue / 10.0)) * 100;
           tsk.progresNextLevel = progressNextLevel;
-          tsk.progressValue = tsk.progresNextLevel;
-          tsk.progressValue = (tsk.value / GameSettings.maxAbilLvl) * 100;
-          tsk.progressValue = ((tsk.value - GameSettings.minAbilLvl) / (GameSettings.maxAbilLvl - GameSettings.minAbilLvl)) * 100;
+
+          // let valP = tsk.value;
+          let valP = 1 + tsk.tesValue / 10;
+
+          // tsk.progressValue = ((valP - GameSettings.minAbilLvl) / (GameSettings.maxAbilLvl - GameSettings.minAbilLvl)) * 100;
+          // ab.progressValue = tsk.progressValue;
+          tsk.progressValue = progressNextLevel;
           ab.progressValue = tsk.progressValue;
 
           abMax += GameSettings.maxAbilLvl - 1;
@@ -1514,7 +1531,8 @@ export class PersService {
       tesAbTotalCur += tesAbCur;
       abExpPointsTotalCur += abExpPointsCur;
 
-      const chaCeilProgr = this.countCharacteristicValue(ch, abCur, abMax);
+      let chaCeilProgr = this.countCharacteristicValue(ch, abCur, abMax);
+      chaCeilProgr = Math.floor(chaCeilProgr);
 
       const rng = new Rangse();
       rng.val = chaCeilProgr;
@@ -1819,7 +1837,11 @@ export class PersService {
     }
 
     // Ранг
-    prs.rangName = Pers.rangNames[thisMonstersLevel - 1];
+    let persRang = Math.floor(prs.level / 10);
+    if (persRang > GameSettings.rangsCount - 1) {
+      persRang = GameSettings.rangsCount - 1;
+    }
+    prs.rangName = Pers.rangNames[persRang];
 
     localStorage.setItem("isOffline", JSON.stringify(true));
     localStorage.setItem("pers", JSON.stringify(prs));
@@ -1923,13 +1945,17 @@ export class PersService {
     let left = GameSettings.maxChaLvl - start;
     let progr = abCur / abMax;
     ch.value = start + left * progr;
-    const chaCeilProgr = Math.floor(ch.value);
 
-    ch.progressValue = ((chaCeilProgr - GameSettings.minChaLvl) / (GameSettings.maxChaLvl - GameSettings.minChaLvl)) * 100;
+    let chaCeilProgr = Math.floor(ch.value);
+    // let chaCeilProgr = ch.value;
+
+    // ch.progressValue = ((chaCeilProgr - GameSettings.minChaLvl) / (GameSettings.maxChaLvl - GameSettings.minChaLvl)) * 100;
+
     ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
     if (chaCeilProgr >= GameSettings.maxChaLvl) {
       ch.progresNextLevel = 100;
     }
+    ch.progressValue = ch.progresNextLevel;
 
     return chaCeilProgr;
   }
@@ -2573,9 +2599,8 @@ export class PersService {
       abs = 1;
     }
 
-    let onEveryLevel = 1;
-
-    let gainedOns = Math.floor(persLevel / onEveryLevel);
+    // Каждый нечетный уровень +1
+    let gainedOns = Math.ceil(persLevel / 2);
 
     let startOn = GameSettings.startAbPoints;
 
@@ -2583,13 +2608,16 @@ export class PersService {
 
     ons = totalGained - abOpenned * 1;
     if (startOn + gainedOns > abs) {
-      ons = abs - abOpenned + 1;
+      ons = 0;
     }
 
     prs.mayAddAbils = totalGained - abCount * 1 >= 1;
 
     // ons = 3;
     // prs.mayAddAbils = true;
+    if (ons < 0) {
+      ons = 0;
+    }
 
     return ons;
   }
@@ -2803,7 +2831,8 @@ export class PersService {
         if (tsk.aimUnit != "Раз") {
           let aimVal = 0;
           aimVal = st.secondsDone;
-          const progr = this.getProgrForTittle(tsk.value + 1, tsk.value, tsk.isPerk, false);
+          const cur = 1 + tsk.tesValue / 10;
+          const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, false);
           let plus = this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit);
           plusName += " " + plus;
         } else {
@@ -2985,7 +3014,8 @@ export class PersService {
       }
 
       // Текущий уровень
-      const cur = 1 + tsk.tesValue / 10;
+      // const cur = 1 + tsk.tesValue / 10;
+      const cur = tsk.value;
       const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, isMegaPlan);
 
       if (tsk.aimTimer && tsk.aimUnit != "Раз") {

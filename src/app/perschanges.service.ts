@@ -48,8 +48,6 @@ export class PerschangesService {
     // Произошло открытие навыка
     let isAbilActivated = false;
 
-    const isOpenPersAtNewLevel = false;
-
     Object.keys(changesMap).forEach((n) => {
       const el = changesMap[n];
       // Квесты
@@ -326,7 +324,7 @@ export class PerschangesService {
       return getChSort(a) - getChSort(b);
 
       function getChSort(ch: ChangesModel): number {
-        const sort = ["qwest", "abil", "cha", "exp"];
+        const sort = ["abil", "cha", "qwest", "exp"];
 
         const idx = sort.findIndex((q) => q == ch.type);
         if (idx != -1) {
@@ -393,10 +391,10 @@ export class PerschangesService {
 
       dialogRefLvlUp.close();
 
-      if (isOpenPersAtNewLevel) {
+      if (GameSettings.isOpenPersAtNewLevel) {
         this.srvSt.selTabPersList = 0;
         this.srvSt.selInventoryList = 0;
-        if (this.afterPers.ON >= 3) {
+        if (this.afterPers.ON >= 1) {
           this.router.navigate(["/pers"]);
         }
       }

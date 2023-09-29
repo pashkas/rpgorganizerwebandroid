@@ -37,7 +37,7 @@ export class AddItemDialogComponent implements OnInit {
         this.gallerryImages.push('assets/img/Perses/' + ss + '.webp');
       }
     } else if (this.data.isRev) {
-      this.isGallery = false;
+      // this.isGallery = false;
       for (let i = 1; i <= 44; i++) {
         let ss = '000' + i;
         ss = ss.substr(ss.length - 3);
@@ -45,7 +45,7 @@ export class AddItemDialogComponent implements OnInit {
       }
     } else {
       if (this.data.isQwest) {
-        this.isGallery = false;
+        // this.isGallery = false;
       }
       for (let i = 1; i <= 126; i++) {
         let ss = '000' + i;

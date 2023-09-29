@@ -19,7 +19,7 @@
     <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"> </app-image-component>
     <div class="progress position-relative" style="height: 32px" *ngIf="tskAbility">
       <div *ngIf="tskAbility.isOpen" style="z-index: 1; height: 32px" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'"></div>
-      <div
+      <!-- <div
         *ngIf="tskAbility.isOpen"
         class="position-absolute progress-bar"
         role="progressbar"
@@ -27,7 +27,7 @@
         style="height: 32px"
         [ngClass]="{ 'progr-val-less': tskAbility.tasks[0].progresNextLevel <= tskAbility.progressValue, 'progr-val-more': tskAbility.tasks[0].progresNextLevel > tskAbility.progressValue }"
         [style.z-index]="tskAbility.progressValue > tskAbility.tasks[0].progresNextLevel ? 2 : 0"
-      ></div>
+      ></div> -->
       <div style="z-index: 3" class="d-flex position-absolute w-100 px-1">
         <div class="flex-grow-1 text-left align-self-baseline">
           <h4>{{ tsk | abHardness }}</h4>
@@ -38,9 +38,9 @@
       </div>
     </div>
     
-    <div *ngIf="tskAbility" class="pt-1">
+    <!-- <div *ngIf="tskAbility" class="pt-1">
       <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel"> </mat-progress-bar>
-    </div>
+    </div> -->
 
     <div class="w-100 px-0 text-center" *ngIf="!tskAbility">
       <h4>{{ tsk.name }}</h4>

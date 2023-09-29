@@ -3,7 +3,7 @@ import { Observable, Subject, timer } from "rxjs";
 import { map, shareReplay, takeUntil } from "rxjs/operators";
 import { PersService } from "../pers.service";
 import { MatDialogRef } from "@angular/material/dialog";
-import { CancelOptions, LocalNotifications } from "@capacitor/local-notifications";
+import { CancelOptions, LocalNotificationSchema, LocalNotifications } from "@capacitor/local-notifications";
 import { Task } from "src/Models/Task";
 
 @Component({
@@ -18,7 +18,7 @@ export class TaskTimerComponentComponent implements OnInit {
   event: { title: string; location: string; notes: string; startDate: Date; endDate: Date; reminders: { minutes: number }[] };
   calendarId: any;
   isDelEv: boolean;
-  notification: any;
+  notification: LocalNotificationSchema;
 
   constructor(private srv: PersService, private dialogRef: MatDialogRef<TaskTimerComponentComponent>) {}
 
@@ -90,12 +90,17 @@ export class TaskTimerComponentComponent implements OnInit {
 
   private sheduleNotification(tsk: Task, leftSeconds: number) {
     const randomId = Math.floor(Math.random() * 10000) + 1;
+
+    const seconds = leftSeconds * 1000;
+    const date = new Date(Date.now() + seconds);
+
     this.notification = {
       title: "Таймер",
       body: tsk.tittle,
       id: randomId,
       schedule: {
-        at: new Date(Date.now() + leftSeconds * 1000),
+        at: date,
+        allowWhileIdle: true,
       },
     };
 

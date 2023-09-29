@@ -1,11 +1,12 @@
 export class GameSettings {
+  static isShowDec: boolean = true;
   /**
    * Максимальный уровень персонажа.
    */
   static maxPersLevel: number = 100;
 
   /**
-   * Тип расчета опыта. (dynamic, abLvl, abVal)
+   * Тип расчета опыта. (dynamic, abLvl, abVal, abLvl2)
    */
   static expFotmulaType: string = "abLvl";
 
@@ -13,6 +14,11 @@ export class GameSettings {
    * Очков за уровень.
    */
   static abLvlForPersLvl: number = 3;
+
+  /**
+   * За сколько уровней даются очки навыков.
+   */
+  static perLvl: number = 2;
 
   /**
    * ОН активны.
@@ -32,7 +38,7 @@ export class GameSettings {
   /**
    * Начальное ОН.
    */
-  static startAbPoints: number = 3;
+  static startAbPoints: number = 5;
 
   /**
    * Плюс к прогрессу для задания в задаче.
@@ -50,7 +56,7 @@ export class GameSettings {
     if (isTES) {
       // В стиле TES
       let skillMult = 1;
-      let skillOffcet = 3 - skillMult;
+      let skillOffcet = 2 - skillMult;
 
       let result = level * skillMult + skillOffcet;
       result = Math.ceil(result);
@@ -75,9 +81,13 @@ export class GameSettings {
   }
 
   /**
+   * Открывать окно перса когда новый уровень?
+   */
+  static isOpenPersAtNewLevel: boolean = true;
+  /**
    * Показывать полный список требований навыка, по уровням.
    */
-  static isShowAbProgrTable: boolean = false;
+  static isShowAbProgrTable: boolean = true;
 
   /**
    * Показывать изменения уровней характеристик.
@@ -126,7 +136,7 @@ export class GameSettings {
   /**
    * Анимация вспышки задачи.
    */
-  static flashDelay: number = 150;
+  static flashDelay: number = 200;
 
   /**
    * Показывать процент в прогрессе навыка.
