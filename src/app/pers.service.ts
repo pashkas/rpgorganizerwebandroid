@@ -1943,6 +1943,9 @@ export class PersService {
   private countCharacteristicValue(ch: Characteristic, abCur: number, abMax: number) {
     const start = ch.startRang.val + GameSettings.minChaLvl;
     let left = GameSettings.maxChaLvl - start;
+    if (abMax == 0) {
+      abMax = 1;
+    }
     let progr = abCur / abMax;
     ch.value = start + left * progr;
 
@@ -2324,10 +2327,10 @@ export class PersService {
   tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number, isEven?: boolean) {
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
-    let value = Math.ceil(progr * av);
+    let value = Math.round(progr * av);
 
     if (aimVal < 0) {
-      value = Math.floor(progr * av);
+      value = Math.round(progr * av);
     }
 
     if (moreThenOne && !(aimVal < 0)) {
@@ -2341,12 +2344,12 @@ export class PersService {
     }
 
     if (aimUnit == "Раз чет") {
-      value = 2 * Math.ceil(value / 2);
+      value = 2 * Math.round(value / 2);
       if (value < 2) value = 2;
     }
 
     if (aimUnit == "Раз нечет") {
-      value = 2 * Math.ceil(value / 2) - 1;
+      value = 2 * Math.round(value / 2) - 1;
       if (value < 1) value = 1;
     }
 
@@ -2355,7 +2358,7 @@ export class PersService {
     }
 
     if (aimDone != null && aimUnit != "Раз" && aimUnit != "Раз чет" && aimUnit != "Раз нечет") {
-      value = Math.ceil(value - aimDone);
+      value = Math.round(value - aimDone);
     }
 
     return value;
@@ -2600,7 +2603,8 @@ export class PersService {
     }
 
     // Каждый нечетный уровень +1
-    let gainedOns = Math.ceil(persLevel / 2);
+    // let gainedOns = Math.ceil(persLevel / 2);
+    let gainedOns = persLevel;
 
     let startOn = GameSettings.startAbPoints;
 
@@ -2733,9 +2737,9 @@ export class PersService {
     // }
 
     // При пропуске штраф больше в 2 раза
-    if (!isPlus) {
-      koef = koef * 2;
-    }
+    // if (!isPlus) {
+    //   koef = koef * 2;
+    // }
 
     if (isChangeAb) {
       subTasksCoef = subTasksCoef * task.hardnes;
@@ -2831,7 +2835,8 @@ export class PersService {
         if (tsk.aimUnit != "Раз") {
           let aimVal = 0;
           aimVal = st.secondsDone;
-          const cur = 1 + tsk.tesValue / 10;
+          // const cur = 1 + tsk.tesValue / 10;
+          const cur = tsk.value;
           const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, false);
           let plus = this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit);
           plusName += " " + plus;

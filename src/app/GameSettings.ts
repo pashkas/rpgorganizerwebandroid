@@ -13,12 +13,12 @@ export class GameSettings {
   /**
    * Очков за уровень.
    */
-  static abLvlForPersLvl: number = 3;
+  static abLvlForPersLvl: number = 5;
 
   /**
    * За сколько уровней даются очки навыков.
    */
-  static perLvl: number = 2;
+  static perLvl: number = 1;
 
   /**
    * ОН активны.
@@ -56,7 +56,7 @@ export class GameSettings {
     if (isTES) {
       // В стиле TES
       let skillMult = 1;
-      let skillOffcet = 2 - skillMult;
+      let skillOffcet = 1 - skillMult;
 
       let result = level * skillMult + skillOffcet;
       result = Math.ceil(result);
@@ -166,7 +166,7 @@ export class GameSettings {
   /**
    * Максимальный уровень характеристик.
    */
-  static maxChaLvl: number = 10;
+  static maxChaLvl: number = 20;
   /**
    * Минимальный уровень характеристик.
    */
@@ -175,7 +175,7 @@ export class GameSettings {
   /**
    * Максимальный уровень навыков.
    */
-  static maxAbilLvl: number = 10;
+  static maxAbilLvl: number = 20;
 
   /**
    * Минимальный уровень навыка.
