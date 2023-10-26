@@ -37,7 +37,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- <div *ngIf="tskAbility" class="pt-1">
       <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel"> </mat-progress-bar>
     </div> -->
@@ -54,7 +54,7 @@
       </ng-container>
 
       <div>
-        {{ tsk |requrence | titlecase }}
+        {{ tsk | requrence | titlecase }}
       </div>
 
       <div>
@@ -79,7 +79,7 @@
         </span>
       </div>
       <!-- Закрыть навык -->
-      <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px" *ngIf="tskAbility?.isOpen">
+      <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px" *ngIf="tskAbility?.isOpen && !isClassical">
         <button class="icon-small" mat-icon-button (click)="downAbil()">
           <img src="assets/icons/down.png" class="img-fluid" />
         </button>
@@ -132,7 +132,11 @@
     </ng-container>
     <br />
     <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
-      <div *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)" class="text-center px-0 py-1 border-0" [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }">
+      <div
+        *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)"
+        class="text-center px-0 py-1 border-0"
+        [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }"
+      >
         <b>
           <ng-container *ngIf="isShowAbProgrTable">
             {{ i + percSymbol + ": " }}

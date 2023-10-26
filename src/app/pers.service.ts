@@ -18,6 +18,7 @@ import { curpersview } from "src/Models/curpersview";
 import { MatDialog } from "@angular/material";
 import { ReqItemType } from "src/Models/ReqItem";
 import { GameSettings } from "./GameSettings";
+import { getExpResult } from "src/Models/getExpResult";
 
 @Injectable({
   providedIn: "root",
@@ -285,11 +286,24 @@ export class PersService {
     var tsk = new Task();
     tsk.name = newTsk;
 
-    this.GetRndEnamy(tsk, this.pers$.value.level, this.pers$.value.maxPersLevel);
+    this.GetRndEnamy(tsk, this.getAbMonsterLvl(tsk), this.pers$.value.maxPersLevel);
 
     abil.tasks.push(tsk);
 
     return tsk.id;
+  }
+
+  getAbMonsterLvl(tsk: Task): number {
+    let lvl = tsk.value * 10;
+    if (lvl < GameSettings.maxPersLevel) {
+      lvl = lvl - 0.01;
+    }
+
+    if (lvl < 0) {
+      lvl = 0;
+    }
+
+    return lvl;
   }
 
   /**
@@ -412,13 +426,13 @@ export class PersService {
     }
   }
 
-  changesAfter(isGood) {
+  changesAfter(isGood, img?: string) {
     if (isGood == null) {
       isGood = true;
     }
 
     this.changes.afterPers = this.changes.getClone(this.pers$.value);
-    this.changes.showChanges(this.getCongrantMsg(), this.getFailMsg(), isGood);
+    this.changes.showChanges(this.getCongrantMsg(), this.getFailMsg(), isGood, img);
   }
 
   changesBefore() {
@@ -564,6 +578,32 @@ export class PersService {
     }
   }
 
+  deActivateAbility(tskAbility: Ability) {
+    let ab = this.allMap[tskAbility.id].item;
+    this.changesBefore();
+    ab.isOpen = false;
+
+    for (const tsk of ab.tasks) {
+      tsk.value = 0;
+      tsk.tesValue = 0;
+      tsk.tesAbValue = 0;
+      tsk.progresNextLevel = 0;
+      tsk.progressValue = 0;
+    }
+
+    ab.value = 0;
+    ab.progressValue = 0;
+
+    // Обновляем дату
+    let date = new Date();
+    date.setHours(0, 0, 0, 0);
+
+    setTimeout(() => {
+      this.savePers(false);
+      this.changesAfter(false);
+    }, 50);
+  }
+
   /**
    * Удаление навыка по идентификатору.
    * @param id Идентификатор.
@@ -699,6 +739,13 @@ export class PersService {
     return aimVal;
   }
 
+  getClassicalAbPoints(persLevel: number, abValTotal: number, prs: Pers, abCount: number): number {
+    let gained = persLevel * GameSettings.startAbPoints + GameSettings.startAbPoints;
+    let spent = abValTotal;
+
+    return gained - spent;
+  }
+
   getEraCostLvl(curAbLvl: number) {
     //return curAbLvl + 1;
     if (curAbLvl == 0) {
@@ -784,6 +831,14 @@ export class PersService {
     return result;
   }
 
+  getIsSt(tsk: Task): boolean {
+    if (tsk.states.length > 0 && tsk.aimCounter == 0 && tsk.aimTimer == 0) {
+      return true;
+    }
+
+    return false;
+  }
+
   getPers() {
     let prsJson = localStorage.getItem("pers");
     if (prsJson) {
@@ -798,19 +853,37 @@ export class PersService {
     }
   }
 
-  getPersExp(
-    tesCur: number,
-    abCount: number,
-    expPoints: number,
-    tesMax: number,
-    abTotalCur: number
-  ): {
-    persLevel: number;
-    exp: number;
-    startExp: number;
-    nextExp: number;
-    expDirect: number;
-  } {
+  getPersExpClassical(classicalExpTotal: number, abCount: number): getExpResult {
+    let result = new getExpResult();
+
+    result.exp = classicalExpTotal;
+
+    let persLevel = 0;
+    let expLvl = 0;
+
+    while (true) {
+      result.startExp = expLvl;
+
+      let curLvl = (persLevel + 1) * GameSettings.startAbPoints;
+      let koef = 1 + persLevel * 0.05;
+      curLvl = curLvl * koef;
+
+      expLvl += curLvl;
+
+      result.nextExp = expLvl;
+
+      if (expLvl > result.exp) {
+        result.persLevel = persLevel;
+        break;
+      }
+
+      persLevel++;
+    }
+
+    return result;
+  }
+
+  getPersExpTES(tesCur: number, abCount: number, expPoints: number, tesMax: number, abTotalCur: number): getExpResult {
     let startExp = 0;
     let persLevel = 0;
     let exp = 0;
@@ -892,7 +965,15 @@ export class PersService {
       nextExp = persLevel + 1;
     }
 
-    return { persLevel, exp, startExp, nextExp, expDirect };
+    let result: getExpResult = {
+      exp: exp,
+      expDirect: expDirect,
+      nextExp: nextExp,
+      startExp: startExp,
+      persLevel: persLevel,
+    };
+
+    return result;
   }
 
   getQwestExpChange(qwHardness: number) {
@@ -936,41 +1017,34 @@ export class PersService {
     let base = 5.0;
 
     if (requrense === "будни") {
-      return base / 5.0;
+      return 1;
     }
     if (requrense === "выходные") {
       return base / 2.0;
     }
     if (requrense === "ежедневно") {
-      return base / 5.0;
-    }
-    if (requrense === "пн,ср,пт") {
-      return base / 3.0;
-    }
-    if (requrense === "вт,чт,сб") {
-      return base / 3.0;
-    }
-    if (requrense === "пн,вт,чт,сб") {
-      return base / 4.0;
-    }
-    if (requrense === "не суббота") {
-      return base / 5.0;
-    }
-    if (requrense === "не воскресенье") {
-      return base / 5.0;
+      return 1;
     }
     if (requrense === "дни недели") {
-      return base / weekDays.length;
+      let wd = weekDays.length;
+      if (wd > base) {
+        wd = base;
+      }
+      if (wd <= 0) {
+        wd = 1;
+      }
+
+      return base / wd;
     }
     if (isPlus) {
       if (requrense === "через 1 день") {
-        return (base / 7.0) * 2;
+        return 2;
       }
       if (requrense === "через 2 дня") {
-        return (base / 7.0) * 3;
+        return 3;
       }
       if (requrense === "через 3 дня") {
-        return (base / 7.0) * 4;
+        return 4;
       }
     }
 
@@ -1002,6 +1076,33 @@ export class PersService {
     this.unsubscribe$.complete();
   }
 
+  normalizeTskAbilityValue(tsk: Task, ab: Ability) {
+    if (tsk.tesValue == null || tsk.tesValue == undefined || tsk.tesValue < 0) {
+      tsk.tesValue = 0;
+    }
+
+    if (tsk.tesAbValue == null || tsk.tesAbValue == undefined || tsk.tesAbValue < 0) {
+      tsk.tesAbValue = 0;
+    }
+
+    if (tsk.tesValue < 0 || ab.isOpen == false) {
+      tsk.tesValue = 0;
+    }
+
+    tsk.tesValue = Math.ceil(tsk.tesValue * 1000) / 1000;
+
+    tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen, tsk.value);
+
+    if (tsk.value < 0) {
+      tsk.value = 0;
+    }
+    if (tsk.value > GameSettings.maxAbilLvl) {
+      tsk.value = GameSettings.maxAbilLvl;
+    }
+
+    ab.value = tsk.value;
+  }
+
   openCharact(id: any) {
     this.router.navigate(["/pers/characteristic", id]);
   }
@@ -1027,9 +1128,9 @@ export class PersService {
     prs.characteristics.forEach((ch) => {
       ch.abilities.forEach((ab) => {
         ab.tasks.forEach((tsk) => {
-          this.GetRndEnamy(tsk, prs.level, prs.maxPersLevel);
+          this.GetRndEnamy(tsk, this.getAbMonsterLvl(tsk), GameSettings.maxPersLevel);
           tsk.states.forEach((st) => {
-            this.GetRndEnamy(st, prs.level, prs.maxPersLevel);
+            this.GetRndEnamy(st, this.getAbMonsterLvl(tsk), GameSettings.maxPersLevel);
           });
         });
       });
@@ -1037,7 +1138,7 @@ export class PersService {
 
     prs.qwests.forEach((qw) => {
       qw.tasks.forEach((tsk) => {
-        this.GetRndEnamy(tsk, prs.level, prs.maxPersLevel);
+        this.GetRndEnamy(tsk, prs.level, GameSettings.maxPersLevel);
       });
     });
 
@@ -1220,62 +1321,6 @@ export class PersService {
     this.pers$.value.isGlobalView = b;
   }
 
-  deActivateAbility(tskAbility: Ability) {
-    let ab = this.allMap[tskAbility.id].item;
-    this.changesBefore();
-    ab.isOpen = false;
-
-    for (const tsk of ab.tasks) {
-      tsk.value = 0;
-      tsk.tesValue = 0;
-      tsk.tesAbValue = 0;
-      tsk.progresNextLevel = 0;
-      tsk.progressValue = 0;
-    }
-
-    ab.value = 0;
-    ab.progressValue = 0;
-
-    // Обновляем дату
-    let date = new Date();
-    date.setHours(0, 0, 0, 0);
-
-    setTimeout(() => {
-      this.savePers(false);
-      this.changesAfter(false);
-    }, 50);
-  }
-
-  activateAbility(ab: Ability, isFromMain: boolean = false) {
-    this.changesBefore();
-    ab.isOpen = true;
-
-    // Обновляем дату
-    let date = new Date();
-    date.setHours(0, 0, 0, 0);
-
-    for (const tsk of ab.tasks) {
-      tsk.date = date;
-      tsk.order = GameSettings.tskOrderDefault;
-
-      this.CheckSetTaskDate(tsk);
-
-      tsk.states.forEach((el) => {
-        el.isDone = false;
-        el.order = GameSettings.tskOrderDefault;
-      });
-    }
-
-    if (GameSettings.isOpenAbWhenActivate) {
-      this.router.navigate(["pers/task", ab.tasks[0].id, true], { queryParams: { isQuick: true, isActivate: true, isFromMain: isFromMain } });
-    }
-
-    setTimeout(() => {
-      this.savePers(false);
-      this.changesAfter(true);
-    }, 50);
-  }
-
   /**
    * Записать персонажа в БД.
    */
@@ -1296,6 +1341,8 @@ export class PersService {
     let abTotalCur = 0;
     let tesAbTotalMax = 0;
     let abExpPointsTotalCur = 0;
+    let classicalExpTotal = 0;
+    let abValTotal = 0;
 
     if (!prs.currentView) {
       prs.currentView = curpersview.SkillTasks;
@@ -1435,13 +1482,15 @@ export class PersService {
           let progressNextLevel = (tsk.tesValue / 10.0 - Math.floor(tsk.tesValue / 10.0)) * 100;
           tsk.progresNextLevel = progressNextLevel;
 
-          // let valP = tsk.value;
-          let valP = 1 + tsk.tesValue / 10;
-
-          // tsk.progressValue = ((valP - GameSettings.minAbilLvl) / (GameSettings.maxAbilLvl - GameSettings.minAbilLvl)) * 100;
-          // ab.progressValue = tsk.progressValue;
-          tsk.progressValue = progressNextLevel;
-          ab.progressValue = tsk.progressValue;
+          if (GameSettings.isCeilProgressInList) {
+            let valP = tsk.value;
+            tsk.progressValue = (valP / GameSettings.maxAbilLvl) * 100;
+            ab.progressValue = tsk.progressValue;
+          } else {
+            let valP = 1 + tsk.tesValue / 10;
+            tsk.progressValue = progressNextLevel;
+            ab.progressValue = tsk.progressValue;
+          }
 
           abMax += GameSettings.maxAbilLvl - 1;
           abCur += tsk.value - GameSettings.minAbilLvl >= 0 ? tsk.value - GameSettings.minAbilLvl : 0;
@@ -1459,8 +1508,15 @@ export class PersService {
           } else {
             tsk.mayUp = false;
           }
-          if (prs.isTES && ab.isOpen) {
-            tsk.mayUp = false;
+
+          if (!GameSettings.isClassicaRPG) {
+            if (ab.isOpen) {
+              tsk.mayUp = false;
+            }
+          } else {
+            if (tsk.value >= GameSettings.maxAbilLvl) {
+              tsk.mayUp = false;
+            }
           }
 
           const rng = new Rangse();
@@ -1517,6 +1573,12 @@ export class PersService {
           if (tsk.IsNextLvlSame) {
             isHasSameAbil = true;
           }
+
+          if (tsk.classicalExp == null) {
+            tsk.classicalExp = 0;
+          }
+          classicalExpTotal += tsk.classicalExp;
+          abValTotal += this.getAbVal(tsk.tesValue, ab.isOpen, tsk.value);
         }
 
         if (ab.isOpen) {
@@ -1741,15 +1803,26 @@ export class PersService {
 
     this.setCurPersTask(prs);
 
-    let { persLevel, exp, startExp, nextExp, expDirect } = this.getPersExp(tesAbTotalCur, abCount, abExpPointsTotalCur, tesAbTotalMax, abTotalCur);
-    let ons = this.getPersAbPoints(abCount, persLevel, abOpenned, prs);
+    let expResult: getExpResult;
+    if (!GameSettings.isClassicaRPG) {
+      expResult = this.getPersExpTES(tesAbTotalCur, abCount, abExpPointsTotalCur, tesAbTotalMax, abTotalCur);
+    } else {
+      expResult = this.getPersExpClassical(classicalExpTotal, abCount);
+    }
+
+    let ons: number = 0;
+    if (!GameSettings.isClassicaRPG) {
+      ons = this.getTESAbPoints(abCount, expResult.persLevel, abOpenned, prs);
+    } else {
+      ons = this.getClassicalAbPoints(expResult.persLevel, abValTotal, prs, abCount);
+    }
 
     let prevPersLevel = prs.level;
-    prs.level = Math.floor(persLevel);
-    prs.prevExp = startExp;
-    prs.nextExp = nextExp;
+    prs.level = Math.floor(expResult.persLevel);
+    prs.prevExp = expResult.startExp;
+    prs.nextExp = expResult.nextExp;
     prs.ON = ons;
-    prs.exp = exp;
+    prs.exp = expResult.exp;
     prs.totalProgress = (prs.level / GameSettings.maxPersLevel) * 100;
 
     let stage = (prs.level / GameSettings.maxPersLevel) * (GameSettings.rangsCount - 1);
@@ -1764,11 +1837,11 @@ export class PersService {
     }
     prs.rangProgress = rangProgress * 100;
 
-    let lvlExp = nextExp - startExp;
+    let lvlExp = expResult.nextExp - expResult.startExp;
     let progr = 0;
 
     if (lvlExp != 0) {
-      progr = (prs.exp - startExp) / lvlExp;
+      progr = (prs.exp - expResult.startExp) / lvlExp;
     }
     prs.progressValue = progr * 100;
 
@@ -1777,18 +1850,18 @@ export class PersService {
     prs.prevExp = prs.prevExp;
     // prs.expDirect = expDirect;
 
-    let thisMonstersLevel = this.getMonsterLevel(prs.level, prs.maxPersLevel);
+    let thisMonstersLevel = this.getMonsterLevel(prs.level, GameSettings.maxPersLevel);
 
     let prevMonstersLevel = thisMonstersLevel;
 
     if (prevPersLevel != prs.level) {
-      prevMonstersLevel = this.getMonsterLevel(prevPersLevel, prs.maxPersLevel);
+      prevMonstersLevel = this.getMonsterLevel(prevPersLevel, GameSettings.maxPersLevel);
     }
 
     // Апдэйт картинок
     if (prevMonstersLevel != thisMonstersLevel) {
       this.updateQwestTasksImages(prs);
-      this.updateAbTasksImages(prs);
+      // this.updateAbTasksImages(prs);
     }
 
     // Награды
@@ -1858,109 +1931,6 @@ export class PersService {
 
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
-  }
-
-  normalizeTskAbilityValue(tsk: Task, ab: Ability) {
-    if (tsk.tesValue == null || tsk.tesValue == undefined || tsk.tesValue < 0) {
-      tsk.tesValue = 0;
-    }
-
-    if (tsk.tesAbValue == null || tsk.tesAbValue == undefined || tsk.tesAbValue < 0) {
-      tsk.tesAbValue = 0;
-    }
-
-    if (tsk.tesValue < 0 || ab.isOpen == false) {
-      tsk.tesValue = 0;
-    }
-
-    tsk.tesValue = Math.ceil(tsk.tesValue * 1000) / 1000;
-
-    tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen);
-
-    if (tsk.value < 0) {
-      tsk.value = 0;
-    }
-    if (tsk.value > GameSettings.maxAbilLvl) {
-      tsk.value = GameSettings.maxAbilLvl;
-    }
-
-    ab.value = tsk.value;
-  }
-
-  testAbFormula() {
-    // Тест опыта
-    // let tsks: Task[] = [];
-    // for (let i = 0; i < GameSettings.startAbPoints; i++) {
-    //     let tsk = new Task();
-    //     tsks.push(tsk);
-    // }
-    // let vals: number[] = [];
-    // for (let i = 1; i <= 100; i++) {
-    //   if (i >= 2 && i <= 29) {
-    //     let tsk = new Task();
-    //     tsks.push(tsk);
-    //   }
-    //   let total = 0;
-    //   for (const t of tsks) {
-    //     let before = t.tesValue;
-    //     this.changeTes(t, true, 1);
-    //     total += (t.tesValue - before) / 10;
-    //   }
-    //   vals.push(total);
-    // }
-    // let tsksV = tsks.reduce((a, b) => a + b.tesValue / 10, 0);
-    // debugger;
-    // Тест прокачки навыка
-    // let tsk = new Task();
-    // tsk.name = "test";
-    // tsk.tesValue = 0;
-    // let day = 0;
-    // let perc50 = 0;
-    // let perc100 = 0;
-    // let prevAbVal = GameSettings.minAbilLvl;
-    // let prevDay = 0;
-    // while (true) {
-    //   this.changeTes(tsk, true, false, 1);
-    //   day++;
-    //   tsk.tesValue = Math.ceil(tsk.tesValue * 1000) / 1000;
-    //   const abVal = this.getAbVal(tsk.tesValue, true);
-    //   if (abVal != prevAbVal) {
-    //     console.log(day - prevDay);
-    //     prevAbVal = abVal;
-    //     prevDay = day;
-    //   }
-    //   if (abVal >= GameSettings.maxAbilLvl / 2 && perc50 == 0) {
-    //     perc50 = day;
-    //   }
-    //   if (abVal >= GameSettings.maxAbilLvl) {
-    //     perc100 = day;
-    //     break;
-    //   }
-    // }
-    // debugger;
-  }
-
-  private countCharacteristicValue(ch: Characteristic, abCur: number, abMax: number) {
-    const start = ch.startRang.val + GameSettings.minChaLvl;
-    let left = GameSettings.maxChaLvl - start;
-    if (abMax == 0) {
-      abMax = 1;
-    }
-    let progr = abCur / abMax;
-    ch.value = start + left * progr;
-
-    let chaCeilProgr = Math.floor(ch.value);
-    // let chaCeilProgr = ch.value;
-
-    // ch.progressValue = ((chaCeilProgr - GameSettings.minChaLvl) / (GameSettings.maxChaLvl - GameSettings.minChaLvl)) * 100;
-
-    ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
-    if (chaCeilProgr >= GameSettings.maxChaLvl) {
-      ch.progresNextLevel = 100;
-    }
-    ch.progressValue = ch.progresNextLevel;
-
-    return chaCeilProgr;
   }
 
   setCurInd(i: number): any {
@@ -2137,21 +2107,17 @@ export class PersService {
   subtaskDoneOrFail(taskId: string, subtaskId: string, isDone: boolean) {
     let tsk: Task = this.allMap[taskId].item;
     let subTask: taskState = this.allMap[subtaskId].item;
+    let activeSubtasksCount = tsk.states.filter((n) => n.isActive).length;
 
     // Изменяем значение
-    let activeSubtasksCount = tsk.states.filter((n) => n.isActive).length;
-    this.changeTes(tsk, isDone, subTask.lastNotDone, activeSubtasksCount);
+    if (!GameSettings.isClassicaRPG) {
+      this.changeTes(tsk, isDone, subTask.lastNotDone, activeSubtasksCount);
+    } else {
+      this.changeClassical(tsk, isDone, activeSubtasksCount);
+    }
 
     subTask.lastDate = new Date().getTime();
     subTask.secondsDone = 0;
-
-    // Авто время
-    if (this.pers$.value.isWriteTime) {
-      let autoCurDate: moment.Moment = moment();
-      let autoTDate: moment.Moment = moment(tsk.date).startOf("day");
-      let autoDate = autoCurDate.diff(autoTDate);
-      subTask.autoTime = autoDate;
-    }
 
     if (this.isNullOrUndefined(subTask.failCounter)) {
       subTask.failCounter = 0;
@@ -2196,21 +2162,17 @@ export class PersService {
     ({ task: tsk, abil } = this.findTaskAnAb(id, tsk, abil));
     if (tsk) {
       // Минусуем значение
-      this.changeTes(tsk, false, tsk.lastNotDone);
+      if (!GameSettings.isClassicaRPG) {
+        this.changeTes(tsk, false, tsk.lastNotDone);
+      } else {
+        this.changeClassical(tsk, false, 1);
+      }
 
       tsk.lastDate = new Date().getTime();
       tsk.counterValue = 0;
       tsk.timerValue = 0;
       if (this.isNullOrUndefined(tsk.failCounter)) {
         tsk.failCounter = 0;
-      }
-
-      // Авто время
-      if (this.pers$.value.isWriteTime) {
-        let autoCurDate: moment.Moment = moment();
-        let autoTDate: moment.Moment = moment(tsk.date).startOf("day");
-        let autoDate = autoCurDate.diff(autoTDate);
-        tsk.autoTime = autoDate;
       }
 
       // Следующая дата
@@ -2232,17 +2194,6 @@ export class PersService {
     }
   }
 
-  upQwest(tskId: string) {
-    let qwest = this.allMap[tskId].link;
-    let qwId = qwest.id;
-    this.pers$.value.currentQwestId = qwId;
-
-    const index = this.pers$.value.qwests.findIndex((qw) => qw.id === qwId);
-    if (index !== -1) {
-      this.pers$.value.qwests.unshift(this.pers$.value.qwests.splice(index, 1)[0]);
-    }
-  }
-
   /**
    * Клик плюс по задаче.
    * @param id Идентификатор задачи.
@@ -2257,19 +2208,15 @@ export class PersService {
       ({ task: tsk, abil } = this.findTaskAnAb(id, tsk, abil));
       if (tsk) {
         // Плюсуем значение
-        this.changeTes(tsk, true, tsk.lastNotDone);
+        if (!GameSettings.isClassicaRPG) {
+          this.changeTes(tsk, true, tsk.lastNotDone);
+        } else {
+          this.changeClassical(tsk, true, 1);
+        }
 
         tsk.counterValue = 0;
         tsk.timerValue = 0;
         tsk.failCounter = 0;
-
-        // Авто время
-        if (this.pers$.value.isWriteTime) {
-          let autoCurDate: moment.Moment = moment();
-          let autoTDate: moment.Moment = moment(tsk.date).startOf("day");
-          let autoDate = autoCurDate.diff(autoTDate);
-          tsk.autoTime = autoDate;
-        }
 
         // Разыгрываем награды
         this.CasinoRevards(tsk);
@@ -2324,7 +2271,7 @@ export class PersService {
     }
   }
 
-  tesTaskTittleCount(progr: number, aimVal: number, moreThenOne: boolean, aimUnit: string, aimDone?: number, isEven?: boolean) {
+  tesTaskTittleCount(progr: number, aimVal: number, oneOrMore: boolean, aimUnit: string, aimDone?: number, isEven?: boolean) {
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
     let value = Math.round(progr * av);
@@ -2333,8 +2280,8 @@ export class PersService {
       value = Math.round(progr * av);
     }
 
-    if (moreThenOne && !(aimVal < 0)) {
-      if (value <= 1) {
+    if (oneOrMore && !(aimVal < 0)) {
+      if (value < 1) {
         value = 1;
       }
     }
@@ -2364,13 +2311,128 @@ export class PersService {
     return value;
   }
 
+  testAbFormula() {
+    // Тест опыта
+    // let tsks: Task[] = [];
+    // for (let i = 0; i < GameSettings.startAbPoints; i++) {
+    //     let tsk = new Task();
+    //     tsks.push(tsk);
+    // }
+    // let vals: number[] = [];
+    // for (let i = 1; i <= 100; i++) {
+    //   if (i >= 2 && i <= 29) {
+    //     let tsk = new Task();
+    //     tsks.push(tsk);
+    //   }
+    //   let total = 0;
+    //   for (const t of tsks) {
+    //     let before = t.tesValue;
+    //     this.changeTes(t, true, 1);
+    //     total += (t.tesValue - before) / 10;
+    //   }
+    //   vals.push(total);
+    // }
+    // let tsksV = tsks.reduce((a, b) => a + b.tesValue / 10, 0);
+    // debugger;
+    // Тест прокачки навыка
+    // let tsk = new Task();
+    // tsk.name = "test";
+    // tsk.tesValue = 0;
+    // let day = 0;
+    // let perc50 = 0;
+    // let perc100 = 0;
+    // let prevAbVal = GameSettings.minAbilLvl;
+    // let prevDay = 0;
+    // while (true) {
+    //   this.changeTes(tsk, true, false, 1);
+    //   day++;
+    //   tsk.tesValue = Math.ceil(tsk.tesValue * 1000) / 1000;
+    //   const abVal = this.getAbVal(tsk.tesValue, true);
+    //   if (abVal != prevAbVal) {
+    //     console.log(day - prevDay);
+    //     prevAbVal = abVal;
+    //     prevDay = day;
+    //   }
+    //   if (abVal >= GameSettings.maxAbilLvl / 2 && perc50 == 0) {
+    //     perc50 = day;
+    //   }
+    //   if (abVal >= GameSettings.maxAbilLvl) {
+    //     perc100 = day;
+    //     break;
+    //   }
+    // }
+    // debugger;
+  }
+
+  upAbility(ab: Ability, isFromMain: boolean = false) {
+    this.changesBefore();
+
+    let wasOpen = ab.isOpen;
+
+    if (!ab.isOpen) {
+      ab.isOpen = true;
+
+      // Обновляем дату
+      let date = new Date();
+      date.setHours(0, 0, 0, 0);
+
+      for (const tsk of ab.tasks) {
+        tsk.date = date;
+        tsk.order = GameSettings.tskOrderDefault;
+        this.CheckSetTaskDate(tsk);
+
+        tsk.states.forEach((el) => {
+          el.isDone = false;
+          el.order = GameSettings.tskOrderDefault;
+        });
+      }
+    }
+
+    if (GameSettings.isClassicaRPG) {
+      for (const tsk of ab.tasks) {
+        tsk.value += 1;
+      }
+    }
+
+    for (const tsk of ab.tasks) {
+      this.GetRndEnamy(tsk, this.getAbMonsterLvl(tsk), GameSettings.maxPersLevel);
+
+      tsk.states.forEach((st) => {
+        this.GetRndEnamy(st, this.getAbMonsterLvl(tsk), GameSettings.maxPersLevel);
+      });
+    }
+
+    if (GameSettings.isOpenAbWhenActivate && !wasOpen && !GameSettings.isClassicaRPG) {
+      this.router.navigate(["pers/task", ab.tasks[0].id, true], { queryParams: { isQuick: true, isActivate: true, isFromMain: isFromMain } });
+    }
+    if (GameSettings.isOpenAbWhenActivate && GameSettings.isClassicaRPG && isFromMain) {
+      this.router.navigate(["pers/task", ab.tasks[0].id, false], { queryParams: { isQuick: true, isActivate: true, isFromMain: isFromMain } });
+    }
+
+    setTimeout(() => {
+      this.savePers(false);
+      this.changesAfter(true);
+    }, 50);
+  }
+
+  upQwest(tskId: string) {
+    let qwest = this.allMap[tskId].link;
+    let qwId = qwest.id;
+    this.pers$.value.currentQwestId = qwId;
+
+    const index = this.pers$.value.qwests.findIndex((qw) => qw.id === qwId);
+    if (index !== -1) {
+      this.pers$.value.qwests.unshift(this.pers$.value.qwests.splice(index, 1)[0]);
+    }
+  }
+
   updateAbTasksImages(prs: Pers) {
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
-          this.GetRndEnamy(tsk, prs.level, prs.maxPersLevel);
+          this.GetRndEnamy(tsk, this.getAbMonsterLvl(tsk), GameSettings.maxPersLevel);
           for (const st of tsk.states) {
-            this.GetRndEnamy(st, prs.level, prs.maxPersLevel);
+            this.GetRndEnamy(st, this.getAbMonsterLvl(tsk), GameSettings.maxPersLevel);
           }
         }
       }
@@ -2380,9 +2442,9 @@ export class PersService {
   updateQwestTasksImages(prs: Pers) {
     for (const qwest of prs.qwests) {
       for (const tsk of qwest.tasks) {
-        this.GetRndEnamy(tsk, prs.level, prs.maxPersLevel);
+        this.GetRndEnamy(tsk, prs.level, GameSettings.maxPersLevel);
         for (const sub of tsk.states) {
-          this.GetRndEnamy(sub, prs.level, prs.maxPersLevel);
+          this.GetRndEnamy(sub, prs.level, GameSettings.maxPersLevel);
         }
       }
     }
@@ -2403,6 +2465,19 @@ export class PersService {
       if (rnd <= rev.ludProbability) {
         this.addToInventory(rev);
       }
+    }
+  }
+
+  private changeClassical(tsk: Task, isDone: boolean, activeSubtasksCount: number) {
+    let koef = this.getWeekKoef(tsk.requrense, isDone, tsk.tskWeekDays) * tsk.value;
+    koef = koef / activeSubtasksCount;
+    if (tsk.classicalExp == null) {
+      tsk.classicalExp = 0;
+    }
+    if (isDone) {
+      tsk.classicalExp += 1 * koef;
+    } else {
+      tsk.classicalExp -= 1 * koef;
     }
   }
 
@@ -2440,6 +2515,35 @@ export class PersService {
     prs.isAutoPumping = false;
     prs.isAutofocus = false;
     prs.Diary = [];
+  }
+
+  private countCharacteristicValue(ch: Characteristic, abCur: number, abMax: number) {
+    const start = ch.startRang.val + GameSettings.minChaLvl;
+    let left = GameSettings.maxChaLvl - start;
+    if (abMax == 0) {
+      abMax = 1;
+    }
+    let progr = abCur / abMax;
+    ch.value = start + left * progr;
+
+    let chaCeilProgr;
+    if (GameSettings.isCeilProgressInList) {
+      chaCeilProgr = Math.floor(ch.value);
+      ch.progressValue = (chaCeilProgr / GameSettings.maxChaLvl) * 100;
+    } else {
+      chaCeilProgr = ch.value;
+    }
+
+    ch.progresNextLevel = (ch.value - chaCeilProgr) * 100;
+    if (chaCeilProgr >= GameSettings.maxChaLvl) {
+      ch.progresNextLevel = 100;
+    }
+
+    if (!GameSettings.isCeilProgressInList) {
+      ch.progressValue = ch.progresNextLevel;
+    }
+
+    return chaCeilProgr;
   }
 
   private countPersLevelAndOns(abTotalMax: number, prevOn: number, startExp: number, exp: number, ons: number, nextExp: number, prs: Pers, persLevel: number) {
@@ -2486,14 +2590,22 @@ export class PersService {
     return this.pers$.value.rewards.filter((n) => n.rare == revType);
   }
 
-  private getAbVal(tesVal: number, isOpen: boolean): number {
-    let val = Math.floor(tesVal / 10.0);
+  private getAbVal(tesVal: number, isOpen: boolean, tskValue: number): number {
+    if (!GameSettings.isClassicaRPG) {
+      let val = Math.floor(tesVal / 10.0);
 
-    if (isOpen) {
-      val = val + GameSettings.minAbilLvl;
+      if (isOpen) {
+        val = val + GameSettings.minAbilLvl;
+      }
+
+      return val;
+    } else {
+      if (!isOpen) {
+        return 0;
+      }
+
+      return tskValue;
     }
-
-    return val;
   }
 
   private getAllMapping(prs: Pers) {
@@ -2594,45 +2706,13 @@ export class PersService {
     // return stage;
   }
 
-  private getPersAbPoints(abCount: number, persLevel: number, abOpenned: number, prs: Pers) {
-    let ons = 0;
-    let abs = abCount;
-
-    if (abs < 1) {
-      abs = 1;
-    }
-
-    // Каждый нечетный уровень +1
-    // let gainedOns = Math.ceil(persLevel / 2);
-    let gainedOns = persLevel;
-
-    let startOn = GameSettings.startAbPoints;
-
-    const totalGained = startOn + gainedOns;
-
-    ons = totalGained - abOpenned * 1;
-    if (startOn + gainedOns > abs) {
-      ons = 0;
-    }
-
-    prs.mayAddAbils = totalGained - abCount * 1 >= 1;
-
-    // ons = 3;
-    // prs.mayAddAbils = true;
-    if (ons < 0) {
-      ons = 0;
-    }
-
-    return ons;
-  }
-
-  private getPlusState(tsk: Task, progr: number, isCur?: boolean) {
+  private getPlusState(tsk: Task, progr: number, progrSt: number, isCur: boolean) {
     let plusState = "";
     // Состояния
     if (tsk.states.length > 0) {
-      let stateInd = this.tesTaskTittleCount(progr, tsk.states.length, true, "State");
+      let stateInd = this.tesTaskTittleCount(progrSt, tsk.states.length - 1, false, "State");
 
-      stateInd = stateInd - 1;
+      stateInd = stateInd;
 
       if (tsk.isStateRefresh) {
         if (tsk.refreshCounter == null && tsk.refreshCounter == undefined) {
@@ -2699,15 +2779,23 @@ export class PersService {
     return plusState;
   }
 
-  private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean) {
+  private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean, isState: boolean) {
     tskVal = tskVal + GameSettings.plusAbProgrForTitle;
+    let progr;
 
-    let progr = tskVal / GameSettings.maxAbilLvl;
-
-    let min = 1 / GameSettings.maxAbilLvl;
-    if (progr < min) {
-      progr = min;
+    if (!isState) {
+      progr = tskVal / GameSettings.maxAbilLvl;
+      let min = 1 / GameSettings.maxAbilLvl;
+      if (progr < min) {
+        progr = min;
+      }
+    } else {
+      progr = (tskVal - 1) / (GameSettings.maxAbilLvl - 1);
+      if (progr < 0) {
+        progr = 0;
+      }
     }
+
     if (progr > 1) {
       progr = 1;
     }
@@ -2726,6 +2814,34 @@ export class PersService {
     expChange = expChange;
 
     return expChange;
+  }
+
+  private getTESAbPoints(abCount: number, persLevel: number, abOpenned: number, prs: Pers) {
+    let ons = 0;
+    let abs = abCount;
+
+    if (abs < 1) {
+      abs = 1;
+    }
+
+    let gainedOns = persLevel;
+
+    let startOn = GameSettings.startAbPoints;
+
+    const totalGained = startOn + gainedOns;
+
+    ons = totalGained - abOpenned * 1;
+    if (startOn + gainedOns > abs) {
+      ons = 0;
+    }
+
+    prs.mayAddAbils = totalGained - abCount * 1 >= 1;
+
+    if (ons < 0) {
+      ons = 0;
+    }
+
+    return ons;
   }
 
   private getTaskChangesExp(task: Task, isPlus: boolean, subTask: taskState = null, subTasksCoef: number = 1, isChangeAb: boolean = false) {
@@ -2827,17 +2943,16 @@ export class PersService {
     }
     if (tsk.isSumStates) {
       plusName = st.name;
+
       let pattern = /‪.*/;
-
       let plusTimerOrCounter = pattern.exec(tsk.curLvlDescr3);
-
       if (plusTimerOrCounter) {
         if (tsk.aimUnit != "Раз") {
           let aimVal = 0;
           aimVal = st.secondsDone;
           // const cur = 1 + tsk.tesValue / 10;
           const cur = tsk.value;
-          const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, false);
+          const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, false, false);
           let plus = this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit);
           plusName += " " + plus;
         } else {
@@ -2876,7 +2991,11 @@ export class PersService {
     stT.lastDate = st.lastDate;
 
     if (!st.image) {
-      this.GetRndEnamy(st, prs.level, prs.maxPersLevel);
+      let lvl = prs.level;
+      if (tsk.requrense != "нет") {
+        lvl = this.getAbMonsterLvl(tsk);
+      }
+      this.GetRndEnamy(st, prs.level, GameSettings.maxPersLevel);
     }
 
     stT.id = st.id;
@@ -3005,14 +3124,14 @@ export class PersService {
       tsk.curLvlDescr = "";
       tsk.statesDescr = [];
       tsk.IsNextLvlSame = false;
-
       tsk.nextAbVal = tsk.value + 1;
 
       // По уровням
       if (GameSettings.isShowAbProgrTable) {
         for (let i = 0; i <= GameSettings.maxAbilLvl; i++) {
-          const progrSt = this.getProgrForTittle(i + 1, i, tsk.isPerk, isMegaPlan);
-          const pSt = this.getPlusState(tsk, progrSt);
+          const progr = this.getProgrForTittle(i + 1, i, tsk.isPerk, isMegaPlan, false);
+          const progrSt = this.getProgrForTittle(i + 1, i, tsk.isPerk, isMegaPlan, true);
+          const pSt = this.getPlusState(tsk, progr, progrSt, false);
 
           tsk.statesDescr.push(pSt);
         }
@@ -3021,13 +3140,14 @@ export class PersService {
       // Текущий уровень
       // const cur = 1 + tsk.tesValue / 10;
       const cur = tsk.value;
-      const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, isMegaPlan);
+      const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, isMegaPlan, false);
+      const progrSt = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, isMegaPlan, true);
 
       if (tsk.aimTimer && tsk.aimUnit != "Раз") {
         tsk.secondsToDone = this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit);
       }
 
-      const plusState = this.getPlusState(tsk, progr, true);
+      const plusState = this.getPlusState(tsk, progr, progrSt, true);
 
       if (!GameSettings.isShowAbProgrTable) {
         tsk.statesDescr.push(plusState);

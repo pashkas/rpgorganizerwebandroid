@@ -342,7 +342,7 @@ export class PersListComponent implements OnInit {
   }
 
   upAbil(ab: Ability) {
-    this.srv.activateAbility(ab, true);
+    this.srv.upAbility(ab, true);
   }
 
   /**
@@ -359,6 +359,7 @@ export class PersListComponent implements OnInit {
           ab.tasks.forEach((tsk) => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
             tsk.order = GameSettings.tskOrderDefault;
+            tsk.classicalExp = 0;
             tsk.autoTime = 0;
             tsk.plusExp = 0;
             tsk.lastDate = 0;
@@ -372,7 +373,6 @@ export class PersListComponent implements OnInit {
             tsk.date = new Date();
             tsk.secondsDone = 0;
             tsk.nextAbVal = 0;
-            this.srv.GetRndEnamy(tsk, 0, this.pers.maxPersLevel);
             tsk.states.forEach((st) => {
               st.order = GameSettings.tskOrderDefault;
               st.autoTime = 0;
@@ -381,7 +381,6 @@ export class PersListComponent implements OnInit {
               st.nextId = null;
               st.lastNotDone = false;
               st.secondsDone = 0;
-              this.srv.GetRndEnamy(st, 0, this.pers.maxPersLevel);
             });
             tsk.secondsDone = 0;
             tsk.lastNotDone = false;
@@ -392,6 +391,7 @@ export class PersListComponent implements OnInit {
 
       // Обновление картинок квестов
       this.srv.updateQwestTasksImages(this.pers);
+      this.srv.updateAbTasksImages(this.pers);
 
       this.pers.expKoef = 0;
       this.pers.exp = 0;

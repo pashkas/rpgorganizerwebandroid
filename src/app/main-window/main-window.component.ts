@@ -40,59 +40,6 @@ export class MainWindowComponent implements OnInit {
 
   constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService) {}
 
-  /**
-   * Автовремя.
-   */
-  autoSort(tsk: Task, isDone: boolean) {
-    let prs = this.srv.pers$.value;
-
-    if (!prs.isWriteTime || prs.currentView != curpersview.SkillTasks) {
-      return;
-    }
-
-    let tsks: Task[] = prs.tasks;
-
-    if (tsks.length > 0 && tsks.find((q) => q.order == GameSettings.tskOrderDefault) != null) {
-      this.srv.pers$.value.currentView = curpersview.SkillsSort;
-      this.srv.savePers(false);
-
-      tsks = this.srv.pers$.value.tasks;
-      this.sortSkillsGlobal();
-
-      // // Лог
-      // for (const tsk of tsks) {
-      //   console.log(tsk.order + ": " + tsk.name);
-      // }
-
-      this.srv.pers$.value.currentView = curpersview.SkillTasks;
-      this.srv.savePers(false);
-
-      tsks = this.srv.pers$.value.tasks;
-    }
-
-    const orders = tsks.map((q) => q.order);
-
-    tsks.unshift(
-      tsks.splice(
-        tsks.findIndex((q) => q.id == tsk.id),
-        1
-      )[0]
-    );
-
-    for (let i = 0; i < tsks.length; i++) {
-      let t = tsks[i];
-      let tskPers: Task | taskState = this.srv.allMap[t.id].item;
-
-      if (tskPers != null) {
-        tskPers.order = orders[i];
-      }
-    }
-
-    if (prs.isWriteTime) {
-      prs.currentView = curpersview.SkillsGlobal;
-    }
-  }
-
   addToQwest() {
     let qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
 
@@ -131,8 +78,13 @@ export class MainWindowComponent implements OnInit {
     }
   }
 
-  changeEnamyImageForItem(id) {
-    this.srv.GetRndEnamy(this.srv.allMap[id].item, this.srv.pers$.value.level, this.srv.pers$.value.maxPersLevel);
+  changeEnamyImageForItem(id, tsk: Task) {
+    let mainTask = this.getMainTask(tsk);
+    if (mainTask != null && mainTask.requrense != "нет") {
+      this.srv.GetRndEnamy(this.srv.allMap[id].item, this.srv.getAbMonsterLvl(mainTask), this.srv.pers$.value.maxPersLevel);
+    } else {
+      this.srv.GetRndEnamy(this.srv.allMap[id].item, this.srv.pers$.value.level, this.srv.pers$.value.maxPersLevel);
+    }
   }
 
   checkDate(date: Date) {
@@ -153,7 +105,7 @@ export class MainWindowComponent implements OnInit {
   async done(t: Task) {
     await this.animate(true);
 
-    this.changeEnamyImageForItem(t.id);
+    this.changeEnamyImageForItem(t.id, t);
 
     this.srv.changesBefore();
 
@@ -162,8 +114,6 @@ export class MainWindowComponent implements OnInit {
     const prs = this.srv.pers$.value;
 
     let tskIndex = prs.tasks.indexOf(t);
-
-    this.autoSort(t, true);
 
     if (t.parrentTask) {
       // Логика для навыков
@@ -183,10 +133,6 @@ export class MainWindowComponent implements OnInit {
       tskName = t.tittle;
     }
 
-    if (tskName && !prs.isNoDiary) {
-      prs.Diary[0].done += tskName + "; ";
-    }
-
     if (t.requrense == "нет") {
       this.srv.upQwest(t.id);
     }
@@ -197,7 +143,32 @@ export class MainWindowComponent implements OnInit {
       this.srv.setCurInd(tskIndex);
     }
 
-    this.srv.changesAfter(true);
+    this.srv.changesAfter(true, this.getAbImg(t));
+  }
+
+  private getAbImg(t: Task) {
+    let abImg: string = null;
+    let mainTsk: Task = this.getMainTask(t);
+    if (mainTsk != null) {
+      if (mainTsk.requrense != "нет") {
+        let ab: Ability = this.srv.allMap[mainTsk.id].link;
+        if (ab != null) {
+          abImg = ab.image;
+        }
+      }
+    }
+    return abImg;
+  }
+
+  private getMainTask(t: Task): Task {
+    let mainTsk: Task = null;
+    if (t.parrentTask) {
+      mainTsk = this.srv.allMap[t.parrentTask].item;
+    } else {
+      mainTsk = t;
+    }
+
+    return mainTsk;
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -214,7 +185,7 @@ export class MainWindowComponent implements OnInit {
 
     await this.animate(false);
 
-    this.changeEnamyImageForItem(t.id);
+    this.changeEnamyImageForItem(t.id, t);
 
     this.srv.changesBefore();
 
@@ -223,8 +194,6 @@ export class MainWindowComponent implements OnInit {
     let prs = this.srv.pers$.value;
 
     let tskIndex = prs.tasks.indexOf(t);
-
-    this.autoSort(t, false);
 
     if (t.parrentTask) {
       // Логика для подзадач
@@ -250,7 +219,7 @@ export class MainWindowComponent implements OnInit {
       this.srv.setCurInd(tskIndex);
     }
 
-    this.srv.changesAfter(false);
+    this.srv.changesAfter(false, this.getAbImg(t));
   }
 
   firstOrGlobal() {

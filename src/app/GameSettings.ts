@@ -1,4 +1,13 @@
 export class GameSettings {
+  /**
+   * В листе перса целые значения/или дробные.
+   */
+  static isCeilProgressInList: boolean = true;
+  /**
+   * Классический режим РПГ.
+   */
+  static isClassicaRPG: boolean = true;
+
   static isShowDec: boolean = true;
   /**
    * Максимальный уровень персонажа.
@@ -38,7 +47,7 @@ export class GameSettings {
   /**
    * Начальное ОН.
    */
-  static startAbPoints: number = 5;
+  static startAbPoints: number = 3;
 
   /**
    * Плюс к прогрессу для задания в задаче.
@@ -92,22 +101,22 @@ export class GameSettings {
   /**
    * Показывать изменения уровней характеристик.
    */
-  static changesIsChowChaLevels: boolean = false;
+  static changesIsChowChaLevels: boolean = true;
 
   /**
    * Показывать изменения значений характеристик.
    */
-  static changesIsChowChaValues: boolean = true;
+  static changesIsChowChaValues: boolean = false;
 
   /**
    * Показывать изменения уровней навыков.
    */
-  static changesIsShowAbLevels: boolean = false;
+  static changesIsShowAbLevels: boolean = true;
 
   /**
    * Показывать изменения значений навыков.
    */
-  static changesIsShowAbValues: boolean = true;
+  static changesIsShowAbValues: boolean = false;
 
   /**
    * Показывать открытие навыка.
@@ -166,7 +175,7 @@ export class GameSettings {
   /**
    * Максимальный уровень характеристик.
    */
-  static maxChaLvl: number = 20;
+  static maxChaLvl: number = 10;
   /**
    * Минимальный уровень характеристик.
    */
@@ -175,7 +184,7 @@ export class GameSettings {
   /**
    * Максимальный уровень навыков.
    */
-  static maxAbilLvl: number = 20;
+  static maxAbilLvl: number = 10;
 
   /**
    * Минимальный уровень навыка.

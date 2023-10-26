@@ -6,6 +6,7 @@ import { plusToName } from "./plusToName";
 import { ReqItemType } from "./ReqItem";
 import { GameSettings } from "src/app/GameSettings";
 export class Task implements IImg {
+  classicalExp: number = 0;
   reqvirements: Reqvirement[] = [];
   prefix: string = "";
   postfix: string = "";

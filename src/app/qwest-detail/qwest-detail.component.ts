@@ -374,7 +374,6 @@ export class QwestDetailComponent implements OnInit {
       }
     });
 
-    debugger;
     if (this.qwest != null && this.qwest.hardnessId == null) {
       this.setHardnessControll(3);
     }

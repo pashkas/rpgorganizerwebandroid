@@ -24,7 +24,7 @@ export class PerschangesService {
     return JSON.parse(JSON.stringify(pers));
   }
 
-  async showChanges(congrantMsg: string, failMsg: string, isGood: boolean) {
+  async showChanges(congrantMsg: string, failMsg: string, isGood: boolean, img?: string) {
     let changesMap = {};
 
     // Значения до
@@ -336,6 +336,15 @@ export class PerschangesService {
     });
 
     let wasGold = false;
+
+    if (img != null) {
+      for (const ch of unionChanges) {
+        if (ch.type == "exp") {
+          ch.img = img;
+        }
+      }
+    }
+
     for (const ch of unionChanges) {
       const head = ch.head;
       const abPoints = ch.head;

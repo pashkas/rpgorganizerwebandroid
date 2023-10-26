@@ -33,6 +33,7 @@ export class TaskDetailComponent implements OnInit {
   isQuick: any;
   isFromMain: any;
   isShowAbProgrTable = GameSettings.isShowAbProgrTable;
+  isClassical = GameSettings.isClassicaRPG;
   linkQwests: Qwest[] = [];
   @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
   percSymbol = GameSettings.changesIsShowPercentageInAb ? "%" : "";
@@ -355,7 +356,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   upAbil() {
-    this.srv.activateAbility(this.tskAbility);
+    this.srv.upAbility(this.tskAbility);
   }
 
   private findLinks() {
