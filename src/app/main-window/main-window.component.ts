@@ -12,11 +12,7 @@ import { curpersview } from "src/Models/curpersview";
 import { Qwest } from "src/Models/Qwest";
 import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-component.component";
 import { takeUntil } from "rxjs/operators";
-import * as moment from "moment";
 import { GameSettings } from "../GameSettings";
-// import { Vibration } from "@awesome-cordova-plugins/vibration";
-// import { BackgroundMode } from "@awesome-cordova-plugins/background-mode";
-import { Vibration } from "@awesome-cordova-plugins/vibration";
 
 @Component({
   selector: "app-main-window",

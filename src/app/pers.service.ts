@@ -865,7 +865,7 @@ export class PersService {
       result.startExp = expLvl;
 
       let curLvl = (persLevel + 1) * GameSettings.startAbPoints;
-      let koef = 1 + persLevel * 0.05;
+      let koef = 1 + persLevel * 0.03;
       curLvl = curLvl * koef;
 
       expLvl += curLvl;
@@ -1967,12 +1967,9 @@ export class PersService {
 
   setPers(data: string) {
     let prs: Pers = JSON.parse(data);
+    prs.isWriteTime = false;
 
-    if (prs.isWriteTime) {
-      prs.currentView = curpersview.SkillsGlobal;
-    } else {
-      prs.currentView = curpersview.SkillTasks;
-    }
+    prs.currentView = curpersview.SkillTasks;
 
     if (prs.tasks && prs.tasks.length > 0) {
       prs.currentTaskIndex = 0;
@@ -2272,15 +2269,15 @@ export class PersService {
   }
 
   tesTaskTittleCount(progr: number, aimVal: number, oneOrMore: boolean, aimUnit: string, aimDone?: number, isEven?: boolean) {
+    if (aimVal < 0) {
+      aimVal = aimVal - 1;
+    }
+
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
     let value = Math.round(progr * av);
 
-    if (aimVal < 0) {
-      value = Math.round(progr * av);
-    }
-
-    if (oneOrMore && !(aimVal < 0)) {
+    if (oneOrMore) {
       if (value < 1) {
         value = 1;
       }
@@ -2405,8 +2402,9 @@ export class PersService {
     if (GameSettings.isOpenAbWhenActivate && !wasOpen && !GameSettings.isClassicaRPG) {
       this.router.navigate(["pers/task", ab.tasks[0].id, true], { queryParams: { isQuick: true, isActivate: true, isFromMain: isFromMain } });
     }
+
     if (GameSettings.isOpenAbWhenActivate && GameSettings.isClassicaRPG && isFromMain) {
-      this.router.navigate(["pers/task", ab.tasks[0].id, false], { queryParams: { isQuick: true, isActivate: true, isFromMain: isFromMain } });
+      this.router.navigate(["pers/task", ab.tasks[0].id, false], { queryParams: { isQuick: true, isActivate: true, isFromMain: false } });
     }
 
     setTimeout(() => {

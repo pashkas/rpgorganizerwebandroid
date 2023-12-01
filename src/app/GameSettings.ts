@@ -12,7 +12,7 @@ export class GameSettings {
   /**
    * Максимальный уровень персонажа.
    */
-  static maxPersLevel: number = 100;
+  static maxPersLevel: number = 50;
 
   /**
    * Тип расчета опыта. (dynamic, abLvl, abVal, abLvl2)
@@ -131,12 +131,12 @@ export class GameSettings {
   /**
    * Длительность показа попапа с изменениями.
    */
-  static changesPopupDuration: number = 2250;
+  static changesPopupDuration: number = 2500;
 
   /**
    * Длительность попапа изменений квестов.
    */
-  static changesPopupDurationQwest: number = 2250;
+  static changesPopupDurationQwest: number = 2500;
 
   /**
    * Длительность самой анимации.
