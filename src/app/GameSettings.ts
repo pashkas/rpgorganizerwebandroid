@@ -196,6 +196,16 @@ export class GameSettings {
    */
   static tesMaxVal: number = GameSettings.maxAbilLvl * 10 - GameSettings.minAbilLvl * 10;
 
+  /**
+   * Число картинок скиллов.
+   */
+  static skiilImgNum: number = 134;
+
+  /**
+   * Число картинок персонажей.
+   */
+  static persImgNum: number = 51;
+
   static tskOrderDefault: number = -1;
 
   static baseTskGold: number = 1;
@@ -206,6 +216,7 @@ export class GameSettings {
     { id: 2, name: "сложно", gold: 500 },
     { id: 1, name: "оч. сложно", gold: 2500 },
   ];
+
   static revProbs: taskProb[] = [
     { id: 5, name: "оч. распространенный", prob: 3, gold: 75 },
     { id: 4, name: "распространенный", prob: 2, gold: 125 },
