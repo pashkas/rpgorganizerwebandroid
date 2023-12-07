@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject, ViewChild, ElementRef } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material";
+import { GameSettings } from "../GameSettings";
 
 @Component({
   selector: "app-add-item-dialog",
@@ -30,7 +31,7 @@ export class AddItemDialogComponent implements OnInit {
     }
 
     if (this.data.isPers) {
-      for (let i = 1; i <= 50; i++) {
+      for (let i = 1; i <= GameSettings.persImgNum; i++) {
         let ss = "000" + i;
         ss = ss.substr(ss.length - 3);
         this.gallerryImages.push("assets/img/Perses/" + ss + ".webp");
@@ -46,7 +47,7 @@ export class AddItemDialogComponent implements OnInit {
       if (this.data.isQwest) {
         // this.isGallery = false;
       }
-      for (let i = 1; i <= 130; i++) {
+      for (let i = 1; i <= GameSettings.skiilImgNum; i++) {
         let ss = "000" + i;
         ss = ss.substr(ss.length - 3);
         this.gallerryImages.push("assets/img/Gallery/" + ss + ".webp");

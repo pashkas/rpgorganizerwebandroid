@@ -315,10 +315,10 @@ export class TaskDetailComponent implements OnInit {
       this.srv.savePers(false);
       this.findLinks();
       this.isEditMode = false;
-      if (this.isQuick) {
-        this.location.back();
-        // this.router.navigate(["/pers"]);
-      }
+      // if (this.isQuick) {
+      //   this.location.back();
+      //   // this.router.navigate(["/pers"]);
+      // }
     } else {
       this.isEditMode = true;
     }
