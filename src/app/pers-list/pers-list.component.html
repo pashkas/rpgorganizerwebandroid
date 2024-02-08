@@ -121,7 +121,9 @@
                   <div>
                     <ul class="list-group py-0" *ngIf="item.abilities.length > 0">
                       <ng-container *ngFor="let ab of item.abilities; let even = even; let odd = odd">
-                        <ng-container *ngIf="(GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp && pers.ON > 0) || (!GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp) || {} as mayUp">
+                        <ng-container
+                          *ngIf="(GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp && pers.ON >= ab.tasks[0]?.hardnes) || (!GameSettings.isAbPointsEnabled && ab.tasks[0]?.mayUp) || {} as mayUp"
+                        >
                           <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped" [ngClass]="{ even: even && mayUp == true }">
                             <div class="align-self-center w-100 d-flex">
                               <div class="flex-grow-1 progress position-relative" style="height: 20px">

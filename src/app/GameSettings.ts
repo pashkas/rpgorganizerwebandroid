@@ -4,6 +4,10 @@ export class GameSettings {
    */
   static isCeilProgressInList: boolean = true;
   /**
+   * Прогресс бар целый?
+   */
+  static isCeilProgressBar: boolean = true;
+  /**
    * Классический режим РПГ.
    */
   static isClassicaRPG: boolean = true;
@@ -12,7 +16,7 @@ export class GameSettings {
   /**
    * Максимальный уровень персонажа.
    */
-  static maxPersLevel: number = 50;
+  static maxPersLevel: number = 100;
 
   /**
    * Тип расчета опыта. (dynamic, abLvl, abVal, abLvl2)
@@ -22,7 +26,7 @@ export class GameSettings {
   /**
    * Очков за уровень.
    */
-  static abLvlForPersLvl: number = 5;
+  static abLvlForPersLvl: number = 3;
 
   /**
    * За сколько уровней даются очки навыков.
@@ -64,8 +68,8 @@ export class GameSettings {
 
     if (isTES) {
       // В стиле TES
-      let skillMult = 1;
-      let skillOffcet = 1 - skillMult;
+      let skillMult = 2;
+      let skillOffcet = 2 - skillMult;
 
       let result = level * skillMult + skillOffcet;
       result = Math.ceil(result);

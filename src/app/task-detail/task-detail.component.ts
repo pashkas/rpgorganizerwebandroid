@@ -40,6 +40,7 @@ export class TaskDetailComponent implements OnInit {
   pers: Pers;
   requrenses: string[] = Task.requrenses;
   times = [1, 2, 3, 4, 5];
+  hardneses = [1, 2, 3];
   tsk: Task;
   tskAbility: Ability;
   tskCharact$ = new BehaviorSubject<Characteristic>(undefined);
@@ -49,12 +50,24 @@ export class TaskDetailComponent implements OnInit {
     return name;
   }
 
-  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, fb: FormBuilder, private platformLocation: PlatformLocation) {
+  constructor(
+    private location: Location,
+    private route: ActivatedRoute,
+    public srv: PersService,
+    private router: Router,
+    public dialog: MatDialog,
+    fb: FormBuilder,
+    private platformLocation: PlatformLocation
+  ) {
     this.charactCntrl = fb.control("");
     this.charactGroup = fb.group({
       charact: this.charactCntrl,
     });
     this.GameSettings = GameSettings;
+  }
+
+  setTskHardness(val: number) {
+    this.tsk.hardnes = val;
   }
 
   /**
@@ -72,20 +85,6 @@ export class TaskDetailComponent implements OnInit {
 
     let header = "";
     let time = null;
-    // if (this.tsk.requrense == 'нет') {
-    //   time = null;
-    // }
-    // else{
-    //   if (st) {
-    //     if (st.time == null || st.time == undefined) {
-    //       st.time = "00:00";
-    //     }
-    //     time = st.time;
-    //   }
-    //   else{
-    //     time = "00:00";
-    //   }
-    // }
 
     header += isEdit ? "Редактировать" : "Добавить";
     header += this.tsk.requrense == "нет" ? " подзадачу" : " подзадачу";
@@ -177,7 +176,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   downAbil() {
-    this.srv.deActivateAbility(this.tskAbility);
+    this.srv.downUbility(this.tskAbility);
   }
 
   drop(event: CdkDragDrop<string[]>) {

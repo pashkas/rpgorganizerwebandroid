@@ -578,25 +578,48 @@ export class PersService {
     }
   }
 
-  deActivateAbility(tskAbility: Ability) {
+  downUbility(tskAbility: Ability) {
     let ab = this.allMap[tskAbility.id].item;
     this.changesBefore();
-    ab.isOpen = false;
 
-    for (const tsk of ab.tasks) {
-      tsk.value = 0;
-      tsk.tesValue = 0;
-      tsk.tesAbValue = 0;
-      tsk.progresNextLevel = 0;
-      tsk.progressValue = 0;
+    var isClosed = false;
+    if (GameSettings.isClassicaRPG) {
+      for (const tsk of ab.tasks) {
+        tsk.value -= 1;
+        if (tsk.value <= 0) {
+          tsk.value = 0;
+          isClosed = true;
+        }
+      }
     }
 
-    ab.value = 0;
-    ab.progressValue = 0;
+    if (isClosed) {
+      ab.isOpen = false;
 
-    // Обновляем дату
-    let date = new Date();
-    date.setHours(0, 0, 0, 0);
+      for (const tsk of ab.tasks) {
+        tsk.value = 0;
+        tsk.tesValue = 0;
+        tsk.tesAbValue = 0;
+        tsk.progresNextLevel = 0;
+        tsk.progressValue = 0;
+        tsk.classicalExp = 0;
+      }
+
+      ab.value = 0;
+      ab.progressValue = 0;
+
+      // Обновляем дату
+      let date = new Date();
+      date.setHours(0, 0, 0, 0);
+    }
+
+    for (const tsk of ab.tasks) {
+      this.GetRndEnamy(tsk, this.getAbMonsterLvl(tsk), GameSettings.maxPersLevel);
+
+      tsk.states.forEach((st) => {
+        this.GetRndEnamy(st, this.getAbMonsterLvl(tsk), GameSettings.maxPersLevel);
+      });
+    }
 
     setTimeout(() => {
       this.savePers(false);
@@ -865,8 +888,8 @@ export class PersService {
       result.startExp = expLvl;
 
       let curLvl = (persLevel + 1) * GameSettings.startAbPoints;
-      let koef = 1 + persLevel * 0.03;
-      curLvl = curLvl * koef;
+      // let koef = 1 + persLevel * 0.03;
+      // curLvl = curLvl * koef;
 
       expLvl += curLvl;
 
@@ -1385,7 +1408,6 @@ export class PersService {
             tsk.autoTime = 0;
           }
 
-          tsk.hardnes = 1;
           abCount += 1;
 
           if (!tsk.tskWeekDays) {
@@ -1482,7 +1504,7 @@ export class PersService {
           let progressNextLevel = (tsk.tesValue / 10.0 - Math.floor(tsk.tesValue / 10.0)) * 100;
           tsk.progresNextLevel = progressNextLevel;
 
-          if (GameSettings.isCeilProgressInList) {
+          if (GameSettings.isCeilProgressBar) {
             let valP = tsk.value;
             tsk.progressValue = (valP / GameSettings.maxAbilLvl) * 100;
             ab.progressValue = tsk.progressValue;
@@ -1492,8 +1514,8 @@ export class PersService {
             ab.progressValue = tsk.progressValue;
           }
 
-          abMax += GameSettings.maxAbilLvl - 1;
-          abCur += tsk.value - GameSettings.minAbilLvl >= 0 ? tsk.value - GameSettings.minAbilLvl : 0;
+          abMax += (GameSettings.maxAbilLvl - 1) * tsk.hardnes;
+          abCur += (tsk.value - GameSettings.minAbilLvl >= 0 ? tsk.value - GameSettings.minAbilLvl : 0) * tsk.hardnes;
 
           if (abMax < (GameSettings.maxAbilLvl - 1) * 1) {
             abMax = (GameSettings.maxAbilLvl - 1) * 1;
@@ -1509,14 +1531,11 @@ export class PersService {
             tsk.mayUp = false;
           }
 
-          if (!GameSettings.isClassicaRPG) {
-            if (ab.isOpen) {
-              tsk.mayUp = false;
-            }
-          } else {
-            if (tsk.value >= GameSettings.maxAbilLvl) {
-              tsk.mayUp = false;
-            }
+          if (!GameSettings.isClassicaRPG && ab.isOpen) {
+            tsk.mayUp = false;
+          }
+          if (tsk.value >= GameSettings.maxAbilLvl) {
+            tsk.mayUp = false;
           }
 
           const rng = new Rangse();
@@ -1578,7 +1597,7 @@ export class PersService {
             tsk.classicalExp = 0;
           }
           classicalExpTotal += tsk.classicalExp;
-          abValTotal += this.getAbVal(tsk.tesValue, ab.isOpen, tsk.value);
+          abValTotal += this.getAbVal(tsk.tesValue, ab.isOpen, tsk.value) * tsk.hardnes;
         }
 
         if (ab.isOpen) {
@@ -2473,9 +2492,9 @@ export class PersService {
       tsk.classicalExp = 0;
     }
     if (isDone) {
-      tsk.classicalExp += 1 * koef;
+      tsk.classicalExp += 1 * koef * tsk.hardnes;
     } else {
-      tsk.classicalExp -= 1 * koef;
+      tsk.classicalExp -= 2 * koef * tsk.hardnes;
     }
   }
 
@@ -2537,7 +2556,7 @@ export class PersService {
       ch.progresNextLevel = 100;
     }
 
-    if (!GameSettings.isCeilProgressInList) {
+    if (!GameSettings.isCeilProgressBar) {
       ch.progressValue = ch.progresNextLevel;
     }
 
@@ -3075,10 +3094,12 @@ export class PersService {
 
     // Прогресс навыка
     let abCellValue = Math.floor(ab.value);
-    // let abProgress = ab.value - abCellValue;
-    // ab.progressValue = abProgress * 100;
-
     ab.progressValue = (abCellValue / 10) * 100;
+
+    if (GameSettings.isCeilProgressBar) {
+      let abProgress = ab.value - abCellValue;
+      ab.progressValue = abProgress * 100;
+    }
   }
 
   private setCurPersTask(prs: Pers) {

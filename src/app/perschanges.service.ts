@@ -337,7 +337,7 @@ export class PerschangesService {
 
     let wasGold = false;
 
-    if (img != null) {
+    if (GameSettings.isClassicaRPG && img != null) {
       for (const ch of unionChanges) {
         if (ch.type == "exp") {
           ch.img = img;

@@ -61,12 +61,14 @@
         {{ tsk.date | datestring }}
       </div>
 
-      <!-- Открыть навык -->
+      <!-- Поднять навык -->
       <div
         fxLayout="row"
         fxLayoutAlign="space-between center"
         fxLayoutGap="5px"
-        *ngIf="tskAbility && ((GameSettings.isAbPointsEnabled && tskAbility.tasks[0]?.mayUp && pers.ON > 0) || (!GameSettings.isAbPointsEnabled && tskAbility.tasks[0]?.mayUp))"
+        *ngIf="
+          tskAbility && ((GameSettings.isAbPointsEnabled && tskAbility.tasks[0]?.mayUp && pers.ON >= tskAbility.tasks[0].hardnes) || (!GameSettings.isAbPointsEnabled && tskAbility.tasks[0]?.mayUp))
+        "
       >
         <button class="icon-small" mat-icon-button (click)="upAbil()">
           <img src="assets/icons/up.png" class="img-fluid" />
@@ -78,8 +80,8 @@
           </span>
         </span>
       </div>
-      <!-- Закрыть навык -->
-      <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px" *ngIf="tskAbility?.isOpen && !isClassical">
+      <!-- Понизить навык -->
+      <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px" *ngIf="tskAbility?.isOpen">
         <button class="icon-small" mat-icon-button (click)="downAbil()">
           <img src="assets/icons/down.png" class="img-fluid" />
         </button>
@@ -229,19 +231,16 @@
           <input onfocus="this.pers" matInput autocomplete="off" placeholder="Постфикс" [(ngModel)]="tsk.postfix" name="tsk.postfix" />
         </mat-form-field>
         <mat-chip-list selectable multiple>
+          <ng-container>
+            <mat-chip (click)="setTskHardness(1)" [selected]="tsk.hardnes == 1" color="accent">Норм</mat-chip>
+            <mat-chip (click)="setTskHardness(2)" [selected]="tsk.hardnes == 2" color="accent">Слож</mat-chip>
+            <mat-chip (click)="setTskHardness(3)" [selected]="tsk.hardnes == 3" color="accent">Оч. слож </mat-chip>
+            <mat-divider vertical class="vertdiv"></mat-divider>
+          </ng-container>
+
           <mat-chip (click)="tsk.isPerk = !tsk.isPerk" [selected]="tsk.isPerk" color="accent"> &nbsp;Перк?&nbsp; </mat-chip>
 
-          <!-- <ng-container>
-            <mat-divider vertical class="vertdiv"></mat-divider>
-            <mat-chip *ngIf="!pers.isTES" (click)="tsk.hardnes=0.5" [selected]="tsk.hardnes==0.5" color="accent">легко
-            </mat-chip>
-            <mat-chip (click)="tsk.hardnes=1" [selected]="tsk.hardnes==1" color="accent">норм</mat-chip>
-            <mat-chip (click)="tsk.hardnes=2" [selected]="tsk.hardnes==2" color="accent">слож</mat-chip>
-            <mat-chip *ngIf="pers.isTES" (click)="tsk.hardnes=3" [selected]="tsk.hardnes==3" color="accent">оч. слож
-            </mat-chip>
-          </ng-container> -->
-
-          <!-- <mat-divider vertical class="vertdiv"></mat-divider> -->
+          <mat-divider vertical class="vertdiv"></mat-divider>
 
           <mat-chip [selected]="tsk.isStatePlusTitle" color="accent" (click)="tsk.isStatePlusTitle = !tsk.isStatePlusTitle"> Название</mat-chip>
           <mat-chip [selected]="tsk.isStateInTitle" color="accent" (click)="tsk.isStateInTitle = !tsk.isStateInTitle"> Заголовок </mat-chip>
