@@ -157,13 +157,6 @@ export class PersService {
       let aTask = a.tasks[0];
       let bTask = b.tasks[0];
 
-      // Макс?
-      // let aMax = aTask.value == GameSettings.maxAbilLvl ? 1 : 0;
-      // let bMax = bTask.value == GameSettings.maxAbilLvl ? 1 : 0;
-      // if (aMax != bMax) {
-      //   return (aMax - bMax);
-      // }
-
       // Открыта?
       let aIsOpen = a.isOpen ? 1 : 0;
       let bIsOpen = b.isOpen ? 1 : 0;
@@ -171,17 +164,27 @@ export class PersService {
         return -(aIsOpen - bIsOpen);
       }
 
-      // Можно открыть
-      let aMayUp = aTask.mayUp || aTask.value == GameSettings.maxAbilLvl ? 1 : 0;
-      let bMayUp = bTask.mayUp || bTask.value == GameSettings.maxAbilLvl ? 1 : 0;
+      if (aIsOpen == 1 && bIsOpen == 1) {
+        // Перк?
+        let aperk = aTask.isPerk ? 1 : 0;
+        let bperk = bTask.isPerk ? 1 : 0;
 
-      if (aMayUp != bMayUp) {
-        return -(aMayUp - bMayUp);
-      }
+        if (aperk != bperk) {
+          return -(aperk - bperk);
+        }
 
-      // Значение
-      if (a.progressValue != b.progressValue) {
-        return a.progressValue - b.progressValue;
+        // Значение
+        if (a.progressValue != b.progressValue) {
+          return a.progressValue - b.progressValue;
+        }
+      } else {
+        // Можно открыть
+        let aMayUp = aTask.mayUp || aTask.value == GameSettings.maxAbilLvl ? 1 : 0;
+        let bMayUp = bTask.mayUp || bTask.value == GameSettings.maxAbilLvl ? 1 : 0;
+
+        if (aMayUp != bMayUp) {
+          return -(aMayUp - bMayUp);
+        }
       }
 
       // Сложность
@@ -194,7 +197,7 @@ export class PersService {
       let bperk = bTask.isPerk ? 1 : 0;
 
       if (aperk != bperk) {
-        return aperk - bperk;
+        return -(aperk - bperk);
       }
 
       return a.name.localeCompare(b.name);
