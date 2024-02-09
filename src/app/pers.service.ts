@@ -1396,6 +1396,7 @@ export class PersService {
     }
 
     for (const ch of prs.characteristics) {
+      ch.descr = null;
       let abMax = 0;
       let abCur = 0;
       let tesAbMax = 0;
@@ -1404,7 +1405,9 @@ export class PersService {
       let abExpPointsCur = 0;
 
       for (const ab of ch.abilities) {
+        ab.descr = null;
         for (const tsk of ab.tasks) {
+          tsk.descr = null;
           this.normalizeTskAbilityValue(tsk, ab);
 
           if (tsk.autoTime == null) {
@@ -1629,6 +1632,7 @@ export class PersService {
     prs.characteristics = prs.characteristics.sort(this.chaSorter());
 
     for (const qw of prs.qwests) {
+      qw.descr = null;
       qw.isNoActive = false;
       let totalTasks = 0;
       let doneTasks = 0;

@@ -62,31 +62,21 @@
       </div>
 
       <!-- Поднять навык -->
-      <div
-        fxLayout="row"
-        fxLayoutAlign="space-between center"
-        fxLayoutGap="5px"
-        *ngIf="
-          tskAbility &&
-          ((GameSettings.isAbPointsEnabled && tskAbility.tasks[0]?.mayUp && (pers.ON >= tskAbility.tasks[0].hardnes || tskAbility?.isOpen)) ||
-            (!GameSettings.isAbPointsEnabled && tskAbility.tasks[0]?.mayUp))
-        "
-      >
-        <!-- Понизить навык -->
-        <button *ngIf="tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
-          <img src="assets/icons/down.png" class="img-fluid" />
-        </button>
-        <span class="pl-1" *ngIf="tsk.requrense != 'нет' && GameSettings.isAbPointsEnabled">
-          <img src="assets/icons/diamond.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
-          <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }">
-            {{ this.pers.ON }}
-          </span>
+      <!-- Понизить навык -->
+      <button *ngIf="tsk.requrense != 'нет' && tskAbility?.isOpen && GameSettings.isAbPointsEnabled" class="icon-small" mat-icon-button (click)="downAbil()">
+        <img src="assets/icons/down.png" class="img-fluid" />
+      </button>
+      <!-- Количество очков -->
+      <div *ngIf="tsk.requrense != 'нет' && GameSettings.isAbPointsEnabled && pers.ON > 0">
+        <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }">
+          <img src="assets/icons/diamond.png" class="img-fluid px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+          {{ this.pers.ON }}
         </span>
-        <!-- Поднять навык -->
-        <button class="icon-small" mat-icon-button (click)="upAbil()">
-          <img src="assets/icons/up.png" class="img-fluid" />
-        </button>
       </div>
+      <!-- Поднять навык -->
+      <button *ngIf="tsk.requrense != 'нет' && GameSettings.isAbPointsEnabled && pers.ON >= tsk.hardnes" class="icon-small" mat-icon-button (click)="upAbil()">
+        <img src="assets/icons/up.png" class="img-fluid" />
+      </button>
     </div>
 
     <!-- Описание -->
