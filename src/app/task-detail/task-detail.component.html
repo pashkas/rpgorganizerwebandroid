@@ -74,7 +74,7 @@
         </span>
       </div>
       <!-- Поднять навык -->
-      <button *ngIf="tsk.requrense != 'нет' && GameSettings.isAbPointsEnabled && pers.ON >= tsk.hardnes" class="icon-small" mat-icon-button (click)="upAbil()">
+      <button *ngIf="tsk.requrense != 'нет' && tsk.mayUp == true" class="icon-small" mat-icon-button (click)="upAbil()">
         <img src="assets/icons/up.png" class="img-fluid" />
       </button>
     </div>

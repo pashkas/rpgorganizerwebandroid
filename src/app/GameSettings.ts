@@ -51,7 +51,7 @@ export class GameSettings {
   /**
    * Начальное ОН.
    */
-  static startAbPoints: number = 3;
+  static startAbPoints: number = 10;
 
   /**
    * Плюс к прогрессу для задания в задаче.
