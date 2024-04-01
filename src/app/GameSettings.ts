@@ -135,21 +135,23 @@ export class GameSettings {
   /**
    * Длительность показа попапа с изменениями.
    */
-  static changesPopupDuration: number = 2500;
+  static changesPopupDuration: number = 3000;
+  static changesPopupDurationAbil: number = 6000;
 
   /**
    * Длительность попапа изменений квестов.
    */
-  static changesPopupDurationQwest: number = 2500;
+  static changesPopupDurationQwest: number = 3000;
 
-  /**
-   * Длительность самой анимации.
-   */
-  static animationDelay: number = 700;
   /**
    * Анимация вспышки задачи.
    */
-  static flashDelay: number = 200;
+  static flashDelay: number = 333;
+  static flashDelay2: number = 555;
+  /**
+   * Длительность самой анимации.
+   */
+  static animationDelay: number = 1000;
 
   /**
    * Показывать процент в прогрессе навыка.

@@ -94,6 +94,8 @@ export class Task implements IImg {
 
   secondsToDone: number = 0;
   secondsDone: number = 0;
+  counterDone: number = 0;
+  counterToDone: number = 0;
   plusExp: number = 0;
   autoTime: number = 0;
 
@@ -236,6 +238,7 @@ export class taskState implements IImg {
   lastNotDone: boolean = false;
   autoTime: number = 0;
   secondsDone: number = 0;
+  counterDone: number = 0;
 }
 
 export interface IImg {

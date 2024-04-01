@@ -61,16 +61,16 @@ export class MainWindowComponent implements OnInit {
       this.isSucessShownOv$.next(true);
       await this.delay(GameSettings.flashDelay);
       this.isSucessShownOv$.next(false);
-      // this.isSucessShown$.next(true);
-      // await this.delay(500);
-      // this.isSucessShown$.next(false);
+      this.isSucessShown$.next(true);
+      await this.delay(GameSettings.flashDelay2);
+      this.isSucessShown$.next(false);
     } else {
       this.isFailShownOv$.next(true);
       await this.delay(GameSettings.flashDelay);
       this.isFailShownOv$.next(false);
-      // this.isFailShown$.next(true);
-      // await this.delay(500);
-      // this.isFailShown$.next(false);
+      this.isFailShown$.next(true);
+      await this.delay(GameSettings.flashDelay2);
+      this.isFailShown$.next(false);
     }
   }
 
@@ -123,6 +123,7 @@ export class MainWindowComponent implements OnInit {
         subTsk.lastNotDone = false;
         subTsk.isDone = true;
         subTsk.secondsDone = 0;
+        subTsk.counterDone = 0;
       }
     } else {
       this.srv.taskPlus(t.id);
@@ -196,6 +197,7 @@ export class MainWindowComponent implements OnInit {
       const tsk: Task = this.srv.allMap[t.parrentTask].item;
       for (const st of tsk.states) {
         st.secondsDone = 0;
+        st.counterDone = 0;
       }
       tskName = this.srv.allMap[t.id].item.name;
       this.srv.subtaskDoneOrFail(t.parrentTask, t.id, false);
@@ -299,6 +301,23 @@ export class MainWindowComponent implements OnInit {
       let idx = this.srv.pers$.value.tasks.findIndex((n) => n.plusToNames.filter((q) => q.linkId == linkId).length > 0);
       this.srv.setCurInd(idx);
     }
+  }
+  clickCounter() {
+    let current = this.srv.currentTask$.value;
+    if (current.parrentTask) {
+      let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.parrentTask].item;
+      let st: taskState = this.srv.allMap[this.srv.currentTask$.value.id].item;
+      var tt = st.counterDone + 1;
+
+      st.counterDone = tt;
+    } else {
+      let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
+      var tt = tsk.counterDone + 1;
+
+      tsk.counterDone = tt;
+    }
+
+    this.srv.savePers(false);
   }
 
   openTaskTimer() {

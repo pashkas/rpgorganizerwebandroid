@@ -24,7 +24,7 @@ export class PerschangesService {
     return JSON.parse(JSON.stringify(pers));
   }
 
-  async showChanges(congrantMsg: string, failMsg: string, isGood: boolean, img?: string) {
+  async showChanges(congrantMsg: string, failMsg: string, isGood: boolean, img?: string, tsk?: Task) {
     let changesMap = {};
 
     // Значения до
@@ -374,11 +374,14 @@ export class PerschangesService {
           img: img,
           gold: gold,
           goldTotal: goldTotal,
+          tsk: tsk,
         },
         backdropClass: "backdrop-changes",
       });
 
-      if (ch.type == "qwest") {
+      if (tsk != null && type == "abil") {
+        await sleep(GameSettings.changesPopupDurationAbil);
+      } else if (ch.type == "qwest") {
         await sleep(GameSettings.changesPopupDurationQwest);
       } else {
         await sleep(GameSettings.changesPopupDuration);

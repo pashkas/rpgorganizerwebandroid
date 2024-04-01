@@ -174,11 +174,9 @@ export class PersService {
         return -this.boolVCompare(a.isOpen, b.isOpen);
       }
 
-      if (aTask.mayUp && bTask.mayUp) {
-        // Одинаковые
-        if (this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame) != 0) {
-          return -this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame);
-        }
+      // Одинаковые
+      if (this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame) != 0) {
+        return -this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame);
       }
 
       // Значение
@@ -193,7 +191,7 @@ export class PersService {
 
       // Перк?
       if (this.boolVCompare(aTask.isPerk, bTask.isPerk) != 0) {
-        return -this.boolVCompare(aTask.isPerk, bTask.isPerk);
+        return this.boolVCompare(aTask.isPerk, bTask.isPerk);
       }
 
       return a.name.localeCompare(b.name);
@@ -425,13 +423,13 @@ export class PersService {
     }
   }
 
-  changesAfter(isGood, img?: string) {
+  changesAfter(isGood, img?: string, tsk?: Task) {
     if (isGood == null) {
       isGood = true;
     }
 
     this.changes.afterPers = this.changes.getClone(this.pers$.value);
-    this.changes.showChanges(this.getCongrantMsg(), this.getFailMsg(), isGood, img);
+    this.changes.showChanges(this.getCongrantMsg(), this.getFailMsg(), isGood, img, tsk);
   }
 
   changesBefore() {
@@ -622,7 +620,7 @@ export class PersService {
 
     setTimeout(() => {
       this.savePers(false);
-      this.changesAfter(false);
+      this.changesAfter(false, null);
     }, 50);
   }
 
@@ -714,9 +712,14 @@ export class PersService {
     return tesValue;
   }
 
-  getAimString(aimVal: number, aimUnit: string): string {
+  getAimString(aimVal: number, aimUnit: string, postfix: string): string {
     if (aimUnit == "Раз" || aimUnit == "Раз чет" || aimUnit == "Раз нечет") {
-      return "‪" + aimVal + "✓";
+      let pstf = "✓";
+      if (postfix != null && postfix.length > 0) {
+        pstf = postfix;
+      }
+
+      return "‪" + aimVal + pstf;
     }
 
     let seconds = aimVal;
@@ -1409,6 +1412,9 @@ export class PersService {
           if (tsk.autoTime == null) {
             tsk.autoTime = 0;
           }
+          if (tsk.counterDone == null) {
+            tsk.counterDone = 0;
+          }
 
           abCount += 1;
 
@@ -1453,6 +1459,9 @@ export class PersService {
 
             if (st.autoTime == null) {
               st.autoTime = 0;
+            }
+            if (st.counterDone == null) {
+              st.counterDone = 0;
             }
 
             if (this.isNullOrUndefined(st.time)) {
@@ -2133,6 +2142,7 @@ export class PersService {
 
     subTask.lastDate = new Date().getTime();
     subTask.secondsDone = 0;
+    subTask.counterDone = 0;
 
     if (this.isNullOrUndefined(subTask.failCounter)) {
       subTask.failCounter = 0;
@@ -2198,8 +2208,10 @@ export class PersService {
 
       for (const st of tsk.states) {
         st.secondsDone = 0;
+        st.counterDone = 0;
       }
       tsk.secondsDone = 0;
+      tsk.counterDone = 0;
       tsk.failCounter++;
 
       this.setCurInd(0);
@@ -2253,10 +2265,12 @@ export class PersService {
         this.setStatesNotDone(tsk);
 
         tsk.secondsDone = 0;
+        tsk.counterDone = 0;
         tsk.lastNotDone = false;
 
         for (const st of tsk.states) {
           st.secondsDone = 0;
+          st.counterDone = 0;
         }
 
         this.setCurInd(0);
@@ -2293,7 +2307,14 @@ export class PersService {
 
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
-    let value = Math.round(progr * av);
+    let pr = progr * av;
+    let value;
+
+    if (av > GameSettings.maxAbilLvl) {
+      value = Math.ceil(pr);
+    } else {
+      value = Math.floor(pr);
+    }
 
     if (oneOrMore) {
       if (value < 1) {
@@ -2306,12 +2327,12 @@ export class PersService {
     }
 
     if (aimUnit == "Раз чет") {
-      value = 2 * Math.round(value / 2);
+      value = 2 * Math.floor(value / 2);
       if (value < 2) value = 2;
     }
 
     if (aimUnit == "Раз нечет") {
-      value = 2 * Math.round(value / 2) - 1;
+      value = 2 * Math.ceil(value / 2) - 1;
       if (value < 1) value = 1;
     }
 
@@ -2319,8 +2340,12 @@ export class PersService {
       value = av - value;
     }
 
-    if (aimDone != null && aimUnit != "Раз" && aimUnit != "Раз чет" && aimUnit != "Раз нечет") {
+    if (aimDone != null && aimDone != 0) {
       value = Math.round(value - aimDone);
+    }
+
+    if (value < 0) {
+      value = 0;
     }
 
     return value;
@@ -2417,17 +2442,22 @@ export class PersService {
       });
     }
 
-    if (GameSettings.isOpenAbWhenActivate && !wasOpen && !GameSettings.isClassicaRPG) {
-      this.router.navigate(["pers/task", ab.tasks[0].id, true], { queryParams: { isQuick: true, isActivate: true, isFromMain: isFromMain } });
+    // if (GameSettings.isOpenAbWhenActivate && !wasOpen && !GameSettings.isClassicaRPG) {
+    //   this.router.navigate(["pers/task", ab.tasks[0].id, true], { queryParams: { isQuick: true, isActivate: true, isFromMain: isFromMain } });
+    // }
+
+    if (GameSettings.isOpenAbWhenActivate && !wasOpen && isFromMain) {
+      this.router.navigate(["pers/task", ab.tasks[0].id, false], { queryParams: { isQuick: true, isActivate: true, isFromMain: false } });
     }
 
-    if (GameSettings.isOpenAbWhenActivate && GameSettings.isClassicaRPG && isFromMain) {
-      this.router.navigate(["pers/task", ab.tasks[0].id, false], { queryParams: { isQuick: true, isActivate: true, isFromMain: false } });
+    let tsk = ab.tasks[0];
+    if (!isFromMain) {
+      tsk = null;
     }
 
     setTimeout(() => {
       this.savePers(false);
-      this.changesAfter(true);
+      this.changesAfter(true, null, tsk);
     }, 50);
   }
 
@@ -2738,15 +2768,21 @@ export class PersService {
       let stateInd = this.tesTaskTittleCount(progrSt, tsk.states.length - 1, false, "State");
 
       stateInd = stateInd;
+      let statePostfix = tsk.postfix;
+      if (tsk.aimTimer != null && tsk.aimTimer > 0) {
+        statePostfix = "";
+      }
 
       if (tsk.isStateRefresh) {
         if (tsk.refreshCounter == null && tsk.refreshCounter == undefined) {
           tsk.refreshCounter = 0;
         }
         let cVal = tsk.refreshCounter % tsk.states.length;
-        const el = tsk.states[cVal].name;
+        let el = tsk.states[cVal].name;
 
         if (el) {
+          el += statePostfix;
+
           plusState += el;
         }
       } else {
@@ -2756,14 +2792,14 @@ export class PersService {
           }
           let plus = [];
           for (let q = 0; q <= stateInd; q++) {
-            const st = tsk.states[q];
+            let el = tsk.states[q];
 
-            plus.push(st.name);
+            plus.push(el.name + statePostfix);
           }
 
           plusState += plus.join("; ");
         } else {
-          plusState += tsk.states[stateInd].name;
+          plusState += tsk.states[stateInd].name + statePostfix;
         }
       }
 
@@ -2783,25 +2819,21 @@ export class PersService {
 
     // Таймер, счетчик
     if (tsk.aimTimer != 0) {
-      let aimVal = 0;
-      if (isCur) {
-        aimVal = tsk.secondsDone;
+      let aimDone = 0;
+      if (isCur && !this.isCounterAim(tsk)) {
+        aimDone = tsk.secondsDone;
+      } else if (isCur && this.isCounterAim(tsk)) {
+        aimDone = tsk.counterDone;
       }
-      plusState += " " + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit);
 
-      if (tsk.aimUnit == "Раз" || tsk.aimUnit == "Раз чет" || tsk.aimUnit == "Раз нечет") {
-        if (tsk.postfix && tsk.postfix.length > 0) {
-          plusState = plusState.replace("✓", "");
-        }
-      }
-    }
-
-    // Постфикс
-    if (tsk.postfix) {
-      plusState += tsk.postfix;
+      plusState += " " + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimDone, tsk.isEven), tsk.aimUnit, tsk.postfix);
     }
 
     return plusState;
+  }
+
+  public isCounterAim(tsk: Task) {
+    return tsk.aimUnit == "Раз" || tsk.aimUnit == "Раз чет" || tsk.aimUnit == "Раз нечет";
   }
 
   private getProgrForTittle(nextAbVal: number, tskVal: number, isPerk: boolean, isMegaPlan: boolean, isState: boolean) {
@@ -2960,6 +2992,8 @@ export class PersService {
     stT.aimUnit = tsk.aimUnit;
     stT.secondsDone = st.secondsDone;
     stT.secondsToDone = tsk.secondsToDone;
+    stT.counterDone = tsk.counterDone;
+    stT.counterToDone = tsk.counterToDone;
     stT.descr = tsk.descr;
 
     let plusName = tsk.curLvlDescr3;
@@ -2972,16 +3006,24 @@ export class PersService {
       let pattern = /‪.*/;
       let plusTimerOrCounter = pattern.exec(tsk.curLvlDescr3);
       if (plusTimerOrCounter) {
-        if (tsk.aimUnit != "Раз") {
+        if (!this.isCounterAim(tsk)) {
           let aimVal = 0;
           aimVal = st.secondsDone;
-          // const cur = 1 + tsk.tesValue / 10;
+
           const cur = tsk.value;
           const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, false, false);
-          let plus = this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit);
+          let plus = this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit, tsk.postfix);
           plusName += " " + plus;
         } else {
-          plusName += " " + plusTimerOrCounter;
+          // plusName += " " + plusTimerOrCounter;
+
+          let aimVal = 0;
+          aimVal = st.counterDone;
+
+          const cur = tsk.value;
+          const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, false, false);
+          let plus = this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimVal, tsk.isEven), tsk.aimUnit, tsk.postfix);
+          plusName += " " + plus;
         }
       }
     }

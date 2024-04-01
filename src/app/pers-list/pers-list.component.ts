@@ -372,6 +372,7 @@ export class PersListComponent implements OnInit {
             tsk.refreshCounter = 0;
             tsk.date = new Date();
             tsk.secondsDone = 0;
+            tsk.counterDone = 0;
             tsk.nextAbVal = 0;
             tsk.states.forEach((st) => {
               st.order = GameSettings.tskOrderDefault;
@@ -381,8 +382,10 @@ export class PersListComponent implements OnInit {
               st.nextId = null;
               st.lastNotDone = false;
               st.secondsDone = 0;
+              st.counterDone = 0;
             });
             tsk.secondsDone = 0;
+            tsk.counterDone = 0;
             tsk.lastNotDone = false;
             this.srv.setStatesNotDone(tsk);
           });

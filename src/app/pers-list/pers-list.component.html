@@ -246,7 +246,7 @@
                     <div mat-list-item *ngFor="let ab of item.abilities; let even = even; let odd = odd" class="row-striped" [ngClass]="{ even: even }">
                       <div class="d-flex align-items-center">
                         <div class="flex-grow-1 align-self-center">
-                          <i>{{ ab.name + (ab | abilitySigns) }}</i>
+                          <i>{{ ab.tasks[0] | abHardness }}</i>
                         </div>
                         <div class="btn-group btn-group-sm" role="group" aria-label="Действия">
                           <!-- Удалить -->

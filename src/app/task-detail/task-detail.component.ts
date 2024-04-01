@@ -26,13 +26,13 @@ export class TaskDetailComponent implements OnInit {
   private unsubscribe$ = new Subject();
 
   GameSettings: typeof GameSettings;
+  isShowAbProgrTable = GameSettings.isShowAbProgrTable;
   charactCntrl: FormControl;
   charactGroup: FormGroup;
   @ViewChild("goUp", { static: false }) goUp: ElementRef;
   isEditMode: boolean = false;
   isQuick: any;
   isFromMain: any;
-  isShowAbProgrTable = GameSettings.isShowAbProgrTable;
   isClassical = GameSettings.isClassicaRPG;
   linkQwests: Qwest[] = [];
   @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;

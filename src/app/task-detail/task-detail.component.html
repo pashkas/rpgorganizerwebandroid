@@ -233,7 +233,7 @@
           <input matInput autocomplete="off" onfocus="this.select()" placeholder="Цель" [(ngModel)]="tsk.aimTimer" name="tsk.aimTimer" />
         </mat-form-field>
 
-        <mat-form-field fxFlex>
+        <mat-form-field fxFlex="30">
           <mat-select [(ngModel)]="tsk.aimUnit" name="aimUnit">
             <mat-option *ngFor="let au of aimUnits" [value]="au.name">
               {{ au.name }}
@@ -241,7 +241,7 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field fxFlex="20">
+        <mat-form-field fxFlex>
           <input onfocus="this.pers" matInput autocomplete="off" placeholder="Постфикс" [(ngModel)]="tsk.postfix" name="tsk.postfix" />
         </mat-form-field>
       </div>

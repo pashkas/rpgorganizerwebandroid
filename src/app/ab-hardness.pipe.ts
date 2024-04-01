@@ -9,16 +9,23 @@ import { Task } from "src/Models/Task";
 export class AbHardnessPipe implements PipeTransform {
   transform(tsk: Task): any {
     let hrd = "";
-    if (tsk.hardnes == 2) {
-      hrd += "*";
-    }
-    if (tsk.hardnes == 3) {
-      hrd += "**";
-    }
     if (tsk.isPerk) {
       hrd += "^";
     }
 
-    return tsk.name + hrd;
+    if (tsk.hardnes == 2) {
+      hrd += "*";
+    }
+
+    if (tsk.hardnes == 3) {
+      hrd += "**";
+    }
+
+    let isSame = "";
+    if(tsk.IsNextLvlSame && tsk.value >= 1 && tsk.mayUp){
+      isSame = "+";
+    }
+
+    return isSame + tsk.name + hrd;
   }
 }
