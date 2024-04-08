@@ -2308,13 +2308,7 @@ export class PersService {
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
     let pr = progr * av;
-    let value;
-
-    if (av > GameSettings.maxAbilLvl) {
-      value = Math.ceil(pr);
-    } else {
-      value = Math.floor(pr);
-    }
+    let value = Math.round(pr);
 
     if (oneOrMore) {
       if (value < 1) {
@@ -2327,7 +2321,7 @@ export class PersService {
     }
 
     if (aimUnit == "Раз чет") {
-      value = 2 * Math.floor(value / 2);
+      value = 2 * Math.ceil(value / 2);
       if (value < 2) value = 2;
     }
 
