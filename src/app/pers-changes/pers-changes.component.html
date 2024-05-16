@@ -39,7 +39,7 @@
       </ng-container>
     </mat-list>
     <!-- Статусы по уровню навыка -->
-    <div class="chLstTsk" *ngIf="tsk && tsk.value > 1 && itemType == 'abil'">
+    <div class="chLstTsk" *ngIf="tsk && (tsk.value > 1 || (tsk.value == 1 && !isGood)) && itemType == 'abil'">
       <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
         <div *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)" class="text-center px-0 py-1 border-0" [ngClass]="{ 'bg-success': i == tsk.value && isShowAbProgrTable }">
           <b>

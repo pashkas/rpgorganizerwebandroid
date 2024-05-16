@@ -50,6 +50,7 @@ export class PersService {
   user: FirebaseUserModel;
 
   constructor(private router: Router, private changes: PerschangesService, public dialog: MatDialog) {
+    GameSettings.setTes();
     this.isOffline = true;
     this.getPers();
   }
@@ -164,34 +165,53 @@ export class PersService {
       let aTask = a.tasks[0];
       let bTask = b.tasks[0];
 
-      // Можно открыть
-      if (this.boolVCompare(aTask.mayUp, bTask.mayUp) != 0) {
-        return -this.boolVCompare(aTask.mayUp, bTask.mayUp);
-      }
-
       // Открыта
       if (this.boolVCompare(a.isOpen, b.isOpen) != 0) {
         return -this.boolVCompare(a.isOpen, b.isOpen);
       }
 
-      // Одинаковые
-      if (this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame) != 0) {
-        return -this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame);
-      }
+      if (GameSettings.isClassicaRPG) {
+        // Можно открыть
+        if (this.boolVCompare(aTask.mayUp, bTask.mayUp) != 0) {
+          return -this.boolVCompare(aTask.mayUp, bTask.mayUp);
+        }
 
-      // Значение
-      if (a.progressValue != b.progressValue) {
-        return a.progressValue - b.progressValue;
-      }
+        if (aTask.mayUp && bTask.mayUp) {
+          // Одинаковые
+          if (this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame) != 0) {
+            return -this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame);
+          }
 
-      // Сложность
-      if (aTask.hardnes != bTask.hardnes) {
-        return aTask.hardnes - bTask.hardnes;
-      }
+          // Значение
+          if (a.progressValue != b.progressValue) {
+            return a.progressValue - b.progressValue;
+          }
+        } else {
+          // Значение
+          if (a.progressValue != b.progressValue) {
+            return -(a.progressValue - b.progressValue);
+          }
+        }
 
-      // Перк?
-      if (this.boolVCompare(aTask.isPerk, bTask.isPerk) != 0) {
-        return this.boolVCompare(aTask.isPerk, bTask.isPerk);
+        // Сложность
+        if (aTask.hardnes != bTask.hardnes) {
+          return aTask.hardnes - bTask.hardnes;
+        }
+
+        // Перк?
+        if (this.boolVCompare(aTask.isPerk, bTask.isPerk) != 0) {
+          return this.boolVCompare(aTask.isPerk, bTask.isPerk);
+        }
+      } else {
+        // Значение
+        if (aTask.tesValue != bTask.tesValue) {
+          return aTask.tesValue - bTask.tesValue;
+        }
+
+        // Можно открыть
+        if (this.boolVCompare(aTask.mayUp, bTask.mayUp) != 0) {
+          return -this.boolVCompare(aTask.mayUp, bTask.mayUp);
+        }
       }
 
       return a.name.localeCompare(b.name);
@@ -202,7 +222,7 @@ export class PersService {
    * Добавить навык.
    * @param charactId Идентификатор характеристики.
    */
-  addAbil(charactId: string, name: string): string {
+  addAbil(charactId: string, name: string, hardness?: number): string {
     var charact: Characteristic = this.pers$.value.characteristics.filter((n) => {
       return n.id === charactId;
     })[0];
@@ -211,7 +231,7 @@ export class PersService {
       abil.name = name;
       abil.isOpen = GameSettings.isNewAbOpened;
 
-      let tsk = this.addTsk(abil, name);
+      let tsk = this.addTsk(abil, name, hardness);
 
       charact.abilities.push(abil);
 
@@ -279,9 +299,12 @@ export class PersService {
    * @param abil Навык.
    * @param newTsk Название задачи.
    */
-  addTsk(abil: Ability, newTsk: string): string {
+  addTsk(abil: Ability, newTsk: string, hardnes?: number): string {
     var tsk = new Task();
     tsk.name = newTsk;
+    if (hardnes) {
+      tsk.hardnes = hardnes;
+    }
 
     this.GetRndEnamy(tsk, this.getAbMonsterLvl(tsk), this.pers$.value.maxPersLevel);
 
@@ -327,15 +350,29 @@ export class PersService {
 
   chaSorter(): (a: Characteristic, b: Characteristic) => number {
     return (a, b) => {
-      // let aHasSame = a.HasSameAbLvl ? 1 : 0;
-      // let bHasSame = b.HasSameAbLvl ? 1 : 0;
+      if (GameSettings.isClassicaRPG) {
+        // Можно открыть
+        if (this.boolVCompare(a.anyMayUp, b.anyMayUp) != 0) {
+          return -this.boolVCompare(a.anyMayUp, b.anyMayUp);
+        }
 
-      // if (aHasSame != bHasSame) {
-      //   return -(aHasSame - bHasSame);
-      // }
+        if (a.anyMayUp == true && b.anyMayUp == true) {
+          if (a.value != b.value) {
+            return a.value - b.value;
+          }
+        } else {
+          if (a.value != b.value) {
+            return -(a.value - b.value);
+          }
+        }
+      } else {
+        if (a.value != b.value) {
+          return a.value - b.value;
+        }
 
-      if (a.value != b.value) {
-        return a.value - b.value;
+        if (a.progressValue != b.progressValue) {
+          return a.progressValue - b.progressValue;
+        }
       }
 
       return a.name.localeCompare(b.name);
@@ -576,7 +613,7 @@ export class PersService {
   }
 
   downUbility(tskAbility: Ability) {
-    let ab = this.allMap[tskAbility.id].item;
+    let ab: Ability = this.allMap[tskAbility.id].item;
     this.changesBefore();
 
     var isClosed = false;
@@ -588,6 +625,13 @@ export class PersService {
           isClosed = true;
         }
       }
+    } else {
+      for (const tsk of ab.tasks) {
+        tsk.value = 0;
+        isClosed = true;
+      }
+
+      ab.value = 0;
     }
 
     if (isClosed) {
@@ -765,7 +809,7 @@ export class PersService {
   }
 
   getClassicalAbPoints(persLevel: number, abValTotal: number, prs: Pers, abCount: number): number {
-    let gained = persLevel * GameSettings.startAbPoints + GameSettings.startAbPoints;
+    let gained = persLevel * GameSettings.perLvl + GameSettings.abPointsStart;
     let spent = abValTotal;
 
     return gained - spent;
@@ -878,7 +922,7 @@ export class PersService {
     }
   }
 
-  getPersExpClassical(classicalExpTotal: number, abCount: number): getExpResult {
+  getExpAndLvl(classicalExpTotal: number, abCount: number): getExpResult {
     let result = new getExpResult();
 
     result.exp = classicalExpTotal;
@@ -889,11 +933,16 @@ export class PersService {
     while (true) {
       result.startExp = expLvl;
 
-      let curLvl = (persLevel + 1) * GameSettings.startAbPoints;
-      // let koef = 1 + persLevel * 0.03;
-      // curLvl = curLvl * koef;
+      let expa = 1 + 0.033 * persLevel;
+      if (expa < 1) {
+        expa = 1;
+      }
+      if (expa > 3) {
+        expa = 3;
+      }
 
-      expLvl += curLvl;
+      let cur = persLevel * GameSettings.perLvl + GameSettings.abPointsStart;
+      expLvl += cur * expa;
 
       result.nextExp = expLvl;
 
@@ -915,21 +964,28 @@ export class PersService {
     let nextExp = 0;
     let expDirect = 0;
 
-    if (abCount < 10) {
-      abCount = 10;
+    let abMinCount = 20;
+
+    if (abCount < abMinCount) {
+      abCount = abMinCount;
     }
 
     if (GameSettings.expFotmulaType == "abVal") {
       // По значению навыка
-      // tesMax = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl * 10;
+      if (!tesMax || tesMax < abMinCount * GameSettings.tesMaxVal) {
+        tesMax = abMinCount * GameSettings.tesMaxVal;
+      }
+
+      // tesMax = GameSettings.maxPersLevel * GameSettings.abPointsPerLvl;
+
       let progress = tesCur / tesMax;
-      exp = GameSettings.maxPersLevel * progress;
+      exp = (GameSettings.maxPersLevel + 0.99) * progress;
       expDirect = exp;
       persLevel = Math.floor(exp);
       startExp = persLevel;
       nextExp = persLevel + 1;
     } else if (GameSettings.expFotmulaType == "abLvl") {
-      let max = GameSettings.maxPersLevel * GameSettings.abLvlForPersLvl;
+      let max = GameSettings.maxPersLevel * GameSettings.abPointsPerLvl;
 
       let progress = abTotalCur / max;
 
@@ -979,7 +1035,7 @@ export class PersService {
         let progress = abTotalCur / 2;
         exp = 2 * progress;
       } else {
-        let max = (GameSettings.maxPersLevel - 2) * GameSettings.abLvlForPersLvl;
+        let max = (GameSettings.maxPersLevel - 2) * GameSettings.abPointsPerLvl;
         let progress = (abTotalCur - 2) / max;
         exp = 2 + (GameSettings.maxPersLevel - 2) * progress;
       }
@@ -1508,8 +1564,8 @@ export class PersService {
           }
 
           // Ограничение по макс
-          if (tsk.tesValue > GameSettings.tesMaxVal + 9.99) {
-            tsk.tesValue = GameSettings.tesMaxVal + 9.99;
+          if (tsk.tesValue > GameSettings.tesMaxVal) {
+            tsk.tesValue = GameSettings.tesMaxVal;
           }
 
           let progressNextLevel = (tsk.tesValue / 10.0 - Math.floor(tsk.tesValue / 10.0)) * 100;
@@ -1524,6 +1580,13 @@ export class PersService {
             tsk.progressValue = progressNextLevel;
             ab.progressValue = tsk.progressValue;
           }
+
+          // МАКС
+          // if (tsk.tesValue > GameSettings.tesMaxVal + 9.99) {
+          //   tsk.progresNextLevel = 100;
+          //   tsk.progressValue = 100;
+          //   ab.progressValue = 100;
+          // }
 
           abMax += (GameSettings.maxAbilLvl - 1) * tsk.hardnes;
           abCur += (tsk.value - GameSettings.minAbilLvl >= 0 ? tsk.value - GameSettings.minAbilLvl : 0) * tsk.hardnes;
@@ -1604,7 +1667,7 @@ export class PersService {
             tsk.classicalExp = 0;
           }
           classicalExpTotal += tsk.classicalExp;
-          abValTotal += this.getTskAccValue(tsk.value) * tsk.hardnes;
+          abValTotal += GameSettings.abTotalCost(tsk.value, tsk.hardnes);
         }
 
         if (ab.isOpen) {
@@ -1832,7 +1895,7 @@ export class PersService {
     if (!GameSettings.isClassicaRPG) {
       expResult = this.getPersExpTES(tesAbTotalCur, abCount, abExpPointsTotalCur, tesAbTotalMax, abTotalCur);
     } else {
-      expResult = this.getPersExpClassical(classicalExpTotal, abCount);
+      expResult = this.getExpAndLvl(classicalExpTotal, abCount);
     }
 
     let ons: number = 0;
@@ -2301,10 +2364,6 @@ export class PersService {
   }
 
   tesTaskTittleCount(progr: number, aimVal: number, oneOrMore: boolean, aimUnit: string, aimDone?: number, isEven?: boolean) {
-    if (aimVal < 0) {
-      aimVal = aimVal - 1;
-    }
-
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
 
     let pr = progr * av;
@@ -2321,13 +2380,15 @@ export class PersService {
     }
 
     if (aimUnit == "Раз чет") {
-      value = 2 * Math.ceil(value / 2);
-      if (value < 2) value = 2;
+      if (value % 2 != 0) {
+        value = value + 1;
+      }
     }
 
     if (aimUnit == "Раз нечет") {
-      value = 2 * Math.ceil(value / 2) - 1;
-      if (value < 1) value = 1;
+      if (value % 2 == 0) {
+        value = value + 1;
+      }
     }
 
     if (aimVal < 0) {
@@ -2508,25 +2569,17 @@ export class PersService {
     }
   }
 
-  private getTskAccValue(v: number): number {
-    if (v <= 0) {
-      return 0;
-    }
-
-    return (v * (v + 1)) / 2;
-  }
-
   private changeClassical(tsk: Task, isDone: boolean, activeSubtasksCount: number) {
-    let koef = this.getWeekKoef(tsk.requrense, isDone, tsk.tskWeekDays) * this.getTskAccValue(tsk.value);
+    let koef = this.getWeekKoef(tsk.requrense, isDone, tsk.tskWeekDays) * GameSettings.abTotalCost(tsk.value, tsk.hardnes);
 
     koef = koef / activeSubtasksCount;
     if (tsk.classicalExp == null) {
       tsk.classicalExp = 0;
     }
     if (isDone) {
-      tsk.classicalExp += 1 * koef * tsk.hardnes;
+      tsk.classicalExp += 1 * koef;
     } else {
-      tsk.classicalExp -= 2 * koef * tsk.hardnes;
+      tsk.classicalExp -= 1 * koef;
     }
   }
 
@@ -2773,6 +2826,9 @@ export class PersService {
         }
         let cVal = tsk.refreshCounter % tsk.states.length;
         let el = tsk.states[cVal].name;
+        if (el.trim().length == 0) {
+          el = tsk.name;
+        }
 
         if (el) {
           el += statePostfix;
@@ -2786,9 +2842,12 @@ export class PersService {
           }
           let plus = [];
           for (let q = 0; q <= stateInd; q++) {
-            let el = tsk.states[q];
+            let el = tsk.states[q].name;
+            if (el.trim().length == 0) {
+              el = tsk.name;
+            }
 
-            plus.push(el.name + statePostfix);
+            plus.push(el + statePostfix);
           }
 
           plusState += plus.join("; ");
@@ -2817,7 +2876,7 @@ export class PersService {
       if (isCur && !this.isCounterAim(tsk)) {
         aimDone = tsk.secondsDone;
       } else if (isCur && this.isCounterAim(tsk)) {
-        aimDone = tsk.counterDone;
+        // aimDone = tsk.counterDone;
       }
 
       plusState += " " + this.getAimString(this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit, aimDone, tsk.isEven), tsk.aimUnit, tsk.postfix);
@@ -2877,7 +2936,7 @@ export class PersService {
 
     let gainedOns = persLevel;
 
-    let startOn = GameSettings.startAbPoints;
+    let startOn = GameSettings.abPointsStart;
 
     const totalGained = startOn + gainedOns;
 
@@ -2903,10 +2962,10 @@ export class PersService {
     //   koef = koef * (task.failCounter + 1);
     // }
 
-    // При пропуске штраф больше в 2 раза
-    // if (!isPlus) {
-    //   koef = koef * 2;
-    // }
+    // При пропуске штраф с коефициентом
+    if (!isPlus) {
+      koef = koef * GameSettings.failKoef;
+    }
 
     if (isChangeAb) {
       subTasksCoef = subTasksCoef * task.hardnes;
@@ -3012,7 +3071,7 @@ export class PersService {
           // plusName += " " + plusTimerOrCounter;
 
           let aimVal = 0;
-          aimVal = st.counterDone;
+          // aimVal = st.counterDone;
 
           const cur = tsk.value;
           const progr = this.getProgrForTittle(tsk.value + 1, cur, tsk.isPerk, false, false);
@@ -3022,10 +3081,14 @@ export class PersService {
       }
     }
 
-    if (tsk.isStatePlusTitle) {
-      stT.tittle = tsk.name + ": " + plusName;
+    if (plusName.trim().length == 0) {
+      stT.tittle = tsk.name;
     } else {
-      stT.tittle = plusName;
+      if (tsk.isStatePlusTitle) {
+        stT.tittle = tsk.name + ": " + plusName;
+      } else {
+        stT.tittle = plusName;
+      }
     }
 
     stT.name = stT.tittle;
@@ -3050,6 +3113,10 @@ export class PersService {
     stT.timerStart = tsk.timerStart;
     stT.requrense = tsk.requrense;
     stT.lastDate = st.lastDate;
+
+    if (tsk.isCounterEnable && st.counterDone > 0) {
+      stT.tittle += " (" + st.counterDone + ")";
+    }
 
     if (!st.image) {
       let lvl = prs.level;
@@ -3209,13 +3276,13 @@ export class PersService {
         tsk.secondsToDone = this.tesTaskTittleCount(progr, tsk.aimTimer, true, tsk.aimUnit);
       }
 
-      const plusState = this.getPlusState(tsk, progr, progrSt, true);
+      let plusState = this.getPlusState(tsk, progr, progrSt, true);
 
       if (!GameSettings.isShowAbProgrTable) {
         tsk.statesDescr.push(plusState);
       }
 
-      if (plusState) {
+      if (plusState && plusState.trim().length > 0) {
         if (tsk.states.length > 0 && !tsk.isSumStates) {
           if (tsk.isStatePlusTitle) {
             tsk.tittle = tsk.name + ": " + plusState;
@@ -3235,6 +3302,11 @@ export class PersService {
         }
       } else {
         tsk.tittle = tsk.name;
+        plusState = tsk.name;
+      }
+
+      if (tsk.isCounterEnable && tsk.counterDone > 0) {
+        tsk.tittle += " (" + tsk.counterDone + ")";
       }
 
       tsk.curLvlDescr = plusState.trim();
@@ -3247,7 +3319,7 @@ export class PersService {
     } else {
       for (let i = 0; i <= GameSettings.maxAbilLvl; i++) {
         if (GameSettings.isShowAbProgrTable || i == tsk.value) {
-          tsk.statesDescr.push(tsk.tittle);
+          tsk.statesDescr.push(tsk.name);
         }
       }
 
@@ -3279,13 +3351,15 @@ export class PersService {
     for (let ch of prs.characteristics) {
       for (let ab of ch.abilities) {
         for (let tsk of ab.tasks) {
-          if (tsk.mayUp == true && on < (tsk.value + 1) * tsk.hardnes) {
+          if (on < GameSettings.abCost(tsk.value, tsk.hardnes) && GameSettings.isAbPointsEnabled) {
             tsk.mayUp = false;
           }
         }
       }
-
+      ch.anyMayUp = ch.abilities.some((q) => q.tasks.some((qq) => qq.mayUp));
       ch.abilities = ch.abilities.sort(this.abSorter());
     }
+
+    prs.characteristics = prs.characteristics.sort(this.chaSorter());
   }
 }

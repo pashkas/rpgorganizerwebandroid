@@ -99,6 +99,8 @@ export class Task implements IImg {
   plusExp: number = 0;
   autoTime: number = 0;
 
+  isCounterEnable: boolean = false;
+
   static getHardness(tsk: Task): number {
     if (!tsk.hardnes) {
       tsk.hardnes = 1;

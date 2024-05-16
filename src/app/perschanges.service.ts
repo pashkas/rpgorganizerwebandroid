@@ -221,7 +221,9 @@ export class PerschangesService {
         let isShowBySettings = isDoneQwest || GameSettings.changesIsShowExp;
 
         if (isShowBySettings) {
-          if (changesMap[n].after != changesMap[n].before) {
+          let isTesChange = !GameSettings.isClassicaRPG && tsk != null && tsk.tesValue >= GameSettings.tesMaxVal && tsk.requrense != 'нет';
+
+          if (changesMap[n].after != changesMap[n].before || isTesChange) {
             let expChanges = new ChangesModel("Уровень", "exp", changesMap[n].before * 10, changesMap[n].after * 10, this.afterPers.prevExp * 10, this.afterPers.nextExp * 10, changesMap[n].img);
 
             let beforeExp = changesMap[n].before;
@@ -324,7 +326,11 @@ export class PerschangesService {
       return getChSort(a) - getChSort(b);
 
       function getChSort(ch: ChangesModel): number {
-        const sort = ["abil", "cha", "qwest", "exp"];
+        let sort = ["abil", "cha", "qwest", "exp"];
+
+        if (!GameSettings.isClassicaRPG) {
+          sort = ["qwest", "exp", "abil", "cha"];
+        }
 
         const idx = sort.findIndex((q) => q == ch.type);
         if (idx != -1) {
@@ -379,8 +385,10 @@ export class PerschangesService {
         backdropClass: "backdrop-changes",
       });
 
-      if (tsk != null && type == "abil") {
+      if (type == "abil") {
         await sleep(GameSettings.changesPopupDurationAbil);
+      } else if (type == "cha") {
+        await sleep(GameSettings.changesPopupDurationCha);
       } else if (ch.type == "qwest") {
         await sleep(GameSettings.changesPopupDurationQwest);
       } else {

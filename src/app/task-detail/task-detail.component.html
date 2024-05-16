@@ -38,9 +38,9 @@
       </div>
     </div>
 
-    <!-- <div *ngIf="tskAbility" class="pt-1">
+    <div *ngIf="tskAbility" class="pt-1">
       <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel"> </mat-progress-bar>
-    </div> -->
+    </div>
 
     <div class="w-100 px-0 text-center" *ngIf="!tskAbility">
       <h4>{{ tsk.name }}</h4>
@@ -63,7 +63,7 @@
 
       <!-- Поднять навык -->
       <!-- Понизить навык -->
-      <button *ngIf="tsk.requrense != 'нет' && tskAbility?.isOpen && GameSettings.isAbPointsEnabled" class="icon-small" mat-icon-button (click)="downAbil()">
+      <button *ngIf="tsk.requrense != 'нет' && tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
         <img src="assets/icons/down.png" class="img-fluid" />
       </button>
       <!-- Количество очков -->
@@ -146,32 +146,34 @@
         <input onfocus="this.select()" matInput autocomplete="off" placeholder="Название" [(ngModel)]="tsk.name" name="tsk.name" #nameEdt />
       </mat-form-field>
     </div>
-    <!-- Характеристика -->
-    <div [formGroup]="charactGroup" *ngIf="tskAbility">
-      <mat-form-field fxFlex>
-        <mat-select formControlName="charact" panelClass="panel-override">
-          <mat-option *ngFor="let a of pers.characteristics" [value]="a">
-            {{ a.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-    <!-- Сложность -->
-    <ng-container *ngIf="tsk.requrense != 'нет'">
-      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="10px" class="pb-3 pl-3">
-        <mat-chip-list selectable multiple>
-          <mat-chip (click)="tsk.isPerk = !tsk.isPerk" [selected]="tsk.isPerk" color="accent"> &nbsp;Перк?&nbsp; </mat-chip>
-
-          <mat-divider vertical class="vertdiv"></mat-divider>
-
-          <ng-container>
-            <mat-chip (click)="setTskHardness(1)" [selected]="tsk.hardnes == 1" color="accent">Норм</mat-chip>
-            <mat-chip (click)="setTskHardness(2)" [selected]="tsk.hardnes == 2" color="accent">Слож</mat-chip>
-            <mat-chip (click)="setTskHardness(3)" [selected]="tsk.hardnes == 3" color="accent">Оч. слож </mat-chip>
-          </ng-container>
-        </mat-chip-list>
+    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
+      <!-- Характеристика -->
+      <div [formGroup]="charactGroup" *ngIf="tskAbility" fxFlex>
+        <mat-form-field>
+          <mat-select formControlName="charact" panelClass="panel-override">
+            <mat-option *ngFor="let a of pers.characteristics" [value]="a">
+              {{ a.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
-    </ng-container>
+      <!-- Сложность -->
+      <ng-container *ngIf="tsk.requrense != 'нет'">
+        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="10px" class="pb-3 pl-3">
+          <mat-chip-list selectable multiple>
+            <mat-chip (click)="tsk.isPerk = !tsk.isPerk" [selected]="tsk.isPerk" color="accent"> &nbsp;Перк?&nbsp; </mat-chip>
+
+            <ng-container *ngIf="GameSettings.isClassicaRPG == true">
+              <mat-divider vertical class="vertdiv"></mat-divider>
+              <ng-container>
+                <mat-chip (click)="setTskHardness(1)" [selected]="tsk.hardnes == 1" color="accent">Норм</mat-chip>
+                <mat-chip (click)="setTskHardness(2)" [selected]="tsk.hardnes == 2" color="accent">Слож</mat-chip>
+              </ng-container>
+            </ng-container>
+          </mat-chip-list>
+        </div>
+      </ng-container>
+    </div>
 
     <!-- Описание -->
     <!-- <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px">
@@ -244,6 +246,8 @@
         <mat-form-field fxFlex>
           <input onfocus="this.pers" matInput autocomplete="off" placeholder="Постфикс" [(ngModel)]="tsk.postfix" name="tsk.postfix" />
         </mat-form-field>
+
+        <mat-chip [selected]="tsk.isCounterEnable" color="accent" (click)="tsk.isCounterEnable = !tsk.isCounterEnable"> &nbsp;✓&nbsp; </mat-chip>
       </div>
     </ng-container>
 

@@ -1,4 +1,50 @@
 export class GameSettings {
+  static setTes() {
+    GameSettings.isAbPointsEnabled = false;
+    GameSettings.isClassicaRPG = false;
+    GameSettings.expFotmulaType = "abVal";
+    GameSettings.abPointsPerLvl = 30;
+    GameSettings.failKoef = 1;
+    GameSettings.changesPopupDurationAbil = 6000;
+    GameSettings.changesPopupDurationCha = 6000;
+  }
+
+  static failKoef: number = 1;
+
+  /**
+   * Начальное ОН.
+   */
+  static abPointsStart: number = 30;
+
+  /**
+   * Очков за уровень.
+   */
+  static abPointsPerLvl: number = 10;
+
+  /**
+   * Стоимость поднятия навыка
+   */
+  static abCost(curLvl: number, hardness: number): number {
+    if (curLvl == 0) {
+      return 10 * hardness;
+    }
+
+    return curLvl * hardness;
+  }
+
+  /**
+   * Сумма потраченных очков на навык.
+   */
+  static abTotalCost(curLvl: number, hardness: number) {
+    if (curLvl == 0) {
+      return 0;
+    }
+
+    let v = curLvl - 1;
+
+    return (10 + (v * (v + 1)) / 2) * hardness;
+  }
+
   /**
    * В листе перса целые значения/или дробные.
    */
@@ -24,14 +70,9 @@ export class GameSettings {
   static expFotmulaType: string = "abLvl";
 
   /**
-   * Очков за уровень.
-   */
-  static abLvlForPersLvl: number = 3;
-
-  /**
    * За сколько уровней даются очки навыков.
    */
-  static perLvl: number = 1;
+  static perLvl: number = 10;
 
   /**
    * ОН активны.
@@ -49,11 +90,6 @@ export class GameSettings {
   static isOpenAbWhenActivate: boolean = true;
 
   /**
-   * Начальное ОН.
-   */
-  static startAbPoints: number = 10;
-
-  /**
    * Плюс к прогрессу для задания в задаче.
    *
    */
@@ -68,8 +104,8 @@ export class GameSettings {
 
     if (isTES) {
       // В стиле TES
-      let skillMult = 2;
-      let skillOffcet = 2 - skillMult;
+      let skillMult = 1;
+      let skillOffcet = 3 - skillMult;
 
       let result = level * skillMult + skillOffcet;
       result = Math.ceil(result);
@@ -96,7 +132,7 @@ export class GameSettings {
   /**
    * Открывать окно перса когда новый уровень?
    */
-  static isOpenPersAtNewLevel: boolean = true;
+  static isOpenPersAtNewLevel: boolean = false;
   /**
    * Показывать полный список требований навыка, по уровням.
    */
@@ -137,6 +173,7 @@ export class GameSettings {
    */
   static changesPopupDuration: number = 3000;
   static changesPopupDurationAbil: number = 6000;
+  static changesPopupDurationCha: number = 6000;
 
   /**
    * Длительность попапа изменений квестов.
@@ -200,7 +237,7 @@ export class GameSettings {
   /**
    * Максимальное значение очков в задаче.
    */
-  static tesMaxVal: number = GameSettings.maxAbilLvl * 10 - GameSettings.minAbilLvl * 10;
+  static tesMaxVal: number = GameSettings.maxAbilLvl * 10 - GameSettings.minAbilLvl * 10 + 9.99;
 
   /**
    * Число картинок скиллов.

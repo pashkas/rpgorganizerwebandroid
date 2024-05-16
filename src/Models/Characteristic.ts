@@ -15,4 +15,5 @@ export class Characteristic {
     startRang: Rangse = { val: 0, name: "0", img: "" };
     value: number = 0;
     HasSameAbLvl: boolean;
+    anyMayUp: boolean;
 }

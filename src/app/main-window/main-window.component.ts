@@ -111,10 +111,13 @@ export class MainWindowComponent implements OnInit {
 
     let tskIndex = prs.tasks.indexOf(t);
 
+    let tsk = t;
+
     if (t.parrentTask) {
       // Логика для навыков
       if (t.requrense != "нет") {
         tskName = this.srv.allMap[t.id].item.name;
+        tsk = this.srv.allMap[t.parrentTask].item;
         this.srv.subtaskDoneOrFail(t.parrentTask, t.id, true);
       }
       // Логика для подзадач
@@ -140,7 +143,11 @@ export class MainWindowComponent implements OnInit {
       this.srv.setCurInd(tskIndex);
     }
 
-    this.srv.changesAfter(true, this.getAbImg(t));
+    if (GameSettings.isClassicaRPG) {
+      tsk = null;
+    }
+
+    this.srv.changesAfter(true, this.getAbImg(t), tsk);
   }
 
   private getAbImg(t: Task) {
@@ -192,9 +199,11 @@ export class MainWindowComponent implements OnInit {
 
     let tskIndex = prs.tasks.indexOf(t);
 
+    let tsk: Task = t;
+
     if (t.parrentTask) {
       // Логика для подзадач
-      const tsk: Task = this.srv.allMap[t.parrentTask].item;
+      tsk = this.srv.allMap[t.parrentTask].item;
       for (const st of tsk.states) {
         st.secondsDone = 0;
         st.counterDone = 0;
@@ -203,6 +212,7 @@ export class MainWindowComponent implements OnInit {
       this.srv.subtaskDoneOrFail(t.parrentTask, t.id, false);
     } else {
       // Логика для задач
+      tsk = t;
       tskName = t.tittle;
       this.srv.taskMinus(t.id);
     }
@@ -217,7 +227,11 @@ export class MainWindowComponent implements OnInit {
       this.srv.setCurInd(tskIndex);
     }
 
-    this.srv.changesAfter(false, this.getAbImg(t));
+    if (GameSettings.isClassicaRPG) {
+      tsk = null;
+    }
+
+    this.srv.changesAfter(false, this.getAbImg(t), tsk);
   }
 
   firstOrGlobal() {

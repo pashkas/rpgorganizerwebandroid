@@ -11,7 +11,10 @@ import { Rangse } from "src/Models/Rangse";
 })
 export class PersMasterComponent implements OnInit {
   rangse: Rangse[];
-  constructor(private fb: FormBuilder, private srv: PersService, private router: Router) {}
+  GameSettings: typeof GameSettings;
+  constructor(private fb: FormBuilder, private srv: PersService, private router: Router) {
+    this.GameSettings = GameSettings;
+  }
 
   persForm: FormGroup;
 
@@ -52,6 +55,11 @@ export class PersMasterComponent implements OnInit {
     this.addAbil(charactsFG.length - 1);
   }
 
+  hardnessList = [
+    { hardness: 1, txt: "норм" },
+    { hardness: 2, txt: "слож." },
+  ];
+
   addAbil(chInd: number) {
     let charactsFG = this.getCharactControls();
     let ch = charactsFG.at(chInd);
@@ -59,6 +67,7 @@ export class PersMasterComponent implements OnInit {
     abs.push(
       this.fb.group({
         abName: ["Навык"],
+        hardness: 1,
       })
     );
   }
@@ -77,7 +86,7 @@ export class PersMasterComponent implements OnInit {
   }
 
   getCharactControls() {
-    return (this.persForm.get("characts") as FormArray);
+    return this.persForm.get("characts") as FormArray;
   }
 
   finish() {
@@ -93,7 +102,7 @@ export class PersMasterComponent implements OnInit {
       cha.startRang.val = ch.val;
 
       for (const ab of ch.abils) {
-        let abil = this.srv.addAbil(cha.id, ab.abName);
+        let abil = this.srv.addAbil(cha.id, ab.abName, ab.hardness);
       }
     }
 

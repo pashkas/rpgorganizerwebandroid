@@ -239,6 +239,9 @@ export class TaskDetailComponent implements OnInit {
     this.route.queryParams.subscribe((queryParams: any) => {
       this.isQuick = queryParams.isQuick;
       this.isFromMain = queryParams.isFromMain;
+      if(queryParams.isActivate){
+        this.isEditMode = true;
+      }
       if (this.isQuick && !queryParams.isActivate) {
         setTimeout(() => this.nameEdt.nativeElement.focus());
       }

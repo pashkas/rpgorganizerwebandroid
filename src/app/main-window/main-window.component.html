@@ -118,15 +118,20 @@
             </ng-template>
           </ng-container>
           <a
-            *ngIf="data?.currentTask?.aimTimer && data?.currentTask?.aimTimer != 0 && data?.currentTask?.aimUnit != null && data?.currentTask?.aimUnit != 'Раз'"
+            *ngIf="
+              data?.currentTask?.aimTimer &&
+              data?.currentTask?.aimTimer != 0 &&
+              data?.currentTask?.aimUnit != null &&
+              data?.currentTask?.aimUnit != 'Раз' &&
+              data?.currentTask?.aimUnit != 'Раз чет' &&
+              data?.currentTask?.aimUnit != 'Раз нечет'
+            "
             class="text-secondary pointer nounderline"
             (click)="openTaskTimer()"
           >
             | ⌛&nbsp;
           </a>
-          <a *ngIf="data?.currentTask?.aimTimer && data?.currentTask?.aimTimer != 0 && srv.isCounterAim(data?.currentTask)" class="text-secondary pointer nounderline" (click)="clickCounter()">
-            | ✓&nbsp;
-          </a>
+          <a *ngIf="data?.currentTask?.isCounterEnable" class="text-secondary pointer nounderline" (click)="clickCounter()"> | ✓&nbsp; </a>
         </small>
       </div>
     </ng-container>

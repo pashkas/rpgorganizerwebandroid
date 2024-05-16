@@ -58,17 +58,26 @@
         <div *ngFor="let cha of getCharactControls().controls; let i = index" [formGroupName]="i" class="d-flex flex-column">
           <h4>{{ cha.value.chaName }}</h4>
           <div formArrayName="abils" class="pt-1">
-            <div *ngFor="let ab of cha.get('abils').controls; let j = index" [formGroupName]="j" class="d-flex flex-row w-100 align-items-center">
-              <mat-form-field class="flex-grow-1 no-padding">
-                <input formControlName="abName" onfocus="this.select()" matInput autocomplete="off" type="text"/>
+            <div *ngFor="let ab of cha.get('abils').controls; let j = index" [formGroupName]="j" style="display: flex; gap: 5px">
+              <mat-form-field>
+                <input formControlName="abName" onfocus="this.select()" matInput autocomplete="off" type="text" />
               </mat-form-field>
-              <div class="d-flex align-items-end">
-                <button mat-icon-button color="primary" *ngIf="j != 0" (click)="deleteAbil(i, j)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-                <button mat-icon-button color="primary" (click)="addAbil(i)">
-                  <mat-icon>add</mat-icon>
-                </button>
+              <div style="display: flex; align-items: center; flex: 1">
+                <mat-form-field *ngIf="GameSettings.isClassicaRPG == true">
+                  <mat-select formControlName="hardness">
+                    <mat-option *ngFor="let hardness of hardnessList" [value]="hardness.hardness">
+                      {{ hardness.txt }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div style="display: flex">
+                  <button mat-icon-button color="primary" *ngIf="j != 0" (click)="deleteAbil(i, j)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                  <button mat-icon-button color="primary" (click)="addAbil(i)">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
