@@ -25,6 +25,7 @@ export class MainWindowComponent implements OnInit {
 
   currentTask$ = this.srv.currentTask$.asObservable();
   currentView$ = this.srv.currentView$.asObservable();
+  currentCounterDone$ = this.srv.currentCounterDone$.asObservable();
   isFailShown$ = new BehaviorSubject<boolean>(false);
   isFailShownOv$ = new BehaviorSubject<boolean>(false);
   isSort: boolean = false;
@@ -94,6 +95,23 @@ export class MainWindowComponent implements OnInit {
     return false;
   }
 
+  async clickCounter(cur: Task) {
+    cur.counterDone = cur.counterDone + 1;
+    this.srv.currentCounterDone$.next(cur.counterDone);
+
+    if (cur.parrentTask) {
+      let st: taskState = this.srv.allMap[cur.id].item;
+
+      st.counterDone = cur.counterDone;
+    } else {
+      let tsk: Task = this.srv.allMap[cur.id].item;
+
+      tsk.counterDone = cur.counterDone;
+    }
+
+    this.srv.savePers(false);
+  }
+
   delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
@@ -148,31 +166,6 @@ export class MainWindowComponent implements OnInit {
     }
 
     this.srv.changesAfter(true, this.getAbImg(t), tsk);
-  }
-
-  private getAbImg(t: Task) {
-    let abImg: string = null;
-    let mainTsk: Task = this.getMainTask(t);
-    if (mainTsk != null) {
-      if (mainTsk.requrense != "нет") {
-        let ab: Ability = this.srv.allMap[mainTsk.id].link;
-        if (ab != null) {
-          abImg = ab.image;
-        }
-      }
-    }
-    return abImg;
-  }
-
-  private getMainTask(t: Task): Task {
-    let mainTsk: Task = null;
-    if (t.parrentTask) {
-      mainTsk = this.srv.allMap[t.parrentTask].item;
-    } else {
-      mainTsk = t;
-    }
-
-    return mainTsk;
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -293,11 +286,6 @@ export class MainWindowComponent implements OnInit {
     this.srv.savePers(false);
   }
 
-  setIsNotWriteTime(ev: any, tsk: Task) {
-    this.srv.allMap[tsk.id].item.isNotWriteTime = ev.checked;
-    tsk.isNotWriteTime = ev.checked;
-  }
-
   openPersList() {
     this.srvSt.selTabPersList = 0;
     this.srvSt.selInventoryList = 0;
@@ -315,23 +303,6 @@ export class MainWindowComponent implements OnInit {
       let idx = this.srv.pers$.value.tasks.findIndex((n) => n.plusToNames.filter((q) => q.linkId == linkId).length > 0);
       this.srv.setCurInd(idx);
     }
-  }
-  clickCounter() {
-    let current = this.srv.currentTask$.value;
-    if (current.parrentTask) {
-      let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.parrentTask].item;
-      let st: taskState = this.srv.allMap[this.srv.currentTask$.value.id].item;
-      var tt = st.counterDone + 1;
-
-      st.counterDone = tt;
-    } else {
-      let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
-      var tt = tsk.counterDone + 1;
-
-      tsk.counterDone = tt;
-    }
-
-    this.srv.savePers(false);
   }
 
   openTaskTimer() {
@@ -359,7 +330,8 @@ export class MainWindowComponent implements OnInit {
             tt = tsk.secondsToDone;
           }
 
-          st.secondsDone = tt;
+          // st.secondsDone = tt;
+          st.secondsDone = n / 1000;
         } else {
           let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
           let tt: number = tsk.secondsToDone - diffSecconds;
@@ -371,7 +343,8 @@ export class MainWindowComponent implements OnInit {
             tt = tsk.secondsToDone;
           }
 
-          tsk.secondsDone = tt;
+          // tsk.secondsDone = tt;
+          tsk.secondsDone = n / 1000;
         }
 
         this.srv.savePers(false);
@@ -435,12 +408,12 @@ export class MainWindowComponent implements OnInit {
     }
   }
 
-  setMegaPlan() {
-    this.srv.savePers(false);
+  setIsNotWriteTime(ev: any, tsk: Task) {
+    this.srv.allMap[tsk.id].item.isNotWriteTime = ev.checked;
+    tsk.isNotWriteTime = ev.checked;
   }
 
-  setWriteTime() {
-    this.srv.pers$.value.isWriteTime = !this.srv.pers$.value.isWriteTime;
+  setMegaPlan() {
     this.srv.savePers(false);
   }
 
@@ -471,22 +444,6 @@ export class MainWindowComponent implements OnInit {
     this.srv.savePers(false);
   }
 
-  private sortSkillsGlobal() {
-    const tasks = this.srv.pers$.value.tasks;
-
-    for (let i = 0; i < tasks.length; i++) {
-      const tsk = tasks[i];
-
-      let tskPersOrder: Task | taskState;
-      tskPersOrder = this.srv.allMap[tsk.id].item;
-
-      if (tskPersOrder != null) {
-        tsk.order = i;
-        tskPersOrder.order = i;
-      }
-    }
-  }
-
   /**
    * Задать вид - задачи, квесты.
    * @param name Название вида.
@@ -499,6 +456,11 @@ export class MainWindowComponent implements OnInit {
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
       this.srv.savePers(false);
     }
+  }
+
+  setWriteTime() {
+    this.srv.pers$.value.isWriteTime = !this.srv.pers$.value.isWriteTime;
+    this.srv.savePers(false);
   }
 
   taskToEnd(tsk: Task) {
@@ -521,5 +483,46 @@ export class MainWindowComponent implements OnInit {
     // {
     //   this.srv.showTask(this.srv.pers$.value.tasks[i]);
     // }
+  }
+
+  private getAbImg(t: Task) {
+    let abImg: string = null;
+    let mainTsk: Task = this.getMainTask(t);
+    if (mainTsk != null) {
+      if (mainTsk.requrense != "нет") {
+        let ab: Ability = this.srv.allMap[mainTsk.id].link;
+        if (ab != null) {
+          abImg = ab.image;
+        }
+      }
+    }
+    return abImg;
+  }
+
+  private getMainTask(t: Task): Task {
+    let mainTsk: Task = null;
+    if (t.parrentTask) {
+      mainTsk = this.srv.allMap[t.parrentTask].item;
+    } else {
+      mainTsk = t;
+    }
+
+    return mainTsk;
+  }
+
+  private sortSkillsGlobal() {
+    const tasks = this.srv.pers$.value.tasks;
+
+    for (let i = 0; i < tasks.length; i++) {
+      const tsk = tasks[i];
+
+      let tskPersOrder: Task | taskState;
+      tskPersOrder = this.srv.allMap[tsk.id].item;
+
+      if (tskPersOrder != null) {
+        tsk.order = i;
+        tskPersOrder.order = i;
+      }
+    }
   }
 }

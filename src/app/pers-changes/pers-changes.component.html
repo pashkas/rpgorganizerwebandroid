@@ -11,9 +11,9 @@
       <img src="assets/icons/gold.png" class="img-fluid px-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
     </div>
     <div>
-      <img *ngIf="isGood && !img" class="img-fluid" style="max-height: 144px" src="assets/img/good.png" [ngStyle]="{ 'object-fit': 'contain' }" />
-      <img *ngIf="!isGood && !img" class="img-fluid" style="max-height: 144px" src="assets/img/bad.png" [ngStyle]="{ 'object-fit': 'contain' }" />
-      <img appImgBroken *ngIf="img" class="img-fluid" style="max-height: 144px" src="{{ img }}" [ngStyle]="{ 'object-fit': 'contain' }" />
+      <img *ngIf="isGood && !img" class="img-fluid changesImg" src="assets/img/good.png" [ngStyle]="{ 'object-fit': 'contain' }" />
+      <img *ngIf="!isGood && !img" class="img-fluid changesImg" src="assets/img/bad.png" [ngStyle]="{ 'object-fit': 'contain' }" />
+      <img appImgBroken *ngIf="img" class="img-fluid changesImg" src="{{ img }}" [ngStyle]="{ 'object-fit': 'contain' }" />
     </div>
     <div fxLayout="row" fxLayoutAlign="center end" *ngIf="this.abPoints != null" class="m-2">
       <img src="assets/icons/diamond.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
@@ -39,9 +39,13 @@
       </ng-container>
     </mat-list>
     <!-- Статусы по уровню навыка -->
-    <div class="chLstTsk" *ngIf="tsk && (tsk.value > 1 || (tsk.value == 1 && !isGood)) && itemType == 'abil'">
+    <div class="chLstTsk abLelelsDescr" *ngIf="tsk && (tsk.value > 1 || (tsk.value == 1 && !isGood)) && itemType == 'abil'">
       <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
-        <div *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)" class="text-center px-0 py-1 border-0" [ngClass]="{ 'bg-success': i == tsk.value && isShowAbProgrTable }">
+        <div
+          *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)"
+          class="text-center px-0 py-0 border-0 bigTextShrink"
+          [ngClass]="{ 'bg-success': i == tsk.value && isShowAbProgrTable }"
+        >
           <b>
             <ng-container *ngIf="isShowAbProgrTable">
               {{ i + percSymbol + ": " }}

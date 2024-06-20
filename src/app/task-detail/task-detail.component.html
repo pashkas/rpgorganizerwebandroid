@@ -118,11 +118,11 @@
       </mat-list>
     </ng-container>
     <br />
-    <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
+    <ng-container *ngFor="let st of tsk.statesDescr; let i = index" >
       <div
         *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)"
-        class="text-center px-0 py-1 border-0"
-        [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }"
+        class="text-center px-0 py-0 border-0 abLelelsDescr"
+        [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }" 
       >
         <b>
           <ng-container *ngIf="isShowAbProgrTable">

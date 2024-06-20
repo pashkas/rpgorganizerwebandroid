@@ -20,23 +20,30 @@ export class TaskTimerComponentComponent implements OnInit {
   isDelEv: boolean;
   notification: LocalNotificationSchema;
 
+  stopWatchStart: number;
+  stopWatchDone: number;
+  stopWatchAim: number;
+  public stopWatchTime$: Observable<timeComponents>;
+
   constructor(private srv: PersService, private dialogRef: MatDialogRef<TaskTimerComponentComponent>) {}
 
-  calcDateDiff(endDay: number): timeComponents {
-    const dDay = endDay;
+  calcDateDiff(startDate: number, endDate: number): timeComponents {
+    const dDay = endDate;
 
     const milliSecondsInASecond = 1000;
     const hoursInADay = 24;
     const minutesInAnHour = 60;
     const secondsInAMinute = 60;
 
-    let timeDifference = dDay - Date.now();
+    let timeDifference = dDay - startDate;
 
     if (timeDifference < 0) {
       timeDifference = 0;
     }
 
     this.dif = timeDifference;
+
+    const stopWatchProgress = (timeDifference / (this.stopWatchAim * 1000)) * 100;
 
     const daysToDday = Math.floor(timeDifference / (milliSecondsInASecond * minutesInAnHour * secondsInAMinute * hoursInADay));
 
@@ -46,7 +53,7 @@ export class TaskTimerComponentComponent implements OnInit {
 
     const secondsToDday = Math.floor(timeDifference / milliSecondsInASecond) % secondsInAMinute;
 
-    return { secondsToDday, minutesToDday, hoursToDday, daysToDday };
+    return { secondsToDday, minutesToDday, hoursToDday, daysToDday, stopWatchProgress };
   }
 
   ngOnDestroy(): void {
@@ -71,16 +78,26 @@ export class TaskTimerComponentComponent implements OnInit {
     // this.setCalendar(leftSeconds);
     this.sheduleNotification(tsk, leftSeconds);
 
-    // Получаем текущую дату и время
-
+    // Таймер
     this.timeLeft$ = timer(0, 1000).pipe(
       takeUntil(this.unsubscribe$),
       map((x) => {
-        const diff = this.calcDateDiff(endTime);
-        // if (diff.hoursToDday == 0 && diff.minutesToDday == 0 && diff.secondsToDday == 0) {
-        //   BackgroundMode.unlock();
-        //   Vibration.vibrate(1000);
-        // }
+        const diff = this.calcDateDiff(Date.now(), endTime);
+
+        return diff;
+      }),
+      shareReplay(1)
+    );
+
+    // Секундомер
+    this.stopWatchAim = tsk.secondsToDone;
+    this.stopWatchDone = tsk.secondsDone;
+    this.stopWatchStart = Date.now() - this.stopWatchDone * 1000;
+
+    this.stopWatchTime$ = timer(0, 100).pipe(
+      takeUntil(this.unsubscribe$),
+      map((x) => {
+        const diff = this.calcDateDiff(this.stopWatchStart, Date.now());
 
         return diff;
       }),
@@ -129,4 +146,6 @@ interface timeComponents {
   hoursToDday: number;
   minutesToDday: number;
   secondsToDday: number;
+
+  stopWatchProgress: number;
 }

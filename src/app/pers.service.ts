@@ -31,6 +31,7 @@ export class PersService {
   absMap: any;
   allMap: {};
   currentTask$ = new BehaviorSubject<Task>(null);
+  currentCounterDone$ = new BehaviorSubject<number>(0);
   currentView$ = new BehaviorSubject<curpersview>(curpersview.SkillTasks);
   isAutoPumpInProcess: boolean = false;
   isDialogOpen: boolean = false;
@@ -53,6 +54,12 @@ export class PersService {
     GameSettings.setTes();
     this.isOffline = true;
     this.getPers();
+
+    this.currentTask$.subscribe((q) => {
+      if (q != null) {
+        this.currentCounterDone$.next(q.counterDone);
+      }
+    });
   }
 
   get baseTaskPoints(): number {
@@ -314,16 +321,18 @@ export class PersService {
   }
 
   getAbMonsterLvl(tsk: Task): number {
-    let lvl = tsk.value * 10;
-    if (lvl < GameSettings.maxPersLevel) {
-      lvl = lvl - 0.01;
-    }
+    return this.pers$.value.level;
 
-    if (lvl < 0) {
-      lvl = 0;
-    }
+    // let lvl = tsk.value * 10;
+    // if (lvl < GameSettings.maxPersLevel) {
+    //   lvl = lvl - 0.01;
+    // }
 
-    return lvl;
+    // if (lvl < 0) {
+    //   lvl = 0;
+    // }
+
+    // return lvl;
   }
 
   /**
@@ -2025,21 +2034,20 @@ export class PersService {
 
   setCurInd(i: number): any {
     const pers = this.pers$.value;
-
     const tasks = pers.tasks;
 
     if (tasks.length - 1 < i) {
       i = tasks.length - 1;
     }
 
-    this.pers$.value.currentTaskIndex = i;
-    this.pers$.value.currentTask = tasks[i];
+    pers.currentTaskIndex = i;
+    pers.currentTask = tasks[i];
 
-    if (this.pers$.value.currentTask && this.pers$.value.currentTask.qwestId) {
-      this.pers$.value.currentQwestId = this.pers$.value.currentTask.qwestId;
+    if (pers.currentTask && pers.currentTask.qwestId) {
+      pers.currentQwestId = pers.currentTask.qwestId;
     }
 
-    this.currentTask$.next(this.pers$.value.currentTask);
+    this.currentTask$.next(pers.currentTask);
   }
 
   setLearningPers(userId) {
@@ -2786,13 +2794,13 @@ export class PersService {
     if (prsLvl < 40) {
       return 2;
     }
-    if (prsLvl < 60) {
+    if (prsLvl < 50) {
       return 3;
     }
-    if (prsLvl < 80) {
+    if (prsLvl < 70) {
       return 4;
     }
-    if (prsLvl < 100) {
+    if (prsLvl < 90) {
       return 5;
     }
 
@@ -3045,7 +3053,7 @@ export class PersService {
     stT.aimUnit = tsk.aimUnit;
     stT.secondsDone = st.secondsDone;
     stT.secondsToDone = tsk.secondsToDone;
-    stT.counterDone = tsk.counterDone;
+    stT.counterDone = st.counterDone;
     stT.counterToDone = tsk.counterToDone;
     stT.descr = tsk.descr;
 
@@ -3113,10 +3121,6 @@ export class PersService {
     stT.timerStart = tsk.timerStart;
     stT.requrense = tsk.requrense;
     stT.lastDate = st.lastDate;
-
-    if (tsk.isCounterEnable && st.counterDone > 0) {
-      stT.tittle += " (" + st.counterDone + ")";
-    }
 
     if (!st.image) {
       let lvl = prs.level;
@@ -3303,10 +3307,6 @@ export class PersService {
       } else {
         tsk.tittle = tsk.name;
         plusState = tsk.name;
-      }
-
-      if (tsk.isCounterEnable && tsk.counterDone > 0) {
-        tsk.tittle += " (" + tsk.counterDone + ")";
       }
 
       tsk.curLvlDescr = plusState.trim();

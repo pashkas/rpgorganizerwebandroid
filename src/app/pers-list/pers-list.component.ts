@@ -358,7 +358,7 @@ export class PersListComponent implements OnInit {
           ab.isOpen = false;
           ab.tasks.forEach((tsk) => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
-            tsk.order = GameSettings.tskOrderDefault;
+            tsk.order = this.GameSettings.tskOrderDefault;
             tsk.classicalExp = 0;
             tsk.autoTime = 0;
             tsk.plusExp = 0;
@@ -375,7 +375,7 @@ export class PersListComponent implements OnInit {
             tsk.counterDone = 0;
             tsk.nextAbVal = 0;
             tsk.states.forEach((st) => {
-              st.order = GameSettings.tskOrderDefault;
+              st.order = this.GameSettings.tskOrderDefault;
               st.autoTime = 0;
               st.lastDate = 0;
               st.prevId = null;

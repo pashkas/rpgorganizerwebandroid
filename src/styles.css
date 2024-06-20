@@ -10,14 +10,6 @@
   line-height: initial !important;
 }
 
-.chLstTsk {
-  background-color: rgba(255, 255, 255, 0.606);
-  margin-left: 5px;
-  margin-right: 5px;
-  border-radius: 5px;
-  color: black;
-}
-
 .nounderline {
   text-decoration: none !important;
 }
@@ -406,4 +398,26 @@ body {
   .flexitem {
     flex-basis: calc(50% - 8px);
   }
+}
+
+.chLstTsk {
+  background-color: rgba(255, 255, 255, 0.606);
+  margin-left: 5px;
+  margin-right: 5px;
+  border-radius: 5px;
+  color: black;
+}
+
+.abLelelsDescr {
+  font-size: small;
+}
+
+.changesImg {
+  max-height: 120px;
+}
+
+.bigTextShrink {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

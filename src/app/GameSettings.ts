@@ -7,6 +7,8 @@ export class GameSettings {
     GameSettings.failKoef = 1;
     GameSettings.changesPopupDurationAbil = 6000;
     GameSettings.changesPopupDurationCha = 6000;
+    GameSettings.maxAbilLvl = 20;
+    GameSettings.maxChaLvl = 20;
   }
 
   static failKoef: number = 1;
@@ -105,7 +107,7 @@ export class GameSettings {
     if (isTES) {
       // В стиле TES
       let skillMult = 1;
-      let skillOffcet = 3 - skillMult;
+      let skillOffcet = 1 - skillMult;
 
       let result = level * skillMult + skillOffcet;
       result = Math.ceil(result);
@@ -171,14 +173,14 @@ export class GameSettings {
   /**
    * Длительность показа попапа с изменениями.
    */
-  static changesPopupDuration: number = 3000;
+  static changesPopupDuration: number = 2500;
   static changesPopupDurationAbil: number = 6000;
   static changesPopupDurationCha: number = 6000;
 
   /**
    * Длительность попапа изменений квестов.
    */
-  static changesPopupDurationQwest: number = 3000;
+  static changesPopupDurationQwest: number = 2500;
 
   /**
    * Анимация вспышки задачи.

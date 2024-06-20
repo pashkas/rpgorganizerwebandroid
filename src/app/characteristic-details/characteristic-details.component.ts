@@ -98,7 +98,7 @@ export class CharacteristicDetailsComponent implements OnInit {
     }
 
     this.rangse = [];
-    for (let index = GameSettings.minChaLvl - 1; index <= GameSettings.maxChaLvl - 1; index++) {
+    for (let index = this.GameSettings.minChaLvl - 1; index <= this.GameSettings.maxChaLvl - 1; index++) {
       let rng = new Rangse();
       rng.val = index;
       rng.img = "";

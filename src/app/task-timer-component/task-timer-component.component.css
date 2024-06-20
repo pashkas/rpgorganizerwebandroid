@@ -7,3 +7,22 @@
 .timer-background{
     background-color: black;
 }
+
+.barWrapper {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    height: 22px;
+    background: transparent;
+    border: 1px solid greenyellow;
+}
+
+.barProgress {
+    background-color: greenyellow;
+}
+
+.barText {
+    position: absolute;
+    padding: 10px;
+    font-size: small;
+}

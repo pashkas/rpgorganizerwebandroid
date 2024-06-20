@@ -86,8 +86,14 @@
                   matBadgePosition="above after"
                   matBadgeOverlap="false"
                   [ngClass]="{ 'text-danger': data.currentTask.failCounter >= 1 }"
-                  >{{ data.currentTask.tittle }}</span
                 >
+                  <ng-container>
+                    {{ data.currentTask.tittle }}
+                  </ng-container>
+                  <ng-container *ngIf="data?.currentTask?.isCounterEnable && data?.currentTask?.counterDone > 0">
+                    {{ " (" + (currentCounterDone$ | async) + ")" }}
+                  </ng-container>
+                </span>
               </ng-container>
             </h4>
           </a>
@@ -131,7 +137,7 @@
           >
             | ⌛&nbsp;
           </a>
-          <a *ngIf="data?.currentTask?.isCounterEnable" class="text-secondary pointer nounderline" (click)="clickCounter()"> | ✓&nbsp; </a>
+          <a *ngIf="data?.currentTask?.isCounterEnable" class="text-secondary pointer nounderline" (click)="clickCounter(data?.currentTask)"> | ✓&nbsp; </a>
         </small>
       </div>
     </ng-container>

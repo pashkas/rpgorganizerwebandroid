@@ -221,7 +221,7 @@ export class PerschangesService {
         let isShowBySettings = isDoneQwest || GameSettings.changesIsShowExp;
 
         if (isShowBySettings) {
-          let isTesChange = !GameSettings.isClassicaRPG && tsk != null && tsk.tesValue >= GameSettings.tesMaxVal && tsk.requrense != 'нет';
+          let isTesChange = !GameSettings.isClassicaRPG && tsk != null && tsk.tesValue >= GameSettings.tesMaxVal && tsk.requrense != "нет";
 
           if (changesMap[n].after != changesMap[n].before || isTesChange) {
             let expChanges = new ChangesModel("Уровень", "exp", changesMap[n].before * 10, changesMap[n].after * 10, this.afterPers.prevExp * 10, this.afterPers.nextExp * 10, changesMap[n].img);
@@ -343,7 +343,8 @@ export class PerschangesService {
 
     let wasGold = false;
 
-    if (GameSettings.isClassicaRPG && img != null) {
+    // GameSettings.isClassicaRPG &&
+    if (img != null) {
       for (const ch of unionChanges) {
         if (ch.type == "exp") {
           ch.img = img;
