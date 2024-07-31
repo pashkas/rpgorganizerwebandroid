@@ -3,6 +3,16 @@
     color: gold;
 }
 
+.mainImg{
+    object-fit: contain;
+    max-height: 196px;
+}
+
+.secImg{
+    object-fit: contain;
+    max-height: 1.8em;
+}
+
 @keyframes blink {
     0% {
         opacity: 0;

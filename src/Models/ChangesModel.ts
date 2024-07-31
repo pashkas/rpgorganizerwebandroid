@@ -1,3 +1,5 @@
+import { NewLvlData } from "./NewLvlData";
+
 export class ChangesModel {
     name: string;
     type: string;
@@ -14,6 +16,7 @@ export class ChangesModel {
     gold: string;
     goldTotal: number;
     lvl: number;
+    newLvlData: NewLvlData;
 
     constructor(name, type, valFrom, valTo, totalMin, totalMax, img) {
         this.img = img;

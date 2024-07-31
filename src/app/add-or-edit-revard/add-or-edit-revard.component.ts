@@ -7,8 +7,8 @@ import { takeUntil } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { RevardDialogData } from "src/Models/RevardDialogData";
 import { Reqvirement } from "src/Models/Task";
-import { GameSettings } from "../GameSettings";
 import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
+import { GameSettings } from "../GameSettings";
 
 @Component({
   selector: "app-add-or-edit-revard",
@@ -18,7 +18,6 @@ import { FormBuilder, FormControl, FormGroup } from "@angular/forms";
 export class AddOrEditRevardComponent implements OnInit {
   private unsubscribe$ = new Subject();
 
-  gameSettings = GameSettings;
   rev: Reward;
   revForm = new FormGroup({
     isLud: new FormControl(false),
@@ -28,7 +27,7 @@ export class AddOrEditRevardComponent implements OnInit {
   });
   revProbCtrl = new FormControl({});
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: RevardDialogData, private dialog: MatDialog) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: RevardDialogData, private dialog: MatDialog, public gameSettings: GameSettings) {}
 
   addReq() {
     const dialogRef = this.openReqDialogHandler(null);

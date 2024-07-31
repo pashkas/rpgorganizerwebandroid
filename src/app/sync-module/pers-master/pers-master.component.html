@@ -63,7 +63,7 @@
                 <input formControlName="abName" onfocus="this.select()" matInput autocomplete="off" type="text" />
               </mat-form-field>
               <div style="display: flex; align-items: center; flex: 1">
-                <mat-form-field *ngIf="GameSettings.isClassicaRPG == true">
+                <mat-form-field *ngIf="this.gameSettings.isClassicaRPG == true">
                   <mat-select formControlName="hardness">
                     <mat-option *ngFor="let hardness of hardnessList" [value]="hardness.hardness">
                       {{ hardness.txt }}

@@ -14,7 +14,7 @@ export class AddItemDialogComponent implements OnInit {
   lblTxt = "Название";
   times = [1, 2, 3, 4, 5];
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data, public dialogRef: MatDialogRef<AddItemDialogComponent>) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data, public dialogRef: MatDialogRef<AddItemDialogComponent>, public gameSettings: GameSettings) {}
 
   chooseImg(img) {
     this.dialogRef.close(img);
@@ -31,7 +31,7 @@ export class AddItemDialogComponent implements OnInit {
     }
 
     if (this.data.isPers) {
-      for (let i = 1; i <= GameSettings.persImgNum; i++) {
+      for (let i = 1; i <= this.gameSettings.persImgNum; i++) {
         let ss = "000" + i;
         ss = ss.substr(ss.length - 3);
         this.gallerryImages.push("assets/img/Perses/" + ss + ".webp");
@@ -47,7 +47,7 @@ export class AddItemDialogComponent implements OnInit {
       if (this.data.isQwest) {
         // this.isGallery = false;
       }
-      for (let i = 1; i <= GameSettings.skiilImgNum; i++) {
+      for (let i = 1; i <= this.gameSettings.skiilImgNum; i++) {
         let ss = "000" + i;
         ss = ss.substr(ss.length - 3);
         this.gallerryImages.push("assets/img/Gallery/" + ss + ".webp");

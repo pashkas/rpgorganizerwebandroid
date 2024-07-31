@@ -1,21 +1,35 @@
 <div class="text-light" fxLayout="column" fxFill fxLayoutAlign="space-around center">
-    <div fxLayout="row" fxLayoutAlign="space-evenly end" fxLayoutGap="15px">
-        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
-            <div class="pl-2"> {{this.abPoints}} </div>
-            <img src="assets/icons/diamond.png" class="img-fluid px-2"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
-        </div>
-        <div>
-            <img src="assets/img/levelUp.png" class="img-fluid" style="max-height: 196px;"
-                [ngStyle]="{'object-fit': 'contain'}">
-        </div>
-        <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
-            <div class="pl-2"> {{this.abPoints}} </div>
-            <img src="assets/icons/diamond.png" class="img-fluid px-2"
-                [ngStyle]="{'object-fit': 'contain', 'height':'1.8em'}">
-        </div>
+  <div fxLayout="row" fxLayoutAlign="space-evenly end" fxLayoutGap="15px">
+    <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
+      <div class="pl-2">{{ this.abPoints }}</div>
+      <img src="assets/icons/diamond.png" class="img-fluid px-2 secImg" />
     </div>
-    <div class="py-2">
-        <h1 class="text-center heartbeat">НОВЫЙ УРОВЕНЬ!!!</h1>
+    <div>
+      <img src="{{ img }}" class="img-fluid mainImg" />
     </div>
+    <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
+      <div class="pl-2">{{ this.abPoints }}</div>
+      <img src="assets/icons/diamond.png" class="img-fluid px-2 secImg" />
+    </div>
+  </div>
+  <div class="py-2">
+    <h2 class="text-center heartbeat">{{ txt }}</h2>
+    <h2 class="text-center heartbeat">Ур. {{ lvl }}</h2>
+    <!-- Статусы по уровню навыка -->
+    <!-- <div class="chLstTsk abLelelsDescr" *ngIf="tsk && (tsk.value > 1 || tsk.value == 1)">
+      <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
+        <div
+          *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)"
+          class="text-center px-0 py-0 border-0 bigTextShrink"
+          [ngClass]="{ 'bg-success': i == tsk.value && isShowAbProgrTable }"
+        >
+          <b>
+            <ng-container *ngIf="isShowAbProgrTable">
+              {{ i + percSymbol + ": " }}
+            </ng-container> </b
+          >{{ st }}
+        </div>
+      </ng-container>
+    </div> -->
+  </div>
 </div>

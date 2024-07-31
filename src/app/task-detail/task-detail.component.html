@@ -63,11 +63,11 @@
 
       <!-- Поднять навык -->
       <!-- Понизить навык -->
-      <button *ngIf="tsk.requrense != 'нет' && tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
+      <button *ngIf="tsk.requrense != 'нет' && tskAbility?.isOpen && !gameSettings.isClassicaRPG" class="icon-small" mat-icon-button (click)="downAbil()">
         <img src="assets/icons/down.png" class="img-fluid" />
       </button>
       <!-- Количество очков -->
-      <div *ngIf="tsk.requrense != 'нет' && GameSettings.isAbPointsEnabled && pers.ON > 0">
+      <div *ngIf="tsk.requrense != 'нет' && this.gameSettings.isAbPointsEnabled && pers.ON > 0">
         <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }">
           <img src="assets/icons/diamond.png" class="img-fluid px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
           {{ this.pers.ON }}
@@ -118,11 +118,11 @@
       </mat-list>
     </ng-container>
     <br />
-    <ng-container *ngFor="let st of tsk.statesDescr; let i = index" >
+    <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
       <div
-        *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)"
+        *ngIf="st && (i >= this.gameSettings.minAbilLvl || !isShowAbProgrTable)"
         class="text-center px-0 py-0 border-0 abLelelsDescr"
-        [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }" 
+        [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }"
       >
         <b>
           <ng-container *ngIf="isShowAbProgrTable">
@@ -163,7 +163,7 @@
           <mat-chip-list selectable multiple>
             <mat-chip (click)="tsk.isPerk = !tsk.isPerk" [selected]="tsk.isPerk" color="accent"> &nbsp;Перк?&nbsp; </mat-chip>
 
-            <ng-container *ngIf="GameSettings.isClassicaRPG == true">
+            <ng-container *ngIf="this.gameSettings.isClassicaRPG == true">
               <mat-divider vertical class="vertdiv"></mat-divider>
               <ng-container>
                 <mat-chip (click)="setTskHardness(1)" [selected]="tsk.hardnes == 1" color="accent">Норм</mat-chip>

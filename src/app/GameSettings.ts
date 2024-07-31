@@ -1,32 +1,187 @@
-export class GameSettings {
-  static setTes() {
-    GameSettings.isAbPointsEnabled = false;
-    GameSettings.isClassicaRPG = false;
-    GameSettings.expFotmulaType = "abVal";
-    GameSettings.abPointsPerLvl = 30;
-    GameSettings.failKoef = 1;
-    GameSettings.changesPopupDurationAbil = 6000;
-    GameSettings.changesPopupDurationCha = 6000;
-    GameSettings.maxAbilLvl = 20;
-    GameSettings.maxChaLvl = 20;
-  }
+import { getExpResult } from "src/Models/getExpResult";
 
-  static failKoef: number = 1;
-
+export abstract class GameSettings {
   /**
-   * Начальное ОН.
+   * Нужно набрать очков чтобы достичь уровень
+   *
    */
-  static abPointsStart: number = 30;
-
+  abPointsForLvl: number = 40;
   /**
    * Очков за уровень.
    */
-  static abPointsPerLvl: number = 10;
+  abPointsPerLvl: number = 10;
+  /**
+   * Начальное ОН.
+   */
+  abPointsStart: number = 30;
+  /**
+   * Длительность самой анимации.
+   */
+  animationDelay: number = 1000;
+  baseTskGold: number = 1;
+  /**
+   * Показывать изменения уровней характеристик.
+   */
+  changesIsChowChaLevels: boolean = true;
+  /**
+   * Показывать изменения значений характеристик.
+   */
+  changesIsChowChaValues: boolean = false;
+  /**
+   * Показывать открытие навыка.
+   */
+  changesIsShowAbActivate: boolean = true;
+  /**
+   * Показывать описание нового уровня навыка в изменениях.
+   */
+  changesIsShowAbDescrInChanges: boolean = false;
+  /**
+   * Показывать изменения уровней навыков.
+   */
+  changesIsShowAbLevels: boolean = true;
+  /**
+   * Показывать изменения значений навыков.
+   */
+  changesIsShowAbValues: boolean = false;
+  /**
+   * Показывать изменение опыта.
+   */
+  changesIsShowExp: boolean = true;
+  /**
+   * Показывать процент в прогрессе навыка.
+   */
+  changesIsShowPercentageInAb: boolean = false;
+  /**
+   * Показывать значение в изменениях навыка.
+   */
+  changesIsShowValueInAb: boolean = true;
+  /**
+   * Показывать значения в изменениях характеристик.
+   */
+  changesIsShowValueInCha: boolean = true;
+  /**
+   * Длительность показа попапа с изменениями.
+   */
+  changesPopupDuration: number = 3000;
+  changesPopupDurationAbil: number = 6000;
+  changesPopupDurationCha: number = 6000;
+  changesPopupDurationNewLevel: number = 5000;
+  /**
+   * Длительность попапа изменений квестов.
+   */
+  changesPopupDurationQwest: number = 3000;
+  /**
+   * Тип расчета опыта. (dynamic, abLvl, abLvlPoints, abValPoints)
+   */
+  expFotmulaType: string = "abLvl";
+  failKoef: number = 1;
+  /**
+   * Анимация вспышки задачи.
+   */
+  flashDelay: number = 333;
+  flashDelay2: number = 555;
+  /**
+   * ОН активны.
+   */
+  isAbPointsEnabled: boolean = true;
+  /**
+   * Прогресс бар целый?
+   */
+  isCeilProgressBar: boolean = true;
+  /**
+   * В листе перса целые значения/или дробные.
+   */
+  isCeilProgressInList: boolean = true;
+  /**
+   * Классический режим РПГ.
+   */
+  isClassicaRPG: boolean = true;
+  /**
+   * Новый навык открыт?
+   */
+  isNewAbOpened: boolean = false;
+  /**
+   * Открывать навык при активации.
+   */
+  isOpenAbWhenActivate: boolean = true;
+  /**
+   * Открывать окно перса когда новый уровень?
+   */
+  isOpenPersAtNewLevel: boolean = false;
+  isShowAbLvlPopup: boolean = false;
+  /**
+   * Показывать полный список требований навыка, по уровням.
+   */
+  isShowAbProgrTable: boolean = true;
+  isShowChaLvlPopup: boolean = false;
+  isShowDec: boolean = true;
+  /**
+   * Максимальный уровень навыков.
+   */
+  maxAbilLvl: number = 10;
+  /**
+   * Максимальный уровень характеристик.
+   */
+  maxChaLvl: number = 10;
+  /**
+   * Максимальный уровень персонажа.
+   */
+  maxPersLevel: number = 100;
+  /**
+   * Минимальный уровень навыка.
+   */
+  minAbilLvl: number = 1;
+  /**
+   * Минимальный уровень характеристик.
+   */
+  minChaLvl: number = 1;
+  /**
+   * За сколько уровней даются очки навыков.
+   */
+  perLvl: number = 10;
+  /**
+   * Число картинок персонажей.
+   */
+  persImgNum: number = 51;
+  /**
+   * Плюс к прогрессу для задания в задаче.
+   *
+   */
+  plusAbProgrForTitle: number = 0;
+  qwestHardneses: qwestHardness[] = [
+    { id: 5, name: "оч. легко", gold: 30 },
+    { id: 4, name: "легко", gold: 60 },
+    { id: 3, name: "норм", gold: 125 },
+    { id: 2, name: "сложно", gold: 500 },
+    { id: 1, name: "оч. сложно", gold: 2500 },
+  ];
+
+  revProbs: taskProb[] = [
+    { id: 5, name: "оч. распространенный", prob: 3, gold: 75 },
+    { id: 4, name: "распространенный", prob: 2, gold: 125 },
+    { id: 3, name: "обычный", prob: 1, gold: 250 },
+    { id: 2, name: "редкий", prob: 0.25, gold: 1000 },
+    { id: 1, name: "оч. редкий", prob: 0.05, gold: 5000 },
+  ];
+  /**
+   * Число картинок скиллов.
+   */
+  skiilImgNum: number = 134;
+  /**
+   * Максимальное значение очков в задаче.
+   */
+  get tesMaxVal(): number {
+    return this.maxAbilLvl * 10 - this.minAbilLvl * 10 + 9.99;
+  }
+
+  tskOrderDefault: number = -1;
 
   /**
    * Стоимость поднятия навыка
    */
-  static abCost(curLvl: number, hardness: number): number {
+  abCost(curLvl: number, hardness: number): number {
+    return 1;
+
     if (curLvl == 0) {
       return 10 * hardness;
     }
@@ -34,10 +189,36 @@ export class GameSettings {
     return curLvl * hardness;
   }
 
+  rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
+
+  abChangeExp(curLvl: number, hardness: number): number {
+    return 0;
+  }
+
+  getMonsterLevel(prsLvl: number, maxLevel: number): number {
+    if (prsLvl < 20) {
+      return 1;
+    }
+    if (prsLvl < 40) {
+      return 2;
+    }
+    if (prsLvl < 50) {
+      return 3;
+    }
+    if (prsLvl < 70) {
+      return 4;
+    }
+    if (prsLvl < 90) {
+      return 5;
+    }
+
+    return 6;
+  }
+
   /**
    * Сумма потраченных очков на навык.
    */
-  static abTotalCost(curLvl: number, hardness: number) {
+  abTotalCost(curLvl: number, hardness: number) {
     if (curLvl == 0) {
       return 0;
     }
@@ -48,59 +229,9 @@ export class GameSettings {
   }
 
   /**
-   * В листе перса целые значения/или дробные.
-   */
-  static isCeilProgressInList: boolean = true;
-  /**
-   * Прогресс бар целый?
-   */
-  static isCeilProgressBar: boolean = true;
-  /**
-   * Классический режим РПГ.
-   */
-  static isClassicaRPG: boolean = true;
-
-  static isShowDec: boolean = true;
-  /**
-   * Максимальный уровень персонажа.
-   */
-  static maxPersLevel: number = 100;
-
-  /**
-   * Тип расчета опыта. (dynamic, abLvl, abVal, abLvl2)
-   */
-  static expFotmulaType: string = "abLvl";
-
-  /**
-   * За сколько уровней даются очки навыков.
-   */
-  static perLvl: number = 10;
-
-  /**
-   * ОН активны.
-   */
-  static isAbPointsEnabled: boolean = true;
-
-  /**
-   * Новый навык открыт?
-   */
-  static isNewAbOpened: boolean = false;
-
-  /**
-   * Открывать навык при активации.
-   */
-  static isOpenAbWhenActivate: boolean = true;
-
-  /**
-   * Плюс к прогрессу для задания в задаче.
-   *
-   */
-  static plusAbProgrForTitle: number = 0;
-
-  /**
    * Формула прогресса навыка.
    */
-  static getTesChangeKoef(tesVal: number): number {
+  getTesChangeKoef(tesVal: number): number {
     const isTES = true;
     let level = 1 + Math.floor(tesVal / 10.0);
 
@@ -115,7 +246,7 @@ export class GameSettings {
       return 1 / result;
     } else {
       // Экспонента
-      let levels = GameSettings.maxAbilLvl;
+      let levels = this.maxAbilLvl;
       let xp_for_first_level = 7;
       let xp_for_last_level = 20;
 
@@ -131,155 +262,78 @@ export class GameSettings {
     }
   }
 
-  /**
-   * Открывать окно перса когда новый уровень?
-   */
-  static isOpenPersAtNewLevel: boolean = false;
-  /**
-   * Показывать полный список требований навыка, по уровням.
-   */
-  static isShowAbProgrTable: boolean = true;
+  setExpFormulaType(type: string) {
+    this.expFotmulaType = type;
 
-  /**
-   * Показывать изменения уровней характеристик.
-   */
-  static changesIsChowChaLevels: boolean = true;
+    if (type == "abLvl") {
+      this.changesPopupDuration = 3000;
+      this.changesPopupDurationAbil = 3000;
+      this.changesPopupDurationCha = 3000;
+      this.changesIsShowAbLevels = false;
+      this.changesIsShowAbValues = true;
+      this.changesIsChowChaLevels = false;
+      this.changesIsChowChaValues = true;
+    } else if (type == "abLvlPoints") {
+      this.changesPopupDuration = 3000;
+      this.changesPopupDurationAbil = 3000;
+      this.changesPopupDurationCha = 3000;
+      this.changesIsShowAbLevels = true;
+      this.changesIsShowAbValues = false;
+      this.changesIsChowChaLevels = true;
+      this.changesIsChowChaValues = false;
+    } else if (type == "abVal") {
+      this.changesPopupDuration = 3000;
+      this.changesPopupDurationAbil = 6000;
+      this.changesPopupDurationCha = 6000;
+      this.changesIsShowAbLevels = false;
+      this.changesIsShowAbValues = true;
+      this.changesIsChowChaLevels = false;
+      this.changesIsChowChaValues = true;
+      this.changesIsShowExp = false;
+    } else if (type == "abValPoints") {
+      this.changesPopupDuration = 3000;
+      this.changesPopupDurationAbil = 6000;
+      this.changesPopupDurationCha = 6000;
+      this.changesPopupDurationQwest = 3000;
+      this.changesIsShowAbLevels = true;
+      this.changesIsShowAbValues = false;
+      this.isShowAbLvlPopup = false;
+      this.changesIsChowChaLevels = true;
+      this.changesIsChowChaValues = false;
+      this.isShowChaLvlPopup = false;
+      this.changesIsShowExp = true;
+    }
+  }
 
-  /**
-   * Показывать изменения значений характеристик.
-   */
-  static changesIsChowChaValues: boolean = false;
+  setTes() {
+    this.isClassicaRPG = false;
 
-  /**
-   * Показывать изменения уровней навыков.
-   */
-  static changesIsShowAbLevels: boolean = true;
+    this.setExpFormulaType("abValPoints");
 
-  /**
-   * Показывать изменения значений навыков.
-   */
-  static changesIsShowAbValues: boolean = false;
+    this.maxAbilLvl = 20;
+    this.maxChaLvl = 20;
 
-  /**
-   * Показывать открытие навыка.
-   */
-  static changesIsShowAbActivate: boolean = true;
+    // Очки навыков
+    this.isAbPointsEnabled = true;
+    this.abPointsStart = 4;
+    this.abPointsPerLvl = 1;
+    this.abPointsForLvl = 4;
 
-  /**
-   * Показывать изменение опыта.
-   */
-  static changesIsShowExp: boolean = true;
+    this.isOpenPersAtNewLevel = true;
+  }
 
-  /**
-   * Длительность показа попапа с изменениями.
-   */
-  static changesPopupDuration: number = 2500;
-  static changesPopupDurationAbil: number = 6000;
-  static changesPopupDurationCha: number = 6000;
-
-  /**
-   * Длительность попапа изменений квестов.
-   */
-  static changesPopupDurationQwest: number = 2500;
-
-  /**
-   * Анимация вспышки задачи.
-   */
-  static flashDelay: number = 333;
-  static flashDelay2: number = 555;
-  /**
-   * Длительность самой анимации.
-   */
-  static animationDelay: number = 1000;
-
-  /**
-   * Показывать процент в прогрессе навыка.
-   */
-  static changesIsShowPercentageInAb: boolean = false;
-
-  /**
-   * Показывать значение в изменениях навыка.
-   */
-  static changesIsShowValueInAb: boolean = true;
-
-  /**
-   * Показывать значения в изменениях характеристик.
-   */
-  static changesIsShowValueInCha: boolean = true;
-
-  /**
-   * Показывать описание нового уровня навыка в изменениях.
-   */
-  static changesIsShowAbDescrInChanges: boolean = false;
-
-  /**
-   * Число рангов.
-   */
-  static rangsCount: number = 11;
-
-  /**
-   * Максимальный уровень характеристик.
-   */
-  static maxChaLvl: number = 10;
-  /**
-   * Минимальный уровень характеристик.
-   */
-  static minChaLvl: number = 1;
-
-  /**
-   * Максимальный уровень навыков.
-   */
-  static maxAbilLvl: number = 10;
-
-  /**
-   * Минимальный уровень навыка.
-   */
-  static minAbilLvl: number = 1;
-
-  /**
-   * Максимальное значение очков в задаче.
-   */
-  static tesMaxVal: number = GameSettings.maxAbilLvl * 10 - GameSettings.minAbilLvl * 10 + 9.99;
-
-  /**
-   * Число картинок скиллов.
-   */
-  static skiilImgNum: number = 134;
-
-  /**
-   * Число картинок персонажей.
-   */
-  static persImgNum: number = 51;
-
-  static tskOrderDefault: number = -1;
-
-  static baseTskGold: number = 1;
-  static qwestHardneses: qwestHardness[] = [
-    { id: 5, name: "оч. легко", gold: 30 },
-    { id: 4, name: "легко", gold: 60 },
-    { id: 3, name: "норм", gold: 125 },
-    { id: 2, name: "сложно", gold: 500 },
-    { id: 1, name: "оч. сложно", gold: 2500 },
-  ];
-
-  static revProbs: taskProb[] = [
-    { id: 5, name: "оч. распространенный", prob: 3, gold: 75 },
-    { id: 4, name: "распространенный", prob: 2, gold: 125 },
-    { id: 3, name: "обычный", prob: 1, gold: 250 },
-    { id: 2, name: "редкий", prob: 0.25, gold: 1000 },
-    { id: 1, name: "оч. редкий", prob: 0.05, gold: 5000 },
-  ];
+  abstract getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number): getExpResult;
 }
 
 export class qwestHardness {
+  gold: number;
   id: number;
   name: string;
-  gold: number;
 }
 
 export class taskProb {
+  gold: number;
   id: number;
   name: string;
   prob: number;
-  gold: number;
 }

@@ -25,18 +25,17 @@ import { GameSettings } from "../GameSettings";
 export class TaskDetailComponent implements OnInit {
   private unsubscribe$ = new Subject();
 
-  GameSettings: typeof GameSettings;
-  isShowAbProgrTable = GameSettings.isShowAbProgrTable;
+  isShowAbProgrTable;
+  isClassical;
+  percSymbol;
   charactCntrl: FormControl;
   charactGroup: FormGroup;
   @ViewChild("goUp", { static: false }) goUp: ElementRef;
   isEditMode: boolean = false;
   isQuick: any;
   isFromMain: any;
-  isClassical = GameSettings.isClassicaRPG;
   linkQwests: Qwest[] = [];
   @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
-  percSymbol = GameSettings.changesIsShowPercentageInAb ? "%" : "";
   pers: Pers;
   requrenses: string[] = Task.requrenses;
   times = [1, 2, 3, 4, 5];
@@ -57,13 +56,17 @@ export class TaskDetailComponent implements OnInit {
     private router: Router,
     public dialog: MatDialog,
     fb: FormBuilder,
-    private platformLocation: PlatformLocation
+    private platformLocation: PlatformLocation,
+    public gameSettings: GameSettings
   ) {
+    this.isShowAbProgrTable = this.gameSettings.isShowAbProgrTable;
+    this.isClassical = this.gameSettings.isClassicaRPG;
+    this.percSymbol = this.gameSettings.changesIsShowPercentageInAb ? "%" : "";
+
     this.charactCntrl = fb.control("");
     this.charactGroup = fb.group({
       charact: this.charactCntrl,
     });
-    this.GameSettings = GameSettings;
   }
 
   setTskHardness(val: number) {
@@ -239,7 +242,7 @@ export class TaskDetailComponent implements OnInit {
     this.route.queryParams.subscribe((queryParams: any) => {
       this.isQuick = queryParams.isQuick;
       this.isFromMain = queryParams.isFromMain;
-      if(queryParams.isActivate){
+      if (queryParams.isActivate) {
         this.isEditMode = true;
       }
       if (this.isQuick && !queryParams.isActivate) {

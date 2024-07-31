@@ -11,16 +11,13 @@ import { Rangse } from "src/Models/Rangse";
 })
 export class PersMasterComponent implements OnInit {
   rangse: Rangse[];
-  GameSettings: typeof GameSettings;
-  constructor(private fb: FormBuilder, private srv: PersService, private router: Router) {
-    this.GameSettings = GameSettings;
-  }
+  constructor(private fb: FormBuilder, private srv: PersService, private router: Router, public gameSettings: GameSettings) {}
 
   persForm: FormGroup;
 
   ngOnInit() {
     this.rangse = [];
-    for (let index = GameSettings.minChaLvl - 1; index <= GameSettings.maxChaLvl - 1; index++) {
+    for (let index = this.gameSettings.minChaLvl - 1; index <= this.gameSettings.maxChaLvl - 1; index++) {
       let rng = new Rangse();
       rng.val = index;
       rng.img = "";

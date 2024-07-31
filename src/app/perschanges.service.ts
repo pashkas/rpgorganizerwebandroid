@@ -2,13 +2,12 @@ import { Injectable } from "@angular/core";
 import { Pers } from "src/Models/Pers";
 import { PersChangesComponent } from "./pers-changes/pers-changes.component";
 import { MatDialog } from "@angular/material/dialog";
-import { Ability } from "src/Models/Ability";
 import { Router } from "@angular/router";
 import { Task } from "src/Models/Task";
 import { ChangesModel, persExpChanges } from "src/Models/ChangesModel";
-import { Characteristic } from "src/Models/Characteristic";
 import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
 import { StatesService } from "./states.service";
+import { NewLvlData } from "src/Models/NewLvlData";
 import { GameSettings } from "./GameSettings";
 
 @Injectable({
@@ -18,10 +17,25 @@ export class PerschangesService {
   afterPers: Pers;
   beforePers: Pers;
 
-  constructor(public dialog: MatDialog, private router: Router, private srvSt: StatesService) {}
+  constructor(public dialog: MatDialog, private router: Router, private srvSt: StatesService, public gameSettings: GameSettings) {
+  }
 
   getClone(pers: Pers): Pers {
     return JSON.parse(JSON.stringify(pers));
+  }
+  getChSort(ch: ChangesModel): number {
+    let sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp"];
+
+    if (!this.gameSettings.isClassicaRPG) {
+      sort = ["exp", "qwest", "abil", "abLvl", "cha", "chaLvl"];
+    }
+
+    const idx = sort.findIndex((q) => q == ch.type);
+    if (idx != -1) {
+      return idx;
+    } else {
+      return sort.length;
+    }
   }
 
   async showChanges(congrantMsg: string, failMsg: string, isGood: boolean, img?: string, tsk?: Task) {
@@ -84,21 +98,23 @@ export class PerschangesService {
       // Характеристики
       else if (el.type == "cha") {
         // Изменение уровня
-        if (GameSettings.changesIsChowChaLevels && el.after != el.before && el.after <= GameSettings.maxChaLvl && el.after > GameSettings.minChaLvl) {
-          let chaChanges = new ChangesModel(
-            el.name,
-            "cha",
-            this.moreThenThero(el.before - GameSettings.minChaLvl),
-            this.moreThenThero(el.after - GameSettings.minChaLvl),
-            0,
-            GameSettings.maxChaLvl - GameSettings.minChaLvl,
-            el.img
-          );
-          chaChanges.lvl = el.after;
-          changes.push(chaChanges);
+        if (el.after != el.before && el.after <= this.gameSettings.maxChaLvl && el.after > this.gameSettings.minChaLvl) {
+          if (this.gameSettings.changesIsChowChaLevels) {
+            let chaChanges = new ChangesModel(
+              el.name,
+              "cha",
+              this.moreThenThero(el.before - this.gameSettings.minChaLvl),
+              this.moreThenThero(el.after - this.gameSettings.minChaLvl),
+              0,
+              this.gameSettings.maxChaLvl - this.gameSettings.minChaLvl,
+              el.img
+            );
+            chaChanges.lvl = el.after;
+            changes.push(chaChanges);
+          }
         }
         // Изменение значения
-        if (GameSettings.changesIsChowChaValues && this.NE(el.before_chaVal, el.after_chaVal) && el.after_chaVal <= GameSettings.maxChaLvl) {
+        if (this.gameSettings.changesIsChowChaValues && this.NE(el.before_chaVal, el.after_chaVal) && el.after_chaVal <= this.gameSettings.maxChaLvl) {
           let beforeVal = el.before_chaVal;
           let afterVal = el.after_chaVal;
 
@@ -120,6 +136,12 @@ export class PerschangesService {
             eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevChaLvl));
             //2
             eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterChaLvl));
+
+            let chaLvlChanges = new ChangesModel(el.name, "chaLvl", beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, el.img);
+            let chaNewLvl: NewLvlData = { txt: `${el.name.toUpperCase()}`, img: el.img, lvl: afterChaLvl, tsk: null };
+            chaLvlChanges;
+            chaLvlChanges.newLvlData = chaNewLvl;
+            changes.push(chaLvlChanges);
           } else if (afterChaLvl < prevChaLvl) {
             //1
             eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevChaLvl));
@@ -137,32 +159,31 @@ export class PerschangesService {
       // Навыки
       else if (el.type == "abil") {
         // Активирован
-        if (GameSettings.changesIsShowAbActivate && el.abIsOpenBefore != el.abIsOpenAfter) {
+        if (this.gameSettings.changesIsShowAbActivate && el.abIsOpenBefore != el.abIsOpenAfter) {
           isAbilActivated = true;
           abToEdit = n;
 
           let txt = el.abIsOpenAfter == true ? "активирован" : "сброшен";
 
-          changes.push(new ChangesModel(`${el.name} ${txt}`, "abil", 0, 0, 0, GameSettings.maxAbilLvl, el.img));
+          changes.push(new ChangesModel(`${el.name} ${txt}`, "abil", 0, 0, 0, this.gameSettings.maxAbilLvl, el.img));
         } else {
           // Иземенение уровня
-          if (GameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= GameSettings.maxAbilLvl) {
+          if (this.gameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= this.gameSettings.maxAbilLvl) {
             let abChanges = new ChangesModel(
               el.name,
               "abil",
-              this.moreThenThero(el.before - GameSettings.minAbilLvl),
-              this.moreThenThero(el.after - GameSettings.minAbilLvl),
+              this.moreThenThero(el.before - this.gameSettings.minAbilLvl),
+              this.moreThenThero(el.after - this.gameSettings.minAbilLvl),
               0,
-              GameSettings.maxAbilLvl - GameSettings.minAbilLvl,
+              this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl,
               el.img
             );
 
             abChanges.lvl = el.after;
-
             changes.push(abChanges);
           }
           // Изменение значения
-          if (GameSettings.changesIsShowAbValues && this.NE(el.before_abVal, el.after_abVal) && el.after_abVal <= GameSettings.tesMaxVal + 9.99) {
+          if (this.gameSettings.changesIsShowAbValues && this.NE(el.before_abVal, el.after_abVal) && el.after_abVal <= this.gameSettings.tesMaxVal + 9.99) {
             let beforeVal = el.before_abVal;
             let afterVal = el.after_abVal;
 
@@ -175,8 +196,8 @@ export class PerschangesService {
             let abilChanges = new ChangesModel(el.name, "abil", beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, el.img);
 
             let eCh: persExpChanges[] = [];
-            let prevAbLvl = GameSettings.minAbilLvl + (Math.floor(beforeVal / 10) * 10) / 10;
-            let afterAbLvl = GameSettings.minAbilLvl + (Math.floor(afterVal / 10) * 10) / 10;
+            let prevAbLvl = this.gameSettings.minAbilLvl + (Math.floor(beforeVal / 10) * 10) / 10;
+            let afterAbLvl = this.gameSettings.minAbilLvl + (Math.floor(afterVal / 10) * 10) / 10;
             abilChanges.lvl = prevAbLvl;
 
             if (afterAbLvl > prevAbLvl) {
@@ -184,6 +205,12 @@ export class PerschangesService {
               eCh.push(new persExpChanges(beforeVal, abBeforeNextExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
               //2
               eCh.push(new persExpChanges(abAfterPrevExp, afterVal, abAfterPrevExp, abAfterNextExp, afterAbLvl));
+
+              let abLvlChanges = new ChangesModel(el.name, "abLvl", beforeVal, afterVal, abBeforePrevExp, abBeforeNextExp, el.img);
+              let abNewLvl: NewLvlData = { txt: `${el.name.toUpperCase()}`, img: el.img, lvl: afterAbLvl, tsk: tsk };
+              abLvlChanges;
+              abLvlChanges.newLvlData = abNewLvl;
+              changes.push(abLvlChanges);
             } else if (afterAbLvl < prevAbLvl) {
               //1
               eCh.push(new persExpChanges(beforeVal, abBeforePrevExp, abBeforePrevExp, abBeforeNextExp, prevAbLvl));
@@ -218,10 +245,10 @@ export class PerschangesService {
     Object.keys(changesMap).forEach((n) => {
       // Опыт
       if (changesMap[n].type == "exp") {
-        let isShowBySettings = isDoneQwest || GameSettings.changesIsShowExp;
+        let isShowBySettings = isDoneQwest || this.gameSettings.changesIsShowExp;
 
         if (isShowBySettings) {
-          let isTesChange = !GameSettings.isClassicaRPG && tsk != null && tsk.tesValue >= GameSettings.tesMaxVal && tsk.requrense != "нет";
+          let isTesChange = !this.gameSettings.isClassicaRPG && tsk != null && tsk.tesValue >= this.gameSettings.tesMaxVal && tsk.requrense != "нет";
 
           if (changesMap[n].after != changesMap[n].before || isTesChange) {
             let expChanges = new ChangesModel("Уровень", "exp", changesMap[n].before * 10, changesMap[n].after * 10, this.afterPers.prevExp * 10, this.afterPers.nextExp * 10, changesMap[n].img);
@@ -251,7 +278,7 @@ export class PerschangesService {
 
             expChanges.expChanges = eCh;
 
-            if (isDoneQwest || GameSettings.changesIsShowExp) {
+            if (isDoneQwest || this.gameSettings.changesIsShowExp) {
               changes.push(expChanges);
             } else {
               changes.unshift(expChanges);
@@ -323,27 +350,12 @@ export class PerschangesService {
 
     // Отдельные изменения
     unionChanges.sort((a, b) => {
-      return getChSort(a) - getChSort(b);
-
-      function getChSort(ch: ChangesModel): number {
-        let sort = ["abil", "cha", "qwest", "exp"];
-
-        if (!GameSettings.isClassicaRPG) {
-          sort = ["qwest", "exp", "abil", "cha"];
-        }
-
-        const idx = sort.findIndex((q) => q == ch.type);
-        if (idx != -1) {
-          return idx;
-        } else {
-          return sort.length;
-        }
-      }
+      return this.getChSort(a) - this.getChSort(b);
     });
 
     let wasGold = false;
 
-    // GameSettings.isClassicaRPG &&
+    // this.gameSettings.isClassicaRPG &&
     if (img != null) {
       for (const ch of unionChanges) {
         if (ch.type == "exp") {
@@ -359,6 +371,33 @@ export class PerschangesService {
       const img = ch.img;
       let gold = ch.gold;
       let goldTotal = ch.goldTotal;
+
+      if (type == "abLvl" || type == "chaLvl") {
+        if (type == "abLvl" && !this.gameSettings.isShowAbLvlPopup) {
+          continue;
+        }
+        if (type == "chaLvl" && !this.gameSettings.isShowChaLvlPopup) {
+          continue;
+        }
+
+        let dialogRefLvlUp = this.dialog.open(LevelUpMsgComponent, {
+          panelClass: classPanel,
+          backdropClass: "backdrop-changes",
+          data: {
+            abPoints: ch.newLvlData.lvl,
+            img: ch.newLvlData.img,
+            txt: ch.newLvlData.txt,
+            lvl: ch.newLvlData.lvl,
+            tsk: ch.newLvlData.tsk,
+          },
+        });
+
+        await sleep(this.gameSettings.changesPopupDurationNewLevel);
+
+        dialogRefLvlUp.close();
+
+        continue;
+      }
 
       if (wasGold) {
         gold = null;
@@ -387,13 +426,13 @@ export class PerschangesService {
       });
 
       if (type == "abil") {
-        await sleep(GameSettings.changesPopupDurationAbil);
+        await sleep(this.gameSettings.changesPopupDurationAbil);
       } else if (type == "cha") {
-        await sleep(GameSettings.changesPopupDurationCha);
+        await sleep(this.gameSettings.changesPopupDurationCha);
       } else if (ch.type == "qwest") {
-        await sleep(GameSettings.changesPopupDurationQwest);
+        await sleep(this.gameSettings.changesPopupDurationQwest);
       } else {
-        await sleep(GameSettings.changesPopupDuration);
+        await sleep(this.gameSettings.changesPopupDuration);
       }
 
       dialogRef.close();
@@ -404,15 +443,17 @@ export class PerschangesService {
         panelClass: classPanel,
         backdropClass: "backdrop-changes",
         data: {
-          abPoints: null,
+          abPoints: this.afterPers.ON,
+          lvl: this.afterPers.level,
+          img: "assets/img/levelUp.png",
         },
       });
 
-      await sleep(GameSettings.changesPopupDuration);
+      await sleep(this.gameSettings.changesPopupDurationNewLevel);
 
       dialogRefLvlUp.close();
 
-      if (GameSettings.isOpenPersAtNewLevel) {
+      if (this.gameSettings.isOpenPersAtNewLevel) {
         this.srvSt.selTabPersList = 0;
         this.srvSt.selInventoryList = 0;
         if (this.afterPers.ON >= 1) {
@@ -475,15 +516,15 @@ export class PerschangesService {
           }
 
           let name = ab.name;
-          if (GameSettings.changesIsShowAbDescrInChanges && tsk.curLvlDescr3 != null && tsk.curLvlDescr3 != ab.name) {
+          if (this.gameSettings.changesIsShowAbDescrInChanges && tsk.curLvlDescr3 != null && tsk.curLvlDescr3 != ab.name) {
             name += " (" + tsk.curLvlDescr3 + ")";
           }
 
           changesMap[tsk.id].name = name;
 
           let abVal = Math.floor(tsk.value);
-          if (abVal > GameSettings.maxAbilLvl) {
-            abVal = GameSettings.maxAbilLvl;
+          if (abVal > this.gameSettings.maxAbilLvl) {
+            abVal = this.gameSettings.maxAbilLvl;
           }
           changesMap[tsk.id][chType] = abVal;
 
@@ -504,8 +545,8 @@ export class PerschangesService {
       }
 
       let chaVal = Math.floor(ch.value);
-      if (chaVal > GameSettings.maxChaLvl) {
-        chaVal = GameSettings.maxChaLvl;
+      if (chaVal > this.gameSettings.maxChaLvl) {
+        chaVal = this.gameSettings.maxChaLvl;
       }
 
       changesMap[ch.id][chType] = chaVal;

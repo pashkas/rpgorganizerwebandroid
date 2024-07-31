@@ -1,115 +1,108 @@
 import { v4 as uuid } from "uuid";
-import { Time } from "@angular/common";
 import { Rangse } from "./Rangse";
-import { Pers } from "./Pers";
 import { plusToName } from "./plusToName";
-import { ReqItemType } from "./ReqItem";
-import { GameSettings } from "src/app/GameSettings";
-export class Task implements IImg {
-  classicalExp: number = 0;
-  reqvirements: Reqvirement[] = [];
-  prefix: string = "";
-  postfix: string = "";
 
+export interface IImg {
+  image: string;
+  imageLvl: string;
+  parrentTask: string;
+  requrense: string;
+  value: number;
+}
+
+export class Reqvirement {
+  elId: any;
+  elName?: string;
+  elVal: number;
+  id: any = uuid();
+  isDone?: boolean = false;
+  type?: string;
+}
+
+export class Task implements IImg {
   static maxValue: number = 10;
   static requrenses: string[] = ["будни", "выходные", "ежедневно", "дни недели", "через 1 день", "через 2 дня", "через 3 дня", "нет"];
-
   static weekDays: string[] = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
 
-  tskWeekDays: string[] = []; //[...Task.weekDays];
-  nextAbVal: number;
-  isNotWriteTime: boolean = false;
-
+  IsNextLvlSame: boolean;
   aimCounter: number = 0;
   aimTimer: number = 0;
-
   aimUnit = "Минут";
-  isEven = false;
-
-  failCounter: number = 0;
+  autoInd: number;
+  autoTime: number = 0;
+  chainIdx: number = -1;
+  classicalExp: number = 0;
+  cost: number = 0;
+  counterDone: number = 0;
+  counterToDone: number = 0;
+  counterValue: number = 0;
+  curLvlDescr: string;
+  curLvlDescr2: string;
+  curLvlDescr3: string;
   curStateDescrInd: number;
-  statesDescr: string[] = [];
-
-  hardnes: number = 1;
-
   date: Date = this.getNowDate();
   descr: string = "";
+  failCounter: number = 0;
+  hardnes: number = 1;
   id: any = uuid();
-
-  prevId: any;
-  nextId: any;
-
   image: string = "";
-  isDone: boolean = false;
-
+  imageLvl: string = "0";
   // Таймер/счетчик
   isCounter: boolean = false;
-  counterValue: number = 0;
-  isTimer: boolean = false;
-  timerStart: Date;
-  timerValue: number = 0;
+  isCounterEnable: boolean = false;
+  isDone: boolean = false;
+  isEven = false;
+  isHard: boolean = false;
+  isNotWriteTime: boolean = false;
+  isPerk: boolean = false;
+  isStateInTitle: boolean = false;
+  isStatePlusTitle: boolean = true;
+  isStateRefresh: boolean = false;
   /**
    * Суммирование состояний.
    */
   isSumStates: boolean = false;
+  isTimer: boolean = false;
+  isfrstqwtsk: boolean;
+  lastDate: number;
+  lastNotDone: boolean = false;
+  mayUp: boolean;
   name: string;
+  //[...Task.weekDays];
+  nextAbVal: number;
+  nextId: any;
+  nextUp: number = 0;
+  order: number = 0;
+  parrentTask: string;
+  plusExp: number = 0;
   plusName: string;
+  plusStateMax: string;
   plusToNames: plusToName[] = [];
-  isStatePlusTitle: boolean = true;
-  isStateRefresh: boolean = false;
-  refreshCounter: number = 0;
-  isStateInTitle: boolean = false;
+  postfix: string = "";
+  prefix: string = "";
+  prevId: any;
+  progresNextLevel: number;
   progressValue: number = 0;
+  qwestId: string;
+  refreshCounter: number = 0;
   requrense: string = "будни";
+  reqvirements: Reqvirement[] = [];
+  roundVal: number = 0;
+  secondsDone: number = 0;
+  secondsToDone: number = 0;
   states: taskState[] = [];
+  statesDescr: string[] = [];
+  tesAbValue: number = 0;
+  tesValue: number = 0;
   // statesDescr: taskState[] = [];
   time: string = "00:00";
   timeForSort: number = 200000000;
-  tittle: string;
-  value: number = 0;
-  order: number = GameSettings.tskOrderDefault;
-  lastNotDone: boolean = false;
-  isfrstqwtsk: boolean;
-  isHard: boolean = false;
-
-  parrentTask: string;
-  curLvlDescr: string;
-  curLvlDescr2: string;
-  imageLvl: string = "0";
-  IsNextLvlSame: boolean;
-  isPerk: boolean = false;
-  mayUp: boolean;
-  cost: number = 0;
-  nextUp: number = 0;
-  tesValue: number = 0;
-  roundVal: number = 0;
-  plusStateMax: string;
   timeVal: number;
-  curLvlDescr3: string;
-  qwestId: string;
-  autoInd: number;
-  lastDate: number;
-  tesAbValue: number = 0;
-  progresNextLevel: number;
-
-  secondsToDone: number = 0;
-  secondsDone: number = 0;
-  counterDone: number = 0;
-  counterToDone: number = 0;
-  plusExp: number = 0;
-  autoTime: number = 0;
-
-  isCounterEnable: boolean = false;
-
-  static getHardness(tsk: Task): number {
-    if (!tsk.hardnes) {
-      tsk.hardnes = 1;
-    }
-
-    return tsk.hardnes;
-  }
-
-  chainIdx: number = -1;
+  timerStart: Date;
+  timerValue: number = 0;
+  tittle: string;
+  tskWeekDays: string[] = [];
+  value: number = 0;
 
   /**
    * Получить формулу для роста/понижения значения задачи.
@@ -136,6 +129,14 @@ export class Task implements IImg {
    */
   static GetNextLvl(value: number): any {
     return Math.floor(value) + 1;
+  }
+
+  static getHardness(tsk: Task): number {
+    if (!tsk.hardnes) {
+      tsk.hardnes = 1;
+    }
+
+    return tsk.hardnes;
   }
 
   /**
@@ -213,49 +214,28 @@ export class Task implements IImg {
 
 export class taskState implements IImg {
   abRang: Rangse;
-  id: any = uuid();
-
-  prevId: any;
-  nextId: any;
-
+  autoTime: number = 0;
   chainIdx: number = -1;
-  isNotWriteTime: boolean = false;
-
-  name: string;
-
-  isDone: boolean = false;
-  parrentTask: string;
-  isActive: boolean = false;
-  startLvl: number = 999;
-  order: number = GameSettings.tskOrderDefault;
-  img: string;
+  counterDone: number = 0;
+  failCounter: number;
+  id: any = uuid();
   image: string;
   imageLvl: string = "0";
-  time: string = "00:00";
-  value: number;
-  requrense: string;
-  timeVal: number;
-  failCounter: number;
+  img: string;
+  isActive: boolean = false;
+  isDone: boolean = false;
+  isNotWriteTime: boolean = false;
   lastDate: number;
   lastNotDone: boolean = false;
-  autoTime: number = 0;
-  secondsDone: number = 0;
-  counterDone: number = 0;
-}
-
-export interface IImg {
-  image: string;
+  name: string;
+  nextId: any;
+  order: number = 0;
   parrentTask: string;
-  imageLvl: string;
-  value: number;
+  prevId: any;
   requrense: string;
-}
-
-export class Reqvirement {
-  id: any = uuid();
-  elId: any;
-  elVal: number;
-  elName?: string;
-  type?: string;
-  isDone?: boolean = false;
+  secondsDone: number = 0;
+  startLvl: number = 999;
+  time: string = "00:00";
+  timeVal: number;
+  value: number;
 }

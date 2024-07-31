@@ -38,21 +38,5 @@
         </div>
       </ng-container>
     </mat-list>
-    <!-- Статусы по уровню навыка -->
-    <div class="chLstTsk abLelelsDescr" *ngIf="tsk && (tsk.value > 1 || (tsk.value == 1 && !isGood)) && itemType == 'abil'">
-      <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
-        <div
-          *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)"
-          class="text-center px-0 py-0 border-0 bigTextShrink"
-          [ngClass]="{ 'bg-success': i == tsk.value && isShowAbProgrTable }"
-        >
-          <b>
-            <ng-container *ngIf="isShowAbProgrTable">
-              {{ i + percSymbol + ": " }}
-            </ng-container> </b
-          >{{ st }}
-        </div>
-      </ng-container>
-    </div>
   </div>
 </div>

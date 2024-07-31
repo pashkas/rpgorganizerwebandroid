@@ -14,7 +14,7 @@ export class PersChangesItemComponent implements OnInit {
 
   @ViewChild("progress", { static: false }) progress: ElementRef;
 
-  constructor(public builder: AnimationBuilder) {}
+  constructor(public builder: AnimationBuilder, public gameSettings: GameSettings) {}
 
   ngOnInit() {}
 
@@ -48,8 +48,8 @@ export class PersChangesItemComponent implements OnInit {
 
       let total = firstPerc + secondPerc;
 
-      let firstTime = (firstPerc / total) * GameSettings.animationDelay;
-      let secondTime = (secondPerc / total) * GameSettings.animationDelay;
+      let firstTime = (firstPerc / total) * this.gameSettings.animationDelay;
+      let secondTime = (secondPerc / total) * this.gameSettings.animationDelay;
 
       //1
       let factory1 = this.builder.build([style({ width: this.item.expChanges[0].valFrom + "%" }), animate(firstTime + "ms", style({ width: this.item.expChanges[0].valTo + "%" }))]);
@@ -76,8 +76,8 @@ export class PersChangesItemComponent implements OnInit {
 
       let total = firstPerc + secondPerc;
 
-      let firstTime = (firstPerc / total) * GameSettings.animationDelay;
-      let secondTime = (secondPerc / total) * GameSettings.animationDelay;
+      let firstTime = (firstPerc / total) * this.gameSettings.animationDelay;
+      let secondTime = (secondPerc / total) * this.gameSettings.animationDelay;
 
       //1
       let factory1 = this.builder.build([style({ width: this.item.abilChanges[0].valFrom + "%" }), animate(firstTime + "ms", style({ width: this.item.abilChanges[0].valTo + "%" }))]);
@@ -92,7 +92,7 @@ export class PersChangesItemComponent implements OnInit {
         player2.play();
       }, firstTime);
     } else {
-      let factory = this.builder.build([style({ width: this.item.valFrom + "%" }), animate(GameSettings.animationDelay + "ms", style({ width: this.item.valTo + "%" }))]);
+      let factory = this.builder.build([style({ width: this.item.valFrom + "%" }), animate(this.gameSettings.animationDelay + "ms", style({ width: this.item.valTo + "%" }))]);
 
       let player = factory.create(this.progress.nativeElement, {});
       if (this.item.lvl != null) {
@@ -102,15 +102,15 @@ export class PersChangesItemComponent implements OnInit {
       player.play();
     }
 
-    if (this.item.type == "abil" && GameSettings.changesIsShowPercentageInAb) {
+    if (this.item.type == "abil" && this.gameSettings.changesIsShowPercentageInAb) {
       this.plusName += "%";
     }
 
-    if (this.item.type == "abil" && !GameSettings.changesIsShowValueInAb) {
+    if (this.item.type == "abil" && !this.gameSettings.changesIsShowValueInAb) {
       this.plusName = "";
     }
 
-    if (this.item.type == "cha" && !GameSettings.changesIsShowValueInCha) {
+    if (this.item.type == "cha" && !this.gameSettings.changesIsShowValueInCha) {
       this.plusName = "";
     }
   }

@@ -10,8 +10,7 @@ import { GameSettings } from "../GameSettings";
   styleUrls: ["./pers-changes.component.css"],
 })
 export class PersChangesComponent implements OnInit {
-  GameSettings: typeof GameSettings;
-  isShowAbProgrTable = GameSettings.isShowAbProgrTable;
+  isShowAbProgrTable;
   abPoints: any;
   gold: any;
   goldTotal: any;
@@ -22,10 +21,12 @@ export class PersChangesComponent implements OnInit {
   slidingDoorValue: string = "out";
   img: any;
   tsk: Task;
-  percSymbol = GameSettings.changesIsShowPercentageInAb ? "%" : "";
+  percSymbol;
   itemType: String;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public gameSettings: GameSettings) {
+    this.percSymbol = this.gameSettings.changesIsShowPercentageInAb ? "%" : "";
+    this.isShowAbProgrTable = this.gameSettings.isShowAbProgrTable;
     this.img = data.img;
     this.headText = data.headText;
     this.changes = data.changes;
@@ -40,7 +41,6 @@ export class PersChangesComponent implements OnInit {
       this.abPoints = null;
     }
     this.tsk = data.tsk;
-    this.GameSettings = GameSettings;
     this.itemType = data.itemType;
   }
 

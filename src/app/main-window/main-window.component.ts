@@ -35,7 +35,7 @@ export class MainWindowComponent implements OnInit {
   pers$ = this.srv.pers$.asObservable();
   qwickSortVals: sortArr[] = [];
 
-  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService) {}
+  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, public gameSettings: GameSettings) {}
 
   addToQwest() {
     let qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
@@ -60,17 +60,17 @@ export class MainWindowComponent implements OnInit {
   async animate(isDone: boolean) {
     if (isDone) {
       this.isSucessShownOv$.next(true);
-      await this.delay(GameSettings.flashDelay);
+      await this.delay(this.gameSettings.flashDelay);
       this.isSucessShownOv$.next(false);
       this.isSucessShown$.next(true);
-      await this.delay(GameSettings.flashDelay2);
+      await this.delay(this.gameSettings.flashDelay2);
       this.isSucessShown$.next(false);
     } else {
       this.isFailShownOv$.next(true);
-      await this.delay(GameSettings.flashDelay);
+      await this.delay(this.gameSettings.flashDelay);
       this.isFailShownOv$.next(false);
       this.isFailShown$.next(true);
-      await this.delay(GameSettings.flashDelay2);
+      await this.delay(this.gameSettings.flashDelay2);
       this.isFailShown$.next(false);
     }
   }
@@ -161,7 +161,7 @@ export class MainWindowComponent implements OnInit {
       this.srv.setCurInd(tskIndex);
     }
 
-    if (GameSettings.isClassicaRPG) {
+    if (this.gameSettings.isClassicaRPG) {
       tsk = null;
     }
 
@@ -220,7 +220,7 @@ export class MainWindowComponent implements OnInit {
       this.srv.setCurInd(tskIndex);
     }
 
-    if (GameSettings.isClassicaRPG) {
+    if (this.gameSettings.isClassicaRPG) {
       tsk = null;
     }
 

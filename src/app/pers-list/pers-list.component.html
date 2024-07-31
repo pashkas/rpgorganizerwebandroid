@@ -59,7 +59,7 @@
               </button>
               <button mat-button color="accent" (click)="quickAddAbil()">
                 <img src="assets/icons/diamond.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-                <span class="text-success" *ngIf="GameSettings.isAbPointsEnabled">{{ pers.ON }}</span>
+                <span class="text-success" *ngIf="this.gameSettings.isAbPointsEnabled">{{ pers.ON }}</span>
               </button>
             </div>
           </div>

@@ -28,7 +28,6 @@ import { GameSettings, qwestHardness } from "../GameSettings";
 })
 export class QwestDetailComponent implements OnInit {
   private unsubscribe$ = new Subject();
-  gameSettings = GameSettings;
 
   qwestHardnessControll = new FormControl({});
 
@@ -48,7 +47,7 @@ export class QwestDetailComponent implements OnInit {
   qwestAbiliti;
   qwestRewards: Reward[] = [];
 
-  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) {}
+  constructor(private location: Location, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog, public gameSettings: GameSettings) {}
 
   /**
    * Добавить награду.

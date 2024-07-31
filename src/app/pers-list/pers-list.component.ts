@@ -32,11 +32,16 @@ export class PersListComponent implements OnInit {
   pers: Pers;
   selAb: Ability;
   selCha: Characteristic;
-  GameSettings: typeof GameSettings;
 
-  constructor(private location: Location, public srvSt: StatesService, private route: ActivatedRoute, public srv: PersService, private router: Router, public dialog: MatDialog) {
-    this.GameSettings = GameSettings;
-  }
+  constructor(
+    private location: Location,
+    public srvSt: StatesService,
+    private route: ActivatedRoute,
+    public srv: PersService,
+    private router: Router,
+    public dialog: MatDialog,
+    public gameSettings: GameSettings
+  ) {}
 
   /**
    * Добавление навыка.
@@ -358,7 +363,6 @@ export class PersListComponent implements OnInit {
           ab.isOpen = false;
           ab.tasks.forEach((tsk) => {
             this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
-            tsk.order = this.GameSettings.tskOrderDefault;
             tsk.classicalExp = 0;
             tsk.autoTime = 0;
             tsk.plusExp = 0;
@@ -374,8 +378,8 @@ export class PersListComponent implements OnInit {
             tsk.secondsDone = 0;
             tsk.counterDone = 0;
             tsk.nextAbVal = 0;
+            tsk.order = 0;
             tsk.states.forEach((st) => {
-              st.order = this.GameSettings.tskOrderDefault;
               st.autoTime = 0;
               st.lastDate = 0;
               st.prevId = null;
@@ -383,6 +387,7 @@ export class PersListComponent implements OnInit {
               st.lastNotDone = false;
               st.secondsDone = 0;
               st.counterDone = 0;
+              st.order = 0;
             });
             tsk.secondsDone = 0;
             tsk.counterDone = 0;
