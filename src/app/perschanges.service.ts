@@ -17,8 +17,7 @@ export class PerschangesService {
   afterPers: Pers;
   beforePers: Pers;
 
-  constructor(public dialog: MatDialog, private router: Router, private srvSt: StatesService, public gameSettings: GameSettings) {
-  }
+  constructor(public dialog: MatDialog, private router: Router, private srvSt: StatesService, public gameSettings: GameSettings) {}
 
   getClone(pers: Pers): Pers {
     return JSON.parse(JSON.stringify(pers));
@@ -327,12 +326,12 @@ export class PerschangesService {
       }
 
       // Добавляем золото к первому изменению
-      if (this.afterPers.gold != this.beforePers.gold) {
-        gold = this.afterPers.gold - this.beforePers.gold;
+      if (Math.floor(this.afterPers.gold) != Math.floor(this.beforePers.gold)) {
+        gold = Math.floor(this.afterPers.gold) - Math.floor(this.beforePers.gold);
         if (gold > 0) {
           gold = "+" + gold;
         }
-        goldTotal = this.afterPers.gold;
+        goldTotal = Math.floor(this.afterPers.gold);
       }
 
       if (isDoneQwest && changes[index].type == "qwest") {

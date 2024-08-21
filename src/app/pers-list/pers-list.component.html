@@ -54,7 +54,7 @@
               <button mat-button (click)="openShop()">
                 <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
                 <span>
-                  <span class="text-success">{{ pers.gold }}</span>
+                  <span class="text-success">{{ pers.gold | floor }}</span>
                 </span>
               </button>
               <button mat-button color="accent" (click)="quickAddAbil()">
@@ -323,8 +323,8 @@
               <img src="assets/icons/create.png" class="img-fluid" />
             </button>
           </div>
-          <div class="flex" style="flex-wrap: wrap; justify-content: center">
-            <div class="flexitem" *ngFor="let qwest of pers.qwests">
+          <div class="masonry-list">
+            <div class="masonry-item" *ngFor="let qwest of pers.qwests">
               <button
                 mat-stroked-button
                 mat-stroked-button
@@ -333,7 +333,7 @@
                 [ngStyle]="{ opacity: qwest.parrentId || qwest.isNoActive ? '0.4' : '1' }"
               >
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ qwest.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '95px' }" />
+                  <img appImgBroken src="{{ qwest.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain' }" />
                   <div class="text-wrap py-2">
                     {{ qwest.name }}
                   </div>
@@ -398,19 +398,19 @@
           <mat-tab label="Инвентарь">
             <!-- Инвентарь -->
             <div class="p-3">
-              <div class="flex" style="flex-wrap: wrap; justify-content: center">
-                <div class="flexitem" *ngFor="let rev of pers.inventory">
-                  <div class="w-100 h-100 revBtn border border-second">
-                    <div class="flex p-2 h-100" style="flex-direction: column; justify-content: space-between; align-items: center">
-                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '95px' }" />
-                      <div class="text-wrap">
+              <div class="masonry-list">
+                <div class="masonry-item" *ngFor="let rev of pers.inventory">
+                  <button mat-stroked-button class="w-100 h-100 revBtn">
+                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
+                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+                      <div class="text-wrap py-2">
                         {{ rev.name }}
                       </div>
                       <button (click)="useRevard(rev)" mat-stroked-button style="color: gold">
                         <small>x{{ rev.count }}</small>
                       </button>
                     </div>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -422,19 +422,19 @@
                 <button mat-button class="icon-small">
                   <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
                   <span>
-                    <span class="text-success">{{ pers.gold }}</span>
+                    <span class="text-success">{{ pers.gold | floor }}</span>
                   </span>
                 </button>
                 <button class="icon-small mr-2" mat-icon-button (click)="qwickAddReward()">
                   <img src="assets/icons/create.png" class="img-fluid" />
                 </button>
               </div>
-              <div class="flex" style="flex-wrap: wrap; justify-content: center">
-                <div class="flexitem" *ngFor="let rev of pers.rewards | shop">
-                  <div class="w-100 h-100 revBtn border border-second">
-                    <div class="flex p-2 h-100" style="flex-direction: column; justify-content: space-between; align-items: center">
-                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain', height: '95px' }" />
-                      <div class="text-wrap" *ngIf="rev.name">
+              <div class="masonry-list">
+                <div class="masonry-item" *ngFor="let rev of pers.rewards | shop">
+                  <button mat-stroked-button class="w-100 h-100 revBtn">
+                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
+                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+                      <div class="text-wrap py-2" *ngIf="rev.name">
                         {{ rev.name }}
                       </div>
                       <div *ngIf="rev.isLud">
@@ -465,7 +465,7 @@
                         </div>
                       </ng-template>
                     </div>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>

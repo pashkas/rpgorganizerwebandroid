@@ -5,13 +5,20 @@
       <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.text" autocomplete="off" name="data.text" [placeholder]="lblTxt" />
     </mat-form-field>
   </div>
-  <ngx-masonry *ngIf="isGallery" class="row p-0">
+  <!-- <ngx-masonry *ngIf="isGallery" class="row p-0">
     <div ngxMasonryItem *ngFor="let gi of gallerryImages" class="col-lg-3 col-4 p-0">
       <div style="cursor: pointer" class="w-100 h-100" (click)="chooseImg(gi)">
         <img src="{{ gi }}" class="img-fluid w-100 h-100" [ngStyle]="{ 'object-fit': 'contain' }" />
       </div>
     </div>
-  </ngx-masonry>
+  </ngx-masonry> -->
+  <div *ngIf="isGallery" class="masonry-list">
+    <div *ngFor="let gi of gallerryImages" class="masonry-item">
+      <div style="cursor: pointer" class="w-100 h-100" (click)="chooseImg(gi)">
+        <img src="{{ gi }}" class="img-fluid w-100 h-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+      </div>
+    </div>
+  </div>
 </div>
 <div mat-dialog-actions [align]="'end'">
   <button *ngIf="data.isGallery" mat-flat-button (click)="gallery()" color="accent">

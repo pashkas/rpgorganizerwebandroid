@@ -7,7 +7,6 @@ import { ChartsModule } from "ng2-charts";
 import { DiaryComponent } from "../diary/diary.component";
 import { DiaryShowComponent } from "../diary/diary-show/diary-show.component";
 import { MatTabsModule } from "@angular/material/tabs";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { RarecolPipe } from "../rarecol.pipe";
 import { MatCardModule, MatIconModule } from "@angular/material";
@@ -45,6 +44,7 @@ import { TurnirTableComponent } from "../turnir-table/turnir-table.component";
 import { LoginComponent } from "../login/login.component";
 import { MatStepperModule } from "@angular/material/stepper";
 import { PersMasterComponent } from "../sync-module/pers-master/pers-master.component";
+import { FloorPipe } from "../floor.pipe";
 
 @NgModule({
   declarations: [
@@ -76,25 +76,24 @@ import { PersMasterComponent } from "../sync-module/pers-master/pers-master.comp
     RequirementsAddDialogComponent,
     TurnirTableComponent,
     LoginComponent,
-    PersMasterComponent
+    PersMasterComponent,
+    FloorPipe,
   ],
   imports: [
+    SharedModule,
     MatStepperModule,
-    ReactiveFormsModule,
     NgxMaterialTimepickerModule,
     AutosizeModule,
     MatChipsModule,
     MatIconModule,
     MatBadgeModule,
     MatSlideToggleModule,
-    SharedModule,
     MatSelectModule,
     MatCardModule,
     CommonModule,
     PersRoutingModule,
     ChartsModule,
     MatTabsModule,
-    FormsModule,
     MatProgressBarModule,
     OwlDateTimeModule,
     OwlNativeDateTimeModule,

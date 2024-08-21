@@ -74,15 +74,17 @@ export class PersService {
   }
 
   CasinoGold(tskExp: number) {
+    this.pers$.value.gold += tskExp;
     // let gold = Math.round(tskExp * Math.random());
     // if (gold < 1) {
     //   gold = 1;
     // }
-    let gold = Math.round(this.gameSettings.baseTskGold * Math.random());
 
-    if (gold >= 1) {
-      this.pers$.value.gold += gold;
-    }
+    // let gold = Math.round(this.gameSettings.baseTskGold * Math.random());
+
+    // if (gold >= 1) {
+    //   this.pers$.value.gold += gold;
+    // }
   }
 
   /**
@@ -1265,7 +1267,7 @@ export class PersService {
         }
       } else {
         if (r.isShop) {
-          if (prs.gold >= r.cost) {
+          if (Math.floor(prs.gold) >= r.cost) {
             r.isAviable = true;
           } else {
             r.isAviable = false;
@@ -1587,7 +1589,7 @@ export class PersService {
           //   ab.progressValue = 100;
           // }
 
-          abMax += (this.gameSettings.maxAbilLvl - 1) * tsk.hardnes;
+          abMax += (this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl) * tsk.hardnes;
           abLvl += (tsk.value - this.gameSettings.minAbilLvl >= 0 ? tsk.value - this.gameSettings.minAbilLvl : 0) * tsk.hardnes;
 
           if (abMax < (this.gameSettings.maxAbilLvl - 1) * 1) {
@@ -1989,7 +1991,7 @@ export class PersService {
     }
 
     for (const qw of prs.qwests) {
-      for (const tsk of prs.tasks) {
+      for (const tsk of qw.tasks) {
         tsk.plusExp = baseGold;
       }
     }
@@ -2619,6 +2621,7 @@ export class PersService {
     if (abMax == 0) {
       abMax = 1;
     }
+
     let progr = abCur / abMax;
     ch.value = start + left * progr;
 

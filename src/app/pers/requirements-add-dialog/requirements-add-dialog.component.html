@@ -1,33 +1,30 @@
-<h1 mat-dialog-title>
-    Добавить требование
-</h1>
+<h1 mat-dialog-title>Добавить требование</h1>
 <div mat-dialog-content [formGroup]="ReqForm">
-    <mat-form-field>
-        <mat-label>Тип</mat-label>
-        <mat-select formControlName="type" panelClass="panel-override">
-            <mat-option *ngFor="let t of types$|async" [value]="t">
-                {{t}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-    <mat-form-field *ngIf="ReqForm.get('type').value != 'Уровень персонажа'">
-        <mat-label>Элемент</mat-label>
-        <mat-select formControlName="elId" panelClass="panel-override">
-            <mat-option *ngFor="let el of elements$|async" [value]="el">
-                {{el.elName}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-    <mat-form-field floatLabel="always" appearance="none" *ngIf="ReqForm.get('type').value == 'Квест'">
-        <mat-slide-toggle [checked]="true" [disabled]="true">Выполнен</mat-slide-toggle>
-        <input matInput hidden />
-    </mat-form-field>
-    <mat-form-field *ngIf="ReqForm.get('type').value != 'Квест'">
-        <input matInput autocomplete="off" type="number" placeholder="Значение ≥" formControlName="elVal"
-            onfocus="this.select()">
-    </mat-form-field>
+  <mat-form-field>
+    <mat-label>Тип</mat-label>
+    <mat-select formControlName="type" panelClass="panel-override">
+      <mat-option *ngFor="let t of types$ | async" [value]="t">
+        {{ t }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field *ngIf="ReqForm.get('type').value != 'Уровень персонажа'">
+    <mat-label>Элемент</mat-label>
+    <mat-select formControlName="elId" panelClass="panel-override">
+      <mat-option *ngFor="let el of elements$ | async" [value]="el">
+        {{ el.elName }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field floatLabel="always" appearance="none" *ngIf="ReqForm.get('type').value == 'Квест'">
+    <mat-slide-toggle [checked]="true" [disabled]="true">Выполнен</mat-slide-toggle>
+    <input matInput hidden />
+  </mat-form-field>
+  <mat-form-field *ngIf="ReqForm.get('type').value != 'Квест'">
+    <input matInput autocomplete="off" type="number" placeholder="Значение ≥" formControlName="elVal" onfocus="this.select()" />
+  </mat-form-field>
 </div>
 <div mat-dialog-actions [align]="'end'">
-    <button mat-button mat-dialog-close>Отмена</button>
-    <button mat-button [disabled]="ReqForm.invalid" (click)="ok()">Ok</button>
+  <button mat-button mat-dialog-close>Отмена</button>
+  <button mat-button [disabled]="ReqForm.invalid" (click)="ok()">Ok</button>
 </div>

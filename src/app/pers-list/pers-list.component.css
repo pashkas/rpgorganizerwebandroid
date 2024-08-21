@@ -1,18 +1,18 @@
 .tabimg {
-    object-fit: contain;
-    height: 2em;
+  object-fit: contain;
+  height: 2em;
 }
 
 .nomarg {
-    margin-right: 0px !important;
-    margin-left: 3px !important;
+  margin-right: 0px !important;
+  margin-left: 3px !important;
 }
 
-.opacity{
-    opacity: .8;
+.opacity {
+  opacity: 0.8;
 }
 
 .revBtn {
-    padding: 2px;
-    line-height: 1.1em !important;
+  padding: 2px;
+  line-height: 1.1em !important;
 }

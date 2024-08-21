@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from "@angular/core";
 import { Reward } from "src/Models/Reward";
-import { MatDialog, MAT_DIALOG_DATA } from "@angular/material";
+import { MatDialog, MAT_DIALOG_DATA, MatDialogRef } from "@angular/material";
 import { Pers } from "src/Models/Pers";
 import { RequirementsAddDialogComponent } from "../pers/requirements-add-dialog/requirements-add-dialog.component";
 import { takeUntil } from "rxjs/operators";
@@ -19,15 +19,17 @@ export class AddOrEditRevardComponent implements OnInit {
   private unsubscribe$ = new Subject();
 
   rev: Reward;
-  revForm = new FormGroup({
-    isLud: new FormControl(false),
-    isShop: new FormControl(false),
-    isReward: new FormControl(false),
-    isArtefact: new FormControl(false),
-  });
-  revProbCtrl = new FormControl({});
+  revForm: FormGroup;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: RevardDialogData, private dialog: MatDialog, public gameSettings: GameSettings) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: RevardDialogData, private dialog: MatDialog, public gameSettings: GameSettings, public dialogRef: MatDialogRef<AddOrEditRevardComponent>) {
+    this.revForm = new FormGroup({
+      isLud: new FormControl(false),
+      isShop: new FormControl(false),
+      isReward: new FormControl(false),
+      isArtefact: new FormControl(false),
+      revProbCtrl: new FormControl({}),
+    });
+  }
 
   addReq() {
     const dialogRef = this.openReqDialogHandler(null);
@@ -74,9 +76,9 @@ export class AddOrEditRevardComponent implements OnInit {
 
     this.rev = this.data.rev;
 
-    this.revProbCtrl.setValue(this.gameSettings.revProbs.find((q) => q.id == this.rev.revProbId));
+    this.revForm.get("revProbCtrl").setValue(this.gameSettings.revProbs.find((q) => q.id == this.rev.revProbId));
 
-    this.revProbCtrl.valueChanges.subscribe((q) => {
+    this.revForm.get("revProbCtrl").valueChanges.subscribe((q) => {
       if (this.rev != null && this.rev.revProbId != q.id) {
         this.rev.revProbId = q.id;
         this.rev.ludProbability = q.prob;
@@ -85,7 +87,7 @@ export class AddOrEditRevardComponent implements OnInit {
     });
 
     if (this.rev.revProbId == null) {
-      this.revProbCtrl.setValue(this.gameSettings.revProbs.find((q) => q.id == 3));
+      this.revForm.get("revProbCtrl").setValue(this.gameSettings.revProbs.find((q) => q.id == 3));
     }
 
     this.revForm.patchValue({
@@ -140,5 +142,9 @@ export class AddOrEditRevardComponent implements OnInit {
       data: data,
       backdropClass: "backdrop",
     });
+  }
+
+  close() {
+    this.dialogRef.close(this.rev);
   }
 }

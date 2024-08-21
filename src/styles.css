@@ -413,11 +413,41 @@ body {
 }
 
 .changesImg {
-  max-height: 120px;
+  max-height: 160px;
+  object-fit: contain;
 }
 
 .bigTextShrink {
   /* overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap; */
+}
+
+.masonry-list {
+  column-count: 3;
+  column-gap: 4px;
+}
+
+.masonry-item {
+  /* display: inline-block; */
+  margin: 0 0 4px;
+  width: 100%;
+}
+
+@media only screen and (min-width: 1024px) {
+  .masonry-list {
+    column-count: 4;
+  }
+}
+
+@media only screen and (max-width: 1023px) and (min-width: 601px) {
+  .masonry-list {
+    column-count: 3;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .masonry-list {
+    column-count: 2;
+  }
 }

@@ -149,19 +149,19 @@ export abstract class GameSettings {
    */
   plusAbProgrForTitle: number = 0;
   qwestHardneses: qwestHardness[] = [
-    { id: 5, name: "оч. легко", gold: 30 },
-    { id: 4, name: "легко", gold: 60 },
-    { id: 3, name: "норм", gold: 125 },
-    { id: 2, name: "сложно", gold: 500 },
-    { id: 1, name: "оч. сложно", gold: 2500 },
+    { id: 5, name: "оч. легко", gold: 5 },
+    { id: 4, name: "легко", gold: 10 },
+    { id: 3, name: "норм", gold: 25 },
+    { id: 2, name: "сложно", gold: 50 },
+    { id: 1, name: "оч. сложно", gold: 100 },
   ];
 
   revProbs: taskProb[] = [
-    { id: 5, name: "оч. распространенный", prob: 3, gold: 75 },
-    { id: 4, name: "распространенный", prob: 2, gold: 125 },
-    { id: 3, name: "обычный", prob: 1, gold: 250 },
-    { id: 2, name: "редкий", prob: 0.25, gold: 1000 },
-    { id: 1, name: "оч. редкий", prob: 0.05, gold: 5000 },
+    { id: 5, name: "оч. распространенный", prob: 3, gold: 25 },
+    { id: 4, name: "распространенный", prob: 2, gold: 50 },
+    { id: 3, name: "обычный", prob: 1, gold:  100},
+    { id: 2, name: "редкий", prob: 0.25, gold: 250 },
+    { id: 1, name: "оч. редкий", prob: 0.05, gold: 500 },
   ];
   /**
    * Число картинок скиллов.
@@ -189,11 +189,11 @@ export abstract class GameSettings {
     return curLvl * hardness;
   }
 
-  rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
-
   abChangeExp(curLvl: number, hardness: number): number {
     return 0;
   }
+
+  rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
 
   getMonsterLevel(prsLvl: number, maxLevel: number): number {
     if (prsLvl < 20) {

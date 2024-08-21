@@ -11,9 +11,9 @@
       <img src="assets/icons/gold.png" class="img-fluid px-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
     </div>
     <div>
-      <img *ngIf="isGood && !img" class="img-fluid changesImg" src="assets/img/good.png" [ngStyle]="{ 'object-fit': 'contain' }" />
-      <img *ngIf="!isGood && !img" class="img-fluid changesImg" src="assets/img/bad.png" [ngStyle]="{ 'object-fit': 'contain' }" />
-      <img appImgBroken *ngIf="img" class="img-fluid changesImg" src="{{ img }}" [ngStyle]="{ 'object-fit': 'contain' }" />
+      <img *ngIf="isGood && !img" class="img-fluid changesImg" src="assets/img/good.png" />
+      <img *ngIf="!isGood && !img" class="img-fluid changesImg" src="assets/img/bad.png" />
+      <img appImgBroken *ngIf="img" class="img-fluid changesImg" src="{{ img }}" />
     </div>
     <div fxLayout="row" fxLayoutAlign="center end" *ngIf="this.abPoints != null" class="m-2">
       <img src="assets/icons/diamond.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />

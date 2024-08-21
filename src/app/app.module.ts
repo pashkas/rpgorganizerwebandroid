@@ -35,6 +35,7 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { GameSettings } from "./GameSettings";
 import { TesSettings } from "./game-settings/TesSettings";
 import { EraSettings } from "./game-settings/EraSettings";
+import { FloorPipe } from "./floor.pipe";
 
 registerLocaleData(localeRu, "ru");
 

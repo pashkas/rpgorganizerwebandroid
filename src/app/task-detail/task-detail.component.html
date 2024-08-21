@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    <div *ngIf="tskAbility" class="pt-1">
+    <div *ngIf="!gameSettings.isClassicaRPG &&tskAbility" class="pt-1">
       <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel"> </mat-progress-bar>
     </div>
 
@@ -120,7 +120,7 @@
     <br />
     <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
       <div
-        *ngIf="st && (i >= this.gameSettings.minAbilLvl || !isShowAbProgrTable)"
+        *ngIf="st && i != 0 && i >= this.gameSettings.minAbilLvl && isShowAbProgrTable"
         class="text-center px-0 py-0 border-0 abLelelsDescr"
         [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }"
       >

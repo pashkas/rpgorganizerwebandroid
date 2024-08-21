@@ -1,82 +1,88 @@
 <h1 mat-dialog-title class="text-center">{{ data.header }}</h1>
 <div mat-dialog-content>
-  <div fxLayout="column" fxLayoutAlign="space-around center">
-    <app-image-component [(data)]="rev.image" [isCanEdit]="true" [isRev]="true" [isQwest]="false"></app-image-component>
-    <div fxFill fxLayoutGap="15px">
-      <mat-form-field fxFlex>
-        <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.rev.name" autocomplete="off" placeholder="Название" name="data.rev.name" />
+  <form [formGroup]="revForm">
+    <div fxLayout="column" fxLayoutAlign="space-around center">
+      <app-image-component [(data)]="rev.image" [isCanEdit]="true" [isRev]="true" [isQwest]="false"></app-image-component>
+      <div fxFill fxLayoutGap="15px">
+        <mat-form-field fxFlex>
+          <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.rev.name" [ngModelOptions]="{ standalone: true }" autocomplete="off" placeholder="Название" name="data.rev.name" />
+        </mat-form-field>
+      </div>
+    </div>
+    <mat-form-field>
+      <mat-label>Редкость</mat-label>
+      <mat-select formControlName="revProbCtrl">
+        <mat-option *ngFor="let h of gameSettings.revProbs" [value]="h">
+          {{ h.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="flex pb-3">
+      <form>
+        <mat-chip-list selectable multiple>
+          <mat-chip [selected]="revForm.controls.isLud.value" (change)="revForm.controls.isLud.setValue($event.checked)" (click)="toggleChip('isLud')"> Трофей </mat-chip>
+          <mat-chip [selected]="revForm.controls.isShop.value" (change)="revForm.controls.isShop.setValue($event.checked)" (click)="toggleChip('isShop')"> Магазин </mat-chip>
+          <mat-chip [selected]="revForm.controls.isReward.value" (change)="revForm.controls.isReward.setValue($event.checked)" (click)="toggleChip('isReward')"> Награда </mat-chip>
+          <mat-chip [selected]="revForm.controls.isArtefact.value" (change)="revForm.controls.isArtefact.setValue($event.checked)" (click)="toggleChip('isArtefact')"> Артефакт </mat-chip>
+        </mat-chip-list>
+      </form>
+    </div>
+    <div class="flex">
+      <mat-form-field *ngIf="rev.isShop">
+        <input type="number" matInput onfocus="this.select()" [(ngModel)]="data.rev.cost" [ngModelOptions]="{ standalone: true }" autocomplete="off" placeholder="Стоимость" name="data.rev.cost" />
+      </mat-form-field>
+      <mat-form-field *ngIf="rev.isLud">
+        <input
+          type="number"
+          matInput
+          onfocus="this.select()"
+          [(ngModel)]="rev.ludProbability"
+          [ngModelOptions]="{ standalone: true }"
+          autocomplete="off"
+          placeholder="Вероятность"
+          name="data.rev.ludProbability"
+        />
       </mat-form-field>
     </div>
-  </div>
-
-  <mat-form-field>
-    <mat-label>Редкость</mat-label>
-    <mat-select [formControl]="revProbCtrl">
-      <mat-option *ngFor="let h of gameSettings.revProbs" [value]="h">
-        {{ h.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <div class="flex pb-3">
-    <form>
-      <mat-chip-list selectable multiple>
-        <mat-chip [selected]="revForm.controls.isLud.value" (change)="revForm.controls.isLud.setValue($event.checked)" formControlName="isLud" (click)="toggleChip('isLud')"> Трофей </mat-chip>
-        <mat-chip [selected]="revForm.controls.isShop.value" (change)="revForm.controls.isShop.setValue($event.checked)" formControlName="isShop" (click)="toggleChip('isShop')"> Магазин </mat-chip>
-        <mat-chip [selected]="revForm.controls.isReward.value" (change)="revForm.controls.isReward.setValue($event.checked)" formControlName="isReward" (click)="toggleChip('isReward')">
-          Награда
-        </mat-chip>
-        <mat-chip [selected]="revForm.controls.isArtefact.value" (change)="revForm.controls.isArtefact.setValue($event.checked)" formControlName="isArtefact" (click)="toggleChip('isArtefact')">
-          Артефакт
-        </mat-chip>
-      </mat-chip-list>
-    </form>
-  </div>
-  <div class="flex">
-    <mat-form-field *ngIf="rev.isShop">
-      <input type="number" matInput onfocus="this.select()" [(ngModel)]="data.rev.cost" autocomplete="off" placeholder="Стоимость" name="data.rev.cost" />
-    </mat-form-field>
-    <mat-form-field *ngIf="rev.isLud">
-      <input type="number" matInput onfocus="this.select()" [(ngModel)]="rev.ludProbability" autocomplete="off" placeholder="Вероятность" name="data.rev.ludProbability" />
-    </mat-form-field>
-  </div>
-  <div *ngIf="rev.isReward">
-    <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-3">
-      <h5>Требования:</h5>
-      <button class="icon-small" (click)="addReq()" mat-icon-button>
-        <img src="assets/icons/create.png" class="img-fluid" />
-      </button>
-    </div>
-    <mat-list *ngIf="rev.reqvirements.length" class="p-0">
-      <div mat-list-item *ngFor="let r of rev.reqvirements; let even = even; let odd = odd" class="row-striped" [ngClass]="{ even: even }">
-        <div class="d-flex align-items-center">
-          <div class="flex-grow-1 align-self-center" [ngClass]="{ done: r.isDone }">
-            <span *ngIf="r.type != 'Уровень персонажа'"
-              ><i>{{ "(" + r.type + ") " }}</i></span
-            >
-            <span
-              ><i>{{ r.elName }}</i></span
-            >
-            <span *ngIf="r.type != 'Квест'"
-              ><i>{{ " ≥ " + r.elVal }}</i></span
-            >
-          </div>
-          <div class="btn-group btn-group-sm" role="group">
-            <!-- Удалить -->
+    <div *ngIf="rev.isReward">
+      <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-3">
+        <h5>Требования:</h5>
+        <button class="icon-small" (click)="addReq()" mat-icon-button>
+          <img src="assets/icons/create.png" class="img-fluid" />
+        </button>
+      </div>
+      <mat-list *ngIf="rev.reqvirements.length" class="p-0">
+        <div mat-list-item *ngFor="let r of rev.reqvirements; let even = even; let odd = odd" class="row-striped" [ngClass]="{ even: even }">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1 align-self-center" [ngClass]="{ done: r.isDone }">
+              <span *ngIf="r.type != 'Уровень персонажа'"
+                ><i>{{ "(" + r.type + ") " }}</i></span
+              >
+              <span
+                ><i>{{ r.elName }}</i></span
+              >
+              <span *ngIf="r.type != 'Квест'"
+                ><i>{{ " ≥ " + r.elVal }}</i></span
+              >
+            </div>
             <div class="btn-group btn-group-sm" role="group">
-              <button class="icon-small" (click)="edit(r)" mat-icon-button>
-                <img src="assets/icons/edit.png" class="img-fluid" />
-              </button>
-              <button class="icon-small" (click)="del(r.id)" mat-icon-button>
-                <img src="assets/icons/del.png" class="img-fluid" />
-              </button>
+              <!-- Удалить -->
+              <div class="btn-group btn-group-sm" role="group">
+                <button class="icon-small" (click)="edit(r)" mat-icon-button>
+                  <img src="assets/icons/edit.png" class="img-fluid" />
+                </button>
+                <button class="icon-small" (click)="del(r.id)" mat-icon-button>
+                  <img src="assets/icons/del.png" class="img-fluid" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </mat-list>
-  </div>
+      </mat-list>
+    </div>
+  </form>
 </div>
 <div mat-dialog-actions [align]="'end'">
   <button mat-button mat-dialog-close>Отмена</button>
-  <button mat-button [mat-dialog-close]="data.rev">Ok</button>
+  <button mat-button (click)="close()">Ok</button>
 </div>

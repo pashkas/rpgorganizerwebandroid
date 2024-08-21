@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiaryEditParamsComponent } from '../diary/diary-edit-params/diary-edit-params.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatListModule, MatInputModule, MatSliderModule, MatGridListModule, MatGridTile, MatSelectModule } from '@angular/material'
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
@@ -32,12 +32,13 @@ import { RequrencePipe } from './requrence.pipe';
     RequrencePipe
   ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     NgxMaterialTimepickerModule,
     NgxMasonryModule,
     MatGridListModule,
     CommonModule,
     MatDialogModule,
-    FormsModule,
     MatListModule,
     MatInputModule,
     MatSliderModule,
@@ -54,11 +55,12 @@ import { RequrencePipe } from './requrence.pipe';
       AddItemDialogComponent,
     ],
   exports: [
+    FormsModule,
+    ReactiveFormsModule,
     ImgBrokenDirective,
     DiaryEditParamsComponent,
     PersChangesItemComponent,
     MatDialogModule,
-    FormsModule,
     MatListModule,
     MatInputModule,
     MatSliderModule,
@@ -72,7 +74,8 @@ import { RequrencePipe } from './requrence.pipe';
     MatSelectModule,
     DatestringPipe,
     AbHardnessPipe,
-    RequrencePipe
+    RequrencePipe,
+    NgxMasonryModule
   ]
 })
 export class SharedModule {
