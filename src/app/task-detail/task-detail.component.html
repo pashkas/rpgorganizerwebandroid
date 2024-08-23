@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    <div *ngIf="!gameSettings.isClassicaRPG &&tskAbility" class="pt-1">
+    <div *ngIf="!gameSettings.isClassicaRPG && tskAbility" class="pt-1">
       <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel"> </mat-progress-bar>
     </div>
 
@@ -146,33 +146,27 @@
         <input onfocus="this.select()" matInput autocomplete="off" placeholder="Название" [(ngModel)]="tsk.name" name="tsk.name" #nameEdt />
       </mat-form-field>
     </div>
-    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
+    <div class="iFlex" *ngIf="tskAbility">
       <!-- Характеристика -->
-      <div [formGroup]="charactGroup" *ngIf="tskAbility" fxFlex>
-        <mat-form-field>
-          <mat-select formControlName="charact" panelClass="panel-override">
-            <mat-option *ngFor="let a of pers.characteristics" [value]="a">
-              {{ a.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+      <mat-form-field [formGroup]="charactGroup">
+        <mat-select formControlName="charact" panelClass="panel-override">
+          <mat-option *ngFor="let a of pers.characteristics" [value]="a">
+            {{ a.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
       <!-- Сложность -->
-      <ng-container *ngIf="tsk.requrense != 'нет'">
-        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="10px" class="pb-3 pl-3">
-          <mat-chip-list selectable multiple>
-            <mat-chip (click)="tsk.isPerk = !tsk.isPerk" [selected]="tsk.isPerk" color="accent"> &nbsp;Перк?&nbsp; </mat-chip>
+      <mat-form-field [formGroup]="hardnesGroup" *ngIf="this.gameSettings.isClassicaRPG == true" style="flex-shrink: 2">
+        <mat-select formControlName="hardnesControl" panelClass="panel-override">
+          <mat-option *ngFor="let a of hardneses" [value]="a.val">
+            {{ a.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-            <ng-container *ngIf="this.gameSettings.isClassicaRPG == true">
-              <mat-divider vertical class="vertdiv"></mat-divider>
-              <ng-container>
-                <mat-chip (click)="setTskHardness(1)" [selected]="tsk.hardnes == 1" color="accent">Норм</mat-chip>
-                <mat-chip (click)="setTskHardness(2)" [selected]="tsk.hardnes == 2" color="accent">Слож</mat-chip>
-              </ng-container>
-            </ng-container>
-          </mat-chip-list>
-        </div>
-      </ng-container>
+      <mat-chip-list selectable multiple>
+        <mat-chip (click)="tsk.isPerk = !tsk.isPerk" [selected]="tsk.isPerk" color="accent"> &nbsp;Перк?&nbsp; </mat-chip>
+      </mat-chip-list>
     </div>
 
     <!-- Описание -->

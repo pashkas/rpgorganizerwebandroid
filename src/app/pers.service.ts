@@ -19,6 +19,8 @@ import { MatDialog } from "@angular/material";
 import { ReqItemType } from "src/Models/ReqItem";
 import { GameSettings } from "./GameSettings";
 import { getExpResult } from "src/Models/getExpResult";
+import { GlobalItem } from "src/Models/GlobalItem";
+import { allmap } from "src/Models/allmap";
 
 @Injectable({
   providedIn: "root",
@@ -202,14 +204,14 @@ export class PersService {
           }
         }
 
-        // Сложность
-        if (aTask.hardnes != bTask.hardnes) {
-          return aTask.hardnes - bTask.hardnes;
-        }
-
         // Перк?
         if (this.boolVCompare(aTask.isPerk, bTask.isPerk) != 0) {
           return this.boolVCompare(aTask.isPerk, bTask.isPerk);
+        }
+
+        // Сложность
+        if (aTask.hardnes != bTask.hardnes) {
+          return aTask.hardnes - bTask.hardnes;
         }
       } else {
         // Значение
@@ -354,6 +356,11 @@ export class PersService {
         // Можно открыть
         if (this.boolVCompare(a.anyMayUp, b.anyMayUp) != 0) {
           return -this.boolVCompare(a.anyMayUp, b.anyMayUp);
+        }
+
+        const hasSameLvl = this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
+        if (hasSameLvl) {
+          return -hasSameLvl;
         }
 
         if (a.anyMayUp == true && b.anyMayUp == true) {
@@ -2016,8 +2023,81 @@ export class PersService {
       this.savePers(false);
     }
 
+    this.generateQwestsGlobal(prs);
+    this.generateSkillsGlobal(prs);
+
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
+  }
+
+  generateSkillsGlobal(prs: Pers) {
+    if (prs == null) {
+      return;
+    }
+
+    prs.skillsGlobal = [];
+
+    if (prs.tasks == null || prs.currentView != curpersview.SkillsGlobal) {
+      return;
+    }
+
+    let map = new Map();
+
+    for (let i = 0; i < prs.tasks.length; i++) {
+      const tsk = prs.tasks[i];
+
+      let ab: Ability;
+      if (tsk.parrentTask) {
+        ab = this.allMap[tsk.parrentTask].link;
+      } else {
+        ab = this.allMap[tsk.id].link;
+      }
+
+      let gl = new GlobalItem();
+      gl.id = ab.id;
+      gl.img = ab.image;
+      gl.tskId = tsk.id;
+      gl.tskIdx = i;
+      gl.name = ab.name;
+
+      if (map.get(ab.id) == null) {
+        map.set(ab.id, gl);
+      }
+    }
+
+    prs.skillsGlobal = [...map.values()];
+  }
+
+  generateQwestsGlobal(prs: Pers) {
+    if (prs == null) {
+      return;
+    }
+
+    prs.qwestGlobal = [];
+
+    if (prs.qwests == null || prs.tasks == null || prs.currentView != curpersview.QwestsGlobal) {
+      return;
+    }
+
+    for (let i = 0; i < prs.tasks.length; i++) {
+      const tsk = prs.tasks[i];
+
+      if (!tsk.qwestId) {
+        continue;
+      }
+
+      let qw: Qwest = this.allMap[tsk.qwestId].item;
+
+      let gl = new GlobalItem();
+      gl.id = qw.id;
+      gl.img = qw.image;
+      gl.tskId = tsk.id;
+      gl.tskIdx = i;
+      gl.name = qw.name;
+      gl.progressValue = qw.progressValue;
+
+      prs.qwestGlobal.push(gl);
+    }
   }
 
   setCurInd(i: number): any {
@@ -3313,10 +3393,16 @@ export class PersService {
         for (let tsk of ab.tasks) {
           if (on < this.gameSettings.abCost(tsk.value, tsk.hardnes) && this.gameSettings.isAbPointsEnabled) {
             tsk.mayUp = false;
+            tsk.IsNextLvlSame = false;
+          }
+
+          if (tsk.value < 1 || !tsk.mayUp) {
+            tsk.IsNextLvlSame = false;
           }
         }
       }
       ch.anyMayUp = ch.abilities.some((q) => q.tasks.some((qq) => qq.mayUp));
+      ch.HasSameAbLvl = ch.abilities.some((q) => q.tasks.some((qq) => qq.IsNextLvlSame));
       ch.abilities = ch.abilities.sort(this.abSorter());
     }
 

@@ -40,7 +40,7 @@ export class EraSettings extends GameSettings {
   setTes() {}
 
   abCost(curLvl: number, hardness: number): number {
-    return 1;
+    return 1 * hardness;
 
     // if (curLvl == 0) {
     //   return this.maxAbilLvl * hardness;
@@ -50,7 +50,7 @@ export class EraSettings extends GameSettings {
   }
 
   abTotalCost(curLvl: number, hardness: number) {
-    return curLvl;
+    return curLvl * hardness;
 
     // if (curLvl == 0) {
     //   return 0;
@@ -76,10 +76,9 @@ export class EraSettings extends GameSettings {
     while (true) {
       result.startExp = expLvl;
 
-      // let cur = 5 + persLevel * 2 + Math.pow(persLevel, 2) * 0.333;
       let l = persLevel + 1;
       let v = 3;
-      let expa = 0.1618;
+      let expa = 0.25;
       let line = v - expa;
       let cur = l * line + Math.pow(l, 2) * expa;
 

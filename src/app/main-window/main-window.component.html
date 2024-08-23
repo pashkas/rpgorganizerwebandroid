@@ -10,139 +10,195 @@
   } as data"
 >
   <div class="grid-container" *ngIf="data.pers && !data.pers.isRest">
-    <!-- Если пусто -->
-    <div *ngIf="!data.currentTask && (data.currentView == 'QwestTasks' || data.currentView == 'SkillTasks')" fxLayout="row" fxLayoutAlign="center center">
-      <h3 class="text-center" *ngIf="!data.pers.characteristics?.length">
-        Пока пусто... Может стоит
-        <a href="https://pashkas.github.io/rpgorganizertutorial.github.io/" target="_blank"> посетить инструкцию? </a>
-      </h3>
-    </div>
-    <div *ngIf="!data.currentTask && (data.currentView == 'QwestTasks' || data.currentView == 'SkillTasks')">&nbsp;</div>
-    <!-- Задачи списком -->
-    <ng-container *ngIf="data.currentView == 'SkillsSort' || data.currentView == 'SkillsGlobal' || data.currentView == 'QwestsGlobal' || data.currentView == 'QwestSort'">
-      <mat-list (cdkDropListDropped)="drop($event)" cdkDropList class="list-group py-2 h-100 w-100 overflow-auto">
-        <ng-container *ngFor="let t of data.pers.tasks; let i = index">
-          <div cdkDrag mat-list-item (click)="tskClick(i)" class="{{ t | listBg : data.currentView : data.pers.isMegaPlan }}">
-            <div class="d-flex align-items-center" [ngClass]="{ 'list-skills-global': data.currentView == 'SkillsGlobal', 'list-skills-sort': data.currentView == 'SkillsSort' }">
-              <div class="flex-grow-1 text-center">
-                <div class="pointer">
-                  <ng-container *ngIf="t.requrense != 'нет' && !data.pers.isMegaPlan && checkDate(t.date)" class="bg-danger"> [{{ t.date | datestring }}] </ng-container>
-                  <ng-container *ngIf="t.requrense != 'нет' || data.currentView == 'QwestSort'; else elseTemplate">
-                    <ng-container *ngIf="data.currentView == 'SkillsSort'">
-                      <a [routerLink]="['/pers/task', t.parrentTask ? t.parrentTask : t.id, false]" class="text-dark">{{ t.tittle }}</a>
+    <ng-container [ngSwitch]="data | mainView">
+      <!-- Если начало -->
+      <ng-container *ngSwitchCase="'start'">
+        <div fxLayout="row" fxLayoutAlign="center center">
+          <h3 class="text-center">
+            Пока пусто... Может стоит
+            <a href="https://pashkas.github.io/rpgorganizertutorial.github.io/" target="_blank"> посетить инструкцию? </a>
+          </h3>
+        </div>
+        <div>&nbsp;</div>
+      </ng-container>
+
+      <!-- Если пусто -->
+      <ng-container *ngSwitchCase="'empty'">
+        <div fxLayout="row" fxLayoutAlign="center center"></div>
+        <div></div>
+      </ng-container>
+
+      <!-- Задачи списком -->
+      <ng-container *ngSwitchCase="'list'">
+        <mat-list (cdkDropListDropped)="drop($event)" cdkDropList class="list-group py-2 h-100 w-100 overflow-auto">
+          <ng-container *ngFor="let t of data.pers.tasks; let i = index">
+            <div cdkDrag mat-list-item (click)="tskClick(i)" class="{{ t | listBg : data.currentView : data.pers.isMegaPlan }}">
+              <div class="d-flex align-items-center" [ngClass]="{ 'list-skills-global': data.currentView == 'SkillsGlobal', 'list-skills-sort': data.currentView == 'SkillsSort' }">
+                <div class="flex-grow-1 text-center">
+                  <div class="pointer">
+                    <ng-container *ngIf="t.requrense != 'нет' && !data.pers.isMegaPlan && checkDate(t.date)" class="bg-danger"> [{{ t.date | datestring }}] </ng-container>
+                    <ng-container *ngIf="t.requrense != 'нет' || data.currentView == 'QwestSort'; else elseTemplate">
+                      <ng-container *ngIf="data.currentView == 'SkillsSort'">
+                        <a [routerLink]="['/pers/task', t.parrentTask ? t.parrentTask : t.id, false]" class="text-dark">{{ t.tittle }}</a>
+                      </ng-container>
+                      <ng-container *ngIf="data.currentView != 'SkillsSort'">
+                        {{ t.tittle }}
+                      </ng-container>
                     </ng-container>
-                    <ng-container *ngIf="data.currentView != 'SkillsSort'">
-                      {{ t.tittle }}
-                    </ng-container>
+                    <ng-template #elseTemplate>
+                      <ng-container *ngIf="t.plusToNames[1]?.name as nn">
+                        {{ "(" + nn + ") " }}
+                      </ng-container>
+                      {{ t.plusToNames[0]?.name }}
+                    </ng-template>
+                  </div>
+                </div>
+                <mat-icon cdkDragHandle class="pointer mr-2" [hidden]="!(data.currentView == 'QwestSort') && !(data.currentView == 'SkillsSort')"> drag_handle </mat-icon>
+              </div>
+            </div>
+          </ng-container>
+        </mat-list>
+        <div></div>
+      </ng-container>
+
+      <!-- Квесты masonry -->
+      <ng-container *ngSwitchCase="'listQwest'">
+        <div class="masonry-container">
+          <div class="masonry-list-galery py-2">
+            <div class="masonry-item" *ngFor="let qwest of data.pers.qwestGlobal">
+              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(qwest.tskIdx)">
+                <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+                  <img appImgBroken src="{{ qwest.img }}" class="masonry-img" />
+                  <div class="text-wrap py-2">
+                    {{ qwest.name }}
+                  </div>
+                  <ng-container *ngIf="qwest.progressValue < 100; else isFullDone">
+                    <div class="py-0" class="w-100">
+                      <mat-progress-bar class="myprogr" color="accent" mode="determinate" value="{{ qwest.progressValue }}"> </mat-progress-bar>
+                    </div>
                   </ng-container>
-                  <ng-template #elseTemplate>
-                    <ng-container *ngIf="t.plusToNames[1]?.name as nn">
-                      {{ "(" + nn + ") " }}
-                    </ng-container>
-                    {{ t.plusToNames[0]?.name }}
+                  <ng-template #isFullDone>
+                    <div class="py-0">
+                      <img src="assets/icons/star.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                    </div>
                   </ng-template>
                 </div>
-              </div>
-              <!-- <mat-checkbox class="my-checkbox" *ngIf="this.srv.pers$.value.isWriteTime && data.currentView == 'SkillsSort'" (change)="setIsNotWriteTime($event, t)" [ngModel]="t.isNotWriteTime"> </mat-checkbox> -->
-              <!-- <div *ngIf="t.requrense != 'нет' && !true" class="px-2">
-                <ngx-material-timepicker-toggle [for]="pikTimeInList"></ngx-material-timepicker-toggle>
-                <ngx-material-timepicker (timeSet)="onTimeChanged($event, t.id)" #pikTimeInList [format]="24" [defaultTime]="t.time"></ngx-material-timepicker>
-                {{ t.time }}
-              </div> -->
-              <mat-icon cdkDragHandle class="pointer mr-2" [hidden]="!(data.currentView == 'QwestSort') && !(data.currentView == 'SkillsSort')"> drag_handle </mat-icon>
+              </button>
             </div>
           </div>
-        </ng-container>
-      </mat-list>
-      <div></div>
-    </ng-container>
-    <!-- Сфокусированный вид задач -->
-    <ng-container *ngIf="data.currentTask && (data.currentView == 'QwestTasks' || data.currentView == 'SkillTasks')">
-      <div class="container" [ngClass]="{ 'vibrate-1': data.isSucessShown }">
-        <img
-          appImgBroken
-          class="rounded element img-fluid pt-1 pb-0 px-1 mh-100 w-100"
-          [ngStyle]="{ 'object-fit': 'contain' }"
-          src="{{ 'assets/img/' + data.currentTask.imageLvl + '/' + data.currentTask.image + '.webp' }}"
-          (contextmenu)="$event.preventDefault()"
-          (press)="onLongPress($event)"
-          (dblclick)="firstOrGlobal(data.currentTask)"
-          (swipeup)="done(data.currentTask)"
-          (swipedown)="fail(data.currentTask)"
-          (swiperight)="onSwipeLeft($event)"
-          (swipeleft)="onSwipeRight($event)"
-        />
-      </div>
-      <div fxLayout="column" fxLayoutAlign="center center" class="w-100 h-100 py-2 px-2" [ngStyle]="{ height: '3em' }">
-        <div fxLayout="row" fxLayoutAlign="center center">
-          <a [routerLink]="['/pers/task', data.currentTask.parrentTask ? data.currentTask.parrentTask : data.currentTask.id, false]" class="text-dark text-center nounderline">
-            <h4 class="m-0">
-              <ng-container>
-                <ng-container *ngIf="data.currentTask.requrense != 'нет' && checkDate(data.currentTask.date)" class="bg-danger"> [{{ data.currentTask.date | datestring }}] </ng-container>
-                <span
-                  matBadge="{{ data.currentTask.failCounter | failMod }}"
-                  matBadgeSize="medium"
-                  matBadgeColor="warn"
-                  matBadgePosition="above after"
-                  matBadgeOverlap="false"
-                  [ngClass]="{ 'text-danger': data.currentTask.failCounter >= 1 }"
-                >
-                  <ng-container>
-                    {{ data.currentTask.tittle }}
-                  </ng-container>
-                  <ng-container *ngIf="data?.currentTask?.isCounterEnable && data?.currentTask?.counterDone > 0">
-                    {{ " (" + (currentCounterDone$ | async) + ")" }}
-                  </ng-container>
-                </span>
-              </ng-container>
-            </h4>
-          </a>
-          <app-timer-counter [tsk]="data.currentTask"></app-timer-counter>
         </div>
-        <small *ngIf="data?.currentTask?.descr" class="text-center text-secondary mynote">
-          {{ data.currentTask.descr }}
-        </small>
-        <small class="text-center" *ngIf="data?.currentTask?.plusToNames && data?.currentTask?.plusToNames?.length > 0">
-          <ng-container *ngFor="let pl of data.currentTask.plusToNames; let i = index">
-            <ng-container *ngIf="i > 0"> | </ng-container>
-            <ng-container *ngIf="pl.linkType; else noLinkType">
-              <a class="text-secondary pointer nounderline" (click)="openPlusType(pl.linkId, pl.linkType)">{{ pl.name }}</a>
-            </ng-container>
-            <ng-template #noLinkType>
-              <ng-container *ngIf="pl.linkName; else elseTemplate">
-                <a class="text-secondary pointer nounderline" [routerLink]="[pl.linkName, pl.linkId]">{{ pl.name }}</a>
+        <div></div>
+      </ng-container>
+
+      <!-- Наыки masonry -->
+      <ng-container *ngSwitchCase="'listSkills'">
+        <div class="masonry-container">
+          <div class="masonry-list-galery py-2">
+            <div class="masonry-item" *ngFor="let qwest of data.pers.skillsGlobal">
+              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(qwest.tskIdx)">
+                <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+                  <img appImgBroken src="{{ qwest.img }}" class="masonry-img" />
+                  <div class="text-wrap py-2">
+                    {{ qwest.name }}
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div></div>
+      </ng-container>
+
+      <!-- Сфокусированный вид задач -->
+      <ng-container *ngSwitchCase="'focus'">
+        <div class="container" [ngClass]="{ 'vibrate-1': data.isSucessShown }">
+          <img
+            appImgBroken
+            class="rounded element img-fluid pt-1 pb-0 px-1 mh-100 w-100"
+            [ngStyle]="{ 'object-fit': 'contain' }"
+            src="{{ 'assets/img/' + data.currentTask.imageLvl + '/' + data.currentTask.image + '.webp' }}"
+            (contextmenu)="$event.preventDefault()"
+            (press)="onLongPress($event)"
+            (dblclick)="firstOrGlobal(data.currentTask)"
+            (swipeup)="done(data.currentTask)"
+            (swipedown)="fail(data.currentTask)"
+            (swiperight)="onSwipeLeft($event)"
+            (swipeleft)="onSwipeRight($event)"
+          />
+        </div>
+        <div fxLayout="column" fxLayoutAlign="center center" class="w-100 h-100 py-2 px-2" [ngStyle]="{ height: '3em' }">
+          <div fxLayout="row" fxLayoutAlign="center center">
+            <a [routerLink]="['/pers/task', data.currentTask.parrentTask ? data.currentTask.parrentTask : data.currentTask.id, false]" class="text-dark text-center nounderline">
+              <h4 class="m-0">
+                <ng-container>
+                  <ng-container *ngIf="data.currentTask.requrense != 'нет' && checkDate(data.currentTask.date)" class="bg-danger"> [{{ data.currentTask.date | datestring }}] </ng-container>
+                  <span
+                    matBadge="{{ data.currentTask.failCounter | failMod }}"
+                    matBadgeSize="medium"
+                    matBadgeColor="warn"
+                    matBadgePosition="above after"
+                    matBadgeOverlap="false"
+                    [ngClass]="{ 'text-danger': data.currentTask.failCounter >= 1 }"
+                  >
+                    <ng-container>
+                      {{ data.currentTask.tittle }}
+                    </ng-container>
+                    <ng-container *ngIf="data?.currentTask?.isCounterEnable && data?.currentTask?.counterDone > 0">
+                      {{ " (" + (currentCounterDone$ | async) + ")" }}
+                    </ng-container>
+                  </span>
+                </ng-container>
+              </h4>
+            </a>
+            <app-timer-counter [tsk]="data.currentTask"></app-timer-counter>
+          </div>
+          <small *ngIf="data?.currentTask?.descr" class="text-center text-secondary mynote">
+            {{ data.currentTask.descr }}
+          </small>
+          <small class="text-center" *ngIf="data?.currentTask?.plusToNames && data?.currentTask?.plusToNames?.length > 0">
+            <ng-container *ngFor="let pl of data.currentTask.plusToNames; let i = index">
+              <ng-container *ngIf="i > 0"> | </ng-container>
+              <ng-container *ngIf="pl.linkType; else noLinkType">
+                <a class="text-secondary pointer nounderline" (click)="openPlusType(pl.linkId, pl.linkType)">{{ pl.name }}</a>
               </ng-container>
-              <ng-template #elseTemplate>
-                <span class="text-secondary">
-                  <ng-container *ngIf="i == 0 && data.currentTask.requrense != 'нет' && !data.pers.isAutofocus">
-                    <ngx-material-timepicker-toggle [for]="toggleTimepicker"></ngx-material-timepicker-toggle>
-                    <ngx-material-timepicker (timeSet)="onTimeChanged($event, data.currentTask.id)" #toggleTimepicker [format]="24" [defaultTime]="data.currentTask.time"> </ngx-material-timepicker>
-                  </ng-container>
-                  {{ pl.name }}
-                </span>
+              <ng-template #noLinkType>
+                <ng-container *ngIf="pl.linkName; else elseTemplate">
+                  <a class="text-secondary pointer nounderline" [routerLink]="[pl.linkName, pl.linkId]">{{ pl.name }}</a>
+                </ng-container>
+                <ng-template #elseTemplate>
+                  <span class="text-secondary">
+                    <ng-container *ngIf="i == 0 && data.currentTask.requrense != 'нет' && !data.pers.isAutofocus">
+                      <ngx-material-timepicker-toggle [for]="toggleTimepicker"></ngx-material-timepicker-toggle>
+                      <ngx-material-timepicker (timeSet)="onTimeChanged($event, data.currentTask.id)" #toggleTimepicker [format]="24" [defaultTime]="data.currentTask.time"> </ngx-material-timepicker>
+                    </ng-container>
+                    {{ pl.name }}
+                  </span>
+                </ng-template>
               </ng-template>
-            </ng-template>
-          </ng-container>
-          <a
-            *ngIf="
-              data?.currentTask?.aimTimer &&
-              data?.currentTask?.aimTimer != 0 &&
-              data?.currentTask?.aimUnit != null &&
-              data?.currentTask?.aimUnit != 'Раз' &&
-              data?.currentTask?.aimUnit != 'Раз чет' &&
-              data?.currentTask?.aimUnit != 'Раз нечет'
-            "
-            class="text-secondary pointer nounderline"
-            (click)="openTaskTimer()"
-          >
-            | ⌛&nbsp;
-          </a>
-          <a *ngIf="data?.currentTask?.isCounterEnable" class="text-secondary pointer nounderline" (click)="clickCounter(data?.currentTask)"> | ✓&nbsp; </a>
-        </small>
-      </div>
+            </ng-container>
+            <a
+              *ngIf="
+                data?.currentTask?.aimTimer &&
+                data?.currentTask?.aimTimer != 0 &&
+                data?.currentTask?.aimUnit != null &&
+                data?.currentTask?.aimUnit != 'Раз' &&
+                data?.currentTask?.aimUnit != 'Раз чет' &&
+                data?.currentTask?.aimUnit != 'Раз нечет'
+              "
+              class="text-secondary pointer nounderline"
+              (click)="openTaskTimer()"
+            >
+              | ⌛&nbsp;
+            </a>
+            <a *ngIf="data?.currentTask?.isCounterEnable" class="text-secondary pointer nounderline" (click)="clickCounter(data?.currentTask)"> | ✓&nbsp; </a>
+          </small>
+        </div>
+      </ng-container>
     </ng-container>
+
     <!-- + ': ' + data.pers.exp + '/' + + data.pers.nextExp -->
     <app-progress-bar-num [text]="data.pers.name + ' (' + data.pers.rangName + ')' + ', уровень ' + data.pers.level" [val]="data.pers.progressValue"> </app-progress-bar-num>
+
     <div fxLayout="row" fxLayoutAlign="space-between center" class="w-100 h-100 py-1" style="min-height: 120px">
       <!-- Кнопки -->
       <button (press)="qwickAddTask()" (contextmenu)="$event.preventDefault()" class="h-100 w-100 px-1 py-0 text-left" mat-button routerLink="/pers" (click)="openPersList()">

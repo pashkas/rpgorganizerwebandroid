@@ -135,7 +135,7 @@
                                   style="height: 20px"
                                   [style.z-index]="ab.progressValue > ab.tasks[0].progresNextLevel ? 2 : 0"
                                 ></div> -->
-                                <div class="d-flex align-items-center position-absolute w-100 h-100 px-1 abText text-primary" style="z-index: 3">
+                                <div class="d-flex align-items-center position-absolute w-100 h-100 px-1 abText {{ ab.tasks[0] | abColor }}" style="z-index: 3">
                                   <div class="flex-grow-1 text-left pointer">
                                     <a (click)="showAbility(ab)">{{ ab.tasks[0] | abHardness }}</a>
                                   </div>
@@ -244,7 +244,7 @@
                   <!-- Навыки -->
                   <mat-list *ngIf="item.abilities.length > 0" class="p-0">
                     <div mat-list-item *ngFor="let ab of item.abilities; let even = even; let odd = odd" class="row-striped" [ngClass]="{ even: even }">
-                      <div class="d-flex align-items-center">
+                      <div class="d-flex align-items-center {{ ab.tasks[0] | abColor }}">
                         <div class="flex-grow-1 align-self-center">
                           <i>{{ ab.tasks[0] | abHardness }}</i>
                         </div>
@@ -406,7 +406,7 @@
                       <div class="text-wrap py-2">
                         {{ rev.name }}
                       </div>
-                      <button (click)="useRevard(rev)" mat-stroked-button style="color: gold">
+                      <button class="w-100" (click)="useRevard(rev, $event)" mat-stroked-button style="color: gold">
                         <small>x{{ rev.count }}</small>
                       </button>
                     </div>
@@ -431,7 +431,7 @@
               </div>
               <div class="masonry-list">
                 <div class="masonry-item" *ngFor="let rev of pers.rewards | shop">
-                  <button mat-stroked-button class="w-100 h-100 revBtn">
+                  <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event)">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
                       <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
                       <div class="text-wrap py-2" *ngIf="rev.name">
@@ -444,10 +444,7 @@
                       </div>
                       <ng-container *ngIf="!rev.isReward; else isReward">
                         <div class="flex w-100" style="justify-content: space-between">
-                          <button (click)="addNewRevard(rev)" mat-stroked-button style="color: gold">
-                            <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1em' }" />
-                          </button>
-                          <button (click)="buyRevard(rev)" mat-stroked-button [disabled]="!rev.isAviable" style="color: gold">
+                          <button class="w-100" (click)="buyRevard(rev, $event)" mat-stroked-button [disabled]="!rev.isAviable" style="color: gold">
                             <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1em' }" />
                             <small>{{ rev.cost }}</small>
                           </button>
@@ -478,7 +475,7 @@
           <div fxLayout="row" fxLayoutAlign="space-between center">
             <h5>Трофеи:</h5>
             <!-- Добвление трофея -->
-            <button class="icon-small" mat-icon-button (click)="addNewRevard(null)">
+            <button class="icon-small" mat-icon-button (click)="addNewRevard(null, $event)">
               <img src="assets/icons/create.png" class="img-fluid" />
             </button>
           </div>

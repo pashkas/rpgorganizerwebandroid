@@ -62,14 +62,14 @@ export abstract class GameSettings {
   /**
    * Длительность показа попапа с изменениями.
    */
-  changesPopupDuration: number = 3000;
-  changesPopupDurationAbil: number = 6000;
-  changesPopupDurationCha: number = 6000;
+  changesPopupDuration: number = 4000;
+  changesPopupDurationAbil: number = 5000;
+  changesPopupDurationCha: number = 5000;
   changesPopupDurationNewLevel: number = 5000;
   /**
    * Длительность попапа изменений квестов.
    */
-  changesPopupDurationQwest: number = 3000;
+  changesPopupDurationQwest: number = 4000;
   /**
    * Тип расчета опыта. (dynamic, abLvl, abLvlPoints, abValPoints)
    */
@@ -159,7 +159,7 @@ export abstract class GameSettings {
   revProbs: taskProb[] = [
     { id: 5, name: "оч. распространенный", prob: 3, gold: 25 },
     { id: 4, name: "распространенный", prob: 2, gold: 50 },
-    { id: 3, name: "обычный", prob: 1, gold:  100},
+    { id: 3, name: "обычный", prob: 1, gold: 100 },
     { id: 2, name: "редкий", prob: 0.25, gold: 250 },
     { id: 1, name: "оч. редкий", prob: 0.05, gold: 500 },
   ];
@@ -246,20 +246,23 @@ export abstract class GameSettings {
       return 1 / result;
     } else {
       // Экспонента
-      let levels = this.maxAbilLvl;
-      let xp_for_first_level = 7;
-      let xp_for_last_level = 20;
-
-      let B = Math.log(xp_for_last_level / xp_for_first_level) / (levels - 1);
-      let A = xp_for_first_level / (Math.exp(B) - 1);
-
-      let old_exp = A * Math.exp(B * (level - 1));
-      let new_exp = A * Math.exp(B * level);
-
-      const diff = new_exp - old_exp;
+      const diff = this.getExpDiff(level, 7, 20, this.maxAbilLvl);
 
       return 1 / diff;
     }
+  }
+
+  public getExpDiff(level: number, xp_for_first_level: number, xp_for_last_level: number, levels: number) {
+
+    let B = Math.log(xp_for_last_level / xp_for_first_level) / (levels - 1);
+    let A = xp_for_first_level / (Math.exp(B) - 1);
+
+    let old_exp = A * Math.exp(B * (level - 1));
+    let new_exp = A * Math.exp(B * level);
+
+    const diff = new_exp - old_exp;
+
+    return diff;
   }
 
   setExpFormulaType(type: string) {

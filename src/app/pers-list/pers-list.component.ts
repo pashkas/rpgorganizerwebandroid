@@ -103,7 +103,11 @@ export class PersListComponent implements OnInit {
   /**
    * Добавить награду.
    */
-  addNewRevard(r) {
+  addNewRevard(r, event: MouseEvent) {
+    if (event != null) {
+      event.stopPropagation();
+    }
+
     let header, isEdit;
 
     if (r) {
@@ -148,7 +152,11 @@ export class PersListComponent implements OnInit {
     this.addAbil(firstCharact.id);
   }
 
-  buyRevard(rev: Reward) {
+  buyRevard(rev: Reward, event: MouseEvent) {
+    if (event != null) {
+      event.stopPropagation();
+    }
+
     this.srv.changesBefore();
 
     this.pers.gold -= rev.cost;
@@ -457,7 +465,11 @@ export class PersListComponent implements OnInit {
    * Использование награды.
    * @param rev Награда.
    */
-  useRevard(rev: Reward) {
+  useRevard(rev: Reward, event: MouseEvent) {
+    if (event != null) {
+      event.stopPropagation();
+    }
+
     this.srv.changesBefore();
 
     // Уменьшаем количество если их больше чем 1
@@ -482,7 +494,7 @@ export class PersListComponent implements OnInit {
   }
 
   qwickAddReward() {
-    this.addNewRevard(null);
+    this.addNewRevard(null, null);
     this.srv.savePers(false);
   }
 }

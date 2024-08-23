@@ -30,6 +30,9 @@ export class TaskDetailComponent implements OnInit {
   percSymbol;
   charactCntrl: FormControl;
   charactGroup: FormGroup;
+  hardnesGroup = new FormGroup({
+    hardnesControl: new FormControl(1),
+  });
   @ViewChild("goUp", { static: false }) goUp: ElementRef;
   isEditMode: boolean = false;
   isQuick: any;
@@ -39,7 +42,11 @@ export class TaskDetailComponent implements OnInit {
   pers: Pers;
   requrenses: string[] = Task.requrenses;
   times = [1, 2, 3, 4, 5];
-  hardneses = [1, 2, 3];
+  hardneses = [
+    { val: 0.5, name: "Легко" },
+    { val: 1, name: "Норм" },
+    { val: 2, name: "Сложно" },
+  ];
   tsk: Task;
   tskAbility: Ability;
   tskCharact$ = new BehaviorSubject<Characteristic>(undefined);
@@ -206,6 +213,7 @@ export class TaskDetailComponent implements OnInit {
         this.requrenses = Task.requrenses.filter((n) => {
           return n != "нет";
         });
+        this.hardnesGroup.patchValue({ hardnesControl: this.tsk.hardnes });
       }
     }
 
@@ -277,6 +285,8 @@ export class TaskDetailComponent implements OnInit {
         this.tskCharact$.next(n);
       }
     });
+
+    this.hardnesGroup.get("hardnesControl").valueChanges.subscribe((q) => (this.tsk.hardnes = q));
   }
 
   onTskDateChange(ev) {

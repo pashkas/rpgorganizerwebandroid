@@ -15,7 +15,7 @@ import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
 import { ServiceWorkerModule } from "@angular/service-worker";
 import { registerLocaleData } from "@angular/common";
 import localeRu from "@angular/common/locales/ru";
-import { GestureConfig, MatProgressSpinnerModule, MatIconModule, MatBadgeModule, MatSlideToggleModule, MatChipsModule } from "@angular/material";
+import { GestureConfig, MatProgressSpinnerModule, MatIconModule, MatBadgeModule, MatSlideToggleModule, MatChipsModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material";
 import { SharedModule } from "./shared/shared.module";
 import { ArrSortDialogComponent } from "./arr-sort-dialog/arr-sort-dialog.component";
 import { ProgressBarNumComponent } from "./shared/progress-bar-num/progress-bar-num.component";
@@ -82,6 +82,12 @@ registerLocaleData(localeRu, "ru");
       useClass: GestureConfig,
     },
     { provide: LOCALE_ID, useValue: "ru" },
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: {
+        subscriptSizing: "dynamic",
+      },
+    },
     {
       provide: RouteReuseStrategy,
       useClass: RouteReuseService,

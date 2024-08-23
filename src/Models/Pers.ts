@@ -6,12 +6,14 @@ import { Qwest } from "./Qwest";
 import { revSetting } from "./revSetting";
 import { Diary } from "./Diary";
 import { curpersview } from "./curpersview";
+import { GlobalItem } from "./GlobalItem";
 
 export class Pers {
+  qwestGlobal: GlobalItem[]=[];
+  skillsGlobal: GlobalItem[]=[];
+
   lastTaskId: any;
-
   isAutofocus: boolean = false;
-
   imgVers: number = 1;
   /**
    * Количество выполненных без пропусков задач.

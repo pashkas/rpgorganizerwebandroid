@@ -18,6 +18,8 @@ import { DatestringPipe } from './datestring.pipe';
 import { AbHardnessPipe } from '../ab-hardness.pipe';
 import { ImgBrokenDirective } from '../img-broken.directive';
 import { RequrencePipe } from './requrence.pipe';
+import { AbColorPipe } from './ab-color.pipe';
+import { MainViewPipe } from './main-view.pipe';
 
 @NgModule({
   declarations: [
@@ -29,7 +31,9 @@ import { RequrencePipe } from './requrence.pipe';
     DatestringPipe,
     AbHardnessPipe,
     ImgBrokenDirective,
-    RequrencePipe
+    RequrencePipe,
+    AbColorPipe,
+    MainViewPipe
   ],
   imports: [
     FormsModule,
@@ -75,7 +79,9 @@ import { RequrencePipe } from './requrence.pipe';
     DatestringPipe,
     AbHardnessPipe,
     RequrencePipe,
-    NgxMasonryModule
+    NgxMasonryModule,
+    AbColorPipe,
+    MainViewPipe
   ]
 })
 export class SharedModule {

@@ -9,7 +9,7 @@ import { DiaryShowComponent } from "../diary/diary-show/diary-show.component";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { RarecolPipe } from "../rarecol.pipe";
-import { MatCardModule, MatIconModule } from "@angular/material";
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatCardModule, MatIconModule } from "@angular/material";
 import { MatSelectModule } from "@angular/material/select";
 import { CharacteristicDetailsComponent } from "../characteristic-details/characteristic-details.component";
 import { AbilityDetailComponent } from "../ability-detail/ability-detail.component";
@@ -107,6 +107,14 @@ import { FloorPipe } from "../floor.pipe";
     QuickAddAbilityComponent,
     RequirementsAddDialogComponent,
   ],
-  providers: [{ provide: OWL_DATE_TIME_LOCALE, useValue: "ru" }],
+  providers: [
+    { provide: OWL_DATE_TIME_LOCALE, useValue: "ru" },
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: {
+        subscriptSizing: "dynamic",
+      },
+    },
+  ],
 })
 export class PersModule {}
