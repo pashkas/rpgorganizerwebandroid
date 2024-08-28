@@ -20,6 +20,7 @@ import { ImgBrokenDirective } from '../img-broken.directive';
 import { RequrencePipe } from './requrence.pipe';
 import { AbColorPipe } from './ab-color.pipe';
 import { MainViewPipe } from './main-view.pipe';
+import { MasonryPipe } from './masonry.pipe';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import { MainViewPipe } from './main-view.pipe';
     ImgBrokenDirective,
     RequrencePipe,
     AbColorPipe,
-    MainViewPipe
+    MainViewPipe,
+    MasonryPipe
   ],
   imports: [
     FormsModule,
@@ -81,7 +83,8 @@ import { MainViewPipe } from './main-view.pipe';
     RequrencePipe,
     NgxMasonryModule,
     AbColorPipe,
-    MainViewPipe
+    MainViewPipe,
+    MasonryPipe
   ]
 })
 export class SharedModule {

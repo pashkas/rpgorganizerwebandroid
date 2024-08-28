@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from "@angular/core";
 import { PersService } from "../pers.service";
 import { Task, taskState } from "src/Models/Task";
-import { BehaviorSubject, Subject } from "rxjs";
+import { BehaviorSubject, Subject, combineLatest, forkJoin } from "rxjs";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { Ability } from "src/Models/Ability";
 import { MatDialog } from "@angular/material";
@@ -13,6 +13,7 @@ import { Qwest } from "src/Models/Qwest";
 import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-component.component";
 import { takeUntil } from "rxjs/operators";
 import { GameSettings } from "../GameSettings";
+import { NgxMasonryComponent } from "ngx-masonry";
 
 @Component({
   selector: "app-main-window",
@@ -23,9 +24,13 @@ import { GameSettings } from "../GameSettings";
 export class MainWindowComponent implements OnInit {
   private unsubscribe$ = new Subject();
 
+  skillsGlobal$ = this.srv.skillsGlobal$;
+  qwestsGlobal$ = this.srv.qwestsGlobal$;
+  masonryReload$ = new BehaviorSubject(null);
+
+  currentCounterDone$ = this.srv.currentCounterDone$.asObservable();
   currentTask$ = this.srv.currentTask$.asObservable();
   currentView$ = this.srv.currentView$.asObservable();
-  currentCounterDone$ = this.srv.currentCounterDone$.asObservable();
   isFailShown$ = new BehaviorSubject<boolean>(false);
   isFailShownOv$ = new BehaviorSubject<boolean>(false);
   isSort: boolean = false;
@@ -34,6 +39,15 @@ export class MainWindowComponent implements OnInit {
   lastGlobalBeforeSort: boolean;
   pers$ = this.srv.pers$.asObservable();
   qwickSortVals: sortArr[] = [];
+  public myOptions = {
+    horizontalOrder: true,
+    animations: "hide",
+    percentPosition: true,
+    itemSelector: ".ngx-masonry-item",
+  };
+
+  @ViewChild("masonrySkills", { static: false }) masonrySkills: NgxMasonryComponent;
+  @ViewChild("masonryQwests", { static: false }) masonryQwests: NgxMasonryComponent;
 
   constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, public gameSettings: GameSettings) {}
 
@@ -155,11 +169,12 @@ export class MainWindowComponent implements OnInit {
       this.srv.upQwest(t.id);
     }
 
-    this.srv.savePers(true);
-
     if (prs.currentView == curpersview.SkillTasks) {
-      this.srv.setCurInd(tskIndex);
+      this.srv.setCurInd(0);
+      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
     }
+
+    this.srv.savePers(true);
 
     if (this.gameSettings.isClassicaRPG) {
       tsk = null;
@@ -214,11 +229,12 @@ export class MainWindowComponent implements OnInit {
       prs.Diary[0].notDone += tskName + "; ";
     }
 
-    this.srv.savePers(true);
-
     if (prs.currentView == curpersview.SkillTasks) {
-      this.srv.setCurInd(tskIndex);
+      this.srv.setCurInd(0);
+      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
     }
+
+    this.srv.savePers(true);
 
     if (this.gameSettings.isClassicaRPG) {
       tsk = null;
@@ -233,6 +249,7 @@ export class MainWindowComponent implements OnInit {
     } else if (this.srv.pers$.value.currentView == curpersview.SkillsSort) {
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     } else if (this.srv.pers$.value.currentView == curpersview.SkillsGlobal) {
+      this.srv.setCurInd(0);
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     } else if (this.srv.pers$.value.currentView == curpersview.QwestTasks) {
       this.srv.pers$.value.currentView = curpersview.QwestsGlobal;
@@ -266,7 +283,22 @@ export class MainWindowComponent implements OnInit {
     this.unsubscribe$.complete();
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.masonryReload$.subscribe((q: NgxMasonryComponent) => {
+      if (q != null) {
+        q.reloadItems();
+        q.layout();
+      }
+    });
+  }
+
+  itemsLoaded(type: string) {
+    if (type == "skills") {
+      this.masonryReload$.next(this.masonrySkills);
+    } else if (type == "qwests") {
+      this.masonryReload$.next(this.masonryQwests);
+    }
+  }
 
   onLongPress(e) {
     this.srv.setCurInd(0);
@@ -432,13 +464,13 @@ export class MainWindowComponent implements OnInit {
       qwest.tasks.sort((a, b) => a.order - b.order);
 
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
-    } else if (currentView == curpersview.SkillTasks) {
+    } else if (currentView == curpersview.SkillsGlobal) {
       this.srv.pers$.value.currentView = curpersview.SkillsSort;
     } else if (currentView == curpersview.SkillsSort || currentView == curpersview.SkillsGlobal) {
       this.sortSkillsGlobal();
 
       this.srv.pers$.value.isMegaPlan = false;
-      this.srv.pers$.value.currentView = curpersview.SkillTasks;
+      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
     }
 
     this.srv.savePers(false);
@@ -450,10 +482,10 @@ export class MainWindowComponent implements OnInit {
    */
   setView(currentView) {
     if (currentView == curpersview.SkillTasks || currentView == curpersview.SkillsGlobal) {
-      this.srv.pers$.value.currentView = curpersview.QwestTasks;
+      this.srv.pers$.value.currentView = curpersview.QwestsGlobal;
       this.srv.savePers(false);
     } else if (currentView == curpersview.QwestTasks || currentView == curpersview.QwestsGlobal) {
-      this.srv.pers$.value.currentView = curpersview.SkillTasks;
+      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
       this.srv.savePers(false);
     }
   }

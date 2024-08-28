@@ -8,4 +8,5 @@ export class GlobalItem {
   tskIdx: number;
   task: Task;
   progressValue: number;
+  masonryIdx: number;
 }

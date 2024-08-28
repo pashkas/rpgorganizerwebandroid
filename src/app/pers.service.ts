@@ -33,8 +33,12 @@ export class PersService {
   absMap: any;
   allMap: {};
   currentTask$ = new BehaviorSubject<Task>(null);
+
+  skillsGlobal$ = new BehaviorSubject<GlobalItem[]>([]);
+  qwestsGlobal$ = new BehaviorSubject<GlobalItem[]>([]);
+
   currentCounterDone$ = new BehaviorSubject<number>(0);
-  currentView$ = new BehaviorSubject<curpersview>(curpersview.SkillTasks);
+  currentView$ = new BehaviorSubject<curpersview>(curpersview.SkillsGlobal);
   isAutoPumpInProcess: boolean = false;
   isDialogOpen: boolean = false;
   isGlobalTaskView: boolean;
@@ -2023,19 +2027,17 @@ export class PersService {
       this.savePers(false);
     }
 
-    this.generateQwestsGlobal(prs);
-    this.generateSkillsGlobal(prs);
-
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
+
+    this.generateQwestsGlobal(prs);
+    this.generateSkillsGlobal(prs);
   }
 
   generateSkillsGlobal(prs: Pers) {
     if (prs == null) {
       return;
     }
-
-    prs.skillsGlobal = [];
 
     if (prs.tasks == null || prs.currentView != curpersview.SkillsGlobal) {
       return;
@@ -2065,7 +2067,7 @@ export class PersService {
       }
     }
 
-    prs.skillsGlobal = [...map.values()];
+    this.skillsGlobal$.next([...map.values()]);
   }
 
   generateQwestsGlobal(prs: Pers) {
@@ -2073,11 +2075,11 @@ export class PersService {
       return;
     }
 
-    prs.qwestGlobal = [];
-
     if (prs.qwests == null || prs.tasks == null || prs.currentView != curpersview.QwestsGlobal) {
       return;
     }
+
+    let qwg = [];
 
     for (let i = 0; i < prs.tasks.length; i++) {
       const tsk = prs.tasks[i];
@@ -2096,8 +2098,10 @@ export class PersService {
       gl.name = qw.name;
       gl.progressValue = qw.progressValue;
 
-      prs.qwestGlobal.push(gl);
+      qwg.push(gl);
     }
+
+    this.qwestsGlobal$.next(qwg);
   }
 
   setCurInd(i: number): any {
@@ -2135,7 +2139,7 @@ export class PersService {
     let prs: Pers = JSON.parse(data);
     prs.isWriteTime = false;
 
-    prs.currentView = curpersview.SkillTasks;
+    prs.currentView = curpersview.SkillsGlobal;
 
     if (prs.tasks && prs.tasks.length > 0) {
       prs.currentTaskIndex = 0;
