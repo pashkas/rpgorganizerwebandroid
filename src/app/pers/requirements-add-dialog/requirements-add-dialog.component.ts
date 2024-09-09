@@ -64,7 +64,7 @@ export class RequirementsAddDialogComponent implements OnInit {
       });
 
     if (!this.ReqForm.get('type').value) {
-      this.ReqForm.get('type').setValue(ReqItemType.qwest);
+      this.ReqForm.get('type').setValue(ReqItemType.abil);
     }
   }
 

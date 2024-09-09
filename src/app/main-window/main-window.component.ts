@@ -13,7 +13,6 @@ import { Qwest } from "src/Models/Qwest";
 import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-component.component";
 import { takeUntil } from "rxjs/operators";
 import { GameSettings } from "../GameSettings";
-import { NgxMasonryComponent } from "ngx-masonry";
 
 @Component({
   selector: "app-main-window",
@@ -26,7 +25,6 @@ export class MainWindowComponent implements OnInit {
 
   skillsGlobal$ = this.srv.skillsGlobal$;
   qwestsGlobal$ = this.srv.qwestsGlobal$;
-  masonryReload$ = new BehaviorSubject(null);
 
   currentCounterDone$ = this.srv.currentCounterDone$.asObservable();
   currentTask$ = this.srv.currentTask$.asObservable();
@@ -39,15 +37,6 @@ export class MainWindowComponent implements OnInit {
   lastGlobalBeforeSort: boolean;
   pers$ = this.srv.pers$.asObservable();
   qwickSortVals: sortArr[] = [];
-  public myOptions = {
-    horizontalOrder: true,
-    animations: "hide",
-    percentPosition: true,
-    itemSelector: ".ngx-masonry-item",
-  };
-
-  @ViewChild("masonrySkills", { static: false }) masonrySkills: NgxMasonryComponent;
-  @ViewChild("masonryQwests", { static: false }) masonryQwests: NgxMasonryComponent;
 
   constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, public gameSettings: GameSettings) {}
 
@@ -283,22 +272,7 @@ export class MainWindowComponent implements OnInit {
     this.unsubscribe$.complete();
   }
 
-  ngOnInit() {
-    this.masonryReload$.subscribe((q: NgxMasonryComponent) => {
-      if (q != null) {
-        q.reloadItems();
-        q.layout();
-      }
-    });
-  }
-
-  itemsLoaded(type: string) {
-    if (type == "skills") {
-      this.masonryReload$.next(this.masonrySkills);
-    } else if (type == "qwests") {
-      this.masonryReload$.next(this.masonryQwests);
-    }
-  }
+  ngOnInit() {}
 
   onLongPress(e) {
     this.srv.setCurInd(0);

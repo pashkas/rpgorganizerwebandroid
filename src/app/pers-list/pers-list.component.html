@@ -395,9 +395,47 @@
       <!-- Просмотр -->
       <div *ngIf="!isEditMode" class="pt-2 pb-4 w-100">
         <mat-tab-group mat-align-tabs="center" animationDuration="0ms" [(selectedIndex)]="this.srvSt.selInventoryList">
+          <mat-tab label="Достижения">
+            <!-- Достижения -->
+            <div class="p-3">
+              <div fxLayout="row" fxLayoutAlign="end center">
+                <button class="icon-small mr-2" mat-icon-button (click)="qwickAddReward('achive')">
+                  <img src="assets/icons/create.png" class="img-fluid" />
+                </button>
+              </div>
+              <div class="masonry-list">
+                <div class="masonry-item" *ngFor="let rev of pers.achievements">
+                  <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event, 'achive')" [ngClass]="{ revFade: !rev.isAviable }">
+                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
+                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+                      <div class="text-wrap py-2">
+                        {{ rev.name }}
+                      </div>
+                      <div class="py-1">
+                        <div *ngFor="let req of rev.reqStr">
+                          {{ req }}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
           <mat-tab label="Инвентарь">
             <!-- Инвентарь -->
             <div class="p-3">
+              <div fxLayout="row" fxLayoutAlign="end center" class="fade">
+                <button mat-button class="icon-small">
+                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                  <span>
+                    <span class="text-success">{{ pers.gold | floor }}</span>
+                  </span>
+                </button>
+                <button class="icon-small mr-2" mat-icon-button>
+                  <img src="assets/icons/create.png" class="img-fluid" />
+                </button>
+              </div>
               <div class="masonry-list">
                 <div class="masonry-item" *ngFor="let rev of pers.inventory">
                   <button mat-stroked-button class="w-100 h-100 revBtn">
@@ -415,17 +453,18 @@
               </div>
             </div>
           </mat-tab>
+
           <mat-tab label="Магазин">
             <!-- Магазин -->
             <div class="p-3">
               <div fxLayout="row" fxLayoutAlign="end center">
                 <button mat-button class="icon-small">
-                  <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
                   <span>
                     <span class="text-success">{{ pers.gold | floor }}</span>
                   </span>
                 </button>
-                <button class="icon-small mr-2" mat-icon-button (click)="qwickAddReward()">
+                <button class="icon-small mr-2" mat-icon-button (click)="qwickAddReward('shop')">
                   <img src="assets/icons/create.png" class="img-fluid" />
                 </button>
               </div>

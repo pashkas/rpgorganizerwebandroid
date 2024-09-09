@@ -9,7 +9,7 @@
         </mat-form-field>
       </div>
     </div>
-    <mat-form-field>
+    <mat-form-field *ngIf="!revForm.get('isReward').value">
       <mat-label>Редкость</mat-label>
       <mat-select formControlName="revProbCtrl">
         <mat-option *ngFor="let h of gameSettings.revProbs" [value]="h">
@@ -17,12 +17,11 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <div class="flex pb-3">
+    <div class="flex pb-3" *ngIf="!revForm.get('isReward').value">
       <form>
         <mat-chip-list selectable multiple>
           <mat-chip [selected]="revForm.controls.isLud.value" (change)="revForm.controls.isLud.setValue($event.checked)" (click)="toggleChip('isLud')"> Трофей </mat-chip>
           <mat-chip [selected]="revForm.controls.isShop.value" (change)="revForm.controls.isShop.setValue($event.checked)" (click)="toggleChip('isShop')"> Магазин </mat-chip>
-          <mat-chip [selected]="revForm.controls.isReward.value" (change)="revForm.controls.isReward.setValue($event.checked)" (click)="toggleChip('isReward')"> Награда </mat-chip>
           <mat-chip [selected]="revForm.controls.isArtefact.value" (change)="revForm.controls.isArtefact.setValue($event.checked)" (click)="toggleChip('isArtefact')"> Артефакт </mat-chip>
         </mat-chip-list>
       </form>

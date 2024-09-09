@@ -450,6 +450,15 @@ body {
 .ngx-masonry-item {
 }
 
+.main-masonry {
+}
+
+.main-masonry-item {
+  margin: 0 0 2px;
+  max-width: 100%;
+  max-height: 100%;
+}
+
 .masonry-img {
   height: 100%;
   width: 100%;
@@ -457,22 +466,27 @@ body {
 
 @media only screen and (min-width: 927px) {
   .masonry-list {
-    column-count: 4;
+    column-count: 6;
   }
 
   .masonry-list-galery {
-    column-count: 5;
+    column-count: 6;
   }
 
   .ngx-masonry-item {
     padding: 2px;
-    width: calc(100% / 7);
+    width: calc(100% / 7) - 2px;
+  }
+
+  .main-masonry {
+    column-count: 7;
+    column-gap: 2px;
   }
 }
 
 @media only screen and (max-width: 926px) and (min-width: 601px) {
   .masonry-list {
-    column-count: 3;
+    column-count: 4;
   }
 
   .masonry-list-galery {
@@ -481,13 +495,18 @@ body {
 
   .ngx-masonry-item {
     padding: 2px;
-    width: calc(100% / 5);
+    width: calc(100% / 5) - 2px;
+  }
+
+  .main-masonry {
+    column-count: 5;
+    column-gap: 2px;
   }
 }
 
 @media only screen and (max-width: 600px) {
   .masonry-list {
-    column-count: 2;
+    column-count: 3;
   }
 
   .masonry-list-galery {
@@ -497,6 +516,18 @@ body {
   .ngx-masonry-item {
     padding: 2px;
     width: calc(100% / 3);
+  }
+
+  .main-masonry {
+    column-count: 3;
+    column-gap: 2px;
+  }
+
+  .masonry-img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    max-height: 175px;
   }
 }
 
@@ -511,4 +542,8 @@ body {
 .revBtn {
   padding: 2px !important;
   line-height: 1.1em !important;
+}
+
+.revFade{
+  opacity: 0.55;
 }

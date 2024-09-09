@@ -79,6 +79,10 @@ export class PersService {
     this.pers$.value.rewards.push(rev);
   }
 
+  addAchive(rev: Reward): any {
+    this.pers$.value.achievements.push(rev);
+  }
+
   CasinoGold(tskExp: number) {
     this.pers$.value.gold += tskExp;
     // let gold = Math.round(tskExp * Math.random());
@@ -1240,14 +1244,15 @@ export class PersService {
   }
 
   recountRewards(prs: Pers) {
-    for (const r of prs.rewards) {
-      let notDoneReqs: string[] = [];
-
-      if (!r.reqvirements) {
-        r.reqvirements = [];
-      }
-
+    // Достижения
+    for (const r of prs.achievements) {
       if (r.isReward) {
+        if (!r.reqvirements) {
+          r.reqvirements = [];
+        }
+
+        let notDoneReqs: string[] = [];
+
         for (const req of r.reqvirements) {
           if (req.type == ReqItemType.persLvl) {
             reqCheck(prs.level, req, notDoneReqs);
@@ -1276,16 +1281,24 @@ export class PersService {
           r.isAviable = true;
           r.reqStr = [];
         }
-      } else {
-        if (r.isShop) {
-          if (Math.floor(prs.gold) >= r.cost) {
-            r.isAviable = true;
-          } else {
-            r.isAviable = false;
-          }
-        } else {
+      }
+    }
+    prs.achievements.sort((a, b) => -this.boolVCompare(a.isAviable, b.isAviable));
+
+    // Награды
+    for (const r of prs.rewards) {
+      if (!r.reqvirements) {
+        r.reqvirements = [];
+      }
+
+      if (r.isShop) {
+        if (Math.floor(prs.gold) >= r.cost) {
           r.isAviable = true;
+        } else {
+          r.isAviable = false;
         }
+      } else {
+        r.isAviable = true;
       }
     }
 
@@ -1296,6 +1309,8 @@ export class PersService {
       } else {
         req.isDone = true;
       }
+
+      req.progr = val / req.elVal;
     }
 
     function getReqStr(req: Reqvirement) {
@@ -2682,6 +2697,18 @@ export class PersService {
 
     if (!prs.qwests) {
       prs.qwests = [];
+    }
+
+    if (!prs.rewards) {
+      prs.rewards = [];
+    }
+
+    if (!prs.achievements) {
+      prs.achievements = [];
+    }
+
+    if (!prs.inventory) {
+      prs.inventory = [];
     }
 
     // Настройки

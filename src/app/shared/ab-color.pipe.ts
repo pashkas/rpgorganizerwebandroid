@@ -3,6 +3,7 @@ import { Task } from "src/Models/Task";
 
 @Pipe({
   name: "abColor",
+  pure: false
 })
 export class AbColorPipe implements PipeTransform {
   transform(tsk: Task, ...args: any[]): any {

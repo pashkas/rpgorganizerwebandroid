@@ -25,4 +25,6 @@ export class Reward {
 
   isAviable: boolean = false;
   revProbId: number;
+
+  progr: number;
 }

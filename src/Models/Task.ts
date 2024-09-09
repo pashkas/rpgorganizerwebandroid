@@ -17,6 +17,7 @@ export class Reqvirement {
   id: any = uuid();
   isDone?: boolean = false;
   type?: string;
+  progr?:number;
 }
 
 export class Task implements IImg {

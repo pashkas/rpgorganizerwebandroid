@@ -64,8 +64,8 @@
       <!-- Квесты masonry -->
       <ng-container *ngSwitchCase="'listQwest'">
         <div class="masonry-container">
-          <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('qwests')" #masonryQwests>
-            <div ngxMasonryItem class="ngx-masonry-item" *ngFor="let qwest of qwestsGlobal$ | async">
+          <div class="main-masonry">
+            <div class="main-masonry-item" *ngFor="let qwest of qwestsGlobal$ | async">
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(qwest.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img appImgBroken src="{{ qwest.img }}" class="masonry-img" />
@@ -85,7 +85,7 @@
                 </div>
               </button>
             </div>
-          </ngx-masonry>
+          </div>
         </div>
         <div></div>
       </ng-container>
@@ -93,8 +93,8 @@
       <!-- Наыки masonry -->
       <ng-container *ngSwitchCase="'listSkills'">
         <div class="masonry-container">
-          <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('skills')" #masonrySkills>
-            <div ngxMasonryItem class="ngx-masonry-item" *ngFor="let skill of skillsGlobal$ | async">
+          <div class="main-masonry">
+            <div class="main-masonry-item" *ngFor="let skill of skillsGlobal$ | async">
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img appImgBroken src="{{ skill.img }}" class="masonry-img" />
@@ -104,7 +104,7 @@
                 </div>
               </button>
             </div>
-          </ngx-masonry>
+          </div>
         </div>
         <div></div>
       </ng-container>
@@ -250,7 +250,7 @@
               [ngStyle]="{ 'object-fit': 'contain', height: '2.5em' }"
             />
           </button>
-          <button (click)="setSort(data.currentView)" mat-icon-button [ngClass]="{ disabled: (data.currentView == 'QwestsGlobal' || data.currentView == 'SkillTasks') }">
+          <button (click)="setSort(data.currentView)" mat-icon-button [ngClass]="{ disabled: data.currentView == 'QwestsGlobal' || data.currentView == 'SkillTasks' }">
             <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
           </button>
         </div>

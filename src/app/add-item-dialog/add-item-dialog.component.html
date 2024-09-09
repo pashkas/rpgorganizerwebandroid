@@ -1,18 +1,11 @@
 <h1 mat-dialog-title class="text-center">{{ data.header }}</h1>
 <div mat-dialog-content [ngClass]="{ 'cust-mat-dialog-content': isGallery }">
-  <div *ngIf="!isGallery">
+  <div *ngIf="!this.isGallery">
     <mat-form-field>
       <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.text" autocomplete="off" name="data.text" [placeholder]="lblTxt" />
     </mat-form-field>
   </div>
-  <!-- <ngx-masonry *ngIf="isGallery" class="row p-0">
-    <div ngxMasonryItem *ngFor="let gi of gallerryImages" class="col-lg-3 col-4 p-0">
-      <div style="cursor: pointer" class="w-100 h-100" (click)="chooseImg(gi)">
-        <img src="{{ gi }}" class="img-fluid w-100 h-100" [ngStyle]="{ 'object-fit': 'contain' }" />
-      </div>
-    </div>
-  </ngx-masonry> -->
-  <div *ngIf="isGallery" class="masonry-list-galery">
+  <div *ngIf="this.isGallery" class="masonry-list-galery">
     <div *ngFor="let gi of gallerryImages" class="masonry-item">
       <div style="cursor: pointer" class="w-100 h-100" (click)="chooseImg(gi)">
         <img src="{{ gi }}" class="img-fluid w-100 h-100" [ngStyle]="{ 'object-fit': 'contain' }" />
@@ -21,10 +14,13 @@
   </div>
 </div>
 <div mat-dialog-actions [align]="'end'">
-  <button *ngIf="data.isGallery" mat-flat-button (click)="gallery()" color="accent">
-    <ng-container *ngIf="isGallery; else isNoGallery"> Из интернета </ng-container>
-    <ng-template #isNoGallery> Галлерея </ng-template>
-  </button>
+  <ng-container *ngIf="this.isGallery">
+    <button mat-flat-button (click)="this.galleryForm.get('isGallery').setValue(true)" color="accent">Галлерея</button>
+    <button mat-flat-button (click)="this.galleryForm.get('isPers').setValue(true)" color="accent">Персонажи</button>
+    <button mat-flat-button (click)="this.galleryForm.get('isRev').setValue(true)" color="accent">Награды</button>
+    <button mat-flat-button (click)="this.galleryForm.get('isUrl').setValue(true)" color="accent">url</button>
+  </ng-container>
+    <button *ngIf="this.galleryForm.get('isUrl').value" mat-flat-button (click)="initForm()" color="accent">url</button>
   <button mat-button mat-dialog-close>Отмена</button>
   <button mat-button (click)="ok()">Ok</button>
   <!-- <button *ngIf="!data.time" mat-button [mat-dialog-close]="data.text">Ok</button> -->

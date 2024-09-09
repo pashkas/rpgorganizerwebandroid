@@ -103,7 +103,7 @@ export class PersListComponent implements OnInit {
   /**
    * Добавить награду.
    */
-  addNewRevard(r, event: MouseEvent) {
+  addNewRevard(r: Reward, event: MouseEvent, type?: string) {
     if (event != null) {
       event.stopPropagation();
     }
@@ -111,14 +111,20 @@ export class PersListComponent implements OnInit {
     let header, isEdit;
 
     if (r) {
-      header = "Редактировать трофей";
+      header = "Редактировать";
       isEdit = true;
     } else {
-      header = "Добавить трофей";
+      header = "Добавить";
       isEdit = false;
       r = new Reward();
       r.isArtefact = false;
       r.image = "assets/icons/tresure.png";
+    }
+
+    if (type == "achive") {
+      r.isReward = true;
+      r.isArtefact = true;
+      r.isShop = false;
     }
 
     this.srv.isDialogOpen = true;
@@ -131,12 +137,17 @@ export class PersListComponent implements OnInit {
     dialogRef.afterClosed().subscribe((rev) => {
       if (rev) {
         if (!isEdit) {
-          this.srv.AddRevard(rev);
+          if (type == "achive") {
+            this.srv.addAchive(rev);
+          } else {
+            this.srv.AddRevard(rev);
+          }
         }
 
         this.srv.recountRewards(this.srv.pers$.value);
       }
       this.srv.isDialogOpen = false;
+      this.srv.savePers(false);
     });
   }
 
@@ -493,8 +504,8 @@ export class PersListComponent implements OnInit {
     this.router.navigate(["pers/qwest", qwestId], { queryParams: { isQuick: true } });
   }
 
-  qwickAddReward() {
-    this.addNewRevard(null, null);
+  qwickAddReward(type: string) {
+    this.addNewRevard(null, null, type);
     this.srv.savePers(false);
   }
 }

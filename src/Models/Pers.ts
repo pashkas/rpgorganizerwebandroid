@@ -191,6 +191,8 @@ export class Pers {
   id: any;
   image: string = "assets/icons/link.webp";
   inventory: Reward[] = [];
+  rewards: Reward[] = [];
+  achievements: Reward[] = [];
   level: number = 0;
   name: string = "Хиро";
   nextRangLvl: number;
@@ -207,7 +209,6 @@ export class Pers {
     { val: 80, name: "Супергерой", img: "" },
     { val: 100, name: "Легенда", img: "" },
   ];
-  rewards: Reward[] = [];
   sellectedView: string = "навыки";
   story: "Обычный человек, который однажды раскрыл свое геройское предназначение...";
   tasks: Task[] = [];

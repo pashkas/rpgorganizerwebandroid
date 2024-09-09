@@ -1,6 +1,7 @@
 export interface ReqItem {
     elId: any;
     elName: string;
+    progr: number;
 }
 
 export enum ReqItemType {
