@@ -142,12 +142,12 @@ button:focus {
   background-color: white !important;
 }
 
-.abNextLevProgrPersList .mat-progress-bar-buffer {
-  background-color: transparent !important;
-}
-
 .abNextLevProgrPersList .mat-progress-bar-fill::after {
   background-color: #ffff5c !important;
+}
+
+.abNextLevProgrPersList .mat-progress-bar-buffer {
+  background-color: transparent !important;
 }
 
 .abNextLevProgrPersList defs {
@@ -413,8 +413,11 @@ body {
 }
 
 .changesImg {
-  max-height: 160px;
   object-fit: contain;
+  max-height: 256px;
+  aspect-ratio: 1/1;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .bigTextShrink {
@@ -436,21 +439,59 @@ body {
 .masonry-container {
   height: 100%;
   width: 100%;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding-left: 4px;
-  padding-right: 4px;
+  padding-right: 2px;
 }
 
 .masonry-item {
-  margin: 0 0 4px;
+  margin: 0 0 2px;
   max-width: 100%;
   max-height: 100%;
 }
 
 .ngx-masonry-item {
+  padding: 2px;
+  width: calc(100% / 3);
+}
+
+.ngx-masonry-item-plus {
+  padding: 2px;
+  width: calc(100% / 4);
+}
+
+.ngx-masonry-item-mid {
+  padding: 2px;
+  width: calc(100% / 5);
+}
+
+.ngx-masonry-item-big {
+  padding: 2px;
+  width: calc(100% / 8);
 }
 
 .main-masonry {
+}
+
+.main-masonry-small {
+  column-count: 3;
+  column-gap: 2px;
+}
+
+.main-masonry-small-plus {
+  column-count: 4;
+  column-gap: 2px;
+}
+
+.main-masonry-mid {
+  column-count: 6;
+  column-gap: 2px;
+}
+
+.main-masonry-big {
+  column-count: 8;
+  column-gap: 2px;
 }
 
 .main-masonry-item {
@@ -473,13 +514,8 @@ body {
     column-count: 6;
   }
 
-  .ngx-masonry-item {
-    padding: 2px;
-    width: calc(100% / 7) - 2px;
-  }
-
   .main-masonry {
-    column-count: 7;
+    column-count: 8;
     column-gap: 2px;
   }
 }
@@ -493,13 +529,8 @@ body {
     column-count: 4;
   }
 
-  .ngx-masonry-item {
-    padding: 2px;
-    width: calc(100% / 5) - 2px;
-  }
-
   .main-masonry {
-    column-count: 5;
+    column-count: 6;
     column-gap: 2px;
   }
 }
@@ -513,11 +544,6 @@ body {
     column-count: 3;
   }
 
-  .ngx-masonry-item {
-    padding: 2px;
-    width: calc(100% / 3);
-  }
-
   .main-masonry {
     column-count: 3;
     column-gap: 2px;
@@ -526,8 +552,8 @@ body {
   .masonry-img {
     height: 100%;
     width: 100%;
+    max-height: 160px;
     object-fit: contain;
-    max-height: 175px;
   }
 }
 
@@ -544,6 +570,22 @@ body {
   line-height: 1.1em !important;
 }
 
-.revFade{
+.revFade {
   opacity: 0.55;
+}
+
+.hp-bar {
+  margin-bottom: 2px;
+}
+
+.hp-bar .mat-progress-bar-fill::after {
+  background-color: pink !important;
+}
+
+.hp-bar .mat-progress-bar-buffer {
+  background-color: transparent !important;
+}
+
+.hp-bar defs {
+  display: none;
 }

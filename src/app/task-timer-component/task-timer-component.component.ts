@@ -76,7 +76,9 @@ export class TaskTimerComponentComponent implements OnInit {
     endTime += leftSeconds * 1000;
 
     // this.setCalendar(leftSeconds);
-    this.sheduleNotification(tsk, leftSeconds);
+    if (tsk.isAlarmEnable) {
+      this.sheduleNotification(tsk, leftSeconds);
+    }
 
     // Таймер
     this.timeLeft$ = timer(0, 1000).pipe(

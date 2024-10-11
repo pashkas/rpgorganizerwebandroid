@@ -1,5 +1,7 @@
 import { getExpResult } from "src/Models/getExpResult";
 import { GameSettings } from "../GameSettings";
+import { Pers } from "src/Models/Pers";
+import { Task } from "src/Models/Task";
 
 /**
  * Настройки игры в стиле Ера Водолея.
@@ -14,6 +16,7 @@ export class EraSettings extends GameSettings {
   abPointsPerLvl = 3;
   isOpenPersAtNewLevel = true;
   maxPersLevel: number = 50;
+  isHpEnabled: boolean = true;
 
   rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
 
@@ -39,36 +42,26 @@ export class EraSettings extends GameSettings {
 
   setTes() {}
 
-  abCost(curLvl: number, hardness: number): number {
+  abCost(curLvl: number, hardness: number, isPerk: boolean): number {
     return 1 * hardness;
-
-    // if (curLvl == 0) {
-    //   return this.maxAbilLvl * hardness;
-    // }
-
-    // return curLvl * hardness;
   }
 
-  abTotalCost(curLvl: number, hardness: number) {
-    return curLvl * hardness;
-
-    // if (curLvl == 0) {
-    //   return 0;
-    // }
-
-    // let v = curLvl - 1;
-
-    // return (this.maxAbilLvl + (v * (v + 1)) / 2) * hardness;
-  }
-
-  abChangeExp(curLvl: number, hardness: number): number {
+  abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
     return curLvl * hardness;
   }
 
-  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number): getExpResult {
+  abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
+    return curLvl * hardness;
+  }
+
+  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number): getExpResult {
+    if (persExpVal == null) {
+      persExpVal = classicalExpTotal;
+    }
+
     let result = new getExpResult();
 
-    result.exp = classicalExpTotal;
+    result.exp = persExpVal;
 
     let persLevel = 0;
     let expLvl = 0;
@@ -96,5 +89,49 @@ export class EraSettings extends GameSettings {
     }
 
     return result;
+  }
+
+  calculateHp(prs: Pers, prevLvl: number, curLvl: number) {
+    if (prs.hp == null) {
+      prs.hp = 100;
+    }
+    if (prs.maxHp == null) {
+      prs.maxHp = 100;
+    }
+    if (prs.hpProgr == null) {
+      prs.hpProgr = 100;
+    }
+
+    if (!this.isHpEnabled) {
+      prs.hp = 100;
+      prs.maxHp = 100;
+      prs.hpProgr = 100;
+
+      return;
+    }
+
+    prs.maxHp = (this.abPointsStart + prs.level * this.abPointsPerLvl) / 3;
+
+    if (curLvl > prevLvl) {
+      prs.hp = prs.maxHp;
+    }
+
+    if (prs.hp > prs.maxHp) {
+      prs.hp = prs.maxHp;
+    }
+
+    prs.hpProgr = (prs.hp / prs.maxHp) * 100;
+  }
+
+  changeExpClassical(tsk: Task, isDone: boolean, koef: number, prs: Pers) {
+    if (isDone) {
+      prs.expVal += 1 * koef;
+    } else {
+      if (this.isHpEnabled) {
+        prs.hp -= 1 * koef;
+      } else {
+        prs.expVal -= 1 * koef;
+      }
+    }
   }
 }

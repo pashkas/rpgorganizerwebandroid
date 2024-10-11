@@ -1,13 +1,13 @@
 .example-section {
-    display: flex;
-    align-content: center;
-    align-items: center;
-    height: 22px;
-    background: rgb(233, 232, 232);
+  display: flex;
+  align-content: center;
+  align-items: center;
+  height: 22px;
+  background: rgb(233, 232, 232);
 }
 
 .text-section {
-    position: absolute;
-    padding: 10px;
-    font-size: small;
+  position: absolute;
+  padding: 10px;
+  font-size: small;
 }

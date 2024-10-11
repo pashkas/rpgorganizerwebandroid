@@ -61,10 +61,44 @@
         <div></div>
       </ng-container>
 
+      <!-- Наыки masonry -->
+      <ng-container *ngSwitchCase="'listSkills'">
+        <div class="masonry-container">
+          <div class="{{ globalMasonryCls$ | async }}">
+            <div class="main-masonry-item" *ngFor="let skill of skillsGlobal$ | async">
+              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)">
+                <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+                  <img appImgBroken src="{{ skill.img }}" class="masonry-img" />
+                  <div class="text-wrap py-2">
+                    {{ skill.name }}
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="masonry-container">
+          <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('skills', $event)">
+            <div ngxMasonryItem class="{{ globalMasonryCls$ | async }}" *ngFor="let skill of skillsGlobal$ | async">
+              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)">
+                <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+                  <img appImgBroken src="{{ skill.img }}" class="masonry-img" />
+                  <div class="text-wrap py-2">
+                    {{ skill.name }}
+                  </div>
+                </div>
+              </button>
+            </div>
+          </ngx-masonry>
+        </div> -->
+
+        <div></div>
+      </ng-container>
+
       <!-- Квесты masonry -->
       <ng-container *ngSwitchCase="'listQwest'">
         <div class="masonry-container">
-          <div class="main-masonry">
+          <div class="{{ globalMasonryCls$ | async }}">
             <div class="main-masonry-item" *ngFor="let qwest of qwestsGlobal$ | async">
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(qwest.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
@@ -87,25 +121,31 @@
             </div>
           </div>
         </div>
-        <div></div>
-      </ng-container>
-
-      <!-- Наыки masonry -->
-      <ng-container *ngSwitchCase="'listSkills'">
-        <div class="masonry-container">
-          <div class="main-masonry">
-            <div class="main-masonry-item" *ngFor="let skill of skillsGlobal$ | async">
-              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)">
+        <!-- <div class="masonry-container">
+          <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('skills', $event)">
+            <div ngxMasonryItem class="{{ globalMasonryCls$ | async }}" *ngFor="let qwest of qwestsGlobal$ | async">
+              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(qwest.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ skill.img }}" class="masonry-img" />
+                  <img appImgBroken src="{{ qwest.img }}" class="masonry-img" />
                   <div class="text-wrap py-2">
-                    {{ skill.name }}
+                    {{ qwest.name }}
                   </div>
+                  <ng-container *ngIf="qwest.progressValue < 100; else isFullDone">
+                    <div class="py-0" class="w-100">
+                      <mat-progress-bar class="myprogr" color="accent" mode="determinate" value="{{ qwest.progressValue }}"> </mat-progress-bar>
+                    </div>
+                  </ng-container>
+                  <ng-template #isFullDone>
+                    <div class="py-0">
+                      <img src="assets/icons/star.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                    </div>
+                  </ng-template>
                 </div>
               </button>
             </div>
-          </div>
-        </div>
+          </ngx-masonry>
+        </div> -->
+
         <div></div>
       </ng-container>
 
@@ -152,9 +192,9 @@
             </a>
             <app-timer-counter [tsk]="data.currentTask"></app-timer-counter>
           </div>
-          <small *ngIf="data?.currentTask?.descr" class="text-center text-secondary mynote">
+          <!-- <small *ngIf="data?.currentTask?.descr" class="text-center text-secondary mynote">
             {{ data.currentTask.descr }}
-          </small>
+          </small> -->
           <small class="text-center" *ngIf="data?.currentTask?.plusToNames && data?.currentTask?.plusToNames?.length > 0">
             <ng-container *ngFor="let pl of data.currentTask.plusToNames; let i = index">
               <ng-container *ngIf="i > 0"> | </ng-container>
@@ -197,7 +237,7 @@
     </ng-container>
 
     <!-- + ': ' + data.pers.exp + '/' + + data.pers.nextExp -->
-    <app-progress-bar-num [text]="data.pers.name + ' (' + data.pers.rangName + ')' + ', уровень ' + data.pers.level" [val]="data.pers.progressValue"> </app-progress-bar-num>
+    <app-progress-bar-num [hp]="data.pers.hpProgr" [text]="data.pers.name + ' (' + data.pers.rangName + ')' + ', уровень ' + data.pers.level" [val]="data.pers.progressValue"> </app-progress-bar-num>
 
     <div fxLayout="row" fxLayoutAlign="space-between center" class="w-100 h-100 py-1" style="min-height: 120px">
       <!-- Кнопки -->

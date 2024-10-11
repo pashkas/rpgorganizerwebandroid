@@ -51,6 +51,7 @@ export class Task implements IImg {
   // Таймер/счетчик
   isCounter: boolean = false;
   isCounterEnable: boolean = false;
+  isAlarmEnable: boolean = false;
   isDone: boolean = false;
   isEven = false;
   isHard: boolean = false;

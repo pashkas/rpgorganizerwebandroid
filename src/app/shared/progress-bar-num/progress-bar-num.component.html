@@ -4,12 +4,12 @@
   <div class="text-section text-center w-100"> {{text}} </div>
 </section> -->
 
-<section class="example-section">
-  <div [style.width]="val + '%'" class="progress-bar h-100"
-    [ngStyle]="{'background-color': 'LightGreen'}">
-  </div>
-  <div class="text-section text-center w-100">
-    {{text}}
-  </div>
-</section>
-
+<div>
+  <mat-progress-bar *ngIf="settings.isHpEnabled" class="hp-bar" mode="determinate" value="{{ hp }}"></mat-progress-bar>
+  <section class="example-section">
+    <div [style.width]="val + '%'" class="progress-bar h-100" [ngStyle]="{ 'background-color': 'LightGreen' }"></div>
+    <div class="text-section text-center w-100">
+      {{ text }}
+    </div>
+  </section>
+</div>

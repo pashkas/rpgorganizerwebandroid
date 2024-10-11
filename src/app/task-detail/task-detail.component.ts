@@ -25,36 +25,33 @@ import { GameSettings } from "../GameSettings";
 export class TaskDetailComponent implements OnInit {
   private unsubscribe$ = new Subject();
 
-  isShowAbProgrTable;
-  isClassical;
-  percSymbol;
+  aimUnits = [{ name: "Минут" }, { name: "Секунд" }, { name: "Часов" }, { name: "Раз" }, { name: "Раз чет" }, { name: "Раз нечет" }];
   charactCntrl: FormControl;
   charactGroup: FormGroup;
+  @ViewChild("goUp", { static: false }) goUp: ElementRef;
   hardnesGroup = new FormGroup({
     hardnesControl: new FormControl(1),
   });
-  @ViewChild("goUp", { static: false }) goUp: ElementRef;
-  isEditMode: boolean = false;
-  isQuick: any;
-  isFromMain: any;
-  linkQwests: Qwest[] = [];
-  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
-  pers: Pers;
-  requrenses: string[] = Task.requrenses;
-  times = [1, 2, 3, 4, 5];
   hardneses = [
     { val: 0.5, name: "Легко" },
     { val: 1, name: "Норм" },
     { val: 2, name: "Сложно" },
   ];
+  isClassical;
+  isEditMode: boolean = false;
+  isFromMain: any;
+  isQuick: any;
+  isShowAbProgrTable;
+  linkQwests: Qwest[] = [];
+  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
+  percSymbol;
+  pers: Pers;
+  requrenses: string[] = Task.requrenses;
+  times = [1, 2, 3, 4, 5];
   tsk: Task;
   tskAbility: Ability;
   tskCharact$ = new BehaviorSubject<Characteristic>(undefined);
   weekDays: string[] = Task.weekDays;
-  aimUnits = [{ name: "Минут" }, { name: "Секунд" }, { name: "Часов" }, { name: "Раз" }, { name: "Раз чет" }, { name: "Раз нечет" }];
-  trackByIdx(index: number, name: any): any {
-    return name;
-  }
 
   constructor(
     private location: Location,
@@ -74,10 +71,6 @@ export class TaskDetailComponent implements OnInit {
     this.charactGroup = fb.group({
       charact: this.charactCntrl,
     });
-  }
-
-  setTskHardness(val: number) {
-    this.tsk.hardnes = val;
   }
 
   /**
@@ -250,7 +243,7 @@ export class TaskDetailComponent implements OnInit {
     this.route.queryParams.subscribe((queryParams: any) => {
       this.isQuick = queryParams.isQuick;
       this.isFromMain = queryParams.isFromMain;
-      if (queryParams.isActivate) {
+      if (queryParams.isActivate == true) {
         this.isEditMode = true;
       }
       if (this.isQuick && !queryParams.isActivate) {
@@ -347,6 +340,10 @@ export class TaskDetailComponent implements OnInit {
     this.tsk.isSumStates = !this.tsk.isSumStates;
   }
 
+  setTskHardness(val: number) {
+    this.tsk.hardnes = val;
+  }
+
   setWeekDays(wd) {
     let idx = this.tsk.tskWeekDays.indexOf(wd);
 
@@ -355,6 +352,10 @@ export class TaskDetailComponent implements OnInit {
     } else {
       this.tsk.tskWeekDays.splice(idx, 1);
     }
+  }
+
+  trackByIdx(index: number, name: any): any {
+    return name;
   }
 
   /**

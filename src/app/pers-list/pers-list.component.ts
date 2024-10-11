@@ -186,15 +186,17 @@ export class PersListComponent implements OnInit {
    * @param id Идентификатор.
    */
   delAbil(id: string) {
+    this.srv.checkAllDelReq(id);
     this.srv.delAbil(id);
   }
 
   /**
    * Удаляем характеристику.
-   * @param uuid Идентификатор.
+   * @param id Идентификатор.
    */
-  delCharact(uuid) {
-    this.srv.DeleteCharact(uuid);
+  delCharact(id) {
+    this.srv.checkAllDelReq(id);
+    this.srv.DeleteCharact(id);
   }
 
   /**
@@ -202,6 +204,7 @@ export class PersListComponent implements OnInit {
    * @param id Идентификатор квеста.
    */
   delQwest(id: string) {
+    this.srv.checkAllDelReq(id);
     this.srv.delQwest(id);
   }
 
@@ -377,6 +380,11 @@ export class PersListComponent implements OnInit {
       this.pers.lastTaskId = null;
       this.pers.isOffline = true;
       this.pers.gold = 0;
+      this.pers.expVal = 0;
+      this.pers.hp = 100;
+      this.pers.maxHp = 100;
+      this.pers.hpProgr = 100;
+
       this.pers.characteristics.forEach((cha) => {
         cha.abilities.forEach((ab) => {
           ab.isOpen = false;

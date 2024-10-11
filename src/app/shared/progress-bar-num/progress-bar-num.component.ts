@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
+import { GameSettings } from 'src/app/GameSettings';
 
 @Component({
   selector: 'app-progress-bar-num',
@@ -9,10 +10,10 @@ import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core
 export class ProgressBarNumComponent implements OnInit {
   @Input() text: Text;
   @Input() val: number;
+  @Input() hp: number;
 
-  constructor() { }
+  constructor(public settings: GameSettings) { }
 
   ngOnInit() {
   }
-
 }

@@ -6,21 +6,30 @@ import { GameSettings } from "../GameSettings";
  */
 export class TesSettings extends GameSettings {
   isClassicaRPG = false;
+  isAbPointsEnabled = false;
   maxAbilLvl = 10;
   maxChaLvl = 10;
-  isAbPointsEnabled = true;
-  abPointsStart = 5;
-  abPointsForLvl = 5;
-  abPointsPerLvl = 1;
   isOpenPersAtNewLevel = true;
+
+  changesPopupDuration = 3000;
+  changesPopupDurationAbil = 6000;
+  changesPopupDurationCha = 6000;
+  changesPopupDurationQwest = 3000;
+  changesIsShowAbLevels = true;
+  changesIsShowAbValues = false;
+  isShowAbLvlPopup = false;
+  changesIsChowChaLevels = true;
+  changesIsChowChaValues = false;
+  isShowChaLvlPopup = false;
+  changesIsShowExp = true;
 
   setTes() {}
 
   getTesChangeKoef(tesVal: number): number {
     let level = 1 + Math.floor(tesVal / 10.0);
 
-    let skillMult = 1;
-    let skillOffcet = 3 - skillMult;
+    let skillMult = 2;
+    let skillOffcet = 2 - skillMult;
 
     let result = level * skillMult + skillOffcet;
     result = Math.ceil(result);
@@ -28,18 +37,23 @@ export class TesSettings extends GameSettings {
     return 1 / result;
   }
 
-  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number): getExpResult {
+  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number): getExpResult {
     let startExp = 0;
     let persLevel = 0;
     let exp = 0;
     let nextExp = 0;
     let expDirect = 0;
-    let abMinCount = 20;
+    let minAbCount = 20;
+    let minAbValMax = minAbCount * this.maxAbilLvl;
 
-    abCount = abMinCount;
+    if (abCount < minAbCount) {
+      abCount = minAbCount;
+    }
+    if (totalAbValMax < minAbValMax) {
+      totalAbValMax = minAbValMax;
+    }
 
-    let max = this.maxPersLevel * this.abPointsForLvl;
-    let progress = totalAbLvl / max;
+    let progress = totalAbVal / totalAbValMax;
     exp = this.maxPersLevel * progress;
 
     expDirect = exp;

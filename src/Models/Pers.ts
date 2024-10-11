@@ -177,6 +177,10 @@ export class Pers {
   static maxLevel: number = 100;
   static rangLvls: number[] = [0, 20, 40, 60, 80, 100];
 
+  hp: number = 100;
+  maxHp: number = 100;
+  hpProgr: number = 100;
+
   mnstrCounter: number = 0;
   storyProgress: number = 0;
   characteristics: Characteristic[] = [];
@@ -188,6 +192,7 @@ export class Pers {
   isAutoPumping: boolean = false;
   dateLastUse: Date = new Date();
   exp: number = 0;
+  expVal: number = 0;
   id: any;
   image: string = "assets/icons/link.webp";
   inventory: Reward[] = [];

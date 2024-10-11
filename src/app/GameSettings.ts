@@ -1,6 +1,9 @@
+import { Pers } from "src/Models/Pers";
+import { Task } from "src/Models/Task";
 import { getExpResult } from "src/Models/getExpResult";
 
 export abstract class GameSettings {
+  isHardnessEnable: boolean = true;
   /**
    * Нужно набрать очков чтобы достичь уровень
    *
@@ -96,6 +99,7 @@ export abstract class GameSettings {
    * Классический режим РПГ.
    */
   isClassicaRPG: boolean = true;
+  isHpEnabled: boolean = false;
   /**
    * Новый навык открыт?
    */
@@ -104,6 +108,9 @@ export abstract class GameSettings {
    * Открывать навык при активации.
    */
   isOpenAbWhenActivate: boolean = true;
+  isOpenAbWhenUp: boolean = false;
+  isEditAbWhenActivate:boolean = true;
+
   /**
    * Открывать окно перса когда новый уровень?
    */
@@ -155,7 +162,7 @@ export abstract class GameSettings {
     { id: 2, name: "сложно", gold: 50 },
     { id: 1, name: "оч. сложно", gold: 100 },
   ];
-
+  rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
   revProbs: taskProb[] = [
     { id: 5, name: "оч. распространенный", prob: 3, gold: 25 },
     { id: 4, name: "распространенный", prob: 2, gold: 50 },
@@ -166,7 +173,9 @@ export abstract class GameSettings {
   /**
    * Число картинок скиллов.
    */
-  skiilImgNum: number = 134;
+  skillImgNum: number = 155;
+  tskOrderDefault: number = -1;
+
   /**
    * Максимальное значение очков в задаче.
    */
@@ -174,26 +183,58 @@ export abstract class GameSettings {
     return this.maxAbilLvl * 10 - this.minAbilLvl * 10 + 9.99;
   }
 
-  tskOrderDefault: number = -1;
+  abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
+    return 0;
+  }
 
   /**
    * Стоимость поднятия навыка
    */
-  abCost(curLvl: number, hardness: number): number {
+  abCost(curLvl: number, hardness: number, isPerk: boolean): number {
     return 1;
+  }
 
+  /**
+   * Сумма потраченных очков на навык.
+   */
+  abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
     if (curLvl == 0) {
-      return 10 * hardness;
+      return 0;
     }
 
-    return curLvl * hardness;
+    let v = curLvl - 1;
+
+    return (10 + (v * (v + 1)) / 2) * hardness;
   }
 
-  abChangeExp(curLvl: number, hardness: number): number {
-    return 0;
+  calculateHp(prs: Pers, prevLvl: number, curLvl: number) {}
+
+  changeExpClassical(tsk: Task, isDone: boolean, koef: number, prs: Pers) {
+    if (tsk.classicalExp == null) {
+      tsk.classicalExp = 0;
+    }
+    if (isDone) {
+      tsk.classicalExp += 1 * koef;
+    } else {
+      tsk.classicalExp -= 1 * koef;
+    }
   }
 
-  rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
+  checkPerkTskValue(tsk: Task) {
+    return;
+  }
+
+  public getExpDiff(level: number, xp_for_first_level: number, xp_for_last_level: number, levels: number) {
+    let B = Math.log(xp_for_last_level / xp_for_first_level) / (levels - 1);
+    let A = xp_for_first_level / (Math.exp(B) - 1);
+
+    let old_exp = A * Math.exp(B * (level - 1));
+    let new_exp = A * Math.exp(B * level);
+
+    const diff = new_exp - old_exp;
+
+    return diff;
+  }
 
   getMonsterLevel(prsLvl: number, maxLevel: number): number {
     if (prsLvl < 20) {
@@ -213,19 +254,6 @@ export abstract class GameSettings {
     }
 
     return 6;
-  }
-
-  /**
-   * Сумма потраченных очков на навык.
-   */
-  abTotalCost(curLvl: number, hardness: number) {
-    if (curLvl == 0) {
-      return 0;
-    }
-
-    let v = curLvl - 1;
-
-    return (10 + (v * (v + 1)) / 2) * hardness;
   }
 
   /**
@@ -250,19 +278,6 @@ export abstract class GameSettings {
 
       return 1 / diff;
     }
-  }
-
-  public getExpDiff(level: number, xp_for_first_level: number, xp_for_last_level: number, levels: number) {
-
-    let B = Math.log(xp_for_last_level / xp_for_first_level) / (levels - 1);
-    let A = xp_for_first_level / (Math.exp(B) - 1);
-
-    let old_exp = A * Math.exp(B * (level - 1));
-    let new_exp = A * Math.exp(B * level);
-
-    const diff = new_exp - old_exp;
-
-    return diff;
   }
 
   setExpFormulaType(type: string) {
@@ -325,7 +340,7 @@ export abstract class GameSettings {
     this.isOpenPersAtNewLevel = true;
   }
 
-  abstract getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number): getExpResult;
+  abstract getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number): getExpResult;
 }
 
 export class qwestHardness {

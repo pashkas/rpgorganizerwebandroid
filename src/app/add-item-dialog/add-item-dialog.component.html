@@ -13,15 +13,15 @@
     </div>
   </div>
 </div>
-<div mat-dialog-actions [align]="'end'">
-  <ng-container *ngIf="this.isGallery">
-    <button mat-flat-button (click)="this.galleryForm.get('isGallery').setValue(true)" color="accent">Галлерея</button>
-    <button mat-flat-button (click)="this.galleryForm.get('isPers').setValue(true)" color="accent">Персонажи</button>
-    <button mat-flat-button (click)="this.galleryForm.get('isRev').setValue(true)" color="accent">Награды</button>
-    <button mat-flat-button (click)="this.galleryForm.get('isUrl').setValue(true)" color="accent">url</button>
-  </ng-container>
-    <button *ngIf="this.galleryForm.get('isUrl').value" mat-flat-button (click)="initForm()" color="accent">url</button>
+<div mat-dialog-actions [align]="'end'" [formGroup]="galleryForm" [ngClass]="{ 'cust-mat-actions': isGallery || galleryForm.get('isUrl').value }">
+  <mat-form-field *ngIf="isGallery || galleryForm.get('isUrl').value">
+    <mat-select formControlName="type">
+      <mat-option value="gallery">Галерея</mat-option>
+      <mat-option value="pers">Персонажи</mat-option>
+      <mat-option value="reward">Награды</mat-option>
+      <mat-option value="url">Из интернета</mat-option>
+    </mat-select>
+  </mat-form-field>
   <button mat-button mat-dialog-close>Отмена</button>
   <button mat-button (click)="ok()">Ok</button>
-  <!-- <button *ngIf="!data.time" mat-button [mat-dialog-close]="data.text">Ok</button> -->
 </div>

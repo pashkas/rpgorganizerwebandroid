@@ -21,6 +21,7 @@ export class AddItemDialogComponent implements OnInit {
     isPers: new FormControl(true),
     isRev: new FormControl(false),
     isUrl: new FormControl(false),
+    type: new FormControl(),
   });
 
   constructor(@Inject(MAT_DIALOG_DATA) public data, public dialogRef: MatDialogRef<AddItemDialogComponent>, public gameSettings: GameSettings) {}
@@ -30,75 +31,67 @@ export class AddItemDialogComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.galleryForm.get("type").valueChanges.subscribe((q) => {
+      switch (q) {
+        case "gallery":
+          let galeryImg = [];
+          for (let i = 1; i <= this.gameSettings.skillImgNum; i++) {
+            let ss = "000" + i;
+            ss = ss.substr(ss.length - 3);
+            galeryImg.push("assets/img/Gallery/" + ss + ".webp");
+          }
+          this.gallerryImages = galeryImg;
+          this.isGallery = true;
+          break;
+        case "pers":
+          let persImg = [];
+          for (let i = 1; i <= this.gameSettings.persImgNum; i++) {
+            let ss = "000" + i;
+            ss = ss.substr(ss.length - 3);
+            persImg.push("assets/img/Perses/" + ss + ".webp");
+          }
+          this.gallerryImages = persImg;
+          this.isGallery = true;
+          break;
+        case "reward":
+          let revImg = [];
+          for (let i = 1; i <= 44; i++) {
+            let ss = "000" + i;
+            ss = ss.substr(ss.length - 3);
+            revImg.push("assets/img/Revards/" + ss + ".webp");
+          }
+          this.gallerryImages = revImg;
+          this.isGallery = true;
+          break;
+        case "url":
+          this.gallerryImages = [];
+          this.lblTxt = "url";
+          this.isGallery = false;
+          break;
+      }
+    });
+
     this.galleryForm.get("isGallery").valueChanges.subscribe((q) => {
       if (q) {
-        this.galleryForm.patchValue({
-          isRev: false,
-          isPers: false,
-          isUrl: false,
-        });
-
-        let img = [];
-        for (let i = 1; i <= this.gameSettings.skiilImgNum; i++) {
-          let ss = "000" + i;
-          ss = ss.substr(ss.length - 3);
-          img.push("assets/img/Gallery/" + ss + ".webp");
-        }
-        this.gallerryImages = img;
-
-        this.isGallery = true;
+        this.galleryForm.patchValue({ type: "gallery" });
       }
     });
 
     this.galleryForm.get("isPers").valueChanges.subscribe((q) => {
       if (q) {
-        this.galleryForm.patchValue({
-          isRev: false,
-          isQwest: false,
-          isUrl: false,
-        });
-
-        let img = [];
-        for (let i = 1; i <= this.gameSettings.persImgNum; i++) {
-          let ss = "000" + i;
-          ss = ss.substr(ss.length - 3);
-          img.push("assets/img/Perses/" + ss + ".webp");
-        }
-        this.gallerryImages = img;
-        this.isGallery = true;
+        this.galleryForm.patchValue({ type: "pers" });
       }
     });
 
     this.galleryForm.get("isRev").valueChanges.subscribe((q) => {
       if (q) {
-        this.galleryForm.patchValue({
-          isPers: false,
-          isQwest: false,
-          isUrl: false,
-        });
-
-        let img = [];
-        for (let i = 1; i <= 44; i++) {
-          let ss = "000" + i;
-          ss = ss.substr(ss.length - 3);
-          img.push("assets/img/Revards/" + ss + ".webp");
-        }
-        this.gallerryImages = img;
-        this.isGallery = true;
+        this.galleryForm.patchValue({ type: "reward" });
       }
     });
 
     this.galleryForm.get("isUrl").valueChanges.subscribe((q) => {
       if (q) {
-        this.galleryForm.patchValue({
-          isPers: false,
-          isQwest: false,
-          isRev: false,
-        });
-
-        this.gallerryImages = [];
-        this.lblTxt = "url";
-        this.isGallery = false;
+        this.galleryForm.patchValue({ type: "url" });
       }
     });
 

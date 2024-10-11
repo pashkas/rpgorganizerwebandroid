@@ -23,10 +23,10 @@ export class PerschangesService {
     return JSON.parse(JSON.stringify(pers));
   }
   getChSort(ch: ChangesModel): number {
-    let sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp"];
+    let sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp", "hp"];
 
     if (!this.gameSettings.isClassicaRPG) {
-      sort = ["exp", "qwest", "abil", "abLvl", "cha", "chaLvl"];
+      sort = ["exp", "qwest", "abil", "abLvl", "cha", "chaLvl", "hp"];
     }
 
     const idx = sort.findIndex((q) => q == ch.type);
@@ -63,6 +63,12 @@ export class PerschangesService {
 
     Object.keys(changesMap).forEach((n) => {
       const el = changesMap[n];
+      // HP
+      if (el.type == "hp") {
+        if (el.after < el.before) {
+          changes.push(new ChangesModel("HP", "hp", el.before, el.after, 0, this.afterPers.maxHp, null));
+        }
+      }
       // Квесты
       if (el.type == "qwest") {
         // Квест выполнен
@@ -505,6 +511,14 @@ export class PerschangesService {
       changesMap["exp"] = this.getChItem("exp", "exp", null);
     }
     changesMap["exp"][chType] = prs.exp;
+
+    // HP
+    if (this.gameSettings.isHpEnabled) {
+      if (!changesMap["hp"]) {
+        changesMap["hp"] = this.getChItem("hp", "hp", null);
+      }
+      changesMap["hp"][chType] = prs.hp;
+    }
 
     // Навыки
     prs.characteristics.forEach((ch) => {

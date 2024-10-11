@@ -61,22 +61,23 @@
         {{ tsk.date | datestring }}
       </div>
 
-      <!-- Поднять навык -->
-      <!-- Понизить навык -->
-      <button *ngIf="tsk.requrense != 'нет' && tskAbility?.isOpen && !gameSettings.isClassicaRPG" class="icon-small" mat-icon-button (click)="downAbil()">
-        <img src="assets/icons/down.png" class="img-fluid" />
-      </button>
-      <!-- Количество очков -->
-      <div *ngIf="tsk.requrense != 'нет' && this.gameSettings.isAbPointsEnabled && pers.ON > 0">
-        <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }">
-          <img src="assets/icons/diamond.png" class="img-fluid px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-          {{ this.pers.ON }}
-        </span>
+      <div *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)" style="display: flex; gap: 10px">
+        <!-- Понизить навык -->
+        <button *ngIf="tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
+          <img src="assets/icons/down.png" class="img-fluid" />
+        </button>
+        <!-- Поднять навык -->
+        <button *ngIf="tsk.mayUp == true" class="icon-small" mat-icon-button (click)="upAbil()">
+          <img src="assets/icons/up.png" class="img-fluid" />
+        </button>
+        <!-- Количество очков -->
+        <div *ngIf="this.gameSettings.isAbPointsEnabled && pers.ON > 0">
+          <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }">
+            <img src="assets/icons/diamond.png" class="img-fluid px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+            {{ this.pers.ON }}
+          </span>
+        </div>
       </div>
-      <!-- Поднять навык -->
-      <button *ngIf="tsk.requrense != 'нет' && tsk.mayUp == true" class="icon-small" mat-icon-button (click)="upAbil()">
-        <img src="assets/icons/up.png" class="img-fluid" />
-      </button>
     </div>
 
     <!-- Описание -->
@@ -120,12 +121,12 @@
     <br />
     <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
       <div
-        *ngIf="st && i != 0 && i >= this.gameSettings.minAbilLvl && isShowAbProgrTable"
+        *ngIf="st && i != 0 && i >= this.gameSettings.minAbilLvl && isShowAbProgrTable && (!tsk.isPerk || i == this.gameSettings.maxAbilLvl)"
         class="text-center px-0 py-0 border-0 abLelelsDescr"
         [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }"
       >
         <b>
-          <ng-container *ngIf="isShowAbProgrTable">
+          <ng-container *ngIf="isShowAbProgrTable && !tsk.isPerk">
             {{ i + percSymbol + ": " }}
           </ng-container> </b
         >{{ st }}
@@ -156,7 +157,7 @@
         </mat-select>
       </mat-form-field>
       <!-- Сложность -->
-      <mat-form-field [formGroup]="hardnesGroup" *ngIf="this.gameSettings.isClassicaRPG == true" style="flex-shrink: 2">
+      <mat-form-field [formGroup]="hardnesGroup" *ngIf="this.gameSettings.isisHardnessEnable == true" style="flex-shrink: 2">
         <mat-select formControlName="hardnesControl" panelClass="panel-override">
           <mat-option *ngFor="let a of hardneses" [value]="a.val">
             {{ a.name }}
@@ -170,11 +171,11 @@
     </div>
 
     <!-- Описание -->
-    <!-- <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px">
+    <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="10px">
       <mat-form-field>
         <textarea matInput autosize minRows="1" maxRows="5" useImportant="true" onfocus="this.select()" autocomplete="off" placeholder="Описание" [(ngModel)]="tsk.descr" name="tsk.descr"></textarea>
       </mat-form-field>
-    </div> -->
+    </div>
 
     <!-- Дата, повторение -->
     <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
@@ -241,7 +242,8 @@
           <input onfocus="this.pers" matInput autocomplete="off" placeholder="Постфикс" [(ngModel)]="tsk.postfix" name="tsk.postfix" />
         </mat-form-field>
 
-        <mat-chip [selected]="tsk.isCounterEnable" color="accent" (click)="tsk.isCounterEnable = !tsk.isCounterEnable"> &nbsp;✓&nbsp; </mat-chip>
+        <mat-chip [selected]="tsk.isCounterEnable" color="accent" (click)="tsk.isCounterEnable = !tsk.isCounterEnable"> <mat-icon>done</mat-icon> </mat-chip>
+        <mat-chip [selected]="tsk.isAlarmEnable" color="accent" (click)="tsk.isAlarmEnable = !tsk.isAlarmEnable"> <mat-icon>alarm</mat-icon> </mat-chip>
       </div>
     </ng-container>
 

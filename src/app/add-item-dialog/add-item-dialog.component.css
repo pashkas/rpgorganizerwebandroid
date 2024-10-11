@@ -2,3 +2,7 @@
     padding-left: 4px;
     padding-right: 4px;
 }
+
+.cust-mat-actions{
+    flex-wrap: nowrap;
+}
