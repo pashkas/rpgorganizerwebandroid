@@ -149,7 +149,7 @@ export abstract class GameSettings {
   /**
    * Число картинок персонажей.
    */
-  persImgNum: number = 51;
+  persImgNum: number = 54;
   /**
    * Плюс к прогрессу для задания в задаче.
    *
@@ -173,7 +173,7 @@ export abstract class GameSettings {
   /**
    * Число картинок скиллов.
    */
-  skillImgNum: number = 155;
+  skillImgNum: number = 161;
   tskOrderDefault: number = -1;
 
   /**

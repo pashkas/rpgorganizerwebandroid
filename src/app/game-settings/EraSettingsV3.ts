@@ -6,13 +6,13 @@ import { Task } from "src/Models/Task";
  * Настройки игры в стиле Ера Водолея.
  */
 export class EraSettingsV3 extends EraSettings {
-  maxAbilLvl = 10;
   minAbilLvl = 1;
+  maxAbilLvl = 5;
   minChaLvl = 1;
-  maxChaLvl = 10;
-  maxPersLevel: number = 100;
-  abPointsStart = 5;
-  abPointsPerLvl = 5;
+  maxChaLvl = 5;
+  maxPersLevel: number = 50;
+  abPointsStart = 3;
+  abPointsPerLvl = 3;
   isHardnessEnable = false;
 
   isOpenAbWhenActivate: boolean = false;
@@ -27,7 +27,7 @@ export class EraSettingsV3 extends EraSettings {
 
   abCost(curLvl: number, hardness: number, isPerk: boolean): number {
     if (isPerk) {
-      return this.maxAbilLvl * hardness;
+      return 3;
     }
 
     return 1 * hardness;
@@ -35,7 +35,7 @@ export class EraSettingsV3 extends EraSettings {
 
   abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
     if (isPerk && curLvl > 0) {
-      curLvl = this.maxAbilLvl;
+      return 3;
     }
 
     return curLvl * hardness;
@@ -43,7 +43,7 @@ export class EraSettingsV3 extends EraSettings {
 
   abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
     if (isPerk) {
-      curLvl = this.maxAbilLvl;
+      return 3;
     }
 
     return curLvl * hardness;

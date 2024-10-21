@@ -105,15 +105,7 @@ export class PerschangesService {
         // Изменение уровня
         if (el.after != el.before && el.after <= this.gameSettings.maxChaLvl && el.after > this.gameSettings.minChaLvl) {
           if (this.gameSettings.changesIsChowChaLevels) {
-            let chaChanges = new ChangesModel(
-              el.name,
-              "cha",
-              this.moreThenThero(el.before - this.gameSettings.minChaLvl),
-              this.moreThenThero(el.after - this.gameSettings.minChaLvl),
-              0,
-              this.gameSettings.maxChaLvl - this.gameSettings.minChaLvl,
-              el.img
-            );
+            let chaChanges = new ChangesModel(el.name, "cha", this.moreThenThero(el.before), this.moreThenThero(el.after), this.gameSettings.minChaLvl, this.gameSettings.maxChaLvl, el.img);
             chaChanges.lvl = el.after;
             changes.push(chaChanges);
           }
@@ -174,15 +166,7 @@ export class PerschangesService {
         } else {
           // Иземенение уровня
           if (this.gameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= this.gameSettings.maxAbilLvl) {
-            let abChanges = new ChangesModel(
-              el.name,
-              "abil",
-              this.moreThenThero(el.before - this.gameSettings.minAbilLvl),
-              this.moreThenThero(el.after - this.gameSettings.minAbilLvl),
-              0,
-              this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl,
-              el.img
-            );
+            let abChanges = new ChangesModel(el.name, "abil", this.moreThenThero(el.before), this.moreThenThero(el.after), this.gameSettings.minAbilLvl, this.gameSettings.maxAbilLvl, el.img);
 
             abChanges.lvl = el.after;
             changes.push(abChanges);

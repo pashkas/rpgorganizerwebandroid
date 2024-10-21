@@ -53,19 +53,19 @@
         <a [routerLink]="['/pers/characteristic', charact.id]">{{ charact.name }}</a>
       </ng-container>
 
-      <div>
+      <div *ngIf="tskAbility">
         {{ tsk | requrence | titlecase }}
       </div>
 
-      <div>
+      <div *ngIf="tskAbility?.isOpen">
         {{ tsk.date | datestring }}
       </div>
 
       <div *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)" style="display: flex; gap: 10px">
         <!-- Понизить навык -->
-        <button *ngIf="tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
+        <!-- <button *ngIf="tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
           <img src="assets/icons/down.png" class="img-fluid" />
-        </button>
+        </button> -->
         <!-- Поднять навык -->
         <button *ngIf="tsk.mayUp == true" class="icon-small" mat-icon-button (click)="upAbil()">
           <img src="assets/icons/up.png" class="img-fluid" />

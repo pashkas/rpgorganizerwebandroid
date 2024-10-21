@@ -1513,10 +1513,12 @@ export class PersService {
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
-          // tsk.date = new Date();
           let tskDate: moment.Moment = moment(tsk.date);
           if (tskDate.isBefore(moment(new Date()), "d")) {
             tsk.date = new Date();
+            for (const st of tsk.states) {
+              st.isDone = false;
+            }
           }
         }
       }
@@ -1722,8 +1724,8 @@ export class PersService {
           //   ab.progressValue = 100;
           // }
 
-          abMax += (this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl) * tsk.hardnes;
-          abLvl += (tsk.value - this.gameSettings.minAbilLvl >= 0 ? tsk.value - this.gameSettings.minAbilLvl : 0) * tsk.hardnes;
+          abMax += this.gameSettings.maxAbilLvl * tsk.hardnes;
+          abLvl += tsk.value * tsk.hardnes;
 
           abValMax += this.gameSettings.tesMaxVal;
           tesAbCur += tsk.tesValue;
@@ -2106,15 +2108,14 @@ export class PersService {
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
-          let weekKoef = this.getWeekKoef(tsk.requrense, true, tsk.tskWeekDays);
-          let tskLvl = tsk.value;
+          let koef = this.getWeekKoef(tsk.requrense, true, tsk.tskWeekDays) * this.gameSettings.abChangeExp(tsk.value, tsk.hardnes, tsk.isPerk);
           let subTasksKoef = 1;
 
           if (tsk.isSumStates && tsk.states.length > 0) {
             subTasksKoef = tsk.states.filter((n) => n.isActive).length;
           }
 
-          tsk.plusExp = (baseGold * tskLvl * weekKoef) / subTasksKoef;
+          tsk.plusExp = (baseGold * koef) / subTasksKoef;
         }
       }
     }
@@ -2502,15 +2503,28 @@ export class PersService {
 
   tesTaskTittleCount(progr: number, aimVal: number, aimUnit: string, aimDone?: number, isEven?: boolean) {
     let av = this.getAimValueWithUnit(Math.abs(aimVal), aimUnit);
+    let end = av;
 
     let start = 0;
     if (aimVal > 0 && aimUnit != "State") {
       start = (av * this.gameSettings.minAbilLvl) / this.gameSettings.maxAbilLvl;
       start = this.checkEven(aimUnit, start);
       start = this.checkOdd(aimUnit, start);
-    }
 
-    let end = av;
+      if (start > 1) {
+        let steps = this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl;
+        if (steps < 1) {
+          steps = 1;
+        }
+
+        // Тут попробовать перенести все "остатки" в начало
+        let step = (end - start) / steps;
+        const fact = step * steps;
+        const floor = Math.floor(step) * steps;
+        let dots = fact - floor;
+        start += dots;
+      }
+    }
 
     let pr = start + progr * (end - start);
     let value = Math.round(pr);

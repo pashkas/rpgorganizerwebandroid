@@ -503,6 +503,7 @@ body {
 .masonry-img {
   height: 100%;
   width: 100%;
+  object-fit: contain;
 }
 
 @media only screen and (min-width: 927px) {
@@ -547,13 +548,6 @@ body {
   .main-masonry {
     column-count: 3;
     column-gap: 2px;
-  }
-
-  .masonry-img {
-    height: 100%;
-    width: 100%;
-    max-height: 160px;
-    object-fit: contain;
   }
 }
 
