@@ -150,6 +150,9 @@ export abstract class GameSettings {
    * Число картинок персонажей.
    */
   persImgNum: number = 54;
+
+  perkHardness: number = 0.5;
+
   /**
    * Плюс к прогрессу для задания в задаче.
    *

@@ -15,6 +15,7 @@ import { filter, switchMap, takeUntil } from "rxjs/operators";
 import { GameSettings } from "../GameSettings";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { NgxMasonryComponent } from "ngx-masonry";
+import { GlobalItem } from "src/Models/GlobalItem";
 
 @Component({
   selector: "app-main-window",
@@ -320,6 +321,23 @@ export class MainWindowComponent implements OnInit {
     this.srv.setCurInd(0);
   }
 
+  onMasonrySkillsLongPress(e, skill: GlobalItem) {
+    let tsk = this.srv.pers$.value.tasks[skill.tskIdx];
+    // Если есть таймер
+    if (tsk.aimTimer > 0 && !this.srv.isCounterAim(tsk)) {
+      this.srv.currentTask$.next(tsk);
+      this.openTaskTimer(skill.tskIdx);
+    }
+    // Если есть счетчик
+    else if (tsk.isCounterEnable) {
+      this.clickCounter(tsk);
+    }
+    // Просто открываем, если ничего
+    else {
+      this.tskClick(skill.tskIdx);
+    }
+  }
+
   onSwipeLeft(ev) {
     this.prevTask();
   }
@@ -353,7 +371,7 @@ export class MainWindowComponent implements OnInit {
     }
   }
 
-  openTaskTimer() {
+  openTaskTimer(tskIdx?: number) {
     let dialogRef = this.dialog.open(TaskTimerComponentComponent, {
       disableClose: true,
       panelClass: "backdrop-timer",
@@ -366,12 +384,14 @@ export class MainWindowComponent implements OnInit {
       .subscribe((n) => {
         let diffSecconds = n / 1000;
         let current = this.srv.currentTask$.value;
+        let isDone = false;
         if (current.parrentTask) {
           let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.parrentTask].item;
           let st: taskState = this.srv.allMap[this.srv.currentTask$.value.id].item;
           let tt: number = tsk.secondsToDone - diffSecconds;
-          if (tt < 0) {
+          if (tt <= 0) {
             tt = 0;
+            isDone = true;
           }
 
           if (tt > tsk.secondsToDone) {
@@ -383,8 +403,9 @@ export class MainWindowComponent implements OnInit {
         } else {
           let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
           let tt: number = tsk.secondsToDone - diffSecconds;
-          if (tt < 0) {
+          if (tt <= 0) {
             tt = 0;
+            isDone = true;
           }
 
           if (tt > tsk.secondsToDone) {
@@ -395,7 +416,11 @@ export class MainWindowComponent implements OnInit {
           tsk.secondsDone = n / 1000;
         }
 
-        this.srv.savePers(false);
+        if (tskIdx != null && isDone) {
+          this.tskClick(tskIdx);
+        } else {
+          this.srv.savePers(false);
+        }
       });
   }
 

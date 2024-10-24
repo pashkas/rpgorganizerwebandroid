@@ -836,6 +836,12 @@ export class PersService {
       gl.tskId = tsk.id;
       gl.tskIdx = i;
       gl.name = ab.name;
+      if (tsk.counterDone > 0) {
+        gl.name += ` (${tsk.counterDone}✓)`;
+      }
+      if (tsk.secondsDone > 0) {
+        gl.name += ` (${this.getAimString(Math.floor(tsk.secondsDone), tsk.aimUnit, tsk.prefix)})`;
+      }
 
       if (map.get(ab.id) == null) {
         map.set(ab.id, gl);
@@ -1595,7 +1601,7 @@ export class PersService {
           this.gameSettings.checkPerkTskValue(tsk);
           if (!this.gameSettings.isHardnessEnable) {
             if (tsk.isPerk) {
-              tsk.hardnes = 0.5;
+              tsk.hardnes = this.gameSettings.perkHardness;
             } else {
               tsk.hardnes = 1;
             }

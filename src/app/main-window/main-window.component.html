@@ -66,7 +66,9 @@
         <div class="masonry-container">
           <div class="{{ globalMasonryCls$ | async }}">
             <div class="main-masonry-item" *ngFor="let skill of skillsGlobal$ | async">
-              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)">
+              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)"
+            (press)="onMasonrySkillsLongPress($event, skill)"
+              >
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img appImgBroken src="{{ skill.img }}" class="masonry-img" />
                   <div class="text-wrap py-2">

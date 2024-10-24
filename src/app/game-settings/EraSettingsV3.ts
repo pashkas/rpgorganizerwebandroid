@@ -18,6 +18,7 @@ export class EraSettingsV3 extends EraSettings {
   isOpenAbWhenActivate: boolean = false;
   isOpenAbWhenUp: boolean = false;
   isEditAbWhenActivate: boolean = false;
+  perkHardness: number = 0.6;
 
   checkPerkTskValue(tsk: Task) {
     if (tsk.isPerk && tsk.value > 0) {
@@ -27,7 +28,7 @@ export class EraSettingsV3 extends EraSettings {
 
   abCost(curLvl: number, hardness: number, isPerk: boolean): number {
     if (isPerk) {
-      return 3;
+      curLvl = this.maxAbilLvl;
     }
 
     return 1 * hardness;
@@ -35,7 +36,7 @@ export class EraSettingsV3 extends EraSettings {
 
   abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
     if (isPerk && curLvl > 0) {
-      return 3;
+      curLvl = this.maxAbilLvl;
     }
 
     return curLvl * hardness;
@@ -43,7 +44,7 @@ export class EraSettingsV3 extends EraSettings {
 
   abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
     if (isPerk) {
-      return 3;
+      curLvl = this.maxAbilLvl;
     }
 
     return curLvl * hardness;
