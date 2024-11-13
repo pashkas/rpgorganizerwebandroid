@@ -109,7 +109,7 @@ export abstract class GameSettings {
    */
   isOpenAbWhenActivate: boolean = true;
   isOpenAbWhenUp: boolean = false;
-  isEditAbWhenActivate:boolean = true;
+  isEditAbWhenActivate: boolean = true;
 
   /**
    * Открывать окно перса когда новый уровень?
@@ -149,7 +149,7 @@ export abstract class GameSettings {
   /**
    * Число картинок персонажей.
    */
-  persImgNum: number = 54;
+  persImgNum: number = 56;
 
   perkHardness: number = 0.5;
 
@@ -184,6 +184,15 @@ export abstract class GameSettings {
    */
   get tesMaxVal(): number {
     return this.maxAbilLvl * 10 - this.minAbilLvl * 10 + 9.99;
+  }
+
+  getPersRangName(persLvl): string {
+    let persRang = Math.floor(persLvl / 10);
+    if (persRang > this.rangNames.length - 1) {
+      persRang = this.rangNames.length - 1;
+    }
+
+    return this.rangNames[persRang];
   }
 
   abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {

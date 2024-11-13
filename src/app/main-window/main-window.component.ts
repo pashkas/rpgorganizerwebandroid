@@ -30,6 +30,7 @@ export class MainWindowComponent implements OnInit {
   currentTask$ = this.srv.currentTask$.asObservable();
   currentView$ = this.srv.currentView$.asObservable();
   globalMasonryCls$: Observable<string>;
+  globalMasonryClsNGX$: Observable<string>;
   isFailShown$ = new BehaviorSubject<boolean>(false);
   isFailShownOv$ = new BehaviorSubject<boolean>(false);
   isSort: boolean = false;
@@ -303,6 +304,31 @@ export class MainWindowComponent implements OnInit {
           cls += "-mid";
         } else if (screen.breakpoints["(max-width: 600px)"]) {
           cls += "-small";
+          // if (view == curpersview.QwestsGlobal && qwests.length >= 12) {
+          //   cls += "-plus";
+          // }
+
+          // if (view == curpersview.SkillsGlobal && skills.length >= 12) {
+          //   cls += "-plus";
+          // }
+        }
+
+        return of(cls);
+      })
+    );
+
+    this.globalMasonryClsNGX$ = combineLatest([screenObservable, qwestObservable, skillsObservable, viewObservable]).pipe(
+      switchMap(([screen, qwests, skills, view]) => {
+        let cls = "ngx-masonry-item";
+
+        if (screen.breakpoints["(min-width: 927px)"]) {
+          // большой
+          cls += "-big";
+        } else if (screen.breakpoints["(max-width: 926px) and (min-width: 601px)"]) {
+          // средний
+          cls += "-mid";
+        } else if (screen.breakpoints["(max-width: 600px)"]) {
+          // cls += "-small";
           // if (view == curpersview.QwestsGlobal && qwests.length >= 12) {
           //   cls += "-plus";
           // }

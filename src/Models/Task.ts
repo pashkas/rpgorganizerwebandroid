@@ -25,6 +25,7 @@ export class Task implements IImg {
   static requrenses: string[] = ["будни", "выходные", "ежедневно", "дни недели", "через 1 день", "через 2 дня", "через 3 дня", "нет"];
   static weekDays: string[] = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
 
+  notActive: boolean = false;
   IsNextLvlSame: boolean;
   aimCounter: number = 0;
   aimTimer: number = 0;

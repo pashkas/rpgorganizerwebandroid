@@ -7,10 +7,10 @@ import { Task } from "src/Models/Task";
  */
 export class EraSettingsV3 extends EraSettings {
   minAbilLvl = 1;
-  maxAbilLvl = 5;
+  maxAbilLvl = 10;
   minChaLvl = 1;
-  maxChaLvl = 5;
-  maxPersLevel: number = 50;
+  maxChaLvl = 10;
+  maxPersLevel: number = 100;
   abPointsStart = 3;
   abPointsPerLvl = 3;
   isHardnessEnable = false;
@@ -28,7 +28,7 @@ export class EraSettingsV3 extends EraSettings {
 
   abCost(curLvl: number, hardness: number, isPerk: boolean): number {
     if (isPerk) {
-      curLvl = this.maxAbilLvl;
+      return this.maxAbilLvl * hardness;
     }
 
     return 1 * hardness;
@@ -65,7 +65,7 @@ export class EraSettingsV3 extends EraSettings {
     while (true) {
       result.startExp = expLvl;
 
-      let cur = this.abPointsPerLvl * (persLevel + 1) * Math.pow(1.0333, persLevel);
+      let cur = this.abPointsPerLvl * (persLevel + 1) * Math.pow(1.01618, persLevel);
 
       expLvl += cur;
 
@@ -81,5 +81,31 @@ export class EraSettingsV3 extends EraSettings {
     }
 
     return result;
+  }
+
+  getMonsterLevel(prsLvl: number, maxLevel: number): number {
+    if (prsLvl < 10) {
+      return 1;
+    }
+    if (prsLvl < 30) {
+      return 2;
+    }
+    if (prsLvl < 50) {
+      return 3;
+    }
+    if (prsLvl < 70) {
+      return 4;
+    }
+    if (prsLvl < 90) {
+      return 5;
+    }
+
+    return 6;
+  }
+
+  getPersRangName(persLvl): string {
+    let rngIdx = this.getMonsterLevel(persLvl, this.maxPersLevel);
+
+    return this.rangNames[rngIdx - 1];
   }
 }

@@ -63,36 +63,34 @@
 
       <!-- Наыки masonry -->
       <ng-container *ngSwitchCase="'listSkills'">
-        <div class="masonry-container">
+        <!-- <div class="masonry-container">
           <div class="{{ globalMasonryCls$ | async }}">
             <div class="main-masonry-item" *ngFor="let skill of skillsGlobal$ | async">
-              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)"
-            (press)="onMasonrySkillsLongPress($event, skill)"
-              >
+              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ skill.img }}" class="masonry-img" />
-                  <div class="text-wrap py-2">
+                  <img appImgBroken src="{{ skill.img }}" class="masonry-img global-skill-img" />
+                  <div class="text-wrap py-1">
                     {{ skill.name }}
                   </div>
                 </div>
               </button>
             </div>
           </div>
-        </div>
-        <!-- <div class="masonry-container">
+        </div> -->
+        <div class="masonry-container">
           <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('skills', $event)">
-            <div ngxMasonryItem class="{{ globalMasonryCls$ | async }}" *ngFor="let skill of skillsGlobal$ | async">
+            <div ngxMasonryItem class="{{ globalMasonryClsNGX$ | async }}" *ngFor="let skill of skillsGlobal$ | async">
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ skill.img }}" class="masonry-img" />
-                  <div class="text-wrap py-2">
+                  <img appImgBroken src="{{ skill.img }}" class="masonry-img global-skill-img" />
+                  <div class="text-wrap py-1">
                     {{ skill.name }}
                   </div>
                 </div>
               </button>
             </div>
           </ngx-masonry>
-        </div> -->
+        </div>
 
         <div></div>
       </ng-container>
@@ -105,7 +103,7 @@
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(qwest.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img appImgBroken src="{{ qwest.img }}" class="masonry-img" />
-                  <div class="text-wrap py-2">
+                  <div class="text-wrap py-1">
                     {{ qwest.name }}
                   </div>
                   <ng-container *ngIf="qwest.progressValue < 100; else isFullDone">

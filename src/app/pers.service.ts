@@ -1753,11 +1753,15 @@ export class PersService {
           const rng = new Rangse();
 
           if (ab.isOpen == false) {
-            rng.name = "";
+            rng.name = "-";
           } else {
             rng.name = tsk.value + "";
             if (this.gameSettings.changesIsShowPercentageInAb) {
               rng.name += "%";
+            }
+
+            if(tsk.isPerk){
+              rng.name = "⭐";
             }
           }
 
@@ -2133,11 +2137,7 @@ export class PersService {
     }
 
     // Ранг
-    let persRang = Math.floor(prs.level / 10);
-    if (persRang > this.gameSettings.rangNames.length - 1) {
-      persRang = this.gameSettings.rangNames.length - 1;
-    }
-    prs.rangName = this.gameSettings.rangNames[persRang];
+    prs.rangName = this.gameSettings.getPersRangName(prs.level);
 
     // HP
     this.gameSettings.calculateHp(prs, prevPersLevel, prs.level);
@@ -2407,6 +2407,15 @@ export class PersService {
         tsk.failCounter = 0;
       }
 
+      // Счетчик обновлений стейтов
+      if (tsk.isStateRefresh) {
+        if (tsk.refreshCounter == null || tsk.refreshCounter == undefined) {
+          tsk.refreshCounter = 0;
+        } else {
+          tsk.refreshCounter++;
+        }
+      }
+
       // Следующая дата
       this.setTaskNextDate(tsk, false);
       this.setStatesNotDone(tsk);
@@ -2516,6 +2525,10 @@ export class PersService {
       start = (av * this.gameSettings.minAbilLvl) / this.gameSettings.maxAbilLvl;
       start = this.checkEven(aimUnit, start);
       start = this.checkOdd(aimUnit, start);
+
+      if (start < 1) {
+        start = 1;
+      }
 
       if (start > 1) {
         let steps = this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl;
@@ -3195,6 +3208,11 @@ export class PersService {
     stT.counterToDone = tsk.counterToDone;
     stT.descr = tsk.descr;
     stT.isAlarmEnable = tsk.isAlarmEnable;
+    if (st.isActive == false) {
+      stT.notActive = true;
+    } else {
+      stT.notActive = false;
+    }
 
     let plusName = tsk.curLvlDescr3;
     if (tsk.requrense == "нет") {
