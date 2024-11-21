@@ -332,7 +332,6 @@ export class MainWindowComponent implements OnInit {
           // if (view == curpersview.QwestsGlobal && qwests.length >= 12) {
           //   cls += "-plus";
           // }
-
           // if (view == curpersview.SkillsGlobal && skills.length >= 12) {
           //   cls += "-plus";
           // }
@@ -347,20 +346,15 @@ export class MainWindowComponent implements OnInit {
     this.srv.setCurInd(0);
   }
 
-  onMasonrySkillsLongPress(e, skill: GlobalItem) {
-    let tsk = this.srv.pers$.value.tasks[skill.tskIdx];
+  onMasonrySkillsLongPress(tsk: Task) {
     // Если есть таймер
     if (tsk.aimTimer > 0 && !this.srv.isCounterAim(tsk)) {
       this.srv.currentTask$.next(tsk);
-      this.openTaskTimer(skill.tskIdx);
+      this.openTaskTimer();
     }
     // Если есть счетчик
     else if (tsk.isCounterEnable) {
       this.clickCounter(tsk);
-    }
-    // Просто открываем, если ничего
-    else {
-      this.tskClick(skill.tskIdx);
     }
   }
 

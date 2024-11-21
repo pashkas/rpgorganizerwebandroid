@@ -158,7 +158,7 @@
             [ngStyle]="{ 'object-fit': 'contain' }"
             src="{{ 'assets/img/' + data.currentTask.imageLvl + '/' + data.currentTask.image + '.webp' }}"
             (contextmenu)="$event.preventDefault()"
-            (press)="onLongPress($event)"
+            (press)="onMasonrySkillsLongPress(data.currentTask)"
             (dblclick)="firstOrGlobal(data.currentTask)"
             (swipeup)="done(data.currentTask)"
             (swipedown)="fail(data.currentTask)"

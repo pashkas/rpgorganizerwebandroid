@@ -18,7 +18,7 @@ export class EraSettingsV3 extends EraSettings {
   isOpenAbWhenActivate: boolean = false;
   isOpenAbWhenUp: boolean = false;
   isEditAbWhenActivate: boolean = false;
-  perkHardness: number = 0.6;
+  perkHardness: number = 0.3;
 
   checkPerkTskValue(tsk: Task) {
     if (tsk.isPerk && tsk.value > 0) {
