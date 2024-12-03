@@ -5,7 +5,6 @@ export class EraSettingsV2 extends EraSettings {
   maxPersLevel: number = 100;
   abPointsStart = 5;
   abPointsPerLvl = 5;
-  changesIsChowChaLevels: boolean = false;
 
   getMonsterLevel(prsLvl: number, maxLevel: number): number {
     if (prsLvl < 20) {

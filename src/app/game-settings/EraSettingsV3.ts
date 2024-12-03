@@ -15,6 +15,8 @@ export class EraSettingsV3 extends EraSettings {
   abPointsPerLvl = 3;
   isHardnessEnable = false;
 
+  isOpenPersAtNewLevel: boolean = false;
+
   isOpenAbWhenActivate: boolean = false;
   isOpenAbWhenUp: boolean = false;
   isEditAbWhenActivate: boolean = false;

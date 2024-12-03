@@ -65,14 +65,14 @@ export abstract class GameSettings {
   /**
    * Длительность показа попапа с изменениями.
    */
-  changesPopupDuration: number = 4000;
-  changesPopupDurationAbil: number = 5000;
-  changesPopupDurationCha: number = 5000;
-  changesPopupDurationNewLevel: number = 5000;
+  changesPopupDuration: number = 3000;
+  changesPopupDurationAbil: number = 3000;
+  changesPopupDurationCha: number = 3000;
+  changesPopupDurationNewLevel: number = 3000;
   /**
    * Длительность попапа изменений квестов.
    */
-  changesPopupDurationQwest: number = 4000;
+  changesPopupDurationQwest: number = 3000;
   /**
    * Тип расчета опыта. (dynamic, abLvl, abLvlPoints, abValPoints)
    */

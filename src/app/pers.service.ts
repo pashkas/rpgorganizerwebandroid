@@ -176,48 +176,19 @@ export class PersService {
         return -this.boolVCompare(a.isOpen, b.isOpen);
       }
 
-      if (this.gameSettings.isClassicaRPG) {
-        // Можно открыть
-        if (this.boolVCompare(aTask.mayUp, bTask.mayUp) != 0) {
-          return -this.boolVCompare(aTask.mayUp, bTask.mayUp);
-        }
+      // Значение
+      if (a.progressValue != b.progressValue) {
+        return a.progressValue - b.progressValue;
+      }
 
-        if (aTask.mayUp && bTask.mayUp) {
-          // Одинаковые
-          if (this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame) != 0) {
-            return -this.boolVCompare(aTask.IsNextLvlSame, bTask.IsNextLvlSame);
-          }
+      // Перк?
+      if (this.boolVCompare(aTask.isPerk, bTask.isPerk) != 0) {
+        return this.boolVCompare(aTask.isPerk, bTask.isPerk);
+      }
 
-          // Значение
-          if (a.progressValue != b.progressValue) {
-            return a.progressValue - b.progressValue;
-          }
-        } else {
-          // Значение
-          if (a.progressValue != b.progressValue) {
-            return -(a.progressValue - b.progressValue);
-          }
-        }
-
-        // Перк?
-        if (this.boolVCompare(aTask.isPerk, bTask.isPerk) != 0) {
-          return this.boolVCompare(aTask.isPerk, bTask.isPerk);
-        }
-
-        // Сложность
-        if (aTask.hardnes != bTask.hardnes) {
-          return aTask.hardnes - bTask.hardnes;
-        }
-      } else {
-        // Значение
-        if (aTask.tesValue != bTask.tesValue) {
-          return aTask.tesValue - bTask.tesValue;
-        }
-
-        // Можно открыть
-        if (this.boolVCompare(aTask.mayUp, bTask.mayUp) != 0) {
-          return -this.boolVCompare(aTask.mayUp, bTask.mayUp);
-        }
+      // Сложность
+      if (aTask.hardnes != bTask.hardnes) {
+        return aTask.hardnes - bTask.hardnes;
       }
 
       return a.name.localeCompare(b.name);
@@ -359,29 +330,14 @@ export class PersService {
         if (this.boolVCompare(a.anyMayUp, b.anyMayUp) != 0) {
           return -this.boolVCompare(a.anyMayUp, b.anyMayUp);
         }
+      }
 
-        const hasSameLvl = this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
-        if (hasSameLvl) {
-          return -hasSameLvl;
-        }
+      if (a.value != b.value) {
+        return a.value - b.value;
+      }
 
-        if (a.anyMayUp == true && b.anyMayUp == true) {
-          if (a.value != b.value) {
-            return a.value - b.value;
-          }
-        } else {
-          if (a.value != b.value) {
-            return -(a.value - b.value);
-          }
-        }
-      } else {
-        if (a.value != b.value) {
-          return a.value - b.value;
-        }
-
-        if (a.progressValue != b.progressValue) {
-          return a.progressValue - b.progressValue;
-        }
+      if (a.progressValue != b.progressValue) {
+        return a.progressValue - b.progressValue;
       }
 
       return a.name.localeCompare(b.name);
@@ -1760,7 +1716,7 @@ export class PersService {
               rng.name += "%";
             }
 
-            if(tsk.isPerk){
+            if (tsk.isPerk) {
               rng.name = "⭐";
             }
           }
@@ -2525,12 +2481,16 @@ export class PersService {
       start = (av * this.gameSettings.minAbilLvl) / this.gameSettings.maxAbilLvl;
       start = this.checkEven(aimUnit, start);
       start = this.checkOdd(aimUnit, start);
+      let isOdd = aimUnit == "Раз чет";
 
       if (start < 1) {
         start = 1;
       }
+      if (isOdd && start < 2) {
+        start = 2;
+      }
 
-      if (start > 1) {
+      if ((!isOdd && start > 1) || (isOdd && start > 2)) {
         let steps = this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl;
         if (steps < 1) {
           steps = 1;
