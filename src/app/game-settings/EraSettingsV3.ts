@@ -7,10 +7,10 @@ import { Task } from "src/Models/Task";
  */
 export class EraSettingsV3 extends EraSettings {
   minAbilLvl = 1;
-  maxAbilLvl = 10;
+  maxAbilLvl = 5;
   minChaLvl = 1;
-  maxChaLvl = 10;
-  maxPersLevel: number = 100;
+  maxChaLvl = 5;
+  maxPersLevel: number = 50;
   abPointsStart = 3;
   abPointsPerLvl = 3;
   isHardnessEnable = false;
@@ -20,7 +20,7 @@ export class EraSettingsV3 extends EraSettings {
   isOpenAbWhenActivate: boolean = false;
   isOpenAbWhenUp: boolean = false;
   isEditAbWhenActivate: boolean = false;
-  perkHardness: number = 0.3;
+  perkHardness: number = 3/5;
 
   checkPerkTskValue(tsk: Task) {
     if (tsk.isPerk && tsk.value > 0) {
@@ -67,7 +67,7 @@ export class EraSettingsV3 extends EraSettings {
     while (true) {
       result.startExp = expLvl;
 
-      let cur = this.abPointsPerLvl * (persLevel + 1) * Math.pow(1.01618, persLevel);
+      let cur = this.abPointsPerLvl * (persLevel + 1) * Math.pow(1.02288, persLevel);
 
       expLvl += cur;
 
@@ -89,16 +89,16 @@ export class EraSettingsV3 extends EraSettings {
     if (prsLvl < 10) {
       return 1;
     }
-    if (prsLvl < 30) {
+    if (prsLvl < 20) {
       return 2;
     }
-    if (prsLvl < 50) {
+    if (prsLvl < 30) {
       return 3;
     }
-    if (prsLvl < 70) {
+    if (prsLvl < 40) {
       return 4;
     }
-    if (prsLvl < 90) {
+    if (prsLvl < 50) {
       return 5;
     }
 
