@@ -73,19 +73,19 @@ export class UserService {
       );
   }
 
-  syncDownload():Observable<any> {
+  syncDownload(): Observable<any> {
     return this.loadPers(this.srv.pers$.value.userId)
       .pipe(take(1))
       .pipe(
         tap((n) => {
           let prs: Pers = n as Pers;
-          prs.currentView = curpersview.SkillTasks;
+          prs.currentView = curpersview.SkillsGlobal;
           this.srv.savePers(false, null, prs);
         })
       );
   }
 
-  syncUpload(): Observable<any>{
+  syncUpload(): Observable<any> {
     this.srv.savePers(false);
     let prs = this.srv.pers$.value;
     const persJson = JSON.parse(JSON.stringify(prs));

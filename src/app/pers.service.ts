@@ -2117,6 +2117,15 @@ export class PersService {
       this.savePers(false);
     }
 
+    // Только задачи навыка, если он
+    if (prs.currentView == curpersview.SkillTasks && prs.tasks != null) {
+      if (prs.currentTask != null) {
+        prs.tasks = prs.tasks.filter((q) => q.parrentTask == prs.currentTask.parrentTask);
+      } else {
+        prs.tasks = prs.tasks.filter((q) => q.id == prs.currentTask.id);
+      }
+    }
+
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
 
@@ -2532,8 +2541,9 @@ export class PersService {
 
   private checkOdd(aimUnit: string, value: number) {
     if (aimUnit == "Раз нечет") {
-      if (value % 2 == 0) {
-        value = value + 1;
+      const floor = Math.floor(value);
+      if (floor % 2 == 0) {
+        value = floor + 1;
       }
     }
     return value;
@@ -2541,8 +2551,9 @@ export class PersService {
 
   private checkEven(aimUnit: string, value: number) {
     if (aimUnit == "Раз чет") {
-      if (value % 2 != 0) {
-        value = value + 1;
+      const floor = Math.floor(value);
+      if (floor % 2 != 0) {
+        value = floor + 1;
       }
     }
 

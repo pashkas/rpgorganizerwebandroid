@@ -18,8 +18,6 @@ export class MasonryPipe implements PipeTransform {
 
       dt.sort((a, b) => a.masonryIdx - b.masonryIdx);
 
-      debugger;
-
       return dt;
     }
 
