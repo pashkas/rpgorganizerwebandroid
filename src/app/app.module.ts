@@ -38,6 +38,7 @@ import { EraSettings } from "./game-settings/EraSettings";
 import { FloorPipe } from "./floor.pipe";
 import { EraSettingsV2 } from "./game-settings/EraSettingsV2";
 import { EraSettingsV3 } from "./game-settings/EraSettingsV3";
+import { EraSettingsV4 } from "./game-settings/EraSettingsV4";
 
 registerLocaleData(localeRu, "ru");
 
@@ -96,7 +97,7 @@ registerLocaleData(localeRu, "ru");
     },
     {
       provide: GameSettings,
-      useClass: EraSettingsV3,
+      useClass: EraSettingsV4,
     },
   ],
   bootstrap: [AppComponent],

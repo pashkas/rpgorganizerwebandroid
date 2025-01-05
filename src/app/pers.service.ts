@@ -2125,6 +2125,15 @@ export class PersService {
         prs.tasks = prs.tasks.filter((q) => q.id == prs.currentTask.id);
       }
     }
+    // Только задачи квеста, если он
+    if (prs.currentView == curpersview.QwestTasks && prs.tasks != null) {
+      if (prs.currentTask != null && prs.currentTask.qwestId != null) {
+        let qw = prs.qwests.find((q) => q.id == prs.currentTask.qwestId);
+        prs.tasks = qw.tasks.filter((q) => this.checkTask(q) && !q.isDone);
+      } else {
+        prs.tasks = prs.tasks.filter((q) => q.id == prs.currentTask.id);
+      }
+    }
 
     this.currentView$.next(prs.currentView);
     this.currentTask$.next(prs.currentTask);
@@ -3179,6 +3188,7 @@ export class PersService {
     stT.counterToDone = tsk.counterToDone;
     stT.descr = tsk.descr;
     stT.isAlarmEnable = tsk.isAlarmEnable;
+    stT.isCounterEnable = tsk.isCounterEnable;
     if (st.isActive == false) {
       stT.notActive = true;
     } else {

@@ -241,6 +241,26 @@ export class MainWindowComponent implements OnInit {
     this.srv.changesAfter(false, this.getAbImg(t), tsk);
   }
 
+  clickPreventSingleClick = false;
+  clickTimer: any;
+  clickDelay: Number;
+
+  masonrySingleClick(tskIdx: number) {
+    this.clickPreventSingleClick = false;
+    const clickDelay = 200;
+    this.clickTimer = setTimeout(() => {
+      if (!this.clickPreventSingleClick) {
+        this.tskClick(tskIdx);
+      }
+    }, clickDelay);
+  }
+
+  masonryDoubleClick() {
+    this.clickPreventSingleClick = true;
+    clearTimeout(this.clickTimer);
+    this.firstOrGlobal();
+  }
+
   firstOrGlobal() {
     if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
       this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
@@ -347,15 +367,16 @@ export class MainWindowComponent implements OnInit {
   }
 
   onMasonrySkillsLongPress(tsk: Task) {
-    // Если есть таймер
-    if (tsk.aimTimer > 0 && !this.srv.isCounterAim(tsk)) {
-      this.srv.currentTask$.next(tsk);
-      this.openTaskTimer();
-    }
-    // Если есть счетчик
-    else if (tsk.isCounterEnable) {
-      this.clickCounter(tsk);
-    }
+    this.tskClick(0);
+    // // Если есть таймер
+    // if (tsk.aimTimer > 0 && !this.srv.isCounterAim(tsk)) {
+    //   this.srv.currentTask$.next(tsk);
+    //   this.openTaskTimer();
+    // }
+    // // Если есть счетчик
+    // else if (tsk.isCounterEnable) {
+    //   this.clickCounter(tsk);
+    // }
   }
 
   onSwipeLeft(ev) {
