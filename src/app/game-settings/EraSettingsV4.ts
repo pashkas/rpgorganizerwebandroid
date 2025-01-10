@@ -14,6 +14,7 @@ export class EraSettingsV4 extends EraSettings {
   abPointsStart = 0;
   abPointsPerLvl = 5;
   isHardnessEnable = false;
+  isHpEnabled = false;
 
   isOpenPersAtNewLevel: boolean = false;
 

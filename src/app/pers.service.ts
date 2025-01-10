@@ -1471,7 +1471,9 @@ export class PersService {
     const prs = this.pers$.value;
     prs.isRest = false;
     prs.hp = prs.maxHp;
-    prs.expVal = prs.prevExp;
+    if (this.gameSettings.isHpEnabled) {
+      prs.expVal = prs.prevExp;
+    }
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
