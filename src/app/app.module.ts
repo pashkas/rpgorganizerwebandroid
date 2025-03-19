@@ -97,7 +97,7 @@ registerLocaleData(localeRu, "ru");
     },
     {
       provide: GameSettings,
-      useClass: EraSettingsV4,
+      useClass: TesSettings,
     },
   ],
   bootstrap: [AppComponent],

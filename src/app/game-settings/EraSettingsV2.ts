@@ -40,7 +40,7 @@ export class EraSettingsV2 extends EraSettings {
     return this.abTotalCost(curLvl, hardness,  isPerk);
   }
 
-  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number): getExpResult {
+  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number, abOpenned: number): getExpResult {
     if (persExpVal == null) {
       persExpVal = classicalExpTotal;
     }

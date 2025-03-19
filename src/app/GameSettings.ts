@@ -352,7 +352,7 @@ export abstract class GameSettings {
     this.isOpenPersAtNewLevel = true;
   }
 
-  abstract getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number): getExpResult;
+  abstract getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number, abOpenned: number): getExpResult;
 }
 
 export class qwestHardness {

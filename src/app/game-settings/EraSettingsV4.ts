@@ -34,11 +34,7 @@ export class EraSettingsV4 extends EraSettings {
       return 5;
     }
 
-    if (curLvl == 0) {
-      return 5;
-    }
-
-    return curLvl;
+    return curLvl + 1;
   }
 
   abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
@@ -50,14 +46,14 @@ export class EraSettingsV4 extends EraSettings {
       return 5;
     }
 
-    return 5 + ((curLvl - 1) * curLvl) / 2;
+    return ((curLvl + 1) * curLvl) / 2;
   }
 
   abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
     return this.abTotalCost(curLvl, hardness, isPerk);
   }
 
-  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number): getExpResult {
+  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number, abOpenned: number): getExpResult {
     if (persExpVal == null) {
       persExpVal = classicalExpTotal;
     }
@@ -72,7 +68,8 @@ export class EraSettingsV4 extends EraSettings {
     while (true) {
       result.startExp = expLvl;
 
-      let e = 1 + (persLevel - 1) * 0.033333;
+      // let e = 1 + (persLevel - 1) * 0.033333;
+      let e = 2;
       // Math.pow(1.02288, persLevel)
       let cur = this.abPointsPerLvl * persLevel * e;
 
@@ -93,13 +90,13 @@ export class EraSettingsV4 extends EraSettings {
   }
 
   getMonsterLevel(prsLvl: number, maxLevel: number): number {
-    if (prsLvl < 20) {
+    if (prsLvl < 10) {
       return 1;
     }
-    if (prsLvl < 40) {
+    if (prsLvl < 30) {
       return 2;
     }
-    if (prsLvl < 60) {
+    if (prsLvl < 50) {
       return 3;
     }
     if (prsLvl < 80) {

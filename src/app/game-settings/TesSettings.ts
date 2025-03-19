@@ -5,22 +5,28 @@ import { GameSettings } from "../GameSettings";
  * Настройки игры в стиле TES.
  */
 export class TesSettings extends GameSettings {
+  isHardnessEnable: boolean = false;
   isClassicaRPG = false;
-  isAbPointsEnabled = false;
+  perkHardness: number = 1;
+
+  isAbPointsEnabled = true;
+  abPointsStart = 3;
+  abPointsPerLvl = 1;
+
   maxAbilLvl = 10;
   maxChaLvl = 10;
   isOpenPersAtNewLevel = true;
 
   changesPopupDuration = 3000;
-  changesPopupDurationAbil = 6000;
-  changesPopupDurationCha = 6000;
-  changesPopupDurationQwest = 3000;
-  changesIsShowAbLevels = true;
-  changesIsShowAbValues = false;
-  isShowAbLvlPopup = false;
-  changesIsChowChaLevels = true;
-  changesIsChowChaValues = false;
-  isShowChaLvlPopup = false;
+  changesPopupDurationAbil = 4000;
+  changesPopupDurationCha = 4000;
+  changesPopupDurationQwest = 4000;
+  changesIsShowAbValues = true;
+  changesIsShowAbLevels = false;
+  isShowAbLvlPopup = true;
+  changesIsChowChaLevels = false;
+  changesIsChowChaValues = true;
+  isShowChaLvlPopup = true;
   changesIsShowExp = true;
 
   setTes() {}
@@ -37,24 +43,25 @@ export class TesSettings extends GameSettings {
     return 1 / result;
   }
 
-  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number): getExpResult {
+  getPersExpAndLevel(
+    totalAbVal: number,
+    abCount: number,
+    expPoints: number,
+    totalAbValMax: number,
+    totalAbLvl: number,
+    classicalExpTotal: number,
+    persExpVal: number,
+    abOpenned: number
+  ): getExpResult {
     let startExp = 0;
     let persLevel = 0;
     let exp = 0;
     let nextExp = 0;
     let expDirect = 0;
-    let minAbCount = 20;
-    let minAbValMax = minAbCount * this.maxAbilLvl;
 
-    if (abCount < minAbCount) {
-      abCount = minAbCount;
-    }
-    if (totalAbValMax < minAbValMax) {
-      totalAbValMax = minAbValMax;
-    }
-
-    let progress = totalAbVal / totalAbValMax;
-    exp = this.maxPersLevel * progress;
+    // 1 уровень за 3 очка
+    let progress = totalAbLvl / 300;
+    exp = 1 + this.maxPersLevel * progress;
 
     expDirect = exp;
     persLevel = Math.floor(exp);

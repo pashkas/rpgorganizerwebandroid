@@ -473,6 +473,14 @@ export class PersService {
       if (weekDay === 1 || weekDay === 2 || weekDay === 3 || weekDay === 4 || weekDay === 5) {
         return true;
       }
+    } else if (requrense === "кроме субботы") {
+      if (weekDay === 1 || weekDay === 2 || weekDay === 3 || weekDay === 4 || weekDay === 5 || weekDay === 0) {
+        return true;
+      }
+    } else if (requrense === "кроме воскресенья") {
+      if (weekDay === 1 || weekDay === 2 || weekDay === 3 || weekDay === 4 || weekDay === 5 || weekDay === 6) {
+        return true;
+      }
     } else if (requrense === "выходные") {
       if (weekDay === 6 || weekDay === 0) {
         return true;
@@ -1179,7 +1187,7 @@ export class PersService {
   getWeekKoef(requrense: string, isPlus: boolean, weekDays: string[]): number {
     let base = 5.0;
 
-    if (requrense === "будни") {
+    if (requrense === "будни" || requrense === "кроме субботы" || requrense === "кроме воскресенья") {
       return 1;
     }
     if (requrense === "выходные") {
@@ -1256,7 +1264,13 @@ export class PersService {
       tsk.tesValue = 0;
     }
 
-    tsk.tesValue = Math.ceil(tsk.tesValue * 1000) / 1000;
+    // Округление до ближайшего целого, если значение на границе
+    let roundedValue = Math.round(tsk.tesValue);
+    let difference = Math.abs(tsk.tesValue - roundedValue);
+
+    if (difference != 0 && difference <= 0.005) {
+      tsk.tesValue = roundedValue;
+    }
 
     tsk.value = this.getAbVal(tsk.tesValue, ab.isOpen, tsk.value);
 
@@ -1688,8 +1702,15 @@ export class PersService {
           //   ab.progressValue = 100;
           // }
 
-          abMax += this.gameSettings.maxAbilLvl * tsk.hardnes;
-          abLvl += tsk.value * tsk.hardnes;
+          abMax += this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl;
+          if (ab.isOpen) {
+            let vl = tsk.value - this.gameSettings.minAbilLvl;
+            if (vl < 0) {
+              vl = 0;
+            }
+
+            abLvl += vl;
+          }
 
           abValMax += this.gameSettings.tesMaxVal;
           tesAbCur += tsk.tesValue;
@@ -1718,7 +1739,7 @@ export class PersService {
               rng.name += "%";
             }
 
-            if (tsk.isPerk) {
+            if (tsk.isPerk && this.gameSettings.isClassicaRPG) {
               rng.name = "⭐";
             }
           }
@@ -1992,7 +2013,7 @@ export class PersService {
 
     this.setCurPersTask(prs);
 
-    let expResult: getExpResult = this.gameSettings.getPersExpAndLevel(totalAbVal, abCount, abExpPointsTotalCur, totalAbValMax, totalAbLvl, classicalExpTotal, prs.expVal);
+    let expResult: getExpResult = this.gameSettings.getPersExpAndLevel(totalAbVal, abCount, abExpPointsTotalCur, totalAbValMax, totalAbLvl, classicalExpTotal, prs.expVal, abOpenned);
 
     let ons: number = 0;
     if (!this.gameSettings.isClassicaRPG) {
@@ -3075,18 +3096,19 @@ export class PersService {
       abs = 1;
     }
 
-    let gainedOns = persLevel;
+    let lvl = persLevel - 1;
+    if (lvl < 0) {
+      lvl = 0;
+    }
 
+    let gainedOns = lvl;
     let startOn = this.gameSettings.abPointsStart;
 
     const totalGained = startOn + gainedOns;
 
-    ons = totalGained - abOpenned * 1;
-    if (startOn + gainedOns > abs) {
-      ons = 0;
-    }
+    ons = totalGained - abOpenned;
 
-    prs.mayAddAbils = totalGained - abCount * 1 >= 1;
+    prs.mayAddAbils = totalGained - abCount >= 1;
 
     if (ons < 0) {
       ons = 0;

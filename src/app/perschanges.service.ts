@@ -25,9 +25,9 @@ export class PerschangesService {
   getChSort(ch: ChangesModel): number {
     let sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp", "hp"];
 
-    if (!this.gameSettings.isClassicaRPG) {
-      sort = ["exp", "qwest", "abil", "abLvl", "cha", "chaLvl", "hp"];
-    }
+    // if (!this.gameSettings.isClassicaRPG) {
+    //   sort = ["exp", "qwest", "abil", "abLvl", "cha", "chaLvl", "hp"];
+    // }
 
     const idx = sort.findIndex((q) => q == ch.type);
     if (idx != -1) {
@@ -345,13 +345,13 @@ export class PerschangesService {
     let wasGold = false;
 
     // this.gameSettings.isClassicaRPG &&
-    if (img != null) {
-      for (const ch of unionChanges) {
-        if (ch.type == "exp") {
-          ch.img = img;
-        }
-      }
-    }
+    // if (img != null) {
+    //   for (const ch of unionChanges) {
+    //     if (ch.type == "exp") {
+    //       ch.img = img;
+    //     }
+    //   }
+    // }
 
     for (const ch of unionChanges) {
       const head = ch.head;
