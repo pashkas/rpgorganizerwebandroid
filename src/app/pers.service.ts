@@ -2542,7 +2542,9 @@ export class PersService {
         const fact = step * steps;
         const floor = Math.floor(step) * steps;
         let dots = fact - floor;
-        start += dots;
+        if (step <= 1) {
+          start += dots;
+        }
       }
     }
 

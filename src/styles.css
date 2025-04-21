@@ -436,6 +436,11 @@ body {
   column-gap: 4px;
 }
 
+.skillBtn {
+  padding: 0px !important;
+  /* line-height: 1.1em !important; */
+}
+
 .masonry-container {
   height: 100%;
   width: 100%;
@@ -452,13 +457,15 @@ body {
 }
 
 .ngx-masonry-item {
-  padding: 2px;
+  padding: 1px;
   width: calc(100% / 3);
+  margin-bottom: -7px !important;
 }
 
 .ngx-masonry-item-plus {
-  padding: 2px;
+  padding: 1px;
   width: calc(100% / 4);
+  margin-bottom: -7px !important;
 }
 
 .ngx-masonry-item-mid {
@@ -472,6 +479,13 @@ body {
 }
 
 .main-masonry {
+}
+
+.no-border {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0px !important;
 }
 
 .main-masonry-small {

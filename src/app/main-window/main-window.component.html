@@ -80,12 +80,12 @@
         <div class="masonry-container" (dblclick)="masonryDoubleClick()">
           <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('skills', $event)">
             <div ngxMasonryItem class="{{ globalMasonryClsNGX$ | async }}" *ngFor="let skill of skillsGlobal$ | async">
-              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="masonrySingleClick(skill.tskIdx)">
+              <button mat-stroked-button class="w-100 h-100 skillBtn no-border" (click)="masonrySingleClick(skill.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img appImgBroken src="{{ skill.img }}" class="masonry-img global-skill-img" />
-                  <div class="text-wrap py-1">
+                  <!-- <div class="text-wrap py-1">
                     {{ skill.name }}
-                  </div>
+                  </div> -->
                 </div>
               </button>
             </div>

@@ -328,9 +328,9 @@ export class MainWindowComponent implements OnInit {
           //   cls += "-plus";
           // }
 
-          // if (view == curpersview.SkillsGlobal && skills.length >= 12) {
-          //   cls += "-plus";
-          // }
+          if (view == curpersview.SkillsGlobal && skills.length > 12) {
+            cls += "-plus";
+          }
         }
 
         return of(cls);
