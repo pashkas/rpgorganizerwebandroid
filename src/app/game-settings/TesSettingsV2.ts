@@ -4,7 +4,7 @@ import { GameSettings } from "../GameSettings";
 /**
  * Настройки игры в стиле TES.
  */
-export class TesSettings extends GameSettings {
+export class TesSettingsV2 extends GameSettings {
   isHardnessEnable: boolean = false;
   isClassicaRPG = false;
   perkHardness: number = 1;
@@ -21,13 +21,14 @@ export class TesSettings extends GameSettings {
   changesPopupDurationAbil = 4000;
   changesPopupDurationCha = 4000;
   changesPopupDurationQwest = 4000;
-  changesIsShowAbValues = true;
-  changesIsShowAbLevels = false;
+  changesIsShowAbValues = false;
+  changesIsShowAbLevels = true;
   isShowAbLvlPopup = true;
-  changesIsChowChaLevels = false;
-  changesIsChowChaValues = true;
+  changesIsChowChaValues = false;
+  changesIsChowChaLevels = true;
   isShowChaLvlPopup = true;
   changesIsShowExp = true;
+  sort = ["exp", "abil", "abLvl", "cha", "chaLvl", "qwest", "hp"];
 
   setTes() {}
 
@@ -59,7 +60,7 @@ export class TesSettings extends GameSettings {
     let expDirect = 0;
 
     // 1 уровень за START очков (например 5)
-    let progress = totalAbLvl / (this.abPointsStart * 100);
+    let progress = totalAbVal / (this.abPointsStart * 1000);
     exp = 1 + this.maxPersLevel * progress;
 
     expDirect = exp;

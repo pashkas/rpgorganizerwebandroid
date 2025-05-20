@@ -6,7 +6,7 @@ import { Characteristic } from "src/Models/Characteristic";
 import { Ability } from "src/Models/Ability";
 import { Task, taskState, IImg, Reqvirement } from "src/Models/Task";
 import { Qwest } from "src/Models/Qwest";
-import { Reward } from "src/Models/Reward";
+import { ReqStrExt, Reward } from "src/Models/Reward";
 import { plusToName } from "src/Models/plusToName";
 import { Rangse } from "src/Models/Rangse";
 import { Router } from "@angular/router";
@@ -644,6 +644,12 @@ export class PersService {
    */
   delReward(id: string): any {
     this.pers$.value.rewards = this.pers$.value.rewards.filter((n) => {
+      return n.id != id;
+    });
+  }
+
+  delAchive(id: string): any {
+    this.pers$.value.achievements = this.pers$.value.achievements.filter((n) => {
       return n.id != id;
     });
   }
@@ -1338,7 +1344,7 @@ export class PersService {
           r.reqvirements = [];
         }
 
-        let notDoneReqs: string[] = [];
+        let notDoneReqs: ReqStrExt[] = [];
 
         for (const req of r.reqvirements) {
           if (req.type == ReqItemType.persLvl) {
@@ -1363,10 +1369,12 @@ export class PersService {
 
         if (notDoneReqs.length) {
           r.isAviable = false;
-          r.reqStr = notDoneReqs;
+          r.reqStr = notDoneReqs.map((q) => q.name);
+          r.reqStrExt = notDoneReqs;
         } else {
           r.isAviable = true;
           r.reqStr = [];
+          r.reqStrExt = [];
         }
       }
     }
@@ -1470,15 +1478,14 @@ export class PersService {
     });
   }
 
-  reqCheck(val: number, req: Reqvirement, notDoneReqs: string[]) {
+  reqCheck(val: number, req: Reqvirement, notDoneReqs: ReqStrExt[]) {
+    req.progr = val / req.elVal;
     if (val < req.elVal) {
-      notDoneReqs.push(this.getReqStr(req));
+      notDoneReqs.push({ name: this.getReqStr(req), progress: req.progr * 100 });
       req.isDone = false;
     } else {
       req.isDone = true;
     }
-
-    req.progr = val / req.elVal;
   }
 
   returnToAdventure() {
@@ -1928,6 +1935,8 @@ export class PersService {
       }
     }
 
+    prs.qwests = prs.qwests.sort(this.qwestsSorter());
+
     // let root = prs.qwests.filter((q) => !q.parrentId);
     // .sort((a, b) => {
     //   let aIsDeal = a.name == "Дела" ? 1 : 0;
@@ -2163,6 +2172,24 @@ export class PersService {
 
     this.generateQwestsGlobal(prs);
     this.generateSkillsGlobal(prs);
+  }
+
+  qwestsSorter(): (a: Qwest, b: Qwest) => number {
+    return (a, b) => {
+      if (a.name == "Дела") {
+        return -1;
+      }
+
+      if (b.name == "Дела") {
+        return 1;
+      }
+
+      if(a.hardnessId != b.hardnessId){
+        return -(a.hardnessId - b.hardnessId);
+      }
+
+      return a.name.localeCompare(b.name);
+    };
   }
 
   setCurInd(i: number): any {

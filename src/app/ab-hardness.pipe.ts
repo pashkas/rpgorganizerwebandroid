@@ -11,7 +11,7 @@ export class AbHardnessPipe implements PipeTransform {
     let hrd = "";
 
     if (tsk.hardnes == 0.5) {
-      hrd += '"';
+      // hrd += '"';
     }
 
     if (tsk.hardnes == 2) {

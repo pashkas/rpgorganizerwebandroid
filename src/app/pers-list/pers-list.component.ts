@@ -216,6 +216,10 @@ export class PersListComponent implements OnInit {
     this.srv.delReward(id);
   }
 
+  delAchive(id: string) {
+    this.srv.delAchive(id);
+  }
+
   delTask(ab: Ability, id: string) {
     this.srv.delTask(ab, id);
   }

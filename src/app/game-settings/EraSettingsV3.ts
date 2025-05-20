@@ -12,7 +12,7 @@ export class EraSettingsV3 extends EraSettings {
   maxChaLvl = 5;
   maxPersLevel: number = 50;
   abPointsStart = 0;
-  abPointsPerLvl = 3;
+  abPointsPerLvl = 5;
   isHardnessEnable = false;
 
   isOpenPersAtNewLevel: boolean = false;
@@ -68,7 +68,6 @@ export class EraSettingsV3 extends EraSettings {
       result.startExp = expLvl;
 
       let e = 1 + (persLevel - 1) * 0.1;
-      // Math.pow(1.02288, persLevel)
       let cur = this.abPointsPerLvl * persLevel * e;
 
       expLvl += cur;

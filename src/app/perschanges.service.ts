@@ -23,7 +23,7 @@ export class PerschangesService {
     return JSON.parse(JSON.stringify(pers));
   }
   getChSort(ch: ChangesModel): number {
-    let sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp", "hp"];
+    let sort = this.gameSettings.sort;
 
     // if (!this.gameSettings.isClassicaRPG) {
     //   sort = ["exp", "qwest", "abil", "abLvl", "cha", "chaLvl", "hp"];
@@ -169,6 +169,10 @@ export class PerschangesService {
             let abChanges = new ChangesModel(el.name, "abil", this.moreThenThero(el.before), this.moreThenThero(el.after), this.gameSettings.minAbilLvl, this.gameSettings.maxAbilLvl, el.img);
 
             abChanges.lvl = el.after;
+
+            let abNewLvl: NewLvlData = { txt: `${el.name.toUpperCase()}`, img: el.img, lvl: el.after, tsk: tsk };
+            abChanges.newLvlData = abNewLvl;
+
             changes.push(abChanges);
           }
           // Изменение значения

@@ -8,15 +8,17 @@ import { Task } from "src/Models/Task";
  */
 export class EraSettings extends GameSettings {
   isClassicaRPG = true;
-  minAbilLvl = 0;
-  maxAbilLvl = 5;
-  maxChaLvl = 5;
+  minAbilLvl = 1;
+  maxAbilLvl = 10;
+  minChaLvl = 1;
+  maxChaLvl = 10;
   isAbPointsEnabled = true;
-  abPointsStart = 3;
-  abPointsPerLvl = 3;
+  abPointsStart = 0;
+  abPointsPerLvl = 5;
   isOpenPersAtNewLevel = true;
   maxPersLevel: number = 50;
-  isHpEnabled: boolean = true;
+  isHpEnabled: boolean = false;
+  isHardnessEnable = false;
 
   rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
 
@@ -43,18 +45,45 @@ export class EraSettings extends GameSettings {
   setTes() {}
 
   abCost(curLvl: number, hardness: number, isPerk: boolean): number {
+    if (isPerk) {
+      return this.maxAbilLvl * hardness;
+    }
+
     return 1 * hardness;
   }
 
   abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
+    if (isPerk && curLvl > 0) {
+      curLvl = this.maxAbilLvl;
+    }
+
     return curLvl * hardness;
   }
 
   abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
+    if (isPerk) {
+      curLvl = this.maxAbilLvl;
+    }
+
     return curLvl * hardness;
   }
 
-  getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number, abOpenned: number): getExpResult {
+  checkPerkTskValue(tsk: Task) {
+    if (tsk.isPerk && tsk.value > 0) {
+      tsk.value = this.maxAbilLvl;
+    }
+  }
+
+  getPersExpAndLevel(
+    totalAbVal: number,
+    abCount: number,
+    expPoints: number,
+    totalAbValMax: number,
+    totalAbLvl: number,
+    classicalExpTotal: number,
+    persExpVal: number,
+    abOpenned: number
+  ): getExpResult {
     if (persExpVal == null) {
       persExpVal = classicalExpTotal;
     }
@@ -63,18 +92,14 @@ export class EraSettings extends GameSettings {
 
     result.exp = persExpVal;
 
-    let persLevel = 0;
+    let persLevel = 1;
     let expLvl = 0;
 
     while (true) {
       result.startExp = expLvl;
 
-      let l = persLevel + 1;
-      let v = 3;
-      let expa = 0.25;
-      let line = v - expa;
-      let cur = l * line + Math.pow(l, 2) * expa;
-
+      let e = 1 + (persLevel - 1) * 0.1;
+      let cur = this.abPointsPerLvl * persLevel * e;
       expLvl += cur;
 
       result.nextExp = expLvl;

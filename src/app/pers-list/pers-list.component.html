@@ -89,6 +89,17 @@
             <i>{{ pers.story }}</i>
           </div>
 
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;" class="w-100 py-1">
+            <div *ngFor="let rev of pers.achievements | filterByProperty : 'isAviable' : true; let i = index;">
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; ">
+                <img appImgBroken [src]="rev.image" class="img-fluid rounded w-100" style="height: 100px; object-fit: contain;" />
+                <div class="text-muted small mt-1 text-wrap">
+                  {{ rev.name }}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Атрибуты -->
           <ng-container *ngIf="pers.characteristics?.length > 0 && !pers.isNoAbs">
             <!-- <h5>Атрибуты:</h5> -->
@@ -405,16 +416,19 @@
                 </button>
               </div>
               <div class="masonry-list pt-1">
-                <div class="masonry-item" *ngFor="let rev of pers.achievements">
+                <div class="masonry-item" *ngFor="let rev of pers.achievements | filterByProperty : 'isAviable' : false">
                   <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event, 'achive')" [ngClass]="{ revFade: !rev.isAviable }">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
                       <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
-                      <div class="text-wrap py-2">
+                      <div class="text-wrap py-1">
                         {{ rev.name }}
                       </div>
-                      <div class="py-1">
-                        <div *ngFor="let req of rev.reqStr">
-                          <small class="text-wrap text-muted">{{ req }}</small>
+                      <div class="w-100">
+                        <div *ngFor="let req of rev.reqStrExt" class="progress position-relative" style="min-height: 18px">
+                          <div class="position-absolute w-100 h-100 d-flex align-items-center">
+                            <small class="w-100 px-1 text-break fst-italic">{{ req.name }}</small>
+                          </div>
+                          <div class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="req.progress + '%'" style="height: 100%; z-index: 1"></div>
                         </div>
                       </div>
                     </div>
@@ -423,38 +437,7 @@
               </div>
             </div>
           </mat-tab>
-          <mat-tab label="Инвентарь">
-            <!-- Инвентарь -->
-            <div class="p-3">
-              <div fxLayout="row" fxLayoutAlign="end center" class="fade">
-                <button mat-button class="icon-small">
-                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
-                  <span>
-                    <span class="text-success">{{ pers.gold | floor }}</span>
-                  </span>
-                </button>
-                <button class="icon-small mr-2" mat-icon-button>
-                  <img src="assets/icons/create.png" class="img-fluid" />
-                </button>
-              </div>
-              <div class="masonry-list pt-1">
-                <div class="masonry-item" *ngFor="let rev of pers.inventory">
-                  <button mat-stroked-button class="w-100 h-100 revBtn">
-                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
-                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
-                      <div class="text-wrap py-2">
-                        {{ rev.name }}
-                      </div>
-                      <button class="w-100" (click)="useRevard(rev, $event)" mat-stroked-button style="color: gold">
-                        <small>x{{ rev.count }}</small>
-                      </button>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </mat-tab>
-          <mat-tab label="Магазин">
+          <mat-tab label="Лавка">
             <!-- Магазин -->
             <div class="p-3">
               <div fxLayout="row" fxLayoutAlign="end center">
@@ -506,13 +489,74 @@
               </div>
             </div>
           </mat-tab>
+          <mat-tab label="Инвентарь">
+            <!-- Инвентарь -->
+            <div class="p-3">
+              <div fxLayout="row" fxLayoutAlign="end center" class="fade">
+                <button mat-button class="icon-small">
+                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                  <span>
+                    <span class="text-success">{{ pers.gold | floor }}</span>
+                  </span>
+                </button>
+                <button class="icon-small mr-2" mat-icon-button>
+                  <img src="assets/icons/create.png" class="img-fluid" />
+                </button>
+              </div>
+              <div class="masonry-list pt-1">
+                <div class="masonry-item" *ngFor="let rev of pers.inventory">
+                  <button mat-stroked-button class="w-100 h-100 revBtn">
+                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
+                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+                      <div class="text-wrap py-2">
+                        {{ rev.name }}
+                      </div>
+                      <button class="w-100" (click)="useRevard(rev, $event)" mat-stroked-button style="color: gold">
+                        <small>x{{ rev.count }}</small>
+                      </button>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
         </mat-tab-group>
       </div>
       <!-- Редактирование -->
       <div *ngIf="isEditMode" class="pt-2 pb-4 w-100">
-        <div class="pb-4">
+        <div class="pb-0">
           <div fxLayout="row" fxLayoutAlign="space-between center">
-            <h5>Трофеи:</h5>
+            <h5>Достижения:</h5>
+            <button class="icon-small" mat-icon-button (click)="qwickAddReward('achive')">
+              <img src="assets/icons/create.png" class="img-fluid" />
+            </button>
+          </div>
+          <mat-list>
+            <div mat-list-item *ngFor="let rev of pers.achievements; let i = index; let even = even; let odd = odd">
+              <div fxFill class="row-striped" [ngClass]="{ even: even }">
+                <div fxFlex fxLayout="row" fxLayoutAlign="space-between center">
+                  <div>{{ rev.name }}&nbsp;</div>
+                </div>
+                <div>
+                  <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="5px">
+                    <button class="icon-small" (click)="addNewRevard(rev, $event, 'achive')" mat-icon-button>
+                      <img src="assets/icons/edit.png" class="img-fluid" />
+                    </button>
+                    <button class="icon-small" (click)="delAchive(rev.id)" mat-icon-button>
+                      <img src="assets/icons/del.png" class="img-fluid" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-list>
+          <!-- <small class="pt-1" *ngIf="pers.totalRewardProbability"><i>Вероятность награды:
+              {{pers.totalRewardProbability}}%</i></small> -->
+          <br />
+        </div>
+        <div class="pb-0">
+          <div fxLayout="row" fxLayoutAlign="space-between center">
+            <h5>Лавка:</h5>
             <!-- Добвление трофея -->
             <button class="icon-small" mat-icon-button (click)="addNewRevard(null, $event)">
               <img src="assets/icons/create.png" class="img-fluid" />

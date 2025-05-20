@@ -153,6 +153,8 @@ export abstract class GameSettings {
 
   perkHardness: number = 0.5;
 
+  sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp", "hp"];
+
   /**
    * Плюс к прогрессу для задания в задаче.
    *
@@ -352,7 +354,16 @@ export abstract class GameSettings {
     this.isOpenPersAtNewLevel = true;
   }
 
-  abstract getPersExpAndLevel(totalAbVal: number, abCount: number, expPoints: number, totalAbValMax: number, totalAbLvl: number, classicalExpTotal: number, persExpVal: number, abOpenned: number): getExpResult;
+  abstract getPersExpAndLevel(
+    totalAbVal: number,
+    abCount: number,
+    expPoints: number,
+    totalAbValMax: number,
+    totalAbLvl: number,
+    classicalExpTotal: number,
+    persExpVal: number,
+    abOpenned: number
+  ): getExpResult;
 }
 
 export class qwestHardness {

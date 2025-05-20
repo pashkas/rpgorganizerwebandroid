@@ -17,6 +17,7 @@ export class Reward {
 
   reqvirements: Reqvirement[] = [];
   reqStr: string[];
+  reqStrExt: ReqStrExt[];
 
   ludProbability: number = 0;
   cost: number = 0;
@@ -27,4 +28,9 @@ export class Reward {
   revProbId: number;
 
   progr: number;
+}
+
+export class ReqStrExt {
+  name: string;
+  progress: number;
 }

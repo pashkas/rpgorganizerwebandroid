@@ -10,7 +10,7 @@
   </mat-form-field>
   <mat-form-field *ngIf="ReqForm.get('type').value != 'Уровень персонажа'">
     <mat-label>Элемент</mat-label>
-    <mat-select formControlName="elId" panelClass="panel-override">
+    <mat-select formControlName="elId" panelClass="panel-override" [compareWith]="compareObjects">
       <mat-option *ngFor="let el of elements$ | async" [value]="el">
         {{ el.elName }}
       </mat-option>
