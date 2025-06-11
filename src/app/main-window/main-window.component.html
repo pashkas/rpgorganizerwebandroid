@@ -270,9 +270,17 @@
       </div>
       <div fxFlex fxLayout="row" *ngIf="data.currentView != 'QwestSort' && data.currentView != 'SkillsSort'" fxLayoutAlign="end center" fxLayoutGap="0.3em" class="w-100 h-100 px-2">
         <!-- Первый / глобальный -->
-        <button [ngClass]="{ disabled: isSort }" [autofocus]="false" (click)="firstOrGlobal()" mat-icon-button>
-          <img *ngIf="data.currentView == 'SkillsGlobal' || data.currentView == 'QwestsGlobal'" src="assets/icons/right.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
-          <img src="assets/icons/left.png" *ngIf="data.currentView == 'SkillTasks' || data.currentView == 'QwestTasks'" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
+        <button [ngClass]="{ disabled: isSort }" [disabled]="isSort" [autofocus]="false" (click)="firstOrGlobal()" mat-icon-button>
+          <img src="assets/icons/left.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
+        </button>
+        <button
+          [ngClass]="{ disabled: isSort || data.currentView == 'SkillTasks' || data.currentView == 'QwestTasks' || data.currentView == 'QwestsGlobal' }"
+          [disabled]="isSort || data.currentView == 'SkillTasks' || data.currentView == 'QwestTasks' || data.currentView == 'QwestsGlobal'"
+          [autofocus]="false"
+          (click)="firstOrGlobal(true)"
+          mat-icon-button
+        >
+          <img src="assets/icons/right.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
         </button>
         <!-- Навыки / квесты -->
         <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="0.3em" class="h-100">
@@ -290,13 +298,19 @@
               [ngStyle]="{ 'object-fit': 'contain', height: '2.5em' }"
             />
           </button>
-          <button (click)="setSort(data.currentView)" mat-icon-button [ngClass]="{ disabled: data.currentView == 'QwestsGlobal' || data.currentView == 'SkillTasks' }">
+          <button
+            (click)="setSort(data.currentView)"
+            mat-icon-button
+            [ngClass]="{ disabled: data.currentView == 'QwestsGlobal' || data.currentView == 'SkillTasks' }"
+            [disabled]="data.currentView == 'QwestsGlobal' || data.currentView == 'SkillTasks'"
+          >
             <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
           </button>
         </div>
         <!-- Сделано -->
         <button
           [ngClass]="{ disabled: !data.currentTask || data.currentView == 'SkillsGlobal' || data.currentView == 'SkillsSort' || data.currentView == 'QwestsGlobal' || data.currentView == 'QwestSort' }"
+          [disabled]="!data.currentTask || data.currentView == 'SkillsGlobal' || data.currentView == 'SkillsSort' || data.currentView == 'QwestsGlobal' || data.currentView == 'QwestSort'"
           (click)="done(data.currentTask)"
           mat-icon-button
         >
@@ -313,6 +327,14 @@
               data.currentView == 'QwestsGlobal' ||
               data.currentView == 'QwestSort'
           }"
+          [disabled]="
+            !data.currentTask ||
+            data.currentView == 'SkillsSort' ||
+            data.currentView == 'SkillsGlobal' ||
+            data.currentView == 'QwestTasks' ||
+            data.currentView == 'QwestsGlobal' ||
+            data.currentView == 'QwestSort'
+          "
           (click)="fail(data.currentTask)"
           mat-icon-button
         >

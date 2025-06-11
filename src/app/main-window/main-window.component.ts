@@ -261,13 +261,17 @@ export class MainWindowComponent implements OnInit {
     this.firstOrGlobal();
   }
 
-  firstOrGlobal() {
+  firstOrGlobal(isLast: boolean = false) {
     if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
       this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
     } else if (this.srv.pers$.value.currentView == curpersview.SkillsSort) {
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     } else if (this.srv.pers$.value.currentView == curpersview.SkillsGlobal) {
-      this.srv.setCurInd(0);
+      if (!isLast) {
+        this.srv.setCurInd(0);
+      } else {
+        this.srv.setCurInd(this.srv.pers$.value.tasks.length);
+      }
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
     } else if (this.srv.pers$.value.currentView == curpersview.QwestTasks) {
       this.srv.pers$.value.currentView = curpersview.QwestsGlobal;
@@ -278,6 +282,22 @@ export class MainWindowComponent implements OnInit {
     }
 
     this.srv.savePers(false);
+  }
+
+  firstOrGlobalSingleClick() {
+    this.clickPreventSingleClick = false;
+    const clickDelay = 200;
+    this.clickTimer = setTimeout(() => {
+      if (!this.clickPreventSingleClick) {
+        this.firstOrGlobal();
+      }
+    }, clickDelay);
+  }
+
+  firstOrGlobalDoubleClick() {
+    this.clickPreventSingleClick = true;
+    clearTimeout(this.clickTimer);
+    this.firstOrGlobal(true);
   }
 
   focusFocus() {
