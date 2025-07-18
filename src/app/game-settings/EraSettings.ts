@@ -19,6 +19,7 @@ export class EraSettings extends GameSettings {
   maxPersLevel: number = 50;
   isHpEnabled: boolean = false;
   isHardnessEnable = false;
+  perkHardness: number = 1;
 
   rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
 
@@ -45,33 +46,18 @@ export class EraSettings extends GameSettings {
   setTes() {}
 
   abCost(curLvl: number, hardness: number, isPerk: boolean): number {
-    if (isPerk) {
-      return this.maxAbilLvl * hardness;
-    }
-
     return 1 * hardness;
   }
 
   abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
-    if (isPerk && curLvl > 0) {
-      curLvl = this.maxAbilLvl;
-    }
-
     return curLvl * hardness;
   }
 
   abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
-    if (isPerk) {
-      curLvl = this.maxAbilLvl;
-    }
-
     return curLvl * hardness;
   }
 
   checkPerkTskValue(tsk: Task) {
-    if (tsk.isPerk && tsk.value > 0) {
-      tsk.value = this.maxAbilLvl;
-    }
   }
 
   getPersExpAndLevel(

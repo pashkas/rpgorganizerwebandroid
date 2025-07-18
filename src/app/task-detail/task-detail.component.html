@@ -121,12 +121,12 @@
     <br />
     <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
       <div
-        *ngIf="st && i != 0 && i >= this.gameSettings.minAbilLvl && isShowAbProgrTable && (!tsk.isPerk || i == this.gameSettings.maxAbilLvl)"
+        *ngIf="st && i != 0 && i >= this.gameSettings.minAbilLvl && isShowAbProgrTable"
         class="text-center px-0 py-0 border-0 abLelelsDescr"
         [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }"
       >
         <b>
-          <ng-container *ngIf="isShowAbProgrTable && !tsk.isPerk">
+          <ng-container *ngIf="isShowAbProgrTable">
             {{ i + percSymbol + ": " }}
           </ng-container> </b
         >{{ st }}

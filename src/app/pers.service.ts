@@ -78,7 +78,7 @@ export class PersService {
   }
 
   CasinoGold(tskExp: number) {
-    this.pers$.value.gold += tskExp;
+    // this.pers$.value.gold += tskExp;
     // let gold = Math.round(tskExp * Math.random());
     // if (gold < 1) {
     //   gold = 1;
@@ -2184,7 +2184,7 @@ export class PersService {
         return 1;
       }
 
-      if(a.hardnessId != b.hardnessId){
+      if (a.hardnessId != b.hardnessId) {
         return -(a.hardnessId - b.hardnessId);
       }
 
@@ -3351,6 +3351,7 @@ export class PersService {
 
   private recountAbilMayUp(prs: Pers) {
     let on = prs.ON;
+    let anySame = false;
 
     for (let ch of prs.characteristics) {
       for (let ab of ch.abilities) {
@@ -3363,11 +3364,28 @@ export class PersService {
           if (tsk.value < 1 || !tsk.mayUp) {
             tsk.IsNextLvlSame = false;
           }
+
+          if (tsk.IsNextLvlSame) {
+            anySame = true;
+          }
         }
       }
+
       ch.anyMayUp = ch.abilities.some((q) => q.tasks.some((qq) => qq.mayUp));
       ch.HasSameAbLvl = ch.abilities.some((q) => q.tasks.some((qq) => qq.IsNextLvlSame));
       ch.abilities = ch.abilities.sort(this.abSorter());
+    }
+
+    if (anySame) {
+      for (let ch of prs.characteristics) {
+        for (let ab of ch.abilities) {
+          for (let tsk of ab.tasks) {
+            if (!tsk.IsNextLvlSame) {
+              tsk.mayUp = false;
+            }
+          }
+        }
+      }
     }
 
     prs.characteristics = prs.characteristics.sort(this.chaSorter());
