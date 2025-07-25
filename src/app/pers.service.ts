@@ -83,9 +83,7 @@ export class PersService {
     // if (gold < 1) {
     //   gold = 1;
     // }
-
     // let gold = Math.round(this.gameSettings.baseTskGold * Math.random());
-
     // if (gold >= 1) {
     //   this.pers$.value.gold += gold;
     // }
@@ -2039,7 +2037,8 @@ export class PersService {
     prs.exp = expResult.exp;
     prs.totalProgress = (prs.level / this.gameSettings.maxPersLevel) * 100;
 
-    let stage = (prs.level / this.gameSettings.maxPersLevel) * (this.gameSettings.rangNames.length - 1);
+    let stage = this.gameSettings.getPersRangIdx(prs.level, this.gameSettings.getMonsterLevel(prs.level, this.gameSettings.maxPersLevel), this.gameSettings.maxPersLevel);
+
     if (stage > this.gameSettings.rangNames.length - 1) {
       stage = this.gameSettings.rangNames.length - 1;
     }

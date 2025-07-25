@@ -6,6 +6,8 @@ import {
   Routes,
   UrlSegment
 } from '@angular/router';
+import { Injectable } from "@angular/core";
+@Injectable()
 export class RouteReuseService implements RouteReuseStrategy {
   routesToCache: string[] = ['main', 'pers'];
   storedRouteHandles = new Map<string, DetachedRouteHandle>();

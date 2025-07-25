@@ -31,7 +31,7 @@ export class QwestDetailComponent implements OnInit {
 
   qwestHardnessControll = new FormControl({});
 
-  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
+  @ViewChild("nameEdt") nameEdt: ElementRef;
   isEditMode: boolean = false;
   /**
    * Добавление задачи из просмотра, когда квест выполнен.

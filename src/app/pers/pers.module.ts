@@ -45,6 +45,7 @@ import { LoginComponent } from "../login/login.component";
 import { MatStepperModule } from "@angular/material/stepper";
 import { PersMasterComponent } from "../sync-module/pers-master/pers-master.component";
 import { FloorPipe } from "../floor.pipe";
+import { FlexLayoutModule } from "@angular/flex-layout";
 
 @NgModule({
   declarations: [
@@ -81,6 +82,7 @@ import { FloorPipe } from "../floor.pipe";
   ],
   imports: [
     SharedModule,
+    FlexLayoutModule,
     MatStepperModule,
     NgxMaterialTimepickerModule,
     AutosizeModule,

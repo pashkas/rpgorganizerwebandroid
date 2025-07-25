@@ -22,6 +22,7 @@ import { AbColorPipe } from "./ab-color.pipe";
 import { MainViewPipe } from "./main-view.pipe";
 import { MasonryPipe } from "./masonry.pipe";
 import { FilterByPropertyPipe } from "../filter-by-property.pipe";
+import { CustomSwipeDirective } from "../customSwipe.directive";
 
 @NgModule({
   declarations: [

@@ -19,7 +19,7 @@ import { GameSettings } from "../GameSettings";
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class CharacteristicDetailsComponent implements OnInit {
-  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
+  @ViewChild("nameEdt") nameEdt: ElementRef;
   private unsubscribe$ = new Subject();
 
   charact: Characteristic;

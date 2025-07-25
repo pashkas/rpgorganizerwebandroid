@@ -12,7 +12,7 @@ export class PersChangesItemComponent implements OnInit {
   @Input() item: ChangesModel;
   plusName: string = "";
 
-  @ViewChild("progress", { static: false }) progress: ElementRef;
+  @ViewChild("progress") progress: ElementRef;
 
   constructor(public builder: AnimationBuilder, public gameSettings: GameSettings) {}
 

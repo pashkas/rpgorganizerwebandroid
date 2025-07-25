@@ -12,17 +12,16 @@
       <img src="assets/icons/diamond.png" class="img-fluid px-2 secImg" />
     </div>
   </div>
-  <div class="py-2">
-    <h2 class="text-center heartbeat">{{ txt }}</h2>
+  <div class="py-2 w-100">
+    <h2 class="text-center">{{ txt }}</h2>
     <h2 class="text-center heartbeat">Ур. {{ lvl }}</h2>
+    <p *ngIf="curLvlDescr != null" class="text-center p-1 text-wrap" style="border: 1px solid white">
+      {{ curLvlDescr }}
+    </p>
     <!-- Статусы по уровню навыка -->
     <!-- <div class="chLstTsk abLelelsDescr" *ngIf="tsk && (tsk.value > 1 || tsk.value == 1)">
       <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
-        <div
-          *ngIf="st && (i >= GameSettings.minAbilLvl || !isShowAbProgrTable)"
-          class="text-center px-0 py-0 border-0 bigTextShrink"
-          [ngClass]="{ 'bg-success': i == tsk.value && isShowAbProgrTable }"
-        >
+        <div *ngIf="st && i >= GameSettings.minAbilLvl" class="text-center px-0 py-0 border-0 bigTextShrink" [ngClass]="{ 'bg-success': i == tsk.value && isShowAbProgrTable }">
           <b>
             <ng-container *ngIf="isShowAbProgrTable">
               {{ i + percSymbol + ": " }}

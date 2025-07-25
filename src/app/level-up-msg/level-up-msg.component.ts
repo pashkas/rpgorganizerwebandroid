@@ -16,6 +16,7 @@ export class LevelUpMsgComponent implements OnInit {
   txt: string = "НОВЫЙ УРОВЕНЬ!!!";
   lvl: number;
   tsk: Task;
+  curLvlDescr: String = null;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public gameSettings: GameSettings) {
     this.isShowAbProgrTable = this.gameSettings.isShowAbProgrTable;
@@ -25,6 +26,9 @@ export class LevelUpMsgComponent implements OnInit {
       this.txt = data.txt;
       this.lvl = data.lvl;
       this.tsk = data.tsk;
+      if (this.tsk != null) {
+        this.curLvlDescr = this.tsk.curLvlDescr;
+      }
     }
   }
 

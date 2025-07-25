@@ -34,7 +34,7 @@ export class TesSettings extends GameSettings {
   getTesChangeKoef(tesVal: number): number {
     let level = 1 + Math.floor(tesVal / 10.0);
 
-    let skillMult = 2;
+    let skillMult = 3;
     let skillOffcet = 3 - skillMult;
     let result = level * skillMult + skillOffcet;
     result = Math.ceil(result);
@@ -90,13 +90,20 @@ export class TesSettings extends GameSettings {
     if (prsLvl < 30) {
       return 3;
     }
-    if (prsLvl < 40) {
+    if (prsLvl < 50) {
       return 4;
     }
-    if (prsLvl < 50) {
+    if (prsLvl < 70) {
       return 5;
     }
 
     return 6;
+  }
+
+  /**
+   * Логика получения ранга персонажа.
+   */
+  getPersRangIdx(persLvl: number, mosterLvl: number, maxPersLvl: number): number {
+    return mosterLvl;
   }
 }

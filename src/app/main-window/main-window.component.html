@@ -160,10 +160,12 @@
             (contextmenu)="$event.preventDefault()"
             (press)="onMasonrySkillsLongPress(data.currentTask)"
             (dblclick)="firstOrGlobal(data.currentTask)"
-            (swipeup)="done(data.currentTask)"
-            (swipedown)="fail(data.currentTask)"
-            (swiperight)="onSwipeLeft($event)"
-            (swipeleft)="onSwipeRight($event)"
+            swipe
+            draggable="false"
+            (up)="done(data.currentTask)"
+            (down)="fail(data.currentTask)"
+            (next)="onSwipeLeft($event)"
+            (previous)="onSwipeRight($event)"
           />
         </div>
         <div fxLayout="column" fxLayoutAlign="center center" class="w-100 h-100 py-2 px-2" [ngStyle]="{ height: '3em' }">

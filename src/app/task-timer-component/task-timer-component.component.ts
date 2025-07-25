@@ -3,7 +3,7 @@ import { Observable, Subject, timer } from "rxjs";
 import { map, shareReplay, takeUntil } from "rxjs/operators";
 import { PersService } from "../pers.service";
 import { MatDialogRef } from "@angular/material/dialog";
-// import { CancelOptions, LocalNotificationSchema, LocalNotifications } from "@capacitor/local-notifications";
+import { CancelOptions, LocalNotificationSchema, LocalNotifications } from "@capacitor/local-notifications";
 import { Task } from "src/Models/Task";
 // import { LocalNotifications } from '@capacitor/local-notifications';
 
@@ -124,27 +124,21 @@ export class TaskTimerComponentComponent implements OnInit {
       },
     };
 
-    // // @ts-ignore
-    // const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
-
-    // try {
-    //   LocalNotifications.schedule({
-    //     notifications: [this.notification],
-    //   }).then(() => {});
-    // } catch {}
+    try {
+      LocalNotifications.schedule({
+        notifications: [this.notification],
+      }).then(() => {});
+    } catch {}
   }
 
   close() {
-    // try {
-    //   // @ts-ignore
-    //   const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
-
-    //   if (this.notification) {
-    //     LocalNotifications.cancel({
-    //       notifications: [this.notification],
-    //     }).then(() => {});
-    //   }
-    // } catch {}
+    try {
+      if (this.notification) {
+        LocalNotifications.cancel({
+          notifications: [this.notification],
+        }).then(() => {});
+      }
+    } catch {}
 
     this.dialogRef.close(this.dif);
   }

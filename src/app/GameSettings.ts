@@ -68,7 +68,7 @@ export abstract class GameSettings {
   changesPopupDuration: number = 3000;
   changesPopupDurationAbil: number = 3000;
   changesPopupDurationCha: number = 3000;
-  changesPopupDurationNewLevel: number = 3000;
+  changesPopupDurationNewLevel: number = 5000;
   /**
    * Длительность попапа изменений квестов.
    */
@@ -161,11 +161,11 @@ export abstract class GameSettings {
    */
   plusAbProgrForTitle: number = 0;
   qwestHardneses: qwestHardness[] = [
-    { id: 5, name: "оч. легко", gold: 5 },
-    { id: 4, name: "легко", gold: 10 },
-    { id: 3, name: "норм", gold: 25 },
-    { id: 2, name: "сложно", gold: 50 },
-    { id: 1, name: "оч. сложно", gold: 100 },
+    { id: 5, name: "оч. легко", gold: 50 },
+    { id: 4, name: "легко", gold: 100 },
+    { id: 3, name: "норм", gold: 250 },
+    { id: 2, name: "сложно", gold: 500 },
+    { id: 1, name: "оч. сложно", gold: 1000 },
   ];
   rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
   revProbs: taskProb[] = [
@@ -335,6 +335,15 @@ export abstract class GameSettings {
       this.isShowChaLvlPopup = false;
       this.changesIsShowExp = true;
     }
+  }
+
+  /**
+   * Логика получения ранга персонажа.
+   */
+  getPersRangIdx(persLvl: number, mosterLvl: number, maxPersLvl: number): number {
+    let stage = (persLvl / maxPersLvl) * (this.rangNames.length - 1);
+
+    return stage;
   }
 
   setTes() {

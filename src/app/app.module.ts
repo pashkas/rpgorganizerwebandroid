@@ -1,5 +1,5 @@
-import { BrowserModule, HAMMER_GESTURE_CONFIG } from "@angular/platform-browser";
-import { NgModule, LOCALE_ID } from "@angular/core";
+import { BrowserModule, HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule } from "@angular/platform-browser";
+import { NgModule, LOCALE_ID, Injectable } from "@angular/core";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { AngularFireModule } from "angularfire2";
@@ -15,7 +15,7 @@ import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
 import { ServiceWorkerModule } from "@angular/service-worker";
 import { registerLocaleData } from "@angular/common";
 import localeRu from "@angular/common/locales/ru";
-import { GestureConfig, MatProgressSpinnerModule, MatIconModule, MatBadgeModule, MatSlideToggleModule, MatChipsModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material";
+import { MatProgressSpinnerModule, MatIconModule, MatBadgeModule, MatSlideToggleModule, MatChipsModule, MAT_FORM_FIELD_DEFAULT_OPTIONS, GestureConfig } from "@angular/material";
 import { SharedModule } from "./shared/shared.module";
 import { ArrSortDialogComponent } from "./arr-sort-dialog/arr-sort-dialog.component";
 import { ProgressBarNumComponent } from "./shared/progress-bar-num/progress-bar-num.component";
@@ -34,6 +34,15 @@ import { TaskTimerComponentComponent } from "./task-timer-component/task-timer-c
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { GameSettings } from "./GameSettings";
 import { EraSettings } from "./game-settings/EraSettings";
+import { CustomSwipeDirective } from "./customSwipe.directive";
+import { TesSettingsV2 } from "./game-settings/TesSettingsV2";
+import { TesSettings } from "./game-settings/TesSettings";
+
+export class MyHammerConfig extends HammerGestureConfig {
+  overrides = <any>{
+    swipe: { direction: Hammer.DIRECTION_ALL }, // Configure for vertical swipes
+  };
+}
 
 registerLocaleData(localeRu, "ru");
 
@@ -54,8 +63,10 @@ registerLocaleData(localeRu, "ru");
     MainProgrDescPipe,
     ListBgPipe,
     TaskTimerComponentComponent,
+    CustomSwipeDirective,
   ],
   imports: [
+    HammerModule,
     MatChipsModule,
     MatCheckboxModule,
     NgxMaterialTimepickerModule,
@@ -77,7 +88,7 @@ registerLocaleData(localeRu, "ru");
   providers: [
     {
       provide: HAMMER_GESTURE_CONFIG,
-      useClass: GestureConfig,
+      useClass: MyHammerConfig,
     },
     { provide: LOCALE_ID, useValue: "ru" },
     {
@@ -92,7 +103,8 @@ registerLocaleData(localeRu, "ru");
     },
     {
       provide: GameSettings,
-      useClass: EraSettings,
+      // useClass: EraSettings,
+      useClass: TesSettings,
     },
   ],
   bootstrap: [AppComponent],

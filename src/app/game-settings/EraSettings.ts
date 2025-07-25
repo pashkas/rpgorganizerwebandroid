@@ -2,10 +2,12 @@ import { getExpResult } from "src/Models/getExpResult";
 import { GameSettings } from "../GameSettings";
 import { Pers } from "src/Models/Pers";
 import { Task } from "src/Models/Task";
+import { Injectable } from "@angular/core";
 
 /**
  * Настройки игры в стиле Ера Водолея.
  */
+@Injectable()
 export class EraSettings extends GameSettings {
   isClassicaRPG = true;
   minAbilLvl = 1;

@@ -28,7 +28,7 @@ export class TaskDetailComponent implements OnInit {
   aimUnits = [{ name: "Минут" }, { name: "Секунд" }, { name: "Часов" }, { name: "Раз" }, { name: "Раз чет" }, { name: "Раз нечет" }];
   charactCntrl: FormControl;
   charactGroup: FormGroup;
-  @ViewChild("goUp", { static: false }) goUp: ElementRef;
+  @ViewChild("goUp") goUp: ElementRef;
   hardnesGroup = new FormGroup({
     hardnesControl: new FormControl(1),
   });
@@ -43,7 +43,7 @@ export class TaskDetailComponent implements OnInit {
   isQuick: any;
   isShowAbProgrTable;
   linkQwests: Qwest[] = [];
-  @ViewChild("nameEdt", { static: false }) nameEdt: ElementRef;
+  @ViewChild("nameEdt") nameEdt: ElementRef;
   percSymbol;
   pers: Pers;
   requrenses: string[] = Task.requrenses;

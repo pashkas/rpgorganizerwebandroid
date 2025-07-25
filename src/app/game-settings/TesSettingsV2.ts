@@ -10,7 +10,7 @@ export class TesSettingsV2 extends GameSettings {
   perkHardness: number = 1;
 
   isAbPointsEnabled = true;
-  abPointsStart = 5;
+  abPointsStart = 7;
   abPointsPerLvl = 1;
 
   maxAbilLvl = 10;

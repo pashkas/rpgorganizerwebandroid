@@ -37,7 +37,7 @@ export class MainWindowComponent implements OnInit {
   isSucessShown$ = new BehaviorSubject<boolean>(false);
   isSucessShownOv$ = new BehaviorSubject<boolean>(false);
   lastGlobalBeforeSort: boolean;
-  @ViewChild(NgxMasonryComponent, { static: false }) masonry: NgxMasonryComponent;
+  @ViewChild(NgxMasonryComponent) masonry: NgxMasonryComponent;
   public myOptions = {
     horizontalOrder: true,
     animations: "hide",
