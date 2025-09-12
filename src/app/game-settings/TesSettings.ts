@@ -2,7 +2,7 @@ import { getExpResult } from "src/Models/getExpResult";
 import { GameSettings } from "../GameSettings";
 
 /**
- * Настройки игры в стиле TES.
+ * Настройки игры в стиле TES. (Базовый, стандартный, вроде норм.)
  */
 export class TesSettings extends GameSettings {
   isHardnessEnable: boolean = false;
@@ -31,7 +31,7 @@ export class TesSettings extends GameSettings {
 
   setTes() {}
 
-  getTesChangeKoef(tesVal: number): number {
+  getTesChangeKoef(tesVal: number, persLvl: number): number {
     let level = 1 + Math.floor(tesVal / 10.0);
 
     let skillMult = 3;

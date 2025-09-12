@@ -78,15 +78,30 @@ export class PersService {
   }
 
   CasinoGold(tskExp: number) {
-    // this.pers$.value.gold += tskExp;
-    // let gold = Math.round(tskExp * Math.random());
-    // if (gold < 1) {
-    //   gold = 1;
-    // }
-    // let gold = Math.round(this.gameSettings.baseTskGold * Math.random());
-    // if (gold >= 1) {
-    //   this.pers$.value.gold += gold;
-    // }
+    if (tskExp <= 0) {
+      return 0;
+    }
+
+    let totalGold = 0;
+
+    // Для каждого целого значения tskExp проводим розыгрыш с вероятностью 50%
+    const wholeParts = Math.floor(tskExp);
+    for (let i = 0; i < wholeParts; i++) {
+      if (Math.random() < 0.5) {
+        totalGold += 1;
+      }
+    }
+
+    // Для дробной части проводим дополнительный розыгрыш
+    const fractionalPart = tskExp - wholeParts;
+    if (fractionalPart > 0) {
+      // Вероятность успеха пропорциональна дробной части
+      if (Math.random() < fractionalPart * 0.5) {
+        totalGold += 1;
+      }
+    }
+
+    this.pers$.value.gold += totalGold;
   }
 
   /**
@@ -172,6 +187,11 @@ export class PersService {
       // Открыта
       if (this.boolVCompare(a.isOpen, b.isOpen) != 0) {
         return -this.boolVCompare(a.isOpen, b.isOpen);
+      }
+
+      // Одинаковый?
+      if (this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl) != 0) {
+        return -this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
       }
 
       // Значение
@@ -328,6 +348,11 @@ export class PersService {
         if (this.boolVCompare(a.anyMayUp, b.anyMayUp) != 0) {
           return -this.boolVCompare(a.anyMayUp, b.anyMayUp);
         }
+      }
+
+      // Одинаковые
+      if (this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl) != null) {
+        return -this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
       }
 
       if (a.value != b.value) {
@@ -1403,6 +1428,10 @@ export class PersService {
         return aIsRev - bIsRev;
       }
 
+      if (a.revProbId != b.revProbId) {
+        return -(a.revProbId - b.revProbId);
+      }
+
       // Количество невыполненных заданий
       let aR = reqNotDone(a);
       let bR = reqNotDone(b);
@@ -1424,12 +1453,12 @@ export class PersService {
         return aArt - bArt;
       }
 
-      // Вероятность получения
-      let aProb = getProbRev(a);
-      let bProb = getProbRev(b);
-      if (aProb != bProb) {
-        return aProb - bProb;
-      }
+      // // Вероятность получения
+      // let aProb = getProbRev(a);
+      // let bProb = getProbRev(b);
+      // if (aProb != bProb) {
+      //   return aProb - bProb;
+      // }
 
       // Название
       return a.name.localeCompare(b.name);
@@ -1472,6 +1501,28 @@ export class PersService {
         }
 
         return 1;
+      }
+    });
+
+    const rewardMap = new Map<string, Reward>();
+
+    prs.rewards?.forEach((q) => {
+      if (q.revProbId) {
+        const rarity = this.gameSettings.revProbs.find((r) => r.id === q.revProbId);
+        q.rarityName = rarity?.name || "";
+      }
+
+      rewardMap.set(q.id, q);
+    });
+
+    prs.inventory.forEach((q) => {
+      const reward = rewardMap.get(q.id);
+      if (reward) {
+        q.name = reward.name;
+        q.image = reward.image;
+        q.rarityName = reward.rarityName;
+        q.revProbId = reward.revProbId;
+        q.rare = reward.rare;
       }
     });
   }
@@ -2767,18 +2818,136 @@ export class PersService {
    * Розыгрыш наград.
    */
   private CasinoRevards(task: Task) {
-    let revards = this.pers$.value.rewards.filter((q) => q.isLud && q.ludProbability > 0 && !q.isReward);
+    let tskExp = task.plusExp;
 
-    if (!revards.length) {
+    let availableRewards = this.pers$.value.rewards.filter((q) => q.isLud && q.ludProbability > 0 && !q.isReward);
+
+    if (!availableRewards.length || tskExp <= 0) {
       return;
     }
 
-    for (const rev of revards) {
-      let rnd = Math.random() * 100;
-      if (rnd <= rev.ludProbability) {
-        this.addToInventory(rev);
+    // Определяем количество полных розыгрышей
+    const wholeDraws = Math.floor(tskExp);
+
+    // Определяем вероятность дополнительного розыгрыша для дробной части
+    const fractionalPart = tskExp - wholeDraws;
+    const hasFractionalDraw = fractionalPart > 0 && Math.random() < fractionalPart;
+
+    // Общее количество розыгрышей
+    const totalDraws = wholeDraws + (hasFractionalDraw ? 1 : 0);
+
+    // Проводим розыгрыши
+    for (let draw = 0; draw < totalDraws; draw++) {
+      const reward = this.weightedRandomReward(availableRewards);
+      if (reward) {
+        this.addToInventory(reward);
       }
     }
+
+    // let revards = this.pers$.value.rewards.filter((q) => q.isLud && q.ludProbability > 0 && !q.isReward);
+
+    // if (!revards.length) {
+    //   return;
+    // }
+
+    // for (const rev of revards) {
+    //   let rnd = Math.random() * 100;
+    //   if (rnd <= rev.ludProbability) {
+    //     this.addToInventory(rev);
+    //   }
+    // }
+  }
+
+  private weightedRandomReward(rewards: any[]): any | null {
+    if (!rewards.length) {
+      return null;
+    }
+
+    // Создаем карту редкостей для быстрого поиска
+    const rarityMap = new Map<number, any[]>();
+    for (const reward of rewards) {
+      if (!rarityMap.has(reward.revProbId)) {
+        rarityMap.set(reward.revProbId, []);
+      }
+      rarityMap.get(reward.revProbId)?.push(reward);
+    }
+
+    // Функция для поиска награды с заданной редкостью или менее редкой
+    const findRewardsByRarity = (rarityId: number): any[] => {
+      // Ищем награды с указанной редкостью
+      if (rarityMap.has(rarityId)) {
+        return rarityMap.get(rarityId) || [];
+      }
+
+      // Если нет, ищем менее редкие (с большим id)
+      const sortedRarities = [...this.gameSettings.revProbs].sort((a, b) => a.id - b.id);
+      const currentRarityIndex = sortedRarities.findIndex((r) => r.id === rarityId);
+
+      // Ищем в порядке убывания редкости (увеличения id)
+      for (let i = currentRarityIndex + 1; i < sortedRarities.length; i++) {
+        const lessRareId = sortedRarities[i].id;
+        if (rarityMap.has(lessRareId)) {
+          return rarityMap.get(lessRareId) || [];
+        }
+      }
+
+      return [];
+    };
+
+    // Создаем взвешенный список редкостей
+    let weightedRarities: Array<{ rarityId: number; weight: number }> = [];
+    let totalWeight = 0;
+
+    for (const rarity of this.gameSettings.revProbs) {
+      const weight = rarity.prob;
+      weightedRarities.push({ rarityId: rarity.id, weight });
+      totalWeight += weight;
+    }
+
+    // Общий вес должен быть 100% (или 1, если prob в десятичном виде)
+    const maxWeight = 100; // или 1, в зависимости от формата prob
+    const nothingWeight = Math.max(0, maxWeight - totalWeight);
+
+    // Если общий вес редкостей больше 100%, нормализуем
+    if (totalWeight > maxWeight) {
+      // Можно либо нормализовать, либо вернуть null
+      totalWeight = maxWeight;
+    }
+
+    // Добавляем вес "ничего не получить"
+    const finalTotalWeight = totalWeight + nothingWeight;
+
+    // Если общий вес 0, ничего не выпадает
+    if (finalTotalWeight <= 0) {
+      return null;
+    }
+
+    // Розыгрыш редкости методом взвешенной случайности
+    let randomValue = Math.random() * finalTotalWeight;
+    let currentWeight = 0;
+
+    // Проверяем редкости
+    for (const weightedRarity of weightedRarities) {
+      currentWeight += weightedRarity.weight;
+      if (randomValue <= currentWeight) {
+        const selectedRarityId = weightedRarity.rarityId;
+
+        // Ищем награды с выбранной редкостью или менее редкие
+        let availableRewards = findRewardsByRarity(selectedRarityId);
+
+        // Если не нашли наград с этой редкостью или менее редкой, возвращаем null
+        if (!availableRewards.length) {
+          return null;
+        }
+
+        // Выбираем случайную награду из доступных
+        const randomIndex = Math.floor(Math.random() * availableRewards.length);
+        return availableRewards[randomIndex];
+      }
+    }
+
+    // Если дошли до сюда, значит выпало "ничего"
+    return null;
   }
 
   private changeClassical(tsk: Task, isDone: boolean, activeSubtasksCount: number) {
@@ -3179,7 +3348,7 @@ export class PersService {
     }
 
     while (true) {
-      let tesKoef = this.gameSettings.getTesChangeKoef(tesVal);
+      let tesKoef = this.gameSettings.getTesChangeKoef(tesVal, this.pers$.value.level);
 
       let tesLeft = 1;
       if (isPlus) {
@@ -3358,14 +3527,17 @@ export class PersService {
           if (on < this.gameSettings.abCost(tsk.value, tsk.hardnes, tsk.isPerk) && this.gameSettings.isAbPointsEnabled) {
             tsk.mayUp = false;
             tsk.IsNextLvlSame = false;
+            ab.HasSameAbLvl = false;
           }
 
           if (tsk.value < 1 || !tsk.mayUp) {
             tsk.IsNextLvlSame = false;
+            ab.HasSameAbLvl = false;
           }
 
           if (tsk.IsNextLvlSame) {
             anySame = true;
+            ab.HasSameAbLvl = true;
           }
         }
       }
@@ -3375,12 +3547,14 @@ export class PersService {
       ch.abilities = ch.abilities.sort(this.abSorter());
     }
 
-    if (anySame) {
-      for (let ch of prs.characteristics) {
-        for (let ab of ch.abilities) {
-          for (let tsk of ab.tasks) {
-            if (!tsk.IsNextLvlSame) {
-              tsk.mayUp = false;
+    if (!this.gameSettings.isMayUpNotSame) {
+      if (anySame) {
+        for (let ch of prs.characteristics) {
+          for (let ab of ch.abilities) {
+            for (let tsk of ab.tasks) {
+              if (!tsk.IsNextLvlSame) {
+                tsk.mayUp = false;
+              }
             }
           }
         }

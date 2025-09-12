@@ -3,6 +3,11 @@ import { Task } from "src/Models/Task";
 import { getExpResult } from "src/Models/getExpResult";
 
 export abstract class GameSettings {
+  /**
+   * Можно открывать не одинаковые уровни навыков.
+   */
+  isMayUpNotSame: boolean = true;
+
   isHardnessEnable: boolean = true;
   /**
    * Нужно набрать очков чтобы достичь уровень
@@ -77,7 +82,7 @@ export abstract class GameSettings {
    * Тип расчета опыта. (dynamic, abLvl, abLvlPoints, abValPoints)
    */
   expFotmulaType: string = "abLvl";
-  failKoef: number = 1;
+  failKoef: number = 2;
   /**
    * Анимация вспышки задачи.
    */
@@ -149,7 +154,7 @@ export abstract class GameSettings {
   /**
    * Число картинок персонажей.
    */
-  persImgNum: number = 56;
+  persImgNum: number = 59;
 
   perkHardness: number = 0.5;
 
@@ -161,24 +166,26 @@ export abstract class GameSettings {
    */
   plusAbProgrForTitle: number = 0;
   qwestHardneses: qwestHardness[] = [
-    { id: 5, name: "оч. легко", gold: 50 },
+    { id: 5, name: "оч. легко", gold: 20 },
     { id: 4, name: "легко", gold: 100 },
-    { id: 3, name: "норм", gold: 250 },
-    { id: 2, name: "сложно", gold: 500 },
-    { id: 1, name: "оч. сложно", gold: 1000 },
+    { id: 3, name: "норм", gold: 400 },
+    { id: 2, name: "сложно", gold: 1000 },
+    { id: 1, name: "безумно", gold: 3000 },
   ];
   rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
+
   revProbs: taskProb[] = [
-    { id: 5, name: "оч. распространенный", prob: 3, gold: 25 },
-    { id: 4, name: "распространенный", prob: 2, gold: 50 },
-    { id: 3, name: "обычный", prob: 1, gold: 100 },
-    { id: 2, name: "редкий", prob: 0.25, gold: 250 },
-    { id: 1, name: "оч. редкий", prob: 0.05, gold: 500 },
+    { id: 5, name: "хлам", prob: 6, gold: 20 }, // 100
+    { id: 4, name: "обычный", prob: 1.2, gold: 100 }, // 500
+    { id: 3, name: "редкий", prob: 0.3, gold: 400 }, // 2000
+    { id: 2, name: "уникальный", prob: 0.12, gold: 1000 }, // 5000
+    { id: 1, name: "легендарный", prob: 0.04, gold: 3000 }, // 15000
   ];
+
   /**
    * Число картинок скиллов.
    */
-  skillImgNum: number = 161;
+  skillImgNum: number = 164;
   tskOrderDefault: number = -1;
 
   /**
@@ -273,7 +280,7 @@ export abstract class GameSettings {
   /**
    * Формула прогресса навыка.
    */
-  getTesChangeKoef(tesVal: number): number {
+  getTesChangeKoef(tesVal: number, persLvl: number): number {
     const isTES = true;
     let level = 1 + Math.floor(tesVal / 10.0);
 

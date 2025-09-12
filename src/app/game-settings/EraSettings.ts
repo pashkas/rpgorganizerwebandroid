@@ -1,31 +1,102 @@
-import { getExpResult } from "src/Models/getExpResult";
+import { Injectable } from "@angular/core";
+
 import { GameSettings } from "../GameSettings";
 import { Pers } from "src/Models/Pers";
 import { Task } from "src/Models/Task";
-import { Injectable } from "@angular/core";
+import { getExpResult } from "src/Models/getExpResult";
 
 /**
  * Настройки игры в стиле Ера Водолея.
  */
 @Injectable()
 export class EraSettings extends GameSettings {
-  isClassicaRPG = true;
-  minAbilLvl = 1;
-  maxAbilLvl = 10;
-  minChaLvl = 1;
-  maxChaLvl = 10;
-  isAbPointsEnabled = true;
-  abPointsStart = 0;
-  abPointsPerLvl = 5;
-  isOpenPersAtNewLevel = true;
-  maxPersLevel: number = 50;
-  isHpEnabled: boolean = false;
-  isHardnessEnable = false;
-  perkHardness: number = 1;
+  public abPointsPerLvl = 5;
+  public abPointsStart = 0;
+  public isAbPointsEnabled = true;
+  public isClassicaRPG = true;
+  public isHardnessEnable = false;
+  public isHpEnabled: boolean = false;
+  public isOpenPersAtNewLevel = true;
+  public maxAbilLvl = 10;
+  public maxChaLvl = 10;
+  public maxPersLevel: number = 70;
+  public minAbilLvl = 1;
+  public minChaLvl = 1;
+  public perkHardness: number = 0.5;
+  public rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
 
-  rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
+  public abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
+    if (isPerk) {
+      curLvl = this.maxAbilLvl;
+    }
 
-  getMonsterLevel(prsLvl: number, maxLevel: number): number {
+    return curLvl * hardness;
+  }
+
+  public abCost(curLvl: number, hardness: number, isPerk: boolean): number {
+    if (isPerk) {
+      return this.maxAbilLvl * hardness;
+    }
+
+    return 1 * hardness;
+  }
+
+  public abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
+    if (isPerk && curLvl > 0) {
+      curLvl = this.maxAbilLvl;
+    }
+
+    return curLvl * hardness;
+  }
+
+  public calculateHp(prs: Pers, prevLvl: number, curLvl: number) {
+    if (prs.hp == null) {
+      prs.hp = 100;
+    }
+    if (prs.maxHp == null) {
+      prs.maxHp = 100;
+    }
+    if (prs.hpProgr == null) {
+      prs.hpProgr = 100;
+    }
+
+    if (!this.isHpEnabled) {
+      prs.hp = 100;
+      prs.maxHp = 100;
+      prs.hpProgr = 100;
+
+      return;
+    }
+
+    prs.maxHp = (this.abPointsStart + prs.level * this.abPointsPerLvl) / 3;
+
+    if (curLvl > prevLvl) {
+      prs.hp = prs.maxHp;
+    }
+
+    if (prs.hp > prs.maxHp) {
+      prs.hp = prs.maxHp;
+    }
+
+    prs.hpProgr = (prs.hp / prs.maxHp) * 100;
+  }
+
+  public changeExpClassical(tsk: Task, isDone: boolean, koef: number, prs: Pers) {
+    if (isDone) {
+      prs.expVal += 1 * koef;
+    } else {
+      if (this.isHpEnabled) {
+        prs.hp -= 1 * koef;
+      } else {
+        prs.expVal -= 1 * koef;
+      }
+    }
+  }
+
+  public checkPerkTskValue(tsk: Task) {
+  }
+
+  public getMonsterLevel(prsLvl: number, maxLevel: number): number {
     if (prsLvl < 10) {
       return 1;
     }
@@ -38,31 +109,14 @@ export class EraSettings extends GameSettings {
     if (prsLvl < 40) {
       return 4;
     }
-    if (prsLvl < 50) {
+    if (prsLvl < 70) {
       return 5;
     }
 
     return 6;
   }
 
-  setTes() {}
-
-  abCost(curLvl: number, hardness: number, isPerk: boolean): number {
-    return 1 * hardness;
-  }
-
-  abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
-    return curLvl * hardness;
-  }
-
-  abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
-    return curLvl * hardness;
-  }
-
-  checkPerkTskValue(tsk: Task) {
-  }
-
-  getPersExpAndLevel(
+  public getPersExpAndLevel(
     totalAbVal: number,
     abCount: number,
     expPoints: number,
@@ -104,47 +158,11 @@ export class EraSettings extends GameSettings {
     return result;
   }
 
-  calculateHp(prs: Pers, prevLvl: number, curLvl: number) {
-    if (prs.hp == null) {
-      prs.hp = 100;
-    }
-    if (prs.maxHp == null) {
-      prs.maxHp = 100;
-    }
-    if (prs.hpProgr == null) {
-      prs.hpProgr = 100;
-    }
+  public getPersRangName(persLvl): string {
+    let rngIdx = this.getMonsterLevel(persLvl, this.maxPersLevel);
 
-    if (!this.isHpEnabled) {
-      prs.hp = 100;
-      prs.maxHp = 100;
-      prs.hpProgr = 100;
-
-      return;
-    }
-
-    prs.maxHp = (this.abPointsStart + prs.level * this.abPointsPerLvl) / 3;
-
-    if (curLvl > prevLvl) {
-      prs.hp = prs.maxHp;
-    }
-
-    if (prs.hp > prs.maxHp) {
-      prs.hp = prs.maxHp;
-    }
-
-    prs.hpProgr = (prs.hp / prs.maxHp) * 100;
+    return this.rangNames[rngIdx - 1];
   }
 
-  changeExpClassical(tsk: Task, isDone: boolean, koef: number, prs: Pers) {
-    if (isDone) {
-      prs.expVal += 1 * koef;
-    } else {
-      if (this.isHpEnabled) {
-        prs.hp -= 1 * koef;
-      } else {
-        prs.expVal -= 1 * koef;
-      }
-    }
-  }
+  public setTes() {}
 }

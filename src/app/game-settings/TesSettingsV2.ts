@@ -32,7 +32,7 @@ export class TesSettingsV2 extends GameSettings {
 
   setTes() {}
 
-  getTesChangeKoef(tesVal: number): number {
+  getTesChangeKoef(tesVal: number, persLvl: number): number {
     let level = 1 + Math.floor(tesVal / 10.0);
 
     let skillMult = 2;

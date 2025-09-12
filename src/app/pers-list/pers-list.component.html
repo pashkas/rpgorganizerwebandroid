@@ -89,10 +89,10 @@
             <i>{{ pers.story }}</i>
           </div>
 
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;" class="w-100 py-1">
-            <div *ngFor="let rev of pers.achievements | filterByProperty : 'isAviable' : true; let i = index;">
-              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; ">
-                <img appImgBroken [src]="rev.image" class="img-fluid rounded w-100" style="height: 100px; object-fit: contain;" />
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center" class="w-100 py-1">
+            <div *ngFor="let rev of pers.achievements | filterByProperty : 'isAviable' : true; let i = index">
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center">
+                <img appImgBroken [src]="rev.image" class="img-fluid rounded w-100" style="height: 100px; object-fit: contain" />
                 <div class="text-muted small mt-1 text-wrap">
                   {{ rev.name }}
                 </div>
@@ -407,6 +407,40 @@
       <!-- Просмотр -->
       <div *ngIf="!isEditMode" class="pt-2 pb-4 w-100">
         <mat-tab-group mat-align-tabs="center" animationDuration="0ms" [(selectedIndex)]="this.srvSt.selInventoryList">
+          <mat-tab label="Инвентарь">
+            <!-- Инвентарь -->
+            <div class="p-3">
+              <div fxLayout="row" fxLayoutAlign="end center" class="fade">
+                <button mat-button class="icon-small">
+                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                  <span>
+                    <span class="text-success">{{ pers.gold | floor }}</span>
+                  </span>
+                </button>
+                <button class="icon-small mr-2" mat-icon-button>
+                  <img src="assets/icons/create.png" class="img-fluid" />
+                </button>
+              </div>
+              <div class="masonry-list pt-1">
+                <div class="masonry-item" *ngFor="let rev of pers.inventory">
+                  <button mat-stroked-button class="w-100 h-100 revBtn">
+                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
+                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+                      <div style="color: green">
+                        <small>{{ rev.rarityName }}</small>
+                      </div>
+                      <div class="text-wrap py-2">
+                        {{ rev.name }}
+                      </div>
+                      <button class="w-100" (click)="useRevard(rev, $event)" mat-stroked-button style="color: gold">
+                        <small>x{{ rev.count }}</small>
+                      </button>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
           <mat-tab label="Достижения">
             <!-- Достижения -->
             <div class="p-3">
@@ -459,10 +493,8 @@
                       <div class="text-wrap py-2" *ngIf="rev.name">
                         {{ rev.name }}
                       </div>
-                      <div *ngIf="rev.isLud">
-                        <small class="text-secondary">
-                          {{ rev.ludProbability + "%" }}
-                        </small>
+                      <div style="color: green" class="py-1">
+                        <small>{{ rev.rarityName }}</small>
                       </div>
                       <ng-container *ngIf="!rev.isReward; else isReward">
                         <div class="flex w-100" style="justify-content: space-between">
@@ -483,37 +515,6 @@
                           >
                         </div>
                       </ng-template>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </mat-tab>
-          <mat-tab label="Инвентарь">
-            <!-- Инвентарь -->
-            <div class="p-3">
-              <div fxLayout="row" fxLayoutAlign="end center" class="fade">
-                <button mat-button class="icon-small">
-                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
-                  <span>
-                    <span class="text-success">{{ pers.gold | floor }}</span>
-                  </span>
-                </button>
-                <button class="icon-small mr-2" mat-icon-button>
-                  <img src="assets/icons/create.png" class="img-fluid" />
-                </button>
-              </div>
-              <div class="masonry-list pt-1">
-                <div class="masonry-item" *ngFor="let rev of pers.inventory">
-                  <button mat-stroked-button class="w-100 h-100 revBtn">
-                    <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
-                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
-                      <div class="text-wrap py-2">
-                        {{ rev.name }}
-                      </div>
-                      <button class="w-100" (click)="useRevard(rev, $event)" mat-stroked-button style="color: gold">
-                        <small>x{{ rev.count }}</small>
-                      </button>
                     </div>
                   </button>
                 </div>
@@ -576,8 +577,8 @@
                         <div *ngIf="rev.isArtefact">
                           <span class="badge pointer bg-info"> арт </span>
                         </div>
-                        <div *ngIf="rev.isLud" style="color: green">
-                          <small>{{ rev.ludProbability + "%" }}</small>
+                        <div style="color: green">
+                          <small>{{ rev.rarityName }}</small>
                         </div>
                         <div *ngIf="rev.isShop" style="color: gold">
                           <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1em' }" />

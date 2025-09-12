@@ -30,7 +30,7 @@
       <mat-form-field *ngIf="rev.isShop">
         <input type="number" matInput onfocus="this.select()" [(ngModel)]="data.rev.cost" [ngModelOptions]="{ standalone: true }" autocomplete="off" placeholder="Стоимость" name="data.rev.cost" />
       </mat-form-field>
-      <mat-form-field *ngIf="rev.isLud">
+      <!-- <mat-form-field *ngIf="rev.isLud">
         <input
           type="number"
           matInput
@@ -41,7 +41,7 @@
           placeholder="Вероятность"
           name="data.rev.ludProbability"
         />
-      </mat-form-field>
+      </mat-form-field> -->
     </div>
     <div *ngIf="rev.isReward">
       <div fxLayout="row" fxLayoutAlign="space-between center" class="pt-3">

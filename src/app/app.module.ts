@@ -37,6 +37,8 @@ import { EraSettings } from "./game-settings/EraSettings";
 import { CustomSwipeDirective } from "./customSwipe.directive";
 import { TesSettingsV2 } from "./game-settings/TesSettingsV2";
 import { TesSettings } from "./game-settings/TesSettings";
+import { TessSettingsUnionExp } from "./game-settings/TesSettingsUnionExp";
+import { TessSettingsEXPA } from "./game-settings/TesSettingsEXPA";
 
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = <any>{
@@ -103,8 +105,8 @@ registerLocaleData(localeRu, "ru");
     },
     {
       provide: GameSettings,
-      // useClass: EraSettings,
-      useClass: TesSettings,
+      useClass: EraSettings,
+      // useClass: TessSettingsEXPA,
     },
   ],
   bootstrap: [AppComponent],

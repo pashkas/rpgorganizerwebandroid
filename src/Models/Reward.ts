@@ -10,7 +10,7 @@ export class Reward {
   count: number = 0;
   rare: string = "Обычный";
 
-  isLud: boolean = false;
+  isLud: boolean = true;
   isShop: boolean = true;
   isArtefact: boolean = false;
   isReward: boolean = false;
@@ -26,6 +26,7 @@ export class Reward {
 
   isAviable: boolean = false;
   revProbId: number;
+  rarityName: string;
 
   progr: number;
 }
