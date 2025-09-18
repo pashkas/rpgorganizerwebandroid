@@ -1525,6 +1525,16 @@ export class PersService {
         q.rare = reward.rare;
       }
     });
+
+    prs.inventory = prs.inventory.sort((a, b) => {
+      // Редкость
+      if (a.revProbId != b.revProbId) {
+        return -(a.revProbId - b.revProbId);
+      }
+
+      // Название
+      return a.name.localeCompare(b.name);
+    });
   }
 
   reqCheck(val: number, req: Reqvirement, notDoneReqs: ReqStrExt[]) {
@@ -2904,26 +2914,8 @@ export class PersService {
       totalWeight += weight;
     }
 
-    // Общий вес должен быть 100% (или 1, если prob в десятичном виде)
-    const maxWeight = 100; // или 1, в зависимости от формата prob
-    const nothingWeight = Math.max(0, maxWeight - totalWeight);
-
-    // Если общий вес редкостей больше 100%, нормализуем
-    if (totalWeight > maxWeight) {
-      // Можно либо нормализовать, либо вернуть null
-      totalWeight = maxWeight;
-    }
-
-    // Добавляем вес "ничего не получить"
-    const finalTotalWeight = totalWeight + nothingWeight;
-
-    // Если общий вес 0, ничего не выпадает
-    if (finalTotalWeight <= 0) {
-      return null;
-    }
-
     // Розыгрыш редкости методом взвешенной случайности
-    let randomValue = Math.random() * finalTotalWeight;
+    let randomValue = Math.random() * 100;
     let currentWeight = 0;
 
     // Проверяем редкости
