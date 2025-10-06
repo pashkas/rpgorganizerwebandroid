@@ -486,8 +486,8 @@
                 </button>
               </div>
               <div class="masonry-list pt-1">
-                <div class="masonry-item" *ngFor="let rev of pers.rewards | shop">
-                  <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event)">
+                <div class="masonry-item" *ngFor="let rev of pers.rewards | shop" >
+                  <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event)" [style.opacity]="!rev.isAviable ? '0.6' : '1'">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
                       <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
                       <div class="text-wrap py-2" *ngIf="rev.name">

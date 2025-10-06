@@ -94,6 +94,9 @@ export class EraSettings extends GameSettings {
   }
 
   public checkPerkTskValue(tsk: Task) {
+    if (tsk.isPerk && tsk.value > 0) {
+      tsk.value = this.maxAbilLvl;
+    }
   }
 
   public getMonsterLevel(prsLvl: number, maxLevel: number): number {

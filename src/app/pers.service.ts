@@ -348,11 +348,13 @@ export class PersService {
         if (this.boolVCompare(a.anyMayUp, b.anyMayUp) != 0) {
           return -this.boolVCompare(a.anyMayUp, b.anyMayUp);
         }
-      }
 
-      // Одинаковые
-      if (this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl) != null) {
-        return -this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
+        // Одинаковые
+        if (a.anyMayUp && b.anyMayUp) {
+          if (this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl) != null) {
+            return -this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
+          }
+        }
       }
 
       if (a.value != b.value) {
@@ -2288,6 +2290,7 @@ export class PersService {
     prs.isWriteTime = false;
 
     prs.currentView = curpersview.SkillsGlobal;
+    // prs.currentView = curpersview.SkillTasks;
 
     if (prs.tasks && prs.tasks.length > 0) {
       prs.currentTaskIndex = 0;

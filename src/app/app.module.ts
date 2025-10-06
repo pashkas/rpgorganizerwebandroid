@@ -1,52 +1,42 @@
-import { BrowserModule, HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule } from "@angular/platform-browser";
-import { NgModule, LOCALE_ID, Injectable } from "@angular/core";
+import { registerLocaleData } from "@angular/common";
+import { HttpClientModule } from "@angular/common/http";
+import localeRu from "@angular/common/locales/ru";
+import { LOCALE_ID, NgModule } from "@angular/core";
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatBadgeModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, MatSlideToggleModule } from "@angular/material";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatDividerModule } from "@angular/material/divider";
+import { BrowserModule } from "@angular/platform-browser";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { RouteReuseStrategy } from "@angular/router";
+import { ServiceWorkerModule } from "@angular/service-worker";
+
+import { AngularFireModule } from "angularfire2";
+import { NgxMaterialTimepickerModule } from "ngx-material-timepicker";
+
+import { environment } from "../environments/environment";
+import { GameSettings } from "./GameSettings";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
-import { AngularFireModule } from "angularfire2";
-import { AngularFirestoreModule } from "angularfire2/firestore";
-import { AngularFireAuthModule } from "angularfire2/auth";
-import { environment } from "../environments/environment";
-import { MainWindowComponent } from "./main-window/main-window.component";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { AutofocusDirective } from "./autofocus.directive";
-import { HttpClientModule } from "@angular/common/http";
-import { SelectOnClickDirective } from "./select-on-click.directive";
-import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
-import { ServiceWorkerModule } from "@angular/service-worker";
-import { registerLocaleData } from "@angular/common";
-import localeRu from "@angular/common/locales/ru";
-import { MatProgressSpinnerModule, MatIconModule, MatBadgeModule, MatSlideToggleModule, MatChipsModule, MAT_FORM_FIELD_DEFAULT_OPTIONS, GestureConfig } from "@angular/material";
-import { SharedModule } from "./shared/shared.module";
 import { ArrSortDialogComponent } from "./arr-sort-dialog/arr-sort-dialog.component";
-import { ProgressBarNumComponent } from "./shared/progress-bar-num/progress-bar-num.component";
-import { TskTimeValDialogComponent } from "./tsk-time-val-dialog/tsk-time-val-dialog.component";
-import { RestComponent } from "./rest/rest.component";
-import { RouteReuseStrategy } from "@angular/router";
-import { RouteReuseService } from "./route-reuse.service";
-import { MatDividerModule } from "@angular/material/divider";
+import { AutofocusDirective } from "./autofocus.directive";
 import { ConfirmationDialogComponent } from "./confirmation-dialog/confirmation-dialog.component";
-import { TimerCounterComponent } from "./main-window/timer-counter/timer-counter.component";
-import { NgxMaterialTimepickerModule } from "ngx-material-timepicker";
-import { FailModPipe } from "./fail-mod.pipe";
-import { MainProgrDescPipe } from "./main-window/main-progr-desc.pipe";
-import { ListBgPipe } from "./list-bg.pipe";
-import { TaskTimerComponentComponent } from "./task-timer-component/task-timer-component.component";
-import { MatCheckboxModule } from "@angular/material/checkbox";
-import { GameSettings } from "./GameSettings";
-import { EraSettings } from "./game-settings/EraSettings";
 import { CustomSwipeDirective } from "./customSwipe.directive";
-import { TesSettingsV2 } from "./game-settings/TesSettingsV2";
-import { TesSettings } from "./game-settings/TesSettings";
-import { TessSettingsUnionExp } from "./game-settings/TesSettingsUnionExp";
-import { TessSettingsEXPA } from "./game-settings/TesSettingsEXPA";
-
-export class MyHammerConfig extends HammerGestureConfig {
-  overrides = <any>{
-    swipe: { direction: Hammer.DIRECTION_ALL }, // Configure for vertical swipes
-  };
-}
-
-registerLocaleData(localeRu, "ru");
+import { FailModPipe } from "./fail-mod.pipe";
+import { EraSettings } from "./game-settings/EraSettings";
+import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
+import { ListBgPipe } from "./list-bg.pipe";
+import { MainProgrDescPipe } from "./main-window/main-progr-desc.pipe";
+import { MainWindowComponent } from "./main-window/main-window.component";
+import { TimerCounterComponent } from "./main-window/timer-counter/timer-counter.component";
+import { RestComponent } from "./rest/rest.component";
+import { RouteReuseService } from "./route-reuse.service";
+import { SelectOnClickDirective } from "./select-on-click.directive";
+import { ProgressBarNumComponent } from "./shared/progress-bar-num/progress-bar-num.component";
+import { SharedModule } from "./shared/shared.module";
+import { TaskTimerComponentComponent } from "./task-timer-component/task-timer-component.component";
+import { TskTimeValDialogComponent } from "./tsk-time-val-dialog/tsk-time-val-dialog.component";
+import { AngularFireAuthModule } from "angularfire2/auth";
+import { AngularFirestoreModule } from "angularfire2/firestore";
 
 @NgModule({
   declarations: [
@@ -68,7 +58,6 @@ registerLocaleData(localeRu, "ru");
     CustomSwipeDirective,
   ],
   imports: [
-    HammerModule,
     MatChipsModule,
     MatCheckboxModule,
     NgxMaterialTimepickerModule,
@@ -88,10 +77,6 @@ registerLocaleData(localeRu, "ru");
     ServiceWorkerModule.register("ngsw-worker.js", { enabled: environment.production }),
   ],
   providers: [
-    {
-      provide: HAMMER_GESTURE_CONFIG,
-      useClass: MyHammerConfig,
-    },
     { provide: LOCALE_ID, useValue: "ru" },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
@@ -114,3 +99,5 @@ registerLocaleData(localeRu, "ru");
   exports: [],
 })
 export class AppModule {}
+
+registerLocaleData(localeRu, "ru");

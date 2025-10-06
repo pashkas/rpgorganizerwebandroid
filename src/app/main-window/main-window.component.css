@@ -2,7 +2,7 @@
   height: 100vh;
   width: 100vw;
   display: grid;
-  grid-template-rows: 1fr auto auto 21vh;
+  grid-template-rows: 1fr auto auto auto;
 }
 
 li:hover {
@@ -168,4 +168,8 @@ li:hover {
 .list-skills-sort {
   padding-top: 0px;
   padding-bottom: 0px;
+}
+
+.pers-img-main{
+  max-height: 22vh;
 }

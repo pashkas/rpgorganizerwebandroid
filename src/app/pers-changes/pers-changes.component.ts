@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from "@angular/core";
-import { MAT_DIALOG_DATA } from "@angular/material";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material";
 import { ChangesModel } from "src/Models/ChangesModel";
 import { Task } from "src/Models/Task";
 import { GameSettings } from "../GameSettings";
@@ -24,7 +24,7 @@ export class PersChangesComponent implements OnInit {
   percSymbol;
   itemType: String;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public gameSettings: GameSettings) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public gameSettings: GameSettings, public dialogRef: MatDialogRef<PersChangesComponent>) {
     this.percSymbol = this.gameSettings.changesIsShowPercentageInAb ? "%" : "";
     this.isShowAbProgrTable = this.gameSettings.isShowAbProgrTable;
     this.img = data.img;
@@ -45,4 +45,8 @@ export class PersChangesComponent implements OnInit {
   }
 
   ngOnInit() {}
+
+  closeDialog() {
+    this.dialogRef.close();
+  }
 }
