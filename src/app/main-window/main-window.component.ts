@@ -348,7 +348,7 @@ export class MainWindowComponent implements OnInit {
           //   cls += "-plus";
           // }
 
-          if (view == curpersview.SkillsGlobal && skills.length > 12) {
+          if (view == curpersview.SkillsGlobal && skills.length > 15) {
             cls += "-plus";
           }
         }
@@ -372,9 +372,9 @@ export class MainWindowComponent implements OnInit {
           // if (view == curpersview.QwestsGlobal && qwests.length >= 12) {
           //   cls += "-plus";
           // }
-          // if (view == curpersview.SkillsGlobal && skills.length >= 12) {
-          //   cls += "-plus";
-          // }
+          if (view == curpersview.SkillsGlobal && skills.length > 15) {
+            cls += "-plus";
+          }
         }
 
         return of(cls);
@@ -436,7 +436,7 @@ export class MainWindowComponent implements OnInit {
     let dialogRef = this.dialog.open(TaskTimerComponentComponent, {
       disableClose: true,
       panelClass: "backdrop-timer",
-      backdropClass: "backdrop",
+      backdropClass: "backdrop-timer",
     });
 
     dialogRef

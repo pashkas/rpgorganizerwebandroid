@@ -351,7 +351,7 @@ export class PersService {
 
         // Одинаковые
         if (a.anyMayUp && b.anyMayUp) {
-          if (this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl) != null) {
+          if (this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl) != 0) {
             return -this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
           }
         }
@@ -2706,7 +2706,6 @@ export class PersService {
     //   vals.push(total);
     // }
     // let tsksV = tsks.reduce((a, b) => a + b.tesValue / 10, 0);
-    // debugger;
     // Тест прокачки навыка
     // let tsk = new Task();
     // tsk.name = "test";
@@ -2734,7 +2733,6 @@ export class PersService {
     //     break;
     //   }
     // }
-    // debugger;
   }
 
   upAbility(ab: Ability, isFromMain: boolean = false) {
@@ -2947,6 +2945,11 @@ export class PersService {
 
   private changeClassical(tsk: Task, isDone: boolean, activeSubtasksCount: number) {
     let koef = this.getWeekKoef(tsk.requrense, isDone, tsk.tskWeekDays) * this.gameSettings.abChangeExp(tsk.value, tsk.hardnes, tsk.isPerk);
+
+    if(!isDone && tsk.failCounter >=1){
+      const failMod = tsk.failCounter + 1;
+      koef = koef * failMod;
+    }
 
     koef = koef / activeSubtasksCount;
 
@@ -3313,14 +3316,15 @@ export class PersService {
     let koef = this.getWeekKoef(task.requrense, isPlus, task.tskWeekDays);
 
     // При пропуске учитывается количество пропусков задачи
-    // if (!isPlus && task.failCounter > 0) {
-    //   koef = koef * (task.failCounter + 1);
-    // }
+    if (!isPlus && task.failCounter > 0) {
+      const failMod = task.failCounter + 1;
+      koef = koef * failMod;
+    }
 
     // При пропуске штраф с коефициентом
-    if (!isPlus) {
-      koef = koef * this.gameSettings.failKoef;
-    }
+    // if (!isPlus) {
+    //   koef = koef * this.gameSettings.failKoef;
+    // }
 
     if (isChangeAb) {
       subTasksCoef = subTasksCoef * task.hardnes;

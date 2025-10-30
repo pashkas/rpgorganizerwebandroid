@@ -176,7 +176,7 @@ button:focus {
 }
 
 .backdrop-timer {
-  background: rgba(0, 0, 0, 0.99);
+  background: rgba(0, 0, 0, 1);
 }
 
 .backdrop-timer .mat-dialog-container {
@@ -446,8 +446,8 @@ body {
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-left: 4px;
-  padding-right: 2px;
+  padding-left: 1px;
+  padding-right: 1px;
 }
 
 .masonry-item {

@@ -1,9 +1,9 @@
 <div class="timer-background">
   <h1 mat-dialog-title>Таймер</h1>
   <div mat-dialog-content>
-    <!-- <div class="timer" *ngIf="timeLeft$ | async as t">{{ t.hoursToDday | number : "2.0" }}:{{ t.minutesToDday | number : "2.0" }}:{{ t.secondsToDday | number : "2.0" }}</div> -->
     <div class="timer" *ngIf="stopWatchTime$ | async as t">
-      <div>{{ t.hoursToDday | number : "2.0" }}:{{ t.minutesToDday | number : "2.0" }}:{{ t.secondsToDday | number : "2.0" }}</div>
+      <!-- <div>{{ t.hoursToDday | number : "2.0" }}:{{ t.minutesToDday | number : "2.0" }}:{{ t.secondsToDday | number : "2.0" }}</div> -->
+      <div *ngIf="timeLeft$ | async as t">{{ t.hoursToDday | number : "2.0" }}:{{ t.minutesToDday | number : "2.0" }}:{{ t.secondsToDday | number : "2.0" }}</div>
       <section class="barWrapper">
         <div [style.width]="t.stopWatchProgress + '%'" class="barProgress progress-bar h-100"></div>
         <div class="barText text-center w-100"></div>

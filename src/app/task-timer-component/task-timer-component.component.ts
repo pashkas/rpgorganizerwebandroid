@@ -44,15 +44,18 @@ export class TaskTimerComponentComponent implements OnInit {
 
     this.dif = timeDifference;
 
-    const stopWatchProgress = (timeDifference / (this.stopWatchAim * 1000)) * 100;
+    let stopWatchProgress = (timeDifference / (this.stopWatchAim * 1000)) * 100;
+    if (stopWatchProgress > 100) {
+      stopWatchProgress = 100;
+    }
 
-    const daysToDday = Math.floor(timeDifference / (milliSecondsInASecond * minutesInAnHour * secondsInAMinute * hoursInADay));
+    let daysToDday = Math.floor(timeDifference / (milliSecondsInASecond * minutesInAnHour * secondsInAMinute * hoursInADay));
 
-    const hoursToDday = Math.floor((timeDifference / (milliSecondsInASecond * minutesInAnHour * secondsInAMinute)) % hoursInADay);
+    let hoursToDday = Math.floor((timeDifference / (milliSecondsInASecond * minutesInAnHour * secondsInAMinute)) % hoursInADay);
 
-    const minutesToDday = Math.floor((timeDifference / (milliSecondsInASecond * minutesInAnHour)) % secondsInAMinute);
+    let minutesToDday = Math.floor((timeDifference / (milliSecondsInASecond * minutesInAnHour)) % secondsInAMinute);
 
-    const secondsToDday = Math.floor(timeDifference / milliSecondsInASecond) % secondsInAMinute;
+    let secondsToDday = Math.floor(timeDifference / milliSecondsInASecond) % secondsInAMinute;
 
     return { secondsToDday, minutesToDday, hoursToDday, daysToDday, stopWatchProgress };
   }
@@ -86,6 +89,21 @@ export class TaskTimerComponentComponent implements OnInit {
       takeUntil(this.unsubscribe$),
       map((x) => {
         const diff = this.calcDateDiff(Date.now(), endTime);
+        if (diff.daysToDday < 0) {
+          diff.daysToDday = 0;
+        }
+        if (diff.hoursToDday < 0) {
+          diff.hoursToDday = 0;
+        }
+        if (diff.minutesToDday < 0) {
+          diff.minutesToDday = 0;
+        }
+        if (diff.secondsToDday < 0) {
+          diff.secondsToDday = 0;
+        }
+        if (diff.stopWatchProgress > 100) {
+          diff.stopWatchProgress = 100;
+        }
 
         return diff;
       }),

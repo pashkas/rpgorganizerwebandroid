@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from "@angular/core";
-import { MAT_DIALOG_DATA } from "@angular/material";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material";
 import { Task } from "src/Models/Task";
 import { GameSettings } from "../GameSettings";
 
@@ -18,7 +18,7 @@ export class LevelUpMsgComponent implements OnInit {
   tsk: Task;
   curLvlDescr: String = null;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public gameSettings: GameSettings) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public gameSettings: GameSettings, public dialogRef: MatDialogRef<LevelUpMsgComponent>) {
     this.isShowAbProgrTable = this.gameSettings.isShowAbProgrTable;
     if (data) {
       this.abPoints = data.abPoints;
@@ -33,4 +33,8 @@ export class LevelUpMsgComponent implements OnInit {
   }
 
   ngOnInit() {}
+
+  closeDialog() {
+    this.dialogRef.close();
+  }
 }

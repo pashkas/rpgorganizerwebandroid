@@ -174,14 +174,8 @@
               <h4 class="m-0">
                 <ng-container>
                   <ng-container *ngIf="data.currentTask.requrense != 'нет' && checkDate(data.currentTask.date)" class="bg-danger"> [{{ data.currentTask.date | datestring }}] </ng-container>
-                  <span
-                    matBadge="{{ data.currentTask.failCounter | failMod }}"
-                    matBadgeSize="medium"
-                    matBadgeColor="warn"
-                    matBadgePosition="above after"
-                    matBadgeOverlap="false"
-                    [ngClass]="{ 'text-danger': data.currentTask.failCounter >= 1 }"
-                  >
+                  <span matBadge="{{ data.currentTask.failCounter | failMod }}" matBadgeSize="small" matBadgeColor="warn" matBadgePosition="above after" matBadgeOverlap="false">
+                    <!-- [ngClass]="{ 'text-danger': data.currentTask.failCounter >= 1 }" -->
                     <ng-container>
                       {{ data.currentTask.tittle }}
                     </ng-container>

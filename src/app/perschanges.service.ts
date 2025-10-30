@@ -9,6 +9,8 @@ import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
 import { StatesService } from "./states.service";
 import { NewLvlData } from "src/Models/NewLvlData";
 import { GameSettings } from "./GameSettings";
+import { race, timer } from "rxjs";
+import { first } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -385,8 +387,7 @@ export class PerschangesService {
           },
         });
 
-        await sleep(this.gameSettings.changesPopupDurationNewLevel);
-
+        await this.waitUserOrTimer(this.gameSettings.changesPopupDurationNewLevel, dialogRefLvlUp);
         dialogRefLvlUp.close();
 
         continue;
@@ -418,16 +419,18 @@ export class PerschangesService {
         backdropClass: "backdrop-changes",
       });
 
+      let delay = 0;
       if (type == "abil") {
-        await sleep(this.gameSettings.changesPopupDurationAbil);
+        delay = this.gameSettings.changesPopupDurationAbil;
       } else if (type == "cha") {
-        await sleep(this.gameSettings.changesPopupDurationCha);
+        delay = this.gameSettings.changesPopupDurationCha;
       } else if (ch.type == "qwest") {
-        await sleep(this.gameSettings.changesPopupDurationQwest);
+        delay = this.gameSettings.changesPopupDurationQwest;
       } else {
-        await sleep(this.gameSettings.changesPopupDuration);
+        delay = this.gameSettings.changesPopupDuration;
       }
 
+      await this.waitUserOrTimer(delay, dialogRef);
       dialogRef.close();
     }
 
@@ -442,8 +445,7 @@ export class PerschangesService {
         },
       });
 
-      await sleep(this.gameSettings.changesPopupDurationNewLevel);
-
+      await this.waitUserOrTimer(this.gameSettings.changesPopupDurationNewLevel, dialogRefLvlUp);
       dialogRefLvlUp.close();
 
       if (this.gameSettings.isOpenPersAtNewLevel) {
@@ -458,6 +460,12 @@ export class PerschangesService {
     if (isDoneQwest && qwestToEdit != null) {
       this.router.navigate(["pers/qwest", qwestToEdit, true]);
     }
+  }
+
+  private async waitUserOrTimer(delay: number, dialogRefLvlUp) {
+    const timer$ = timer(delay);
+    const dialogClosed$ = dialogRefLvlUp.afterClosed().pipe(first());
+    await race(dialogClosed$, timer$).toPromise();
   }
 
   private NE(a: number, b: number): boolean {

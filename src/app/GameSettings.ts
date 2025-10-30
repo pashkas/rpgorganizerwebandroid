@@ -166,10 +166,10 @@ export abstract class GameSettings {
    */
   plusAbProgrForTitle: number = 0;
   qwestHardneses: qwestHardness[] = [
-    { id: 5, name: "оч. легко", gold: 20 },
-    { id: 4, name: "легко", gold: 100 },
-    { id: 3, name: "норм", gold: 400 },
-    { id: 2, name: "сложно", gold: 1000 },
+    { id: 5, name: "легко", gold: 20 },
+    { id: 4, name: "норм", gold: 100 },
+    { id: 3, name: "сложно", gold: 400 },
+    { id: 2, name: "эпично", gold: 1000 },
     { id: 1, name: "безумно", gold: 3000 },
   ];
   rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];

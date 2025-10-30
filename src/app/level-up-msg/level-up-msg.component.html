@@ -1,4 +1,4 @@
-<div class="text-light" fxLayout="column" fxFill fxLayoutAlign="space-around center">
+<div class="text-light" fxLayout="column" fxFill fxLayoutAlign="space-around center" (click)="closeDialog()">
   <div fxLayout="row" fxLayoutAlign="space-evenly end" fxLayoutGap="15px">
     <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
       <div class="pl-2">{{ this.abPoints }}</div>
