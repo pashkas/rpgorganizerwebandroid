@@ -37,6 +37,7 @@ import { TaskTimerComponentComponent } from "./task-timer-component/task-timer-c
 import { TskTimeValDialogComponent } from "./tsk-time-val-dialog/tsk-time-val-dialog.component";
 import { AngularFireAuthModule } from "angularfire2/auth";
 import { AngularFirestoreModule } from "angularfire2/firestore";
+import { EraSettings5Lvl } from "./game-settings/EraSettings5Lvl";
 
 @NgModule({
   declarations: [
@@ -90,6 +91,7 @@ import { AngularFirestoreModule } from "angularfire2/firestore";
     },
     {
       provide: GameSettings,
+      // useClass: EraSettings5Lvl,
       useClass: EraSettings,
       // useClass: TessSettingsEXPA,
     },

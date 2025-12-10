@@ -62,19 +62,21 @@
       </div>
 
       <div *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)" style="display: flex; gap: 10px">
-        <!-- Понизить навык -->
-        <!-- <button *ngIf="tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
-          <img src="assets/icons/down.png" class="img-fluid" />
-        </button> -->
         <!-- Поднять навык -->
         <button *ngIf="tsk.mayUp == true" class="icon-small" mat-icon-button (click)="upAbil()">
           <img src="assets/icons/up.png" class="img-fluid" />
         </button>
         <!-- Количество очков -->
         <div *ngIf="this.gameSettings.isAbPointsEnabled && pers.ON > 0">
-          <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }">
+          <span
+            [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }"
+            matBadge="{{ this.pers.ON }}"
+            matBadgeSize="medium"
+            matBadgeColor="accent"
+            matBadgePosition="above after"
+            matBadgeOverlap="false"
+          >
             <img src="assets/icons/diamond.png" class="img-fluid px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-            {{ this.pers.ON }}
           </span>
         </div>
       </div>
@@ -122,14 +124,25 @@
     <ng-container *ngFor="let st of tsk.statesDescr; let i = index">
       <div
         *ngIf="st && i != 0 && i >= this.gameSettings.minAbilLvl && isShowAbProgrTable && (!tsk.isPerk || i == this.gameSettings.maxAbilLvl)"
-        class="text-center px-0 py-0 border-0 abLelelsDescr"
+        class="abLelelsDescr"
         [ngClass]="{ 'bg-success': i == tsk.value && tskAbility.isOpen && isShowAbProgrTable }"
+        [style.display]="'flex'"
+        [style.justifyContent]="'space-between'"
+        [style.alignItems]="'center'"
+        [style.padding]="'0'"
+        [style.border]="'0'"
       >
-        <b>
-          <ng-container *ngIf="isShowAbProgrTable && !tsk.isPerk">
-            {{ i + percSymbol + ": " }}
-          </ng-container> </b
-        >{{ st }}
+        <div [style.flexGrow]="'1'" [style.textAlign]="'center'" [style.paddingRight]="'10px'">
+          <b>
+            <ng-container *ngIf="isShowAbProgrTable && !tsk.isPerk">
+              {{ i + percSymbol + ": " }}
+            </ng-container>
+          </b>
+          {{ st }}
+        </div>
+        <button [style.visibility]="i == tsk.value && tskAbility.isOpen && isShowAbProgrTable ? 'visible' : 'hidden'" class="icon-small" mat-icon-button (click)="downAbil()">
+          <img src="assets/icons/down.png" class="img-fluid" />
+        </button>
       </div>
     </ng-container>
   </form>

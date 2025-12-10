@@ -1706,9 +1706,9 @@ export class PersService {
               st.time = "00:00";
             }
 
-            if (prs.isTES) {
-              st.failCounter = 0;
-            }
+            // if (prs.isTES) {
+            //   st.failCounter = 0;
+            // }
           }
 
           ab.name = tsk.name;
@@ -2427,20 +2427,20 @@ export class PersService {
     let subTask: taskState = this.allMap[subtaskId].item;
     let activeSubtasksCount = tsk.states.filter((n) => n.isActive).length;
 
+    if (this.isNullOrUndefined(subTask.failCounter)) {
+      subTask.failCounter = 0;
+    }
+
     // Изменяем значение
     if (!this.gameSettings.isClassicaRPG) {
       this.changeTes(tsk, isDone, subTask.lastNotDone, activeSubtasksCount);
     } else {
-      this.changeClassical(tsk, isDone, activeSubtasksCount);
+      this.changeClassical(tsk, isDone, activeSubtasksCount, subTask.failCounter);
     }
 
     subTask.lastDate = new Date().getTime();
     subTask.secondsDone = 0;
     subTask.counterDone = 0;
-
-    if (this.isNullOrUndefined(subTask.failCounter)) {
-      subTask.failCounter = 0;
-    }
 
     if (isDone) {
       this.CasinoRevards(tsk);
@@ -2480,19 +2480,20 @@ export class PersService {
 
     ({ task: tsk, abil } = this.findTaskAnAb(id, tsk, abil));
     if (tsk) {
+      if (this.isNullOrUndefined(tsk.failCounter)) {
+        tsk.failCounter = 0;
+      }
+
       // Минусуем значение
       if (!this.gameSettings.isClassicaRPG) {
         this.changeTes(tsk, false, tsk.lastNotDone);
       } else {
-        this.changeClassical(tsk, false, 1);
+        this.changeClassical(tsk, false, 1, tsk.failCounter);
       }
 
       tsk.lastDate = new Date().getTime();
       tsk.counterValue = 0;
       tsk.timerValue = 0;
-      if (this.isNullOrUndefined(tsk.failCounter)) {
-        tsk.failCounter = 0;
-      }
 
       // Счетчик обновлений стейтов
       if (tsk.isStateRefresh) {
@@ -2537,16 +2538,17 @@ export class PersService {
       let abil: Ability;
       ({ task: tsk, abil } = this.findTaskAnAb(id, tsk, abil));
       if (tsk) {
+        tsk.failCounter = 0;
+
         // Плюсуем значение
         if (!this.gameSettings.isClassicaRPG) {
           this.changeTes(tsk, true, tsk.lastNotDone);
         } else {
-          this.changeClassical(tsk, true, 1);
+          this.changeClassical(tsk, true, 1, tsk.failCounter);
         }
 
         tsk.counterValue = 0;
         tsk.timerValue = 0;
-        tsk.failCounter = 0;
 
         // Разыгрываем награды
         this.CasinoRevards(tsk);
@@ -2943,11 +2945,11 @@ export class PersService {
     return null;
   }
 
-  private changeClassical(tsk: Task, isDone: boolean, activeSubtasksCount: number) {
+  private changeClassical(tsk: Task, isDone: boolean, activeSubtasksCount: number, failCounter: number) {
     let koef = this.getWeekKoef(tsk.requrense, isDone, tsk.tskWeekDays) * this.gameSettings.abChangeExp(tsk.value, tsk.hardnes, tsk.isPerk);
 
-    if(!isDone && tsk.failCounter >=1){
-      const failMod = tsk.failCounter + 1;
+    if (!isDone && tsk.failCounter >= 1) {
+      const failMod = failCounter + 1;
       koef = koef * failMod;
     }
 

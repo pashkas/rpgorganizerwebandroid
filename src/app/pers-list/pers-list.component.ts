@@ -419,6 +419,7 @@ export class PersListComponent implements OnInit {
               st.secondsDone = 0;
               st.counterDone = 0;
               st.order = 0;
+              st.failCounter = 0;
             });
             tsk.secondsDone = 0;
             tsk.counterDone = 0;
