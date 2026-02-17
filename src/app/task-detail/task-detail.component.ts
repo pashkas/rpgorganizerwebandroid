@@ -61,7 +61,7 @@ export class TaskDetailComponent implements OnInit {
     public dialog: MatDialog,
     fb: FormBuilder,
     private platformLocation: PlatformLocation,
-    public gameSettings: GameSettings
+    public gameSettings: GameSettings,
   ) {
     this.isShowAbProgrTable = this.gameSettings.isShowAbProgrTable;
     this.isClassical = this.gameSettings.isClassicaRPG;
@@ -257,8 +257,10 @@ export class TaskDetailComponent implements OnInit {
     });
 
     this.tskCharact$.subscribe((n) => {
-      if (this.charactCntrl.value != null && n.id != this.charactCntrl.value.id) {
-        this.charactCntrl.setValue(n);
+      if (n != null) {
+        if (this.charactCntrl.value != null && n.id != this.charactCntrl.value.id) {
+          this.charactCntrl.setValue(n);
+        }
       }
     });
 

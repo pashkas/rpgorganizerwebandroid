@@ -15,27 +15,39 @@
 <!-- Просмотр -->
 <div class="container pt-2 pb-4" *ngIf="this.pers && tsk && !isEditMode">
   <form class="pb-4">
-    <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image"></app-image-component>
-    <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"> </app-image-component>
-    <div class="progress position-relative" style="height: 32px" *ngIf="tskAbility">
-      <div *ngIf="tskAbility.isOpen" style="z-index: 1; height: 32px" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'"></div>
-      <!-- <div
-        *ngIf="tskAbility.isOpen"
-        class="position-absolute progress-bar"
-        role="progressbar"
-        [style.width]="tskAbility.tasks[0].progresNextLevel + '%'"
-        style="height: 32px"
-        [ngClass]="{ 'progr-val-less': tskAbility.tasks[0].progresNextLevel <= tskAbility.progressValue, 'progr-val-more': tskAbility.tasks[0].progresNextLevel > tskAbility.progressValue }"
-        [style.z-index]="tskAbility.progressValue > tskAbility.tasks[0].progresNextLevel ? 2 : 0"
-      ></div> -->
-      <div style="z-index: 3" class="d-flex position-absolute w-100 px-1">
-        <div class="flex-grow-1 text-left align-self-baseline">
-          <h4>{{ tsk | abHardness }}</h4>
-        </div>
-        <div class="text-right align-self-baseline">
-          <h4>{{ tskAbility.rang.name }}</h4>
+    <div style="position: relative; display: flex; justify-content: center; align-items: center">
+      <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image"></app-image-component>
+      <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"></app-image-component>
+
+      <div *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)" style="position: absolute; top: 0; right: 0">
+        <div *ngIf="this.gameSettings.isAbPointsEnabled && pers.ON > 0">
+          <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }" matBadge="{{ this.pers.ON }}" matBadgeSize="small" matBadgeColor="accent" matBadgePosition="above after">
+            <img src="assets/icons/diamond.png" class="img-fluid px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+          </span>
         </div>
       </div>
+    </div>
+
+    <div style="display: flex; align-items: center; width: 100%; gap: 5px">
+      <button *ngIf="tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
+        <img src="assets/icons/down.png" class="img-fluid" />
+      </button>
+
+      <div class="progress position-relative" style="height: 32px; flex-grow: 1" *ngIf="tskAbility">
+        <div *ngIf="tskAbility.isOpen" style="z-index: 1; height: 32px" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'"></div>
+        <div style="z-index: 3" class="d-flex position-absolute w-100 px-1">
+          <div class="flex-grow-1 text-left align-self-baseline">
+            <h4>{{ tsk | abHardness }}</h4>
+          </div>
+          <div class="text-right align-self-baseline">
+            <h4>{{ tskAbility.rang.name }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <button *ngIf="tsk.mayUp == true" class="icon-small" mat-icon-button (click)="upAbil()">
+        <img src="assets/icons/up.png" class="img-fluid" />
+      </button>
     </div>
 
     <div *ngIf="!gameSettings.isClassicaRPG && tskAbility" class="pt-1">
@@ -59,26 +71,6 @@
 
       <div *ngIf="tskAbility?.isOpen">
         {{ tsk.date | datestring }}
-      </div>
-
-      <div *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)" style="display: flex; gap: 10px">
-        <!-- Поднять навык -->
-        <button *ngIf="tsk.mayUp == true" class="icon-small" mat-icon-button (click)="upAbil()">
-          <img src="assets/icons/up.png" class="img-fluid" />
-        </button>
-        <!-- Количество очков -->
-        <div *ngIf="this.gameSettings.isAbPointsEnabled && pers.ON > 0">
-          <span
-            [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }"
-            matBadge="{{ this.pers.ON }}"
-            matBadgeSize="medium"
-            matBadgeColor="accent"
-            matBadgePosition="above after"
-            matBadgeOverlap="false"
-          >
-            <img src="assets/icons/diamond.png" class="img-fluid px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-          </span>
-        </div>
       </div>
     </div>
 
@@ -140,9 +132,6 @@
           </b>
           {{ st }}
         </div>
-        <button [style.visibility]="i == tsk.value && tskAbility.isOpen && isShowAbProgrTable ? 'visible' : 'hidden'" class="icon-small" mat-icon-button (click)="downAbil()">
-          <img src="assets/icons/down.png" class="img-fluid" />
-        </button>
       </div>
     </ng-container>
   </form>

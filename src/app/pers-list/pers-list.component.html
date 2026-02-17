@@ -155,7 +155,7 @@
                                   </div>
                                 </div>
                               </div>
-                              <a *ngIf="mayUp == true" class="ml-0 px-0 mr-0 pointer" (click)="showAbility(ab)">
+                              <a *ngIf="mayUp == true" class="ml-0 px-0 mr-0 pointer" (click)="upAbilityFromList(ab)">
                                 <!-- upAbil(ab) -->
                                 <img src="assets/icons/up.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '20px' }" />
                               </a>
@@ -410,14 +410,14 @@
           <mat-tab label="Инвентарь">
             <!-- Инвентарь -->
             <div class="p-3">
-              <div fxLayout="row" fxLayoutAlign="end center" class="fade">
+              <div fxLayout="row" fxLayoutAlign="end center">
                 <button mat-button class="icon-small">
                   <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
                   <span>
                     <span class="text-success">{{ pers.gold | floor }}</span>
                   </span>
                 </button>
-                <button class="icon-small mr-2" mat-icon-button>
+                <button class="icon-small mr-2 fade" mat-icon-button>
                   <img src="assets/icons/create.png" class="img-fluid" />
                 </button>
               </div>
@@ -445,6 +445,12 @@
             <!-- Достижения -->
             <div class="p-3">
               <div fxLayout="row" fxLayoutAlign="end center">
+                <button mat-button class="icon-small">
+                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                  <span>
+                    <span class="text-success">{{ pers.gold | floor }}</span>
+                  </span>
+                </button>
                 <button class="icon-small mr-2" mat-icon-button (click)="qwickAddReward('achive')">
                   <img src="assets/icons/create.png" class="img-fluid" />
                 </button>
@@ -486,7 +492,7 @@
                 </button>
               </div>
               <div class="masonry-list pt-1">
-                <div class="masonry-item" *ngFor="let rev of pers.rewards | shop" >
+                <div class="masonry-item" *ngFor="let rev of pers.rewards | shop">
                   <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event)" [style.opacity]="!rev.isAviable ? '0.6' : '1'">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
                       <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />

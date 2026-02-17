@@ -10,6 +10,7 @@ import { getExpResult } from "src/Models/getExpResult";
  */
 @Injectable()
 export class EraSettings extends GameSettings {
+  isMayUpNotSame: boolean = true;
   public abPointsPerLvl = 5;
   public abPointsStart = 0;
   public isAbPointsEnabled = true;
@@ -19,34 +20,49 @@ export class EraSettings extends GameSettings {
   public isOpenPersAtNewLevel = true;
   public maxAbilLvl = 10;
   public maxChaLvl = 10;
-  public maxPersLevel: number = 70;
+  public maxPersLevel: number = 100;
   public minAbilLvl = 1;
   public minChaLvl = 1;
-  public perkHardness: number = 0.5;
-  public rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
+  public perkHardness: number = 1;
+  public rangNames = ["обыватель", "авантюрист", "воин", "капитан", "корсар", "мастер", "чемпион", "герой", "легенда"];
 
   public abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
-    if (isPerk) {
-      curLvl = this.maxAbilLvl;
-    }
+    // if (isPerk) {
+    //   curLvl = this.maxAbilLvl;
+    // }
 
     return curLvl * hardness;
   }
 
   public abCost(curLvl: number, hardness: number, isPerk: boolean): number {
+    // if (isPerk) {
+    //   return this.maxAbilLvl * hardness;
+    // }
     if (isPerk) {
-      return this.maxAbilLvl * hardness;
+      return 5 * hardness;
     }
 
     return 1 * hardness;
   }
 
   public abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
-    if (isPerk && curLvl > 0) {
-      curLvl = this.maxAbilLvl;
-    }
+    // if (isPerk && curLvl > 0) {
+    //   curLvl = this.maxAbilLvl;
+    // }
 
     return curLvl * hardness;
+  }
+
+  public checkPerkTskValue(tsk: Task) {
+    // if (tsk.isPerk && tsk.value > 0) {
+    //   tsk.value = this.maxAbilLvl;
+    // }
+
+    if (tsk.isPerk && tsk.value > 0 && tsk.value <= 5) {
+      tsk.value = 5;
+    } else if (tsk.isPerk && tsk.value > 5) {
+      tsk.value = this.maxAbilLvl;
+    }
   }
 
   public calculateHp(prs: Pers, prevLvl: number, curLvl: number) {
@@ -93,12 +109,6 @@ export class EraSettings extends GameSettings {
     }
   }
 
-  public checkPerkTskValue(tsk: Task) {
-    if (tsk.isPerk && tsk.value > 0) {
-      tsk.value = this.maxAbilLvl;
-    }
-  }
-
   public getMonsterLevel(prsLvl: number, maxLevel: number): number {
     if (prsLvl < 10) {
       return 1;
@@ -106,13 +116,13 @@ export class EraSettings extends GameSettings {
     if (prsLvl < 20) {
       return 2;
     }
-    if (prsLvl < 30) {
+    if (prsLvl < 40) {
       return 3;
     }
-    if (prsLvl < 40) {
+    if (prsLvl < 60) {
       return 4;
     }
-    if (prsLvl < 70) {
+    if (prsLvl < 80) {
       return 5;
     }
 
@@ -127,7 +137,7 @@ export class EraSettings extends GameSettings {
     totalAbLvl: number,
     classicalExpTotal: number,
     persExpVal: number,
-    abOpenned: number
+    abOpenned: number,
   ): getExpResult {
     if (persExpVal == null) {
       persExpVal = classicalExpTotal;
@@ -143,7 +153,8 @@ export class EraSettings extends GameSettings {
     while (true) {
       result.startExp = expLvl;
 
-      let e = 1 + (persLevel - 1) * 0.1;
+      let e = 1 + (persLevel - 1) * 0.05;
+      // let e = 3 + (persLevel - 1) * 0;
       let cur = this.abPointsPerLvl * persLevel * e;
       expLvl += cur;
 
@@ -162,7 +173,7 @@ export class EraSettings extends GameSettings {
   }
 
   public getPersRangName(persLvl): string {
-    let rngIdx = this.getMonsterLevel(persLvl, this.maxPersLevel);
+    let rngIdx = Math.min(Math.floor(persLvl / 10), this.rangNames.length - 1);
 
     return this.rangNames[rngIdx - 1];
   }

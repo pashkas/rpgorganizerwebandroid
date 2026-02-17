@@ -54,7 +54,12 @@ export class PersService {
   // Пользователь
   user: FirebaseUserModel;
 
-  constructor(private router: Router, private changes: PerschangesService, public dialog: MatDialog, public gameSettings: GameSettings) {
+  constructor(
+    private router: Router,
+    private changes: PerschangesService,
+    public dialog: MatDialog,
+    public gameSettings: GameSettings,
+  ) {
     this.gameSettings.setTes();
     this.isOffline = true;
     this.getPers();
@@ -78,30 +83,26 @@ export class PersService {
   }
 
   CasinoGold(tskExp: number) {
-    if (tskExp <= 0) {
-      return 0;
-    }
-
-    let totalGold = 0;
-
-    // Для каждого целого значения tskExp проводим розыгрыш с вероятностью 50%
-    const wholeParts = Math.floor(tskExp);
-    for (let i = 0; i < wholeParts; i++) {
-      if (Math.random() < 0.5) {
-        totalGold += 1;
-      }
-    }
-
-    // Для дробной части проводим дополнительный розыгрыш
-    const fractionalPart = tskExp - wholeParts;
-    if (fractionalPart > 0) {
-      // Вероятность успеха пропорциональна дробной части
-      if (Math.random() < fractionalPart * 0.5) {
-        totalGold += 1;
-      }
-    }
-
-    this.pers$.value.gold += totalGold;
+    // if (tskExp <= 0) {
+    //   return 0;
+    // }
+    // let totalGold = 0;
+    // // Для каждого целого значения tskExp проводим розыгрыш с вероятностью 50%
+    // const wholeParts = Math.floor(tskExp);
+    // for (let i = 0; i < wholeParts; i++) {
+    //   if (Math.random() < 0.5) {
+    //     totalGold += 1;
+    //   }
+    // }
+    // // Для дробной части проводим дополнительный розыгрыш
+    // const fractionalPart = tskExp - wholeParts;
+    // if (fractionalPart > 0) {
+    //   // Вероятность успеха пропорциональна дробной части
+    //   if (Math.random() < fractionalPart * 0.5) {
+    //     totalGold += 1;
+    //   }
+    // }
+    // this.pers$.value.gold += totalGold;
   }
 
   /**
@@ -133,7 +134,7 @@ export class PersService {
   DeleteCharact(uuid: any): any {
     this.pers$.value.characteristics.splice(
       this.pers$.value.characteristics.findIndex((n) => n.id == uuid),
-      1
+      1,
     );
   }
 
@@ -184,6 +185,11 @@ export class PersService {
       let aTask = a.tasks[0];
       let bTask = b.tasks[0];
 
+      // Перк?
+      if (this.boolVCompare(aTask.isPerk, bTask.isPerk) != 0) {
+        return this.boolVCompare(aTask.isPerk, bTask.isPerk);
+      }
+
       // Открыта
       if (this.boolVCompare(a.isOpen, b.isOpen) != 0) {
         return -this.boolVCompare(a.isOpen, b.isOpen);
@@ -197,11 +203,6 @@ export class PersService {
       // Значение
       if (a.progressValue != b.progressValue) {
         return a.progressValue - b.progressValue;
-      }
-
-      // Перк?
-      if (this.boolVCompare(aTask.isPerk, bTask.isPerk) != 0) {
-        return this.boolVCompare(aTask.isPerk, bTask.isPerk);
       }
 
       // Сложность
@@ -708,7 +709,11 @@ export class PersService {
     var isClosed = false;
     if (this.gameSettings.isClassicaRPG) {
       for (const tsk of ab.tasks) {
-        tsk.value -= 1;
+        if (tsk.isPerk) {
+          tsk.value = 0;
+        } else {
+          tsk.value -= 1;
+        }
         if (tsk.value <= 0) {
           tsk.value = 0;
           isClosed = true;
@@ -1807,7 +1812,7 @@ export class PersService {
               rng.name += "%";
             }
 
-            if (tsk.isPerk && this.gameSettings.isClassicaRPG) {
+            if (tsk.isPerk && this.gameSettings.isClassicaRPG && tsk.value > 0) {
               rng.name = "⭐";
             }
           }
@@ -2833,7 +2838,17 @@ export class PersService {
   private CasinoRevards(task: Task) {
     let tskExp = task.plusExp;
 
-    let availableRewards = this.pers$.value.rewards.filter((q) => q.isLud && q.ludProbability > 0 && !q.isReward);
+    let availableRewards: Reward[] = this.gameSettings.revProbs.map((q) => {
+      const rev = new Reward();
+      rev.cost = q.gold;
+      rev.ludProbability = q.prob;
+      rev.name = q.name;
+      rev.revProbId = q.id;
+
+      return rev;
+    });
+
+    // this.pers$.value.rewards.filter((q) => q.isLud && q.ludProbability > 0 && !q.isReward);
 
     if (!availableRewards.length || tskExp <= 0) {
       return;
@@ -2853,22 +2868,9 @@ export class PersService {
     for (let draw = 0; draw < totalDraws; draw++) {
       const reward = this.weightedRandomReward(availableRewards);
       if (reward) {
-        this.addToInventory(reward);
+        this.pers$.value.gold += reward.cost;
       }
     }
-
-    // let revards = this.pers$.value.rewards.filter((q) => q.isLud && q.ludProbability > 0 && !q.isReward);
-
-    // if (!revards.length) {
-    //   return;
-    // }
-
-    // for (const rev of revards) {
-    //   let rnd = Math.random() * 100;
-    //   if (rnd <= rev.ludProbability) {
-    //     this.addToInventory(rev);
-    //   }
-    // }
   }
 
   private weightedRandomReward(rewards: any[]): any | null {
@@ -3536,6 +3538,12 @@ export class PersService {
             ab.HasSameAbLvl = false;
           }
 
+          if (tsk.isPerk && tsk.value > 0 && tsk.mayUp) {
+            tsk.IsNextLvlSame = true;
+          } else {
+            tsk.IsNextLvlSame = false;
+          }
+
           if (tsk.IsNextLvlSame) {
             anySame = true;
             ab.HasSameAbLvl = true;
@@ -3548,14 +3556,26 @@ export class PersService {
       ch.abilities = ch.abilities.sort(this.abSorter());
     }
 
-    if (!this.gameSettings.isMayUpNotSame) {
-      if (anySame) {
-        for (let ch of prs.characteristics) {
-          for (let ab of ch.abilities) {
-            for (let tsk of ab.tasks) {
-              if (!tsk.IsNextLvlSame) {
-                tsk.mayUp = false;
-              }
+    if (anySame) {
+      for (let ch of prs.characteristics) {
+        for (let ab of ch.abilities) {
+          for (let tsk of ab.tasks) {
+            if (!tsk.IsNextLvlSame) {
+              tsk.mayUp = false;
+            }
+          }
+        }
+      }
+    }
+
+    // Ограничение по макс уровню навыка
+    var max = Math.floor(prs.level / 10) + 3;
+    for (let ch of prs.characteristics) {
+      for (let ab of ch.abilities) {
+        for (let tsk of ab.tasks) {
+          if (!tsk.isPerk) {
+            if (tsk.value >= max) {
+              tsk.mayUp = false;
             }
           }
         }

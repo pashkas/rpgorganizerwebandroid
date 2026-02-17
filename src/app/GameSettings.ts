@@ -158,13 +158,14 @@ export abstract class GameSettings {
 
   perkHardness: number = 0.5;
 
-  sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp", "hp"];
+  sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp", "hp", "gold"];
 
   /**
    * Плюс к прогрессу для задания в задаче.
    *
    */
   plusAbProgrForTitle: number = 0;
+  
   qwestHardneses: qwestHardness[] = [
     { id: 5, name: "легко", gold: 20 },
     { id: 4, name: "норм", gold: 100 },
@@ -172,6 +173,7 @@ export abstract class GameSettings {
     { id: 2, name: "эпично", gold: 1000 },
     { id: 1, name: "безумно", gold: 3000 },
   ];
+  
   rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
 
   revProbs: taskProb[] = [

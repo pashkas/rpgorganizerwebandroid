@@ -28,7 +28,7 @@ export class TesSettingsV2 extends GameSettings {
   changesIsChowChaLevels = true;
   isShowChaLvlPopup = true;
   changesIsShowExp = true;
-  sort = ["exp", "abil", "abLvl", "cha", "chaLvl", "qwest", "hp"];
+  sort = ["exp", "abil", "abLvl", "cha", "chaLvl", "qwest", "hp", "gold"];
 
   setTes() {}
 

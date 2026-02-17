@@ -446,8 +446,8 @@ body {
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-left: 1px;
-  padding-right: 1px;
+  /* padding-left: 1px;
+  padding-right: 1px; */
 }
 
 .masonry-item {
@@ -490,12 +490,12 @@ body {
 
 .main-masonry-small {
   column-count: 3;
-  column-gap: 2px;
+  /* column-gap: 2px; */
 }
 
 .main-masonry-small-plus {
   column-count: 4;
-  column-gap: 2px;
+  /* column-gap: 2px; */
 }
 
 .main-masonry-mid {

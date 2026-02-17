@@ -293,6 +293,17 @@ export class PerschangesService {
       changes = changes.filter((n) => n.type != "subtask");
     }
 
+    // Добавляем золото
+    if (Math.floor(this.afterPers.gold) != Math.floor(this.beforePers.gold)) {
+      let gold = Math.floor(this.afterPers.gold) - Math.floor(this.beforePers.gold);
+      if (gold > 0) {
+        const chGold = new ChangesModel(`+ ${gold} (${Math.floor(this.afterPers.gold)})`, "gold", 1, 1, 0, 1, "assets/icons/tresure.png");
+        changes.push(chGold);
+        chGold.gold = "+" + gold;
+        chGold.goldTotal = Math.floor(this.afterPers.gold);
+      }
+    }
+
     let combineChanges: ChangesModel[] = [];
     let unionChanges: ChangesModel[] = [];
 
@@ -321,15 +332,6 @@ export class PerschangesService {
         changes[index].name = " ";
       }
 
-      // Добавляем золото к первому изменению
-      if (Math.floor(this.afterPers.gold) != Math.floor(this.beforePers.gold)) {
-        gold = Math.floor(this.afterPers.gold) - Math.floor(this.beforePers.gold);
-        if (gold > 0) {
-          gold = "+" + gold;
-        }
-        goldTotal = Math.floor(this.afterPers.gold);
-      }
-
       if (isDoneQwest && changes[index].type == "qwest") {
         head = changes[index].name;
         changes[index].name = " ";
@@ -339,8 +341,8 @@ export class PerschangesService {
 
       changes[index].head = head;
       changes[index].abPoints = abPoints;
-      changes[index].gold = gold;
-      changes[index].goldTotal = goldTotal;
+      // changes[index].gold = gold;
+      // changes[index].goldTotal = goldTotal;
     }
 
     // Отдельные изменения

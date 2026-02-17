@@ -466,6 +466,11 @@ export class PersListComponent implements OnInit {
     this.srv.showAbility(ab);
   }
 
+  upAbilityFromList(ab: Ability) {
+    this.upAbil(ab);
+    this.showAbility(ab);
+  }
+
   sync(isDownload) {
     if (this.pers.userId == null) {
       window.alert("Сначала войди в систему...");
