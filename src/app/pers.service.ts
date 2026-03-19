@@ -190,25 +190,44 @@ export class PersService {
         return this.boolVCompare(aTask.isPerk, bTask.isPerk);
       }
 
-      // Открыта
-      if (this.boolVCompare(a.isOpen, b.isOpen) != 0) {
-        return -this.boolVCompare(a.isOpen, b.isOpen);
+      // Можно прокачать?
+      // if (aTask.name == "Даньтянь") {
+      //   debugger;
+      // }
+
+      if (this.boolVCompare(aTask.mayUp, bTask.mayUp) != 0) {
+        return -this.boolVCompare(aTask.mayUp, bTask.mayUp);
       }
+
+      // Открыта
+      // if (this.boolVCompare(a.isOpen, b.isOpen) != 0) {
+      //   return -this.boolVCompare(a.isOpen, b.isOpen);
+      // }
 
       // Одинаковый?
-      if (this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl) != 0) {
-        return -this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
-      }
+      // if (this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl) != 0) {
+      //   return -this.boolVCompare(a.HasSameAbLvl, b.HasSameAbLvl);
+      // }
 
       // Значение
-      if (a.progressValue != b.progressValue) {
-        return a.progressValue - b.progressValue;
+      let aValue = aTask.value;
+      if (!a.isOpen) {
+        aValue = 999;
+      }
+
+      let bValue = bTask.value;
+      if (!b.isOpen) {
+        bValue = 999;
+      }
+
+      if (aValue != bValue) {
+        return aValue - bValue;
       }
 
       // Сложность
-      if (aTask.hardnes != bTask.hardnes) {
-        return aTask.hardnes - bTask.hardnes;
-      }
+      // if (aTask.hardnes != bTask.hardnes) {
+      //   return aTask.hardnes - bTask.hardnes;
+      // }
 
       return a.name.localeCompare(b.name);
     };
@@ -2243,16 +2262,20 @@ export class PersService {
 
   qwestsSorter(): (a: Qwest, b: Qwest) => number {
     return (a, b) => {
-      if (a.name == "Дела") {
-        return -1;
-      }
+      // if (a.name == "Дела") {
+      //   return -1;
+      // }
 
-      if (b.name == "Дела") {
-        return 1;
-      }
+      // if (b.name == "Дела") {
+      //   return 1;
+      // }
 
-      if (a.hardnessId != b.hardnessId) {
-        return -(a.hardnessId - b.hardnessId);
+      // if (a.hardnessId != b.hardnessId) {
+      //   return -(a.hardnessId - b.hardnessId);
+      // }
+
+      if (a.lastTaskDoneDate != b.lastTaskDoneDate) {
+        return -(a.lastTaskDoneDate - b.lastTaskDoneDate);
       }
 
       return a.name.localeCompare(b.name);
@@ -2798,9 +2821,11 @@ export class PersService {
   }
 
   upQwest(tskId: string) {
-    let qwest = this.allMap[tskId].link;
+    let qwest: Qwest = this.allMap[tskId].link;
     let qwId = qwest.id;
     this.pers$.value.currentQwestId = qwId;
+
+    qwest.lastTaskDoneDate = Date.now();
 
     const index = this.pers$.value.qwests.findIndex((qw) => qw.id === qwId);
     if (index !== -1) {
@@ -3553,7 +3578,6 @@ export class PersService {
 
       ch.anyMayUp = ch.abilities.some((q) => q.tasks.some((qq) => qq.mayUp));
       ch.HasSameAbLvl = ch.abilities.some((q) => q.tasks.some((qq) => qq.IsNextLvlSame));
-      ch.abilities = ch.abilities.sort(this.abSorter());
     }
 
     if (anySame) {
@@ -3582,7 +3606,9 @@ export class PersService {
       }
     }
 
+    // Пересортировка
     prs.characteristics = prs.characteristics.sort(this.chaSorter());
+    prs.characteristics.forEach((q) => (q.abilities = q.abilities.sort(this.abSorter())));
   }
 
   /**

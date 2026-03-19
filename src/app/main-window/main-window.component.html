@@ -77,7 +77,7 @@
             </div>
           </div>
         </div> -->
-        <div class="masonry-container" (dblclick)="masonryDoubleClick()">
+        <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()">
           <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('skills', $event)">
             <div ngxMasonryItem class="{{ globalMasonryClsNGX$ | async }}" *ngFor="let skill of skillsGlobal$ | async">
               <button mat-stroked-button class="w-100 h-100 skillBtn no-border" (click)="masonrySingleClick(skill.tskIdx)">
@@ -97,7 +97,7 @@
 
       <!-- Квесты masonry -->
       <ng-container *ngSwitchCase="'listQwest'">
-        <div class="masonry-container" (dblclick)="masonryDoubleClick()">
+        <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()">
           <div class="{{ globalMasonryCls$ | async }}">
             <div class="main-masonry-item" *ngFor="let qwest of qwestsGlobal$ | async">
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="masonrySingleClick(qwest.tskIdx)">
@@ -159,13 +159,12 @@
             src="{{ 'assets/img/' + data.currentTask.imageLvl + '/' + data.currentTask.image + '.webp' }}"
             (contextmenu)="$event.preventDefault()"
             (press)="onMasonrySkillsLongPress(data.currentTask)"
-            (dblclick)="firstOrGlobal(data.currentTask)"
             swipe
             draggable="false"
             (up)="done(data.currentTask)"
             (down)="fail(data.currentTask)"
-            (next)="onSwipeLeft($event)"
-            (previous)="onSwipeRight($event)"
+            (next)="firstOrGlobal(true)"
+            (previous)="firstOrGlobal()"
           />
         </div>
         <div fxLayout="column" fxLayoutAlign="center center" class="w-100 h-100 py-2 px-2" [ngStyle]="{ height: '3em' }">

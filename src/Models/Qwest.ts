@@ -16,5 +16,9 @@ export class Qwest {
   abilitiId: any;
   hardnes: number;
   isNoActive: boolean;
-  hardnessId: number;
+  hardnessId: number = 0;
+  /**
+   * Дата последнего времени использования задачи.
+   */
+  lastTaskDoneDate: number;
 }

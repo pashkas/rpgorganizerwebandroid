@@ -175,7 +175,7 @@ export class EraSettings extends GameSettings {
   public getPersRangName(persLvl): string {
     let rngIdx = Math.min(Math.floor(persLvl / 10), this.rangNames.length - 1);
 
-    return this.rangNames[rngIdx - 1];
+    return this.rangNames[rngIdx];
   }
 
   public setTes() {}
