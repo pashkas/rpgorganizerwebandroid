@@ -15,14 +15,21 @@
 <!-- Просмотр -->
 <div class="container pt-2 pb-4" *ngIf="this.pers && tsk && !isEditMode">
   <form class="pb-4">
-    <div style="position: relative; display: flex; justify-content: center; align-items: center">
-      <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image"></app-image-component>
-      <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"></app-image-component>
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; width: 100%;">
+      <!-- Левая колонка для центровки (невидимая) -->
+      <div style="flex: 0 0 50px" *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)"></div>
 
-      <div *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)" style="position: absolute; top: 0; right: 0">
+      <!-- Картинка по центру -->
+      <div style="flex-grow: 1; display: flex; justify-content: center">
+        <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image"></app-image-component>
+        <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"></app-image-component>
+      </div>
+
+      <!-- Правая колонка с алмазом -->
+      <div *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)" style="flex: 0 0 50px; display: flex; justify-content: flex-end">
         <div *ngIf="this.gameSettings.isAbPointsEnabled && pers.ON > 0">
           <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }" matBadge="{{ this.pers.ON }}" matBadgeSize="small" matBadgeColor="accent" matBadgePosition="above after">
-            <img src="assets/icons/diamond.png" class="img-fluid px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+            <img src="assets/icons/diamond.png" class="px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
           </span>
         </div>
       </div>
@@ -97,17 +104,24 @@
     <ng-container *ngIf="!tskAbility && tsk.states.length > 0">
       <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="states" *ngIf="tsk.states.length > 0">
         <div mat-list-item *ngFor="let st of tsk.states; let i = index">
+          <ng-container *ngIf="isStateVisibleByDate(st)">
           <ng-container *ngIf="st.isDone">
             <del>
               <div class="text-center">
-                {{ st.name }}
+                {{ st.name }}<small *ngIf="st.tskWeekDays?.length > 0" class="text-secondary"> ({{ st.tskWeekDays.join(", ") }})</small>
               </div>
             </del>
           </ng-container>
           <ng-container *ngIf="!st.isDone">
             <div class="text-center">
-              {{ st.name }}
+              {{ st.name }}<small *ngIf="st.tskWeekDays?.length > 0" class="text-secondary"> ({{ st.tskWeekDays.join(", ") }})</small>
             </div>
+          </ng-container>
+          <ng-container *ngIf="st.isChecklist && st.checklistItems?.length > 0">
+            <div *ngFor="let ci of st.checklistItems">
+              <mat-checkbox [(ngModel)]="ci.isDone">{{ ci.name }}</mat-checkbox>
+            </div>
+          </ng-container>
           </ng-container>
         </div>
       </mat-list>
@@ -170,6 +184,14 @@
       <mat-chip-list selectable multiple>
         <mat-chip (click)="tsk.isPerk = !tsk.isPerk" [selected]="tsk.isPerk" color="accent"> &nbsp;Перк?&nbsp; </mat-chip>
       </mat-chip-list>
+    </div>
+
+    <!-- Сложность перка -->
+    <div *ngIf="tsk.isPerk" fxLayout="row" class="perk-hardnes-row">
+      <mat-button-toggle-group>
+        <mat-button-toggle [checked]="tsk.perkHardnes === 0.5" (click)="tsk.perkHardnes = 0.5">норм</mat-button-toggle>
+        <mat-button-toggle [checked]="tsk.perkHardnes === 1" (click)="tsk.perkHardnes = 1">сложн</mat-button-toggle>
+      </mat-button-toggle-group>
     </div>
 
     <!-- Описание -->
@@ -280,11 +302,11 @@
           <div class="flex-grow-1 align-self-center">
             <a class="text-primary">
               <ng-container *ngIf="tsk.requrense != 'нет' || st.isDone == false">
-                {{ st.name }}
+                {{ st.name }}<small *ngIf="st.tskWeekDays?.length > 0" class="text-secondary"> ({{ st.tskWeekDays.join(", ") }})</small>
               </ng-container>
               <ng-container *ngIf="tsk.requrense === 'нет' && st.isDone == true">
                 <del>
-                  {{ st.name }}
+                  {{ st.name }}<small *ngIf="st.tskWeekDays?.length > 0" class="text-secondary"> ({{ st.tskWeekDays.join(", ") }})</small>
                 </del>
               </ng-container>
             </a>
@@ -302,6 +324,9 @@
               <img src="assets/icons/right.png" class="img-fluid" />
             </button>
           </div>
+        </div>
+        <div *ngIf="st.isChecklist && st.checklistItems?.length > 0">
+          <small class="text-secondary"><i>{{ getChecklistText(st) }}</i></small>
         </div>
       </div>
     </mat-list>

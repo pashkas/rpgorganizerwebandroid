@@ -4,9 +4,47 @@
     <mat-form-field>
       <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.text" autocomplete="off" name="data.text" [placeholder]="lblTxt" />
     </mat-form-field>
+    <div *ngIf="data.showChecklist" class="mt-2">
+      <mat-checkbox [(ngModel)]="data.isChecklist" name="isChecklist">Чеклист</mat-checkbox>
+      <div *ngIf="data.isChecklist" class="mt-2">
+        <div *ngFor="let ci of data.checklistItems; let j = index" class="d-flex align-items-center">
+          <span class="flex-grow-1">{{ ci.name }}</span>
+          <button mat-icon-button class="icon-small" (click)="moveChecklistItem(j, -1)" [disabled]="j === 0">
+            <img src="assets/icons/up.png" class="img-fluid" />
+          </button>
+          <button mat-icon-button class="icon-small" (click)="moveChecklistItem(j, 1)" [disabled]="j === data.checklistItems.length - 1">
+            <img src="assets/icons/down.png" class="img-fluid" />
+          </button>
+          <button mat-icon-button class="icon-small" (click)="removeChecklistItem(j)">
+            <img src="assets/icons/del.png" class="img-fluid" />
+          </button>
+        </div>
+        <div class="d-flex align-items-center">
+          <mat-form-field class="flex-grow-1">
+            <input matInput placeholder="Новый пункт" [(ngModel)]="newChecklistText" name="newChecklistText" autocomplete="off" (keyup.enter)="addChecklistItem()" />
+          </mat-form-field>
+          <button class="icon-small" mat-icon-button (click)="addChecklistItem()">
+            <img src="assets/icons/create.png" class="img-fluid" />
+          </button>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="data.showWeekDays" class="mt-2">
+      <mat-checkbox [(ngModel)]="data.isWeekDays" name="isWeekDays">Дни недели</mat-checkbox>
+      <div *ngIf="data.isWeekDays" fxLayout="row" fxLayoutGap="0.3em" fxLayoutAlign="center center" class="mt-1">
+        <mat-chip-list selectable multiple>
+          <mat-chip *ngFor="let wd of weekDays"
+            (click)="setWeekDay(wd)"
+            [selected]="data.tskWeekDays?.includes(wd)"
+            color="accent">
+            {{ " " + wd + " " }}
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+    </div>
   </div>
-  <div *ngIf="this.isGallery" class="masonry-list-galery">
-    <div *ngFor="let gi of gallerryImages" class="masonry-item">
+  <div *ngIf="this.isGallery" class="masonry-grid">
+    <div *ngFor="let gi of gallerryImages">
       <div style="cursor: pointer" class="w-100 h-100" (click)="chooseImg(gi)">
         <img src="{{ gi }}" class="img-fluid w-100 h-100" [ngStyle]="{ 'object-fit': 'contain' }" />
       </div>

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { Pers } from "src/Models/Pers";
-import { Task, taskState, Reqvirement } from "src/Models/Task";
+import { Task, taskState, Reqvirement, ChecklistItem } from "src/Models/Task";
 import { ActivatedRoute, Router } from "@angular/router";
 import { PersService } from "../pers.service";
 import { Location, PlatformLocation } from "@angular/common";
@@ -87,13 +87,23 @@ export class TaskDetailComponent implements OnInit {
     }
 
     let header = "";
-    let time = null;
 
     header += isEdit ? "Редактировать" : "Добавить";
-    header += this.tsk.requrense == "нет" ? " подзадачу" : " подзадачу";
+    header += " подзадачу";
+    let dialogData = {
+      header: header,
+      text: isEdit ? st.name : "",
+      timeVal: st ? st.timeVal : null,
+      showChecklist: true,
+      isChecklist: st ? st.isChecklist : false,
+      checklistItems: st ? [...(st.checklistItems || [])] : [],
+      showWeekDays: true,
+      isWeekDays: st ? (st.tskWeekDays?.length > 0) : false,
+      tskWeekDays: st ? [...(st.tskWeekDays || [])] : [],
+    };
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       panelClass: "my-dialog",
-      data: { header: header, text: isEdit ? st.name : "", timeVal: st ? st.timeVal : null },
+      data: dialogData,
       backdropClass: "backdrop",
     });
 
@@ -104,8 +114,10 @@ export class TaskDetailComponent implements OnInit {
           state.value = this.tsk.value;
           state.requrense = this.tsk.requrense;
           state.image = this.srv.GetRndEnamy(state, this.pers.level, this.pers.maxPersLevel);
-          state.name = stt;
-          //state.time = stt.time;
+          state.name = stt.name;
+          state.isChecklist = stt.isChecklist;
+          state.checklistItems = stt.checklistItems || [];
+          state.tskWeekDays = stt.tskWeekDays || [];
           this.tsk.states.push(state);
 
           if (this.tsk.requrense == "нет") {
@@ -114,12 +126,20 @@ export class TaskDetailComponent implements OnInit {
             });
           }
         } else {
-          st.name = stt;
-          //st.time = stt.time;
+          st.name = stt.name;
+          st.isChecklist = stt.isChecklist;
+          st.checklistItems = stt.checklistItems || [];
+          st.tskWeekDays = stt.tskWeekDays || [];
         }
       }
       this.srv.isDialogOpen = false;
     });
+  }
+
+  isStateVisibleByDate(st: taskState): boolean {
+    if (!st.tskWeekDays || st.tskWeekDays.length === 0) return true;
+
+    return this.srv.checkDate(new Date(this.tsk.date), 'дни недели', st.tskWeekDays);
   }
 
   changeCharact() {
@@ -163,6 +183,23 @@ export class TaskDetailComponent implements OnInit {
     this.tsk.states = this.tsk.states.filter((n) => {
       return n.id != id;
     });
+  }
+
+  addChecklistItem(st: taskState, inputEl: HTMLInputElement) {
+    if (inputEl.value.trim()) {
+      let item = new ChecklistItem();
+      item.name = inputEl.value.trim();
+      st.checklistItems.push(item);
+      inputEl.value = '';
+    }
+  }
+
+  delChecklistItem(st: taskState, index: number) {
+    st.checklistItems.splice(index, 1);
+  }
+
+  getChecklistText(st: taskState): string {
+    return (st.checklistItems || []).map(ci => ci.name).join('; ');
   }
 
   /**
@@ -221,6 +258,10 @@ export class TaskDetailComponent implements OnInit {
 
     if (!this.tsk.reqvirements) {
       this.tsk.reqvirements = [];
+    }
+
+    if (this.tsk.perkHardnes == null) {
+      this.tsk.perkHardnes = 0.5;
     }
 
     this.findLinks();
@@ -284,11 +325,18 @@ export class TaskDetailComponent implements OnInit {
     this.hardnesGroup.get("hardnesControl").valueChanges.subscribe((q) => (this.tsk.hardnes = q));
   }
 
+  onPerkHardnesChange(v: number) {
+    this.tsk.perkHardnes = v;
+  }
+
   onTskDateChange(ev) {
     this.tsk.date = ev;
 
     this.tsk.states.forEach((el) => {
       el.isDone = false;
+      if (el.checklistItems) {
+        el.checklistItems.forEach(ci => ci.isDone = false);
+      }
     });
   }
 
@@ -305,6 +353,9 @@ export class TaskDetailComponent implements OnInit {
 
     this.tsk.states.forEach((el) => {
       el.isDone = false;
+      if (el.checklistItems) {
+        el.checklistItems.forEach(ci => ci.isDone = false);
+      }
     });
   }
 

@@ -426,16 +426,6 @@ body {
   white-space: nowrap; */
 }
 
-.masonry-list-galery {
-  column-count: 3;
-  column-gap: 4px;
-}
-
-.masonry-list {
-  column-count: 3;
-  column-gap: 4px;
-}
-
 .skillBtn {
   padding: 0px !important;
   /* line-height: 1.1em !important; */
@@ -446,39 +436,17 @@ body {
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  /* padding-left: 1px;
-  padding-right: 1px; */
-}
-
-.masonry-item {
-  margin: 0 0 2px;
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.ngx-masonry-item {
-  padding: 1px;
-  width: calc(100% / 3);
-  margin-bottom: -7px !important;
-}
-
-.ngx-masonry-item-plus {
-  padding: 1px;
-  width: calc(100% / 4);
-  margin-bottom: -7px !important;
-}
-
-.ngx-masonry-item-mid {
   padding: 2px;
-  width: calc(100% / 5);
 }
 
-.ngx-masonry-item-big {
-  padding: 2px;
-  width: calc(100% / 8);
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
 }
 
-.main-masonry {
+.masonry-grid.dense {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .no-border {
@@ -486,32 +454,6 @@ body {
   border: none !important;
   box-shadow: none !important;
   border-radius: 0px !important;
-}
-
-.main-masonry-small {
-  column-count: 3;
-  /* column-gap: 2px; */
-}
-
-.main-masonry-small-plus {
-  column-count: 4;
-  /* column-gap: 2px; */
-}
-
-.main-masonry-mid {
-  column-count: 6;
-  column-gap: 2px;
-}
-
-.main-masonry-big {
-  column-count: 8;
-  column-gap: 2px;
-}
-
-.main-masonry-item {
-  margin: 0 0 2px;
-  max-width: 100%;
-  max-height: 100%;
 }
 
 .masonry-img {
@@ -526,47 +468,14 @@ body {
 }
 
 @media only screen and (min-width: 927px) {
-  .masonry-list {
-    column-count: 6;
-  }
-
-  .masonry-list-galery {
-    column-count: 6;
-  }
-
-  .main-masonry {
-    column-count: 8;
-    column-gap: 2px;
+  .masonry-grid {
+    grid-template-columns: repeat(8, 1fr);
   }
 }
 
 @media only screen and (max-width: 926px) and (min-width: 601px) {
-  .masonry-list {
-    column-count: 4;
-  }
-
-  .masonry-list-galery {
-    column-count: 4;
-  }
-
-  .main-masonry {
-    column-count: 6;
-    column-gap: 2px;
-  }
-}
-
-@media only screen and (max-width: 600px) {
-  .masonry-list {
-    column-count: 3;
-  }
-
-  .masonry-list-galery {
-    column-count: 3;
-  }
-
-  .main-masonry {
-    column-count: 3;
-    column-gap: 2px;
+  .masonry-grid {
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 

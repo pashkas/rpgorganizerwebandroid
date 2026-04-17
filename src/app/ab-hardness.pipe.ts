@@ -18,8 +18,8 @@ export class AbHardnessPipe implements PipeTransform {
       hrd += "*";
     }
 
-    if (tsk.isPerk) {
-      // hrd += "^";
+    if (tsk.isPerk && tsk.perkHardnes === 1) {
+      hrd += "*";
     }
 
     let isSame = "";

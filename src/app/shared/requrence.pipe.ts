@@ -14,7 +14,7 @@ export class RequrencePipe implements PipeTransform {
   }
 
   convertToRangeString(tskWeekDays: string[]): string {
-    const sortedDays = tskWeekDays.sort((a, b) => Task.weekDays.indexOf(a) - Task.weekDays.indexOf(b));
+    const sortedDays = [...(tskWeekDays || [])].sort((a, b) => Task.weekDays.indexOf(a) - Task.weekDays.indexOf(b));
     let rangeStart = sortedDays[0];
     let rangeEnd = sortedDays[0];
     let rangeString = "";

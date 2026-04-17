@@ -20,18 +20,19 @@ export class EraSettings extends GameSettings {
   public isOpenPersAtNewLevel = true;
   public maxAbilLvl = 10;
   public maxChaLvl = 10;
-  public maxPersLevel: number = 100;
+  public maxPersLevel: number = 50;
   public minAbilLvl = 1;
   public minChaLvl = 1;
   public perkHardness: number = 1;
-  public rangNames = ["обыватель", "авантюрист", "воин", "капитан", "корсар", "мастер", "чемпион", "герой", "легенда"];
+  rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
 
-  public abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
-    // if (isPerk) {
-    //   curLvl = this.maxAbilLvl;
-    // }
+  public abChangeExp(curLvl: number, hardness: number, isPerk: boolean, perkHardnes?: number): number {
+    let v = curLvl * hardness;
+    if (isPerk) {
+      v = v * (perkHardnes ?? 0.5);
+    }
 
-    return curLvl * hardness;
+    return v;
   }
 
   public abCost(curLvl: number, hardness: number, isPerk: boolean): number {
@@ -45,22 +46,26 @@ export class EraSettings extends GameSettings {
     return 1 * hardness;
   }
 
-  public abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
-    // if (isPerk && curLvl > 0) {
-    //   curLvl = this.maxAbilLvl;
-    // }
+  public abTotalCost(curLvl: number, hardness: number, isPerk: boolean, perkHardnes?: number) {
+    let v = curLvl * hardness;
+    if (isPerk) {
+      v = v * (perkHardnes ?? 0.5);
+    }
 
-    return curLvl * hardness;
+    return v;
   }
 
   public checkPerkTskValue(tsk: Task) {
-    // if (tsk.isPerk && tsk.value > 0) {
-    //   tsk.value = this.maxAbilLvl;
-    // }
+    if (!tsk.isPerk) {
+      return;
+    }
+    if (tsk.perkHardnes == null) {
+      tsk.perkHardnes = 0.5;
+    }
 
-    if (tsk.isPerk && tsk.value > 0 && tsk.value <= 5) {
+    if (tsk.value > 0 && tsk.value <= 5) {
       tsk.value = 5;
-    } else if (tsk.isPerk && tsk.value > 5) {
+    } else if (tsk.value > 5) {
       tsk.value = this.maxAbilLvl;
     }
   }
@@ -116,13 +121,13 @@ export class EraSettings extends GameSettings {
     if (prsLvl < 20) {
       return 2;
     }
-    if (prsLvl < 40) {
+    if (prsLvl < 30) {
       return 3;
     }
-    if (prsLvl < 60) {
+    if (prsLvl < 40) {
       return 4;
     }
-    if (prsLvl < 80) {
+    if (prsLvl < 50) {
       return 5;
     }
 
@@ -147,19 +152,26 @@ export class EraSettings extends GameSettings {
 
     result.exp = persExpVal;
 
+    // Итеративно определяем уровень персонажа по накопленному опыту
     let persLevel = 1;
-    let expLvl = 0;
+    let expLvl = 0; // суммарный опыт, необходимый для достижения текущего уровня
 
     while (true) {
       result.startExp = expLvl;
 
-      let e = 1 + (persLevel - 1) * 0.05;
-      // let e = 3 + (persLevel - 1) * 0;
+      // Коэффициент сложности: сигмоида 1→5, основной рост на 10-20 уровнях, округление вниз до десятых
+      // let e = Math.floor((1 + 4 / (1 + Math.exp(-0.35 * (persLevel - 18)))) * 10) / 10;
+
+      // Сначала 2 дня, потом с каждым рангом + 1
+      let e = Math.floor(persLevel / 10) + 2;
+
+      // Опыт, нужный для перехода на следующий уровень
       let cur = this.abPointsPerLvl * persLevel * e;
       expLvl += cur;
 
       result.nextExp = expLvl;
 
+      // Если суммарный порог превысил накопленный опыт — текущий уровень найден
       if (expLvl > result.exp) {
         result.persLevel = persLevel;
 

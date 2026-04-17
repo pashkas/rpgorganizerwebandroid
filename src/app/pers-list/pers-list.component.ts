@@ -381,10 +381,14 @@ export class PersListComponent implements OnInit {
    */
   resp() {
     if (window.confirm("Вы уверены?")) {
+      this.pers.level = 0;
+      this.pers.expVal = 0;
+      this.pers.exp = 0;
+      this.pers.expKoef = 0;
+
       this.pers.lastTaskId = null;
       this.pers.isOffline = true;
       this.pers.gold = 0;
-      this.pers.expVal = 0;
       this.pers.hp = 100;
       this.pers.maxHp = 100;
       this.pers.hpProgr = 100;
@@ -393,7 +397,6 @@ export class PersListComponent implements OnInit {
         cha.abilities.forEach((ab) => {
           ab.isOpen = false;
           ab.tasks.forEach((tsk) => {
-            this.srv.GetRndEnamy(tsk, this.pers.level, this.pers.maxPersLevel);
             tsk.classicalExp = 0;
             tsk.autoTime = 0;
             tsk.plusExp = 0;
@@ -429,13 +432,10 @@ export class PersListComponent implements OnInit {
         });
       });
 
-      // Обновление картинок квестов
+      // Обновление картинок квестов и навыков
       this.srv.updateQwestTasksImages(this.pers);
       this.srv.updateAbTasksImages(this.pers);
 
-      this.pers.expKoef = 0;
-      this.pers.exp = 0;
-      this.pers.level = 0;
       this.pers.inventory = [];
 
       this.srv.clearDiary();

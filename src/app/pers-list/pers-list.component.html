@@ -335,8 +335,8 @@
               <img src="assets/icons/create.png" class="img-fluid" />
             </button>
           </div>
-          <div class="masonry-list">
-            <div class="masonry-item" *ngFor="let qwest of pers.qwests">
+          <div class="masonry-grid">
+            <div *ngFor="let qwest of pers.qwests">
               <button
                 mat-stroked-button
                 mat-stroked-button
@@ -345,7 +345,7 @@
                 [ngStyle]="{ opacity: qwest.parrentId || qwest.isNoActive ? '0.4' : '1' }"
               >
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ qwest.image }}" class="img-fluid rounded" [ngStyle]="{ 'object-fit': 'contain' }" />
+                  <img appImgBroken src="{{ qwest.image }}" class="masonry-img" />
                   <div class="text-wrap py-2">
                     {{ qwest.name }}
                   </div>
@@ -421,11 +421,11 @@
                   <img src="assets/icons/create.png" class="img-fluid" />
                 </button>
               </div>
-              <div class="masonry-list pt-1">
-                <div class="masonry-item" *ngFor="let rev of pers.inventory">
+              <div class="masonry-grid pt-1">
+                <div *ngFor="let rev of pers.inventory">
                   <button mat-stroked-button class="w-100 h-100 revBtn">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
-                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+                      <img appImgBroken src="{{ rev.image }}" class="masonry-img" />
                       <div style="color: green">
                         <small>{{ rev.rarityName }}</small>
                       </div>
@@ -455,11 +455,11 @@
                   <img src="assets/icons/create.png" class="img-fluid" />
                 </button>
               </div>
-              <div class="masonry-list pt-1">
-                <div class="masonry-item" *ngFor="let rev of pers.achievements | filterByProperty : 'isAviable' : false">
+              <div class="masonry-grid pt-1">
+                <div *ngFor="let rev of pers.achievements | filterByProperty : 'isAviable' : false">
                   <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event, 'achive')" [ngClass]="{ revFade: !rev.isAviable }">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
-                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+                      <img appImgBroken src="{{ rev.image }}" class="masonry-img" />
                       <div class="text-wrap py-1">
                         {{ rev.name }}
                       </div>
@@ -491,11 +491,11 @@
                   <img src="assets/icons/create.png" class="img-fluid" />
                 </button>
               </div>
-              <div class="masonry-list pt-1">
-                <div class="masonry-item" *ngFor="let rev of pers.rewards | shop">
+              <div class="masonry-grid pt-1">
+                <div *ngFor="let rev of pers.rewards | shop">
                   <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event)" [style.opacity]="!rev.isAviable ? '0.6' : '1'">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
-                      <img appImgBroken src="{{ rev.image }}" class="img-fluid rounded w-100" [ngStyle]="{ 'object-fit': 'contain' }" />
+                      <img appImgBroken src="{{ rev.image }}" class="masonry-img" />
                       <div class="text-wrap py-2" *ngIf="rev.name">
                         {{ rev.name }}
                       </div>

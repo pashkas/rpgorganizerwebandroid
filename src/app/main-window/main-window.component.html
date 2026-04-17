@@ -61,45 +61,30 @@
         <div></div>
       </ng-container>
 
-      <!-- Наыки masonry -->
+      <!-- Навыки grid -->
       <ng-container *ngSwitchCase="'listSkills'">
-        <!-- <div class="masonry-container">
-          <div class="{{ globalMasonryCls$ | async }}">
-            <div class="main-masonry-item" *ngFor="let skill of skillsGlobal$ | async">
-              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(skill.tskIdx)">
+        <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()" *ngIf="skillsGlobal$ | async as skills">
+          <div class="masonry-grid" [class.dense]="skills.length > 15">
+            <div *ngFor="let skill of skills">
+              <button mat-stroked-button class="w-100 h-100 skillBtn no-border" (click)="masonrySingleClick(skill.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ skill.img }}" class="masonry-img global-skill-img" />
-                  <div class="text-wrap py-1">
-                    {{ skill.name }}
-                  </div>
+                  <img appImgBroken src="{{ skill.img }}" class="masonry-img global-skill-img"
+                    (load)="onSkillImgLoad(skill.tskId)"
+                    [ngStyle]="{ 'border': (skill.failCounter > 0 && loadedSkillImgs.has(skill.tskId)) ? '3px solid red' : 'none' }" />
                 </div>
               </button>
             </div>
           </div>
-        </div> -->
-        <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()">
-          <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('skills', $event)">
-            <div ngxMasonryItem class="{{ globalMasonryClsNGX$ | async }}" *ngFor="let skill of skillsGlobal$ | async">
-              <button mat-stroked-button class="w-100 h-100 skillBtn no-border" (click)="masonrySingleClick(skill.tskIdx)">
-                <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ skill.img }}" class="masonry-img global-skill-img" />
-                  <!-- <div class="text-wrap py-1">
-                    {{ skill.name }}
-                  </div> -->
-                </div>
-              </button>
-            </div>
-          </ngx-masonry>
         </div>
 
         <div></div>
       </ng-container>
 
-      <!-- Квесты masonry -->
+      <!-- Квесты grid -->
       <ng-container *ngSwitchCase="'listQwest'">
         <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()">
-          <div class="{{ globalMasonryCls$ | async }}">
-            <div class="main-masonry-item" *ngFor="let qwest of qwestsGlobal$ | async">
+          <div class="masonry-grid">
+            <div *ngFor="let qwest of qwestsGlobal$ | async" [ngStyle]="{ opacity: qwest.isNoActive ? '0.75' : '1' }">
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="masonrySingleClick(qwest.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img appImgBroken src="{{ qwest.img }}" class="masonry-img" />
@@ -107,7 +92,7 @@
                     {{ qwest.name }}
                   </div>
                   <ng-container *ngIf="qwest.progressValue < 100; else isFullDone">
-                    <div class="py-0" class="w-100">
+                    <div class="py-0 w-100">
                       <mat-progress-bar class="myprogr" color="accent" mode="determinate" value="{{ qwest.progressValue }}"> </mat-progress-bar>
                     </div>
                   </ng-container>
@@ -121,30 +106,6 @@
             </div>
           </div>
         </div>
-        <!-- <div class="masonry-container">
-          <ngx-masonry [options]="myOptions" [ordered]="true" (itemsLoaded)="itemsLoaded('skills', $event)">
-            <div ngxMasonryItem class="{{ globalMasonryCls$ | async }}" *ngFor="let qwest of qwestsGlobal$ | async">
-              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="tskClick(qwest.tskIdx)">
-                <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ qwest.img }}" class="masonry-img" />
-                  <div class="text-wrap py-2">
-                    {{ qwest.name }}
-                  </div>
-                  <ng-container *ngIf="qwest.progressValue < 100; else isFullDone">
-                    <div class="py-0" class="w-100">
-                      <mat-progress-bar class="myprogr" color="accent" mode="determinate" value="{{ qwest.progressValue }}"> </mat-progress-bar>
-                    </div>
-                  </ng-container>
-                  <ng-template #isFullDone>
-                    <div class="py-0">
-                      <img src="assets/icons/star.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
-                    </div>
-                  </ng-template>
-                </div>
-              </button>
-            </div>
-          </ngx-masonry>
-        </div> -->
 
         <div></div>
       </ng-container>
@@ -223,6 +184,7 @@
               | ⌛&nbsp;
             </a>
             <a *ngIf="data?.currentTask?.isCounterEnable" class="text-secondary pointer nounderline" (click)="clickCounter(data?.currentTask)"> | ✓&nbsp; </a>
+            <a *ngIf="getNextChecklistItem(data.currentTask) as ci" class="text-info pointer nounderline" (click)="completeChecklistItem(data.currentTask)"> | ☐ {{ ci.name }}</a>
           </small>
         </div>
       </ng-container>
@@ -234,9 +196,7 @@
     <div fxLayout="row" fxLayoutAlign="space-between center" class="w-100 h-100 py-0" style="min-height: 120px">
       <!-- Кнопки -->
       <button
-        (swiperight)="onSwipeLeft($event)"
         (press)="qwickAddTask()"
-        (contextmenu)="$event.preventDefault()"
         class="h-100 w-100 px-0 py-0 text-left"
         mat-button
         routerLink="/pers"
@@ -244,8 +204,10 @@
       >
         <img
           appImgBroken
+          draggable="false"
+          (press)="qwickAddTask()"
+          (contextmenu)="qwickAddTask(); $event.preventDefault(); $event.stopPropagation()"
           [ngClass]="{ disabled: isSort, 'vibrate-1': data.isFailShown }"
-          (contextmenu)="$event.preventDefault()"
           src="{{ data.pers.image }}"
           class="img-fluid h-100 pers-img-main"
           [ngStyle]="{ 'object-fit': 'contain' }"

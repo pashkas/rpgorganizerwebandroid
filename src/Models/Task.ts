@@ -58,6 +58,8 @@ export class Task implements IImg {
   isHard: boolean = false;
   isNotWriteTime: boolean = false;
   isPerk: boolean = false;
+  /** Сложность перка: 0.5 — один шаг до полного уровня и x0.5 опыта (норм), 1 — два шага и полный опыт (сложн). */
+  perkHardnes: number = 0.5;
   isStateInTitle: boolean = false;
   isStatePlusTitle: boolean = true;
   isStateRefresh: boolean = false;
@@ -226,6 +228,8 @@ export class taskState implements IImg {
   imageLvl: string = "0";
   img: string;
   isActive: boolean = false;
+  isChecklist: boolean = false;
+  checklistItems: ChecklistItem[] = [];
   isDone: boolean = false;
   isNotWriteTime: boolean = false;
   lastDate: number;
@@ -240,5 +244,12 @@ export class taskState implements IImg {
   startLvl: number = 999;
   time: string = "00:00";
   timeVal: number;
+  tskWeekDays: string[] = [];
   value: number;
+}
+
+export class ChecklistItem {
+  id: any = uuid();
+  name: string;
+  isDone: boolean = false;
 }

@@ -9,3 +9,38 @@
   gap: 10px;
   align-items: center;
 }
+
+.perk-hardnes-row {
+  margin: 4px 0;
+}
+
+.perk-hardnes-row mat-button-toggle-group {
+  width: 100%;
+  display: flex;
+}
+
+.perk-hardnes-row mat-button-toggle {
+  flex: 1 1 50%;
+  text-align: center;
+}
+
+.perk-hardnes-row ::ng-deep .mat-button-toggle-label-content {
+  line-height: 30px !important;
+  padding: 0 8px !important;
+  font-size: 13px;
+}
+
+.perk-hardnes-row ::ng-deep .mat-button-toggle-checked,
+.perk-hardnes-row ::ng-deep .mat-button-toggle-checked.cdk-focused,
+.perk-hardnes-row ::ng-deep .mat-button-toggle-checked.cdk-program-focused,
+.perk-hardnes-row ::ng-deep .mat-button-toggle-checked .mat-button-toggle-button {
+  background-color: #3f51b5 !important;
+}
+
+.perk-hardnes-row ::ng-deep .mat-button-toggle-checked .mat-button-toggle-label-content {
+  color: #fff !important;
+}
+
+.perk-hardnes-row ::ng-deep .mat-button-toggle-focus-overlay {
+  background-color: transparent !important;
+}

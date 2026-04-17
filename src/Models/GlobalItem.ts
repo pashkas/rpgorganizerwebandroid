@@ -9,4 +9,6 @@ export class GlobalItem {
   task: Task;
   progressValue: number;
   masonryIdx: number;
+  isNoActive: boolean;
+  failCounter: number;
 }

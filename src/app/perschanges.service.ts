@@ -162,9 +162,19 @@ export class PerschangesService {
           isAbilActivated = true;
           abToEdit = n;
 
-          let txt = el.abIsOpenAfter == true ? "активирован" : "сброшен";
+          let txt: string;
+          if (el.abIsOpenAfter == true) {
+            if (el.isPerk) {
+              txt = el.perkHardnes === 1 ? "перк активирован" : "перк прокачан";
+            } else {
+              txt = "активирован";
+            }
+          } else {
+            txt = "сброшен";
+          }
 
-          changes.push(new ChangesModel(`${el.name} ${txt}`, "abil", 0, 0, 0, this.gameSettings.maxAbilLvl, el.img));
+          const msg = el.isPerk && el.abIsOpenAfter == true ? `${el.name} — ${txt}` : `${el.name} ${txt}`;
+          changes.push(new ChangesModel(msg, "abil", 0, 0, 0, this.gameSettings.maxAbilLvl, el.img));
         } else {
           // Иземенение уровня
           if (this.gameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= this.gameSettings.maxAbilLvl) {
@@ -428,6 +438,8 @@ export class PerschangesService {
         delay = this.gameSettings.changesPopupDurationCha;
       } else if (ch.type == "qwest") {
         delay = this.gameSettings.changesPopupDurationQwest;
+      } else if (ch.type == "gold") {
+        delay = this.gameSettings.changesPopupDurationGold;
       } else {
         delay = this.gameSettings.changesPopupDuration;
       }
@@ -532,6 +544,8 @@ export class PerschangesService {
           }
 
           changesMap[tsk.id].name = name;
+          changesMap[tsk.id].isPerk = tsk.isPerk;
+          changesMap[tsk.id].perkHardnes = tsk.perkHardnes;
 
           let abVal = Math.floor(tsk.value);
           if (abVal > this.gameSettings.maxAbilLvl) {
@@ -649,4 +663,6 @@ export class changesItem {
   type;
   abIsOpenBefore;
   abIsOpenAfter;
+  isPerk;
+  perkHardnes;
 }

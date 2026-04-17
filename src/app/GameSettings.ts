@@ -71,6 +71,7 @@ export abstract class GameSettings {
    * Длительность показа попапа с изменениями.
    */
   changesPopupDuration: number = 3000;
+  changesPopupDurationGold: number = 8000;
   changesPopupDurationAbil: number = 3000;
   changesPopupDurationCha: number = 3000;
   changesPopupDurationNewLevel: number = 5000;
@@ -165,7 +166,7 @@ export abstract class GameSettings {
    *
    */
   plusAbProgrForTitle: number = 0;
-  
+
   qwestHardneses: qwestHardness[] = [
     { id: 5, name: "легко", gold: 20 },
     { id: 4, name: "норм", gold: 100 },
@@ -173,8 +174,8 @@ export abstract class GameSettings {
     { id: 2, name: "эпично", gold: 1000 },
     { id: 1, name: "безумно", gold: 3000 },
   ];
-  
-  rangNames = ["обыватель", "странник", "авантюрист", "пират", "корсар", "воин", "мастер", "джедай", "чемпион", "герой", "легенда"];
+
+  rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
 
   revProbs: taskProb[] = [
     { id: 5, name: "хлам", prob: 5, gold: 20 }, // 100
@@ -206,7 +207,7 @@ export abstract class GameSettings {
     return this.rangNames[persRang];
   }
 
-  abChangeExp(curLvl: number, hardness: number, isPerk: boolean): number {
+  abChangeExp(curLvl: number, hardness: number, isPerk: boolean, _perkHardnes?: number): number {
     return 0;
   }
 
@@ -220,7 +221,7 @@ export abstract class GameSettings {
   /**
    * Сумма потраченных очков на навык.
    */
-  abTotalCost(curLvl: number, hardness: number, isPerk: boolean) {
+  abTotalCost(curLvl: number, hardness: number, isPerk: boolean, _perkHardnes?: number) {
     if (curLvl == 0) {
       return 0;
     }
@@ -380,7 +381,7 @@ export abstract class GameSettings {
     totalAbLvl: number,
     classicalExpTotal: number,
     persExpVal: number,
-    abOpenned: number
+    abOpenned: number,
   ): getExpResult;
 }
 

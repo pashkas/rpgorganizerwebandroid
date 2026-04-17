@@ -3,6 +3,7 @@ import { Reqvirement } from 'src/Models/Task';
 import { PersService } from 'src/app/pers.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { GameSettings } from 'src/app/GameSettings';
 
 @Component({
   templateUrl: './req-add.component.html',
@@ -17,7 +18,7 @@ export class ReqAddComponent implements OnInit {
   selReq: Reqvirement;
   selVal: number;
 
-  constructor(private srv: PersService) { }
+  constructor(private srv: PersService, public gameSettings: GameSettings) { }
 
   ngOnDestroy(): void {
   this.unsubscribe$.next();
@@ -40,11 +41,11 @@ export class ReqAddComponent implements OnInit {
         }
       }
   
-      this.selVal = 100;
+      this.selVal = this.gameSettings.maxAbilLvl;
   
       this.abs = this.abs.sort((a, b) => a.elName.localeCompare(b.elName));
   
-      for (let i = 1; i <= 100; i++) {
+      for (let i = 1; i <= this.gameSettings.maxAbilLvl; i++) {
         this.abVals.push(i);
       }
     });

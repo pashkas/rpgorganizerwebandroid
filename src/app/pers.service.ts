@@ -113,7 +113,7 @@ export class PersService {
     let tDate = new Date(tsk.date);
 
     while (true) {
-      if (tsk.requrense === "дни недели" && tsk.tskWeekDays.length === 0) {
+      if (tsk.requrense === "дни недели" && (!tsk.tskWeekDays || tsk.tskWeekDays.length === 0)) {
         break;
       }
 
@@ -172,10 +172,7 @@ export class PersService {
     let mnstrLvl = this.gameSettings.getMonsterLevel(lvl, maxlvl);
 
     tsk.imageLvl = "" + mnstrLvl;
-    let prs = this.pers$.value;
-    if (prs != null) {
-      tsk.image = this.getImgPathRandome(mnstrLvl, prs);
-    }
+    tsk.image = this.getImgPathRandome(mnstrLvl);
 
     return;
   }
@@ -821,9 +818,18 @@ export class PersService {
       gl.tskIdx = i;
       gl.name = qw.name;
       gl.progressValue = qw.progressValue;
+      gl.isNoActive = qw.isNoActive || false;
 
       qwg.push(gl);
     }
+
+    qwg.sort((a, b) => {
+      if (a.isNoActive !== b.isNoActive) {
+        return a.isNoActive ? 1 : -1;
+      }
+
+      return 0;
+    });
 
     this.qwestsGlobal$.next(qwg);
   }
@@ -855,6 +861,7 @@ export class PersService {
       gl.tskId = tsk.id;
       gl.tskIdx = i;
       gl.name = ab.name;
+      gl.failCounter = tsk.failCounter || 0;
       if (tsk.counterDone > 0) {
         gl.name += ` (${tsk.counterDone}✓)`;
       }
@@ -1006,7 +1013,7 @@ export class PersService {
     return result;
   }
 
-  getImgPathRandome(lvl: number, prs: Pers): string {
+  getImgPathRandome(lvl: number): string {
     let im: number = 0;
     let max: number = 0;
 
@@ -1035,17 +1042,7 @@ export class PersService {
         break;
     }
 
-    if (!prs.mnstrCounter) {
-      prs.mnstrCounter = 0;
-    }
-    if (prs.mnstrCounter >= max) {
-      prs.mnstrCounter = 0;
-    }
-
-    prs.mnstrCounter++;
-    im = prs.mnstrCounter;
-
-    //im = this.randomInteger(1, max);
+    im = this.randomInteger(1, max);
 
     let result: string = "";
 
@@ -1252,7 +1249,7 @@ export class PersService {
       return 1;
     }
     if (requrense === "дни недели") {
-      let wd = weekDays.length;
+      let wd = (weekDays && weekDays.length) || 0;
       if (wd > base) {
         wd = base;
       }
@@ -1583,6 +1580,10 @@ export class PersService {
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
+          tsk.failCounter = 0;
+          for (const st of tsk.states) {
+            st.failCounter = 0;
+          }
           let tskDate: moment.Moment = moment(tsk.date);
           if (tskDate.isBefore(moment(new Date()), "d")) {
             tsk.date = new Date();
@@ -1684,10 +1685,6 @@ export class PersService {
             tsk.tskWeekDays = [];
           }
 
-          if (tsk.tskWeekDays.length == 0) {
-            tsk.tskWeekDays.push("пн");
-          }
-
           if (!tsk.aimUnit) {
             if (tsk.aimCounter > 0) {
               tsk.aimUnit = "Раз";
@@ -1728,6 +1725,17 @@ export class PersService {
 
             if (this.isNullOrUndefined(st.time)) {
               st.time = "00:00";
+            }
+
+            // Нормализация новых полей — чтобы легаси-сабтаски не падали
+            if (!st.tskWeekDays) {
+              st.tskWeekDays = [];
+            }
+            if (st.isChecklist == null) {
+              st.isChecklist = false;
+            }
+            if (!st.checklistItems) {
+              st.checklistItems = [];
             }
 
             // if (prs.isTES) {
@@ -1880,7 +1888,7 @@ export class PersService {
             tsk.classicalExp = 0;
           }
           classicalExpTotal += tsk.classicalExp;
-          abValTotal += this.gameSettings.abTotalCost(tsk.value, tsk.hardnes, tsk.isPerk);
+          abValTotal += this.gameSettings.abTotalCost(tsk.value, tsk.hardnes, tsk.isPerk, tsk.perkHardnes);
         }
 
         if (ab.isOpen) {
@@ -1938,8 +1946,8 @@ export class PersService {
             }
           }
 
-          // Квест неактивен, если навык неактивен
-          if (!this.checkTask(abLink.item.tasks[0])) {
+          // Квест неактивен, если навык неактивен или не прокачан (value=0)
+          if (!this.checkTask(abLink.item.tasks[0]) || !abLink.item.value) {
             qw.isNoActive = true;
           }
         }
@@ -2013,7 +2021,7 @@ export class PersService {
 
       this.sortQwestTasks(qw);
 
-      if ((prs.currentView == curpersview.QwestTasks || prs.currentView == curpersview.QwestsGlobal) && !qw.isNoActive && totalTasks > 0 && totalTasks != doneTasks) {
+      if ((prs.currentView == curpersview.QwestTasks || prs.currentView == curpersview.QwestsGlobal) && (!qw.isNoActive || (qw.abilitiId && !qw.parrentId)) && totalTasks > 0 && totalTasks != doneTasks) {
         if (this.checkTask(qw.tasks[0])) {
           tasks.push(qw.tasks[0]);
         }
@@ -2192,11 +2200,11 @@ export class PersService {
     for (const ch of prs.characteristics) {
       for (const ab of ch.abilities) {
         for (const tsk of ab.tasks) {
-          let koef = this.getWeekKoef(tsk.requrense, true, tsk.tskWeekDays) * this.gameSettings.abChangeExp(tsk.value, tsk.hardnes, tsk.isPerk);
+          let koef = this.getWeekKoef(tsk.requrense, true, tsk.tskWeekDays) * this.gameSettings.abChangeExp(tsk.value, tsk.hardnes, tsk.isPerk, tsk.perkHardnes);
           let subTasksKoef = 1;
 
           if (tsk.isSumStates && tsk.states.length > 0) {
-            subTasksKoef = tsk.states.filter((n) => n.isActive).length;
+            subTasksKoef = tsk.states.filter((n) => n.isActive).length || 1;
           }
 
           tsk.plusExp = (baseGold * koef) / subTasksKoef;
@@ -2335,6 +2343,11 @@ export class PersService {
       const element = tsk.states[i];
       element.isDone = false;
       element.isActive = false;
+      if (element.checklistItems) {
+        for (const ci of element.checklistItems) {
+          ci.isDone = false;
+        }
+      }
     }
   }
 
@@ -2453,7 +2466,7 @@ export class PersService {
   subtaskDoneOrFail(taskId: string, subtaskId: string, isDone: boolean) {
     let tsk: Task = this.allMap[taskId].item;
     let subTask: taskState = this.allMap[subtaskId].item;
-    let activeSubtasksCount = tsk.states.filter((n) => n.isActive).length;
+    let activeSubtasksCount = tsk.states.filter((n) => n.isActive).length || 1;
 
     if (this.isNullOrUndefined(subTask.failCounter)) {
       subTask.failCounter = 0;
@@ -2471,7 +2484,7 @@ export class PersService {
     subTask.counterDone = 0;
 
     if (isDone) {
-      this.CasinoRevards(tsk);
+      this.CasinoRevards(tsk.plusExp);
       this.CasinoGold(tsk.plusExp);
     }
 
@@ -2579,7 +2592,7 @@ export class PersService {
         tsk.timerValue = 0;
 
         // Разыгрываем награды
-        this.CasinoRevards(tsk);
+        this.CasinoRevards(tsk.plusExp);
 
         // Золото
         this.CasinoGold(tsk.plusExp);
@@ -2627,6 +2640,9 @@ export class PersService {
 
         // Золото
         this.CasinoGold(tsk.plusExp);
+
+        // Розыгрыш наград (1 шанс)
+        this.CasinoRevards(1);
 
         return "квест";
       }
@@ -2791,7 +2807,11 @@ export class PersService {
 
     if (this.gameSettings.isClassicaRPG) {
       for (const tsk of ab.tasks) {
-        tsk.value += 1;
+        if (tsk.isPerk && (tsk.perkHardnes ?? 0.5) === 0.5) {
+          tsk.value = this.gameSettings.maxAbilLvl;
+        } else {
+          tsk.value += 1;
+        }
       }
     }
 
@@ -2860,9 +2880,7 @@ export class PersService {
   /**
    * Розыгрыш наград.
    */
-  private CasinoRevards(task: Task) {
-    let tskExp = task.plusExp;
-
+  private CasinoRevards(tskExp: number) {
     let availableRewards: Reward[] = this.gameSettings.revProbs.map((q) => {
       const rev = new Reward();
       rev.cost = q.gold;
@@ -2973,7 +2991,7 @@ export class PersService {
   }
 
   private changeClassical(tsk: Task, isDone: boolean, activeSubtasksCount: number, failCounter: number) {
-    let koef = this.getWeekKoef(tsk.requrense, isDone, tsk.tskWeekDays) * this.gameSettings.abChangeExp(tsk.value, tsk.hardnes, tsk.isPerk);
+    let koef = this.getWeekKoef(tsk.requrense, isDone, tsk.tskWeekDays) * this.gameSettings.abChangeExp(tsk.value, tsk.hardnes, tsk.isPerk, tsk.perkHardnes);
 
     if (!isDone && tsk.failCounter >= 1) {
       const failMod = failCounter + 1;
@@ -3268,6 +3286,17 @@ export class PersService {
             el.isActive = false;
           }
         }
+
+        // Фильтр по дням недели
+        let tskDate = new Date(tsk.date);
+        for (let i = 0; i < tsk.states.length; i++) {
+          const el = tsk.states[i];
+          if (el.isActive && el.tskWeekDays && el.tskWeekDays.length > 0) {
+            if (!this.checkDate(tskDate, 'дни недели', el.tskWeekDays)) {
+              el.isActive = false;
+            }
+          }
+        }
       }
     }
 
@@ -3545,24 +3574,43 @@ export class PersService {
     return stT;
   }
 
+  /**
+   * Пересчитывает флаг `mayUp` у всех задач перса — можно ли прямо сейчас поднять уровень навыка/перка.
+   *
+   * Флаг `mayUp` изначально выставляется в других местах (при начислении ОН, апгрейде и т.п.),
+   * здесь же он «фильтруется» цепочкой блокирующих правил — каждое может только сбросить `mayUp` в false.
+   * Правила применяются последовательно, порядок важен.
+   *
+   * Попутно считаются вспомогательные флаги:
+   *  - `IsNextLvlSame` на задаче — признак начатого сложн-перка (value>0, прокачка = повтор того же уровня).
+   *  - `ab.HasSameAbLvl` / `ch.HasSameAbLvl` — есть ли такой перк в навыке/характеристике (для сортировки).
+   *  - `ch.anyMayUp` — есть ли в характеристике что-то доступное к прокачке (для сортировки характеристик).
+   *
+   * В конце пересортирует характеристики и навыки — апаемые всплывают наверх.
+   */
   private recountAbilMayUp(prs: Pers) {
     let on = prs.ON;
     let anySame = false;
 
+    // Шаг 1. Базовые блокировки и расчёт IsNextLvlSame.
     for (let ch of prs.characteristics) {
       for (let ab of ch.abilities) {
         for (let tsk of ab.tasks) {
+          // Не хватает ОН на апгрейд (если учёт очков вообще включён).
           if (on < this.gameSettings.abCost(tsk.value, tsk.hardnes, tsk.isPerk) && this.gameSettings.isAbPointsEnabled) {
             tsk.mayUp = false;
             tsk.IsNextLvlSame = false;
             ab.HasSameAbLvl = false;
           }
 
+          // Навык ещё не открыт (value<1) или уже заблокирован — сбрасываем «повтор уровня».
           if (tsk.value < 1 || !tsk.mayUp) {
             tsk.IsNextLvlSame = false;
             ab.HasSameAbLvl = false;
           }
 
+          // Начатый сложн-перк (value>0 и mayUp=true) — следующий апгрейд не повышает уровень,
+          // а «добивает» тот же. Используется для специальной отрисовки и принудительной докачки ниже.
           if (tsk.isPerk && tsk.value > 0 && tsk.mayUp) {
             tsk.IsNextLvlSame = true;
           } else {
@@ -3580,6 +3628,7 @@ export class PersService {
       ch.HasSameAbLvl = ch.abilities.some((q) => q.tasks.some((qq) => qq.IsNextLvlSame));
     }
 
+    // Шаг 2. Если есть начатый сложн-перк — всё остальное блокируется, пока его не докачают.
     if (anySame) {
       for (let ch of prs.characteristics) {
         for (let ab of ch.abilities) {
@@ -3592,8 +3641,10 @@ export class PersService {
       }
     }
 
-    // Ограничение по макс уровню навыка
-    var max = Math.floor(prs.level / 10) + 3;
+    // Шаг 3. Потолок по уровню перса (см. задачу 0019):
+    //   обычные навыки: max = 2 + floor(persLevel/10)*2  (0-9 ур. → 2, 10-19 → 4, ...).
+    //   перки: ограничены только общим maxAbilLvl.
+    var max = 2 + Math.floor(prs.level / 10) * 2;
     for (let ch of prs.characteristics) {
       for (let ab of ch.abilities) {
         for (let tsk of ab.tasks) {
@@ -3601,12 +3652,40 @@ export class PersService {
             if (tsk.value >= max) {
               tsk.mayUp = false;
             }
+          } else if (tsk.value >= this.gameSettings.maxAbilLvl) {
+            tsk.mayUp = false;
           }
         }
       }
     }
 
-    // Пересортировка
+    // Шаг 4. Перки качаются только если обычные навыки упёрлись в потолок.
+    // Идея: сначала разгоняй базу, перки — как «вишенка», когда апать уже нечего.
+    // Исключение — начатый сложн-перк (perkHardnes=1, value>0): его обязательно докачать,
+    // иначе ОН за половинный апгрейд останутся «застрявшими». Норм-перк (perkHardnes=0.5)
+    // прокачивается в один шаг до maxAbilLvl, поэтому у него value>0 уже означает «готов»
+    // и отсекается на шаге 3.
+    const anyRegularMayUp = prs.characteristics.some((ch) =>
+      ch.abilities.some((ab) => ab.tasks.some((t) => !t.isPerk && t.mayUp))
+    );
+
+    if (anyRegularMayUp) {
+      for (let ch of prs.characteristics) {
+        for (let ab of ch.abilities) {
+          for (let tsk of ab.tasks) {
+            if (tsk.isPerk) {
+              const isHardOpened = (tsk.perkHardnes ?? 0.5) === 1 && tsk.value > 0;
+
+              if (!isHardOpened) {
+                tsk.mayUp = false;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Пересортировка — апаемое наверх.
     prs.characteristics = prs.characteristics.sort(this.chaSorter());
     prs.characteristics.forEach((q) => (q.abilities = q.abilities.sort(this.abSorter())));
   }

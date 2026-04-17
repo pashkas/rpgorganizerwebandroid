@@ -1,7 +1,9 @@
 import { Component, OnInit, Inject, ViewChild, ElementRef } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material";
+import { moveItemInArray } from "@angular/cdk/drag-drop";
 import { GameSettings } from "../GameSettings";
 import { FormControl, FormGroup } from "@angular/forms";
+import { Task, ChecklistItem } from "../../Models/Task";
 
 @Component({
   selector: "app-add-item-dialog",
@@ -13,7 +15,9 @@ export class AddItemDialogComponent implements OnInit {
   gallerryImages = [];
   isGallery = false;
   lblTxt = "Название";
+  newChecklistText = "";
   times = [1, 2, 3, 4, 5];
+  weekDays: string[] = Task.weekDays;
 
   galleryForm = new FormGroup({
     isGallery: new FormControl(true),
@@ -107,7 +111,41 @@ export class AddItemDialogComponent implements OnInit {
     });
   }
 
+  moveChecklistItem(index: number, dir: number) {
+    let newIndex = index + dir;
+    if (newIndex < 0 || newIndex >= this.data.checklistItems.length) {
+      return;
+    }
+    moveItemInArray(this.data.checklistItems, index, newIndex);
+  }
+
+  addChecklistItem() {
+    if (this.newChecklistText.trim()) {
+      let item = new ChecklistItem();
+      item.name = this.newChecklistText.trim();
+      this.data.checklistItems.push(item);
+      this.newChecklistText = "";
+    }
+  }
+
+  removeChecklistItem(index: number) {
+    this.data.checklistItems.splice(index, 1);
+  }
+
+  setWeekDay(wd: string) {
+    let idx = this.data.tskWeekDays.indexOf(wd);
+    if (idx === -1) {
+      this.data.tskWeekDays.push(wd);
+    } else {
+      this.data.tskWeekDays.splice(idx, 1);
+    }
+  }
+
   ok() {
-    this.dialogRef.close(this.data.text);
+    if (this.data.showChecklist) {
+      this.dialogRef.close({ name: this.data.text, isChecklist: this.data.isChecklist, checklistItems: this.data.checklistItems, tskWeekDays: this.data.isWeekDays ? (this.data.tskWeekDays || []) : [] });
+    } else {
+      this.dialogRef.close(this.data.text);
+    }
   }
 }

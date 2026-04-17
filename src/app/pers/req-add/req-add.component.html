@@ -11,8 +11,14 @@
         ≥
     </div>
 
-    <mat-slider fxFlex="30" [thumbLabel]="true" class="w-100 pt-2" [max]="100" [min]="1" [step]="1" [(ngModel)]="selVal">
-    </mat-slider>
+    <mat-form-field fxFlex="30">
+        <mat-label>Уровень</mat-label>
+        <mat-select [(ngModel)]="selVal">
+            <mat-option *ngFor="let v of abVals" [value]="v">
+                {{v}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
 </div>
 <div mat-dialog-actions [align]="'end'">
     <button mat-button mat-dialog-close>Отмена</button>

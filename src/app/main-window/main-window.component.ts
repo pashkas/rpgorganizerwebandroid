@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { PersService } from "../pers.service";
 import { Task, taskState } from "src/Models/Task";
-import { BehaviorSubject, Observable, Subject, combineLatest, forkJoin, of } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { Ability } from "src/Models/Ability";
 import { MatDialog } from "@angular/material";
@@ -11,11 +11,8 @@ import { StatesService } from "../states.service";
 import { curpersview } from "src/Models/curpersview";
 import { Qwest } from "src/Models/Qwest";
 import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-component.component";
-import { filter, switchMap, takeUntil } from "rxjs/operators";
+import { takeUntil } from "rxjs/operators";
 import { GameSettings } from "../GameSettings";
-import { BreakpointObserver } from "@angular/cdk/layout";
-import { NgxMasonryComponent } from "ngx-masonry";
-import { GlobalItem } from "src/Models/GlobalItem";
 
 @Component({
   selector: "app-main-window",
@@ -29,25 +26,19 @@ export class MainWindowComponent implements OnInit {
   currentCounterDone$ = this.srv.currentCounterDone$.asObservable();
   currentTask$ = this.srv.currentTask$.asObservable();
   currentView$ = this.srv.currentView$.asObservable();
-  globalMasonryCls$: Observable<string>;
-  globalMasonryClsNGX$: Observable<string>;
   isFailShown$ = new BehaviorSubject<boolean>(false);
   isFailShownOv$ = new BehaviorSubject<boolean>(false);
   isSort: boolean = false;
   isSucessShown$ = new BehaviorSubject<boolean>(false);
   isSucessShownOv$ = new BehaviorSubject<boolean>(false);
   lastGlobalBeforeSort: boolean;
-  @ViewChild(NgxMasonryComponent) masonry: NgxMasonryComponent;
-  public myOptions = {
-    horizontalOrder: true,
-    animations: "hide",
-  };
+  loadedSkillImgs = new Set<string>();
   pers$ = this.srv.pers$.asObservable();
   qwestsGlobal$ = this.srv.qwestsGlobal$;
   qwickSortVals: sortArr[] = [];
   skillsGlobal$ = this.srv.skillsGlobal$;
 
-  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, public gameSettings: GameSettings, private breakpointObserver: BreakpointObserver) {}
+  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, public gameSettings: GameSettings, private cdr: ChangeDetectorRef) {}
 
   addToQwest() {
     let qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
@@ -308,9 +299,32 @@ export class MainWindowComponent implements OnInit {
     }
   }
 
-  itemsLoaded(type: string, ev: any) {
-    this.masonry.reloadItems();
-    this.masonry.layout();
+  /**
+   * Получить первый невыполненный пункт чеклиста для текущей задачи.
+   */
+  getNextChecklistItem(tsk: Task) {
+    let st = this.srv.allMap["stt" + tsk.id]?.link;
+    if (!st || !st.isChecklist || !st.checklistItems) {
+      return null;
+    }
+
+    return st.checklistItems.find(ci => !ci.isDone) || null;
+  }
+
+  /**
+   * Отметить пункт чеклиста выполненным.
+   */
+  completeChecklistItem(tsk: Task) {
+    let item = this.getNextChecklistItem(tsk);
+    if (item) {
+      item.isDone = true;
+      this.srv.savePers(false);
+    }
+  }
+
+  onSkillImgLoad(tskId: string) {
+    this.loadedSkillImgs = new Set(this.loadedSkillImgs).add(tskId);
+    this.cdr.markForCheck();
   }
 
   nextTask() {
@@ -327,59 +341,6 @@ export class MainWindowComponent implements OnInit {
   }
 
   ngOnInit() {
-    const screenObservable = this.breakpointObserver.observe(["(min-width: 927px)", "(max-width: 926px) and (min-width: 601px)", "(max-width: 600px)"]);
-    const qwestObservable = this.srv.qwestsGlobal$;
-    const skillsObservable = this.srv.skillsGlobal$;
-    const viewObservable = this.srv.currentView$.pipe(filter((q) => q == curpersview.QwestsGlobal || q == curpersview.SkillsGlobal));
-
-    this.globalMasonryCls$ = combineLatest([screenObservable, qwestObservable, skillsObservable, viewObservable]).pipe(
-      switchMap(([screen, qwests, skills, view]) => {
-        let cls = "main-masonry";
-
-        if (screen.breakpoints["(min-width: 927px)"]) {
-          // большой
-          cls += "-big";
-        } else if (screen.breakpoints["(max-width: 926px) and (min-width: 601px)"]) {
-          // средний
-          cls += "-mid";
-        } else if (screen.breakpoints["(max-width: 600px)"]) {
-          cls += "-small";
-          // if (view == curpersview.QwestsGlobal && qwests.length >= 12) {
-          //   cls += "-plus";
-          // }
-
-          if (view == curpersview.SkillsGlobal && skills.length > 15) {
-            cls += "-plus";
-          }
-        }
-
-        return of(cls);
-      })
-    );
-
-    this.globalMasonryClsNGX$ = combineLatest([screenObservable, qwestObservable, skillsObservable, viewObservable]).pipe(
-      switchMap(([screen, qwests, skills, view]) => {
-        let cls = "ngx-masonry-item";
-
-        if (screen.breakpoints["(min-width: 927px)"]) {
-          // большой
-          cls += "-big";
-        } else if (screen.breakpoints["(max-width: 926px) and (min-width: 601px)"]) {
-          // средний
-          cls += "-mid";
-        } else if (screen.breakpoints["(max-width: 600px)"]) {
-          // cls += "-small";
-          // if (view == curpersview.QwestsGlobal && qwests.length >= 12) {
-          //   cls += "-plus";
-          // }
-          // if (view == curpersview.SkillsGlobal && skills.length > 15) {
-          //   cls += "-plus";
-          // }
-        }
-
-        return of(cls);
-      })
-    );
   }
 
   onLongPress(e) {
