@@ -107,7 +107,8 @@ export class PerschangesService {
         // Изменение уровня
         if (el.after != el.before && el.after <= this.gameSettings.maxChaLvl && el.after > this.gameSettings.minChaLvl) {
           if (this.gameSettings.changesIsChowChaLevels) {
-            let chaChanges = new ChangesModel(el.name, "cha", this.moreThenThero(el.before), this.moreThenThero(el.after), this.gameSettings.minChaLvl, this.gameSettings.maxChaLvl, el.img);
+            // Точка отсчёта шкалы — 0, а не minChaLvl: иначе шаг уровня не совпадает с 10%-ми разделителями и визуально «поехал»
+            let chaChanges = new ChangesModel(el.name, "cha", this.moreThenThero(el.before), this.moreThenThero(el.after), 0, this.gameSettings.maxChaLvl, el.img);
             chaChanges.lvl = el.after;
             changes.push(chaChanges);
           }
@@ -157,8 +158,8 @@ export class PerschangesService {
       }
       // Навыки
       else if (el.type == "abil") {
-        // Активирован
-        if (this.gameSettings.changesIsShowAbActivate && el.abIsOpenBefore != el.abIsOpenAfter) {
+        // Активирован (только для перков — обычные навыки показываем прогресс-баром 0→1)
+        if (this.gameSettings.changesIsShowAbActivate && el.abIsOpenBefore != el.abIsOpenAfter && el.isPerk) {
           isAbilActivated = true;
           abToEdit = n;
 
@@ -178,7 +179,8 @@ export class PerschangesService {
         } else {
           // Иземенение уровня
           if (this.gameSettings.changesIsShowAbLevels && el.after != el.before && el.after <= this.gameSettings.maxAbilLvl) {
-            let abChanges = new ChangesModel(el.name, "abil", this.moreThenThero(el.before), this.moreThenThero(el.after), this.gameSettings.minAbilLvl, this.gameSettings.maxAbilLvl, el.img);
+            // Точка отсчёта шкалы — всегда 0. Иначе при minAbilLvl=1 уровень 1→2 рисуется от 0% до ~11.1% (шаг не совпадает с 10%-ми разделителями), а 1→0 клампится в 0% и бар не движется.
+            let abChanges = new ChangesModel(el.name, "abil", this.moreThenThero(el.before), this.moreThenThero(el.after), 0, this.gameSettings.maxAbilLvl, el.img);
 
             abChanges.lvl = el.after;
 
@@ -454,6 +456,7 @@ export class PerschangesService {
         backdropClass: "backdrop-changes",
         data: {
           abPoints: this.afterPers.ON,
+          perkPoints: this.afterPers.OP,
           lvl: this.afterPers.level,
           img: "assets/img/levelUp.png",
         },

@@ -37,29 +37,34 @@
             </button> -->
             <div fxLayout="column" fxLayoutAlign="space-between stretch">
               <button mat-button [routerLink]="['turnirtable']">
-                <img src="assets/icons/опыт.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-                <span>
-                  <span class="text-success">{{ pers.level }}</span>
+                <span style="position: relative; display: inline-block; line-height: 0">
+                  <img src="assets/icons/опыт.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+                  <span class="badge badge-pill badge-success" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.level }}</span>
                 </span>
               </button>
               <button mat-button (click)="quickAddCharact()">
                 <img src="assets/icons/create.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-                <span style="visibility: hidden">
-                  <span class="text-success">{{ pers.ON }}</span>
-                </span>
               </button>
             </div>
             <app-image-component [(data)]="pers.image" [isCanEdit]="false"></app-image-component>
             <div fxLayout="column" fxLayoutAlign="space-between">
               <button mat-button (click)="openShop()">
-                <img src="assets/icons/gold.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-                <span>
-                  <span class="text-success">{{ pers.gold | floor }}</span>
+                <span style="position: relative; display: inline-block; line-height: 0">
+                  <img src="assets/icons/gold.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+                  <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.gold | floor }}</span>
+                </span>
+              </button>
+              <button mat-button *ngIf="this.gameSettings.isAbPointsEnabled">
+                <span style="position: relative; display: inline-block; line-height: 0">
+                  <img src="assets/icons/star.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+                  <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.OP }}</span>
                 </span>
               </button>
               <button mat-button color="accent" (click)="quickAddAbil()">
-                <img src="assets/icons/diamond.png" class="img-fluid mr-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-                <span class="text-success" *ngIf="this.gameSettings.isAbPointsEnabled">{{ pers.ON }}</span>
+                <span style="position: relative; display: inline-block; line-height: 0">
+                  <img src="assets/icons/diamond.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+                  <span *ngIf="this.gameSettings.isAbPointsEnabled" class="badge badge-pill" [ngClass]="pers.ON < 0 ? 'badge-danger' : 'badge-success'" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.ON }}</span>
+                </span>
               </button>
             </div>
           </div>
@@ -108,8 +113,9 @@
               <li *ngFor="let item of pers.characteristics; let i = index" class="list-group-item pb-0 px-0 mt-0 mb-0 border-0 pt-2">
                 <!-- Характеристика -->
                 <a class="align-self-center w-100" [routerLink]="['/pers/characteristic', item.id]">
-                  <div class="progress position-relative" style="height: 28px">
-                    <div class="progress-bar attrprogr" role="progressbar" [style.width]="item.progressValue + '%'" style="height: 28px; z-index: 1"></div>
+                  <div class="progress position-relative charactProgr" style="height: 28px">
+                    <div class="position-absolute progress-bar charactProgrFill" role="progressbar" [style.width]="item.progressValue + '%'" style="height: 28px; z-index: 1"></div>
+                    <div class="position-absolute w-100 charactProgrSegments" style="height: 28px; z-index: 2"></div>
                     <!-- <div
                       class="position-absolute progress-bar attr"
                       role="progressbar"
@@ -135,8 +141,9 @@
                         <ng-container *ngIf="ab.tasks[0]?.mayUp || {} as mayUp">
                           <li class="list-group-item py-0 mt-1 mb-0 pr-0 pl-0 border-0 row-striped" [ngClass]="{ even: even && mayUp == true }">
                             <div class="align-self-center w-100 d-flex">
-                              <div class="flex-grow-1 progress position-relative" style="height: 20px">
-                                <div class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="ab.progressValue + '%'" style="height: 20px; z-index: 1" *ngIf="ab.isOpen"></div>
+                              <div class="flex-grow-1 progress position-relative abProgr" style="height: 24px">
+                                <div class="position-absolute progress-bar skillProgrFill" role="progressbar" [style.width]="ab.progressValue + '%'" style="height: 24px; z-index: 1" *ngIf="ab.isOpen"></div>
+                                <div class="position-absolute w-100 charactProgrSegments" style="height: 24px; z-index: 2"></div>
                                 <!-- <div
                                   *ngIf="ab.isOpen"
                                   class="position-absolute progress-bar"
@@ -153,12 +160,11 @@
                                   <div class="text-right pointer">
                                     <a (click)="showAbility(ab)">{{ ab.rang.name }}</a>
                                   </div>
+                                  <a *ngIf="mayUp == true" class="ml-1 pointer d-flex align-items-center" (click)="upAbilityFromList(ab)">
+                                    <img src="assets/icons/up.png" [ngStyle]="{ 'object-fit': 'contain', height: '22px' }" />
+                                  </a>
                                 </div>
                               </div>
-                              <a *ngIf="mayUp == true" class="ml-0 px-0 mr-0 pointer" (click)="upAbilityFromList(ab)">
-                                <!-- upAbil(ab) -->
-                                <img src="assets/icons/up.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '20px' }" />
-                              </a>
                             </div>
                           </li>
                         </ng-container>
@@ -412,9 +418,9 @@
             <div class="p-3">
               <div fxLayout="row" fxLayoutAlign="end center">
                 <button mat-button class="icon-small">
-                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
-                  <span>
-                    <span class="text-success">{{ pers.gold | floor }}</span>
+                  <span style="position: relative; display: inline-block; line-height: 0">
+                    <img src="assets/icons/gold.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                    <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.6em; padding: 2px 5px">{{ pers.gold | floor }}</span>
                   </span>
                 </button>
                 <button class="icon-small mr-2 fade" mat-icon-button>
@@ -446,9 +452,9 @@
             <div class="p-3">
               <div fxLayout="row" fxLayoutAlign="end center">
                 <button mat-button class="icon-small">
-                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
-                  <span>
-                    <span class="text-success">{{ pers.gold | floor }}</span>
+                  <span style="position: relative; display: inline-block; line-height: 0">
+                    <img src="assets/icons/gold.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                    <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.6em; padding: 2px 5px">{{ pers.gold | floor }}</span>
                   </span>
                 </button>
                 <button class="icon-small mr-2" mat-icon-button (click)="qwickAddReward('achive')">
@@ -464,7 +470,7 @@
                         {{ rev.name }}
                       </div>
                       <div class="w-100">
-                        <div *ngFor="let req of rev.reqStrExt" class="progress position-relative" style="min-height: 18px">
+                        <div *ngFor="let req of rev.reqStrExt" class="progress position-relative" style="min-height: 24px">
                           <div class="position-absolute w-100 h-100 d-flex align-items-center">
                             <small class="w-100 px-1 text-break fst-italic">{{ req.name }}</small>
                           </div>
@@ -482,9 +488,9 @@
             <div class="p-3">
               <div fxLayout="row" fxLayoutAlign="end center">
                 <button mat-button class="icon-small">
-                  <img src="assets/icons/gold.png" class="img-fluid mr-2" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
-                  <span>
-                    <span class="text-success">{{ pers.gold | floor }}</span>
+                  <span style="position: relative; display: inline-block; line-height: 0">
+                    <img src="assets/icons/gold.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.5em' }" />
+                    <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.6em; padding: 2px 5px">{{ pers.gold | floor }}</span>
                   </span>
                 </button>
                 <button class="icon-small mr-2" mat-icon-button (click)="qwickAddReward('shop')">

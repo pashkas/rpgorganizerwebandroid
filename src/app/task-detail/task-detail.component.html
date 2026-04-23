@@ -15,9 +15,13 @@
 <!-- Просмотр -->
 <div class="container pt-2 pb-4" *ngIf="this.pers && tsk && !isEditMode">
   <form class="pb-4">
-    <div style="display: flex; align-items: flex-start; justify-content: space-between; width: 100%;">
-      <!-- Левая колонка для центровки (невидимая) -->
-      <div style="flex: 0 0 50px" *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)"></div>
+    <div style="display: flex; align-items: stretch; justify-content: space-between; width: 100%;">
+      <!-- Левая колонка: down слева-внизу только если видны обе кнопки -->
+      <div *ngIf="tsk.requrense != 'нет'" style="flex: 0 0 50px; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start">
+        <button *ngIf="tskAbility?.isOpen && tsk.mayUp" class="icon-small" mat-icon-button (click)="downAbil()">
+          <img src="assets/icons/down.png" class="img-fluid" />
+        </button>
+      </div>
 
       <!-- Картинка по центру -->
       <div style="flex-grow: 1; display: flex; justify-content: center">
@@ -25,24 +29,43 @@
         <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"></app-image-component>
       </div>
 
-      <!-- Правая колонка с алмазом -->
-      <div *ngIf="tsk.requrense != 'нет' && (tskAbility?.isOpen || tsk.mayUp)" style="flex: 0 0 50px; display: flex; justify-content: flex-end">
-        <div *ngIf="this.gameSettings.isAbPointsEnabled && pers.ON > 0">
-          <span [ngClass]="{ 'text-success': pers.ON > 0, 'text-danger': pers.ON < 0 }" matBadge="{{ this.pers.ON }}" matBadgeSize="small" matBadgeColor="accent" matBadgePosition="above after">
-            <img src="assets/icons/diamond.png" class="px-1" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-          </span>
+      <!-- Правая колонка: звезда сверху, алмаз середина/низ, внизу — up или down (или ничего) -->
+      <!-- Обе кнопки: down слева, up справа-внизу, алмаз посередине.
+           Только одна: эта кнопка справа-внизу, алмаз посередине.
+           Ни одной: алмаз уходит в правый нижний угол. -->
+      <div *ngIf="tsk.requrense != 'нет'" style="flex: 0 0 auto; display: flex; justify-content: flex-end; align-items: stretch">
+        <div style="display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap">
+          <ng-container *ngIf="this.gameSettings.isAbPointsEnabled">
+            <div style="position: relative; display: inline-block; line-height: 0" class="px-1">
+              <img src="assets/icons/star.png" [ngStyle]="{ 'object-fit': 'contain', height: '25px' }" />
+              <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.OP }}</span>
+            </div>
+            <div style="flex: 1 1 auto"></div>
+            <div style="position: relative; display: inline-block; line-height: 0" class="px-1">
+              <img src="assets/icons/diamond.png" [ngStyle]="{ 'object-fit': 'contain', height: '25px' }" />
+              <span class="badge badge-pill" [ngClass]="pers.ON < 0 ? 'badge-danger' : 'badge-success'" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ this.pers.ON }}</span>
+            </div>
+          </ng-container>
+          <!-- Разделитель перед кнопкой — только когда кнопка есть -->
+          <div *ngIf="tskAbility?.isOpen || tsk.mayUp" style="flex: 1 1 auto"></div>
+          <!-- up: когда обе видны либо только up -->
+          <button *ngIf="tsk.mayUp" class="icon-small" mat-icon-button (click)="upAbil()">
+            <img src="assets/icons/up.png" class="img-fluid" />
+          </button>
+          <!-- down: переезжает сюда, когда видна только down -->
+          <button *ngIf="tskAbility?.isOpen && !tsk.mayUp" class="icon-small" mat-icon-button (click)="downAbil()">
+            <img src="assets/icons/down.png" class="img-fluid" />
+          </button>
         </div>
       </div>
     </div>
 
-    <div style="display: flex; align-items: center; width: 100%; gap: 5px">
-      <button *ngIf="tskAbility?.isOpen" class="icon-small" mat-icon-button (click)="downAbil()">
-        <img src="assets/icons/down.png" class="img-fluid" />
-      </button>
-
-      <div class="progress position-relative" style="height: 32px; flex-grow: 1" *ngIf="tskAbility">
-        <div *ngIf="tskAbility.isOpen" style="z-index: 1; height: 32px" class="position-absolute progress-bar abprogr" role="progressbar" [style.width]="tskAbility.progressValue + '%'"></div>
-        <div style="z-index: 3" class="d-flex position-absolute w-100 px-1">
+    <div class="mt-2 mb-1" style="display: flex; align-items: center; width: 100%; gap: 5px">
+      <div class="progress position-relative charactProgr" style="height: 32px; flex-grow: 1" *ngIf="tskAbility">
+        <div *ngIf="tskAbility.isOpen" style="z-index: 1; height: 32px" class="position-absolute progress-bar skillProgrFill" role="progressbar" [style.width]="tskAbility.progressValue + '%'"></div>
+        <div *ngIf="!gameSettings.isClassicaRPG" style="z-index: 2; height: 32px" class="position-absolute progress-bar charactNextLevFill" role="progressbar" [style.width]="tsk.progresNextLevel + '%'"></div>
+        <div class="position-absolute w-100 charactProgrSegments" style="height: 32px; z-index: 3"></div>
+        <div style="z-index: 4" class="d-flex position-absolute w-100 px-2">
           <div class="flex-grow-1 text-left align-self-baseline">
             <h4>{{ tsk | abHardness }}</h4>
           </div>
@@ -51,23 +74,14 @@
           </div>
         </div>
       </div>
-
-      <button *ngIf="tsk.mayUp == true" class="icon-small" mat-icon-button (click)="upAbil()">
-        <img src="assets/icons/up.png" class="img-fluid" />
-      </button>
-    </div>
-
-    <div *ngIf="!gameSettings.isClassicaRPG && tskAbility" class="pt-1">
-      <mat-progress-bar class="abNextLevProgr" [color]="'white'" [value]="tsk.progresNextLevel"> </mat-progress-bar>
     </div>
 
     <div class="w-100 px-0 text-center" *ngIf="!tskAbility">
       <h4>{{ tsk.name }}</h4>
     </div>
 
-    <br *ngIf="tskAbility" />
     <!-- Дата и время, повтор -->
-    <div fxLayout="row" fxLayoutAlign="space-between center" class="px-1" *ngIf="tskAbility">
+    <div fxLayout="row" fxLayoutAlign="space-between center" class="px-1 mt-2" *ngIf="tskAbility">
       <ng-container *ngIf="tskCharact$ | async as charact">
         <a [routerLink]="['/pers/characteristic', charact.id]">{{ charact.name }}</a>
       </ng-container>
@@ -186,8 +200,8 @@
       </mat-chip-list>
     </div>
 
-    <!-- Сложность перка -->
-    <div *ngIf="tsk.isPerk" fxLayout="row" class="perk-hardnes-row">
+    <!-- Сложность перка — временно скрыто, все перки захардкожены на «норм» (см. checkPerkTskValue) -->
+    <div *ngIf="false && tsk.isPerk" fxLayout="row" class="perk-hardnes-row">
       <mat-button-toggle-group>
         <mat-button-toggle [checked]="tsk.perkHardnes === 0.5" (click)="tsk.perkHardnes = 0.5">норм</mat-button-toggle>
         <mat-button-toggle [checked]="tsk.perkHardnes === 1" (click)="tsk.perkHardnes = 1">сложн</mat-button-toggle>

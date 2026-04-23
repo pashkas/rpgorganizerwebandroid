@@ -1,13 +1,128 @@
-.example-section {
-    display: flex;
-    align-content: center;
-    align-items: center;
-    height: 24px;
-    background: lightgray;
+:host {
+    display: block;
+    position: relative;
 }
 
-.text-section {
+.changesRow {
+    border-radius: 4px;
+    transition: box-shadow 220ms ease-out;
+}
+
+/* Золотой пульс на level-up */
+.changesRow.flashActive {
+    animation: lvlUpPulse 600ms ease-out;
+}
+
+@keyframes lvlUpPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.85);
+    }
+    60% {
+        box-shadow: 0 0 14px 6px rgba(255, 215, 0, 0.6);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+    }
+}
+
+/* Shimmer-блик по заливке */
+.progressFill {
+    position: relative;
+}
+
+.progressFill .shimmer {
     position: absolute;
-    padding: 10px;
-    font-size: small;
+    top: 0;
+    left: -40%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.55) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-20deg);
+    animation: shimmerRun 1800ms ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes shimmerRun {
+    0% {
+        left: -40%;
+    }
+    100% {
+        left: 110%;
+    }
+}
+
+/* Всплывашка «+1 ур.» */
+.floatLvlup {
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    font-size: 11px;
+    font-weight: 600;
+    color: gold;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.8), 0 0 2px rgba(255, 215, 0, 0.9);
+    pointer-events: none;
+    animation: floatUp 900ms ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 0);
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -22px);
+    }
+}
+
+/* Спарки — 8 точек разлетаются от центра */
+.spark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: gold;
+    box-shadow: 0 0 6px 1px rgba(255, 215, 0, 0.9);
+    pointer-events: none;
+    animation: sparkFly 800ms ease-out forwards;
+    z-index: 4;
+}
+
+.spark[data-i="0"] { --tx: 40px;  --ty: 0;     }
+.spark[data-i="1"] { --tx: 28px;  --ty: -28px; }
+.spark[data-i="2"] { --tx: 0;     --ty: -40px; }
+.spark[data-i="3"] { --tx: -28px; --ty: -28px; }
+.spark[data-i="4"] { --tx: -40px; --ty: 0;     }
+.spark[data-i="5"] { --tx: -28px; --ty: 28px;  }
+.spark[data-i="6"] { --tx: 0;     --ty: 40px;  }
+.spark[data-i="7"] { --tx: 28px;  --ty: 28px;  }
+
+@keyframes sparkFly {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--tx, 0)), calc(-50% + var(--ty, 0))) scale(0.4);
+    }
+}
+
+/* Минусовое изменение — красноватая тонировка строки */
+:host(.sign-minus) .changesRow {
+    box-shadow: inset 0 0 0 1px rgba(220, 53, 69, 0.35);
+}
+
+:host(.sign-minus) .progressFill {
+    filter: hue-rotate(-30deg) saturate(1.2);
 }

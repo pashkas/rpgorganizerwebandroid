@@ -1,25 +1,23 @@
 <ng-container *ngIf="item.valFrom!=item.valTo">
-  <div class="flex-grow-1 w-100" [ngStyle]="{'height': '24px'}">
-    <div class="progress position-relative h-100" style="background-color: aliceblue !important;">
-      <div #progress class="progress-bar h-100" [ngStyle]="{'background-color': item.color}">
+  <div class="flex-grow-1 w-100">
+    <div class="progress position-relative abProgr changesRow" [class.flashActive]="flashActive" style="height: 24px; overflow: visible;">
+      <div #progress class="position-absolute progress-bar progressFill" [ngClass]="fillClass"
+        [ngStyle]="{'background-color': item.color}" style="height: 24px; z-index: 1; overflow: hidden;">
+        <span class="shimmer"></span>
       </div>
-      <div [ngStyle]="{'font-size': 'small'}"
-        class="align-self-center justify-content-center d-flex position-absolute w-100 text-dark">
+      <div *ngIf="item.type == 'cha' || item.type == 'abil'" class="position-absolute w-100 charactProgrSegments" style="height: 24px; z-index: 2"></div>
+      <div class="align-self-center justify-content-center d-flex position-absolute w-100 text-dark"
+        style="font-size: small; z-index: 3;">
         {{item.name}}{{item.valChange + plusName}}
       </div>
+
+      <!-- Всплывашка «+1 ур.» -->
+      <div *ngIf="floatText" class="floatLvlup">{{ floatText }}</div>
+
+      <!-- Искры level-up -->
+      <ng-container *ngIf="sparks.length">
+        <span class="spark" *ngFor="let s of sparks; let i = index" [attr.data-i]="i"></span>
+      </ng-container>
     </div>
   </div>
 </ng-container>
-
-<!-- <div class="text-center w-100">{{item.name}}&nbsp;{{item.valChange}}</div>
-<section class="example-section">
-  <div #progress class="progress-bar h-100" [ngStyle]="{'background-color': 'Gold'}">
-  </div>
-</section> -->
-
-
-<!-- <section class="example-section" *ngIf="true">
-  <mat-progress-bar #progress [color]="'white'" [value]="100" style="height: 24px;">
-  </mat-progress-bar>
-  <div class="text-section text-center w-100">  {{item.name}}&nbsp;{{item.valChange}} </div>
-</section> -->

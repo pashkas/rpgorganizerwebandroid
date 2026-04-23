@@ -12,6 +12,7 @@ export class LevelUpMsgComponent implements OnInit {
   percSymbol = "";
   isShowAbProgrTable;
   abPoints: any = null;
+  perkPoints: any = null;
   img: any = "assets/img/levelUp.png";
   txt: string = "НОВЫЙ УРОВЕНЬ!!!";
   lvl: number;
@@ -22,6 +23,7 @@ export class LevelUpMsgComponent implements OnInit {
     this.isShowAbProgrTable = this.gameSettings.isShowAbProgrTable;
     if (data) {
       this.abPoints = data.abPoints;
+      this.perkPoints = data.perkPoints;
       this.img = data.img;
       this.txt = data.txt;
       this.lvl = data.lvl;

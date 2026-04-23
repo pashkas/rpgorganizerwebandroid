@@ -34,7 +34,6 @@ export class ReqAddComponent implements OnInit {
           for (const t of ab.tasks) {
             let r = new Reqvirement();
             r.elName = t.name;
-            r.elVal = 10;
             r.elId = t.id;
             this.abs.push(r);
           }

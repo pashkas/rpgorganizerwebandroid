@@ -1,0 +1,217 @@
+.pers-master-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 12px 32px;
+}
+
+/* --- Живое превью --- */
+.pers-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.pers-preview__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-color: #f4f4f8;
+  flex-shrink: 0;
+  border: 3px solid rgba(63, 81, 181, 0.18);
+}
+
+.pers-preview__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pers-preview__name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.pers-preview__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stat-chip {
+  font-size: 0.82rem;
+  padding: 2px 10px;
+  background: #f1f3f8;
+  border-radius: 12px;
+  color: #555;
+}
+
+.stat-chip b {
+  color: #3f51b5;
+  margin-left: 2px;
+}
+
+/* --- Прогресс и stepper --- */
+.pers-master__progress {
+  margin-bottom: 8px;
+  border-radius: 2px;
+  height: 6px;
+}
+
+.pers-master__stepper {
+  background: transparent;
+}
+
+/* --- Блок шага --- */
+.step-block {
+  padding: 8px 4px 4px;
+}
+
+.step-block--center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.pers-avatar-frame {
+  width: 200px;
+  max-width: 100%;
+}
+
+.step-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  margin-top: 16px;
+}
+
+/* --- Карточка характеристики --- */
+.cha-card {
+  padding: 12px !important;
+  border-radius: 10px !important;
+  margin-bottom: 10px;
+}
+
+.cha-card__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cha-card__avatar {
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.cha-card__fields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cha-card__del {
+  align-self: flex-start;
+}
+
+.cha-card__title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  color: #3f51b5;
+}
+
+/* --- Навыки --- */
+.abils-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.abil-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.abil-row__name {
+  flex: 1 1 200px;
+  min-width: 160px;
+}
+
+.abil-row__hardness {
+  flex: 0 0 130px;
+}
+
+/* --- Кнопки добавления --- */
+.add-btn {
+  margin-top: 8px;
+  width: 100%;
+  border-style: dashed !important;
+}
+
+.add-btn--sm {
+  margin-top: 4px;
+}
+
+.icon-inline {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.icon-small {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding: 6px !important;
+}
+
+.icon-small .img-fluid {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* --- Мобильная адаптация --- */
+@media (max-width: 600px) {
+  .pers-master-wrap {
+    padding: 8px 6px 24px;
+  }
+
+  .pers-preview__avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .pers-preview__name {
+    font-size: 1.05rem;
+  }
+
+  .cha-card__row {
+    flex-wrap: wrap;
+  }
+
+  .cha-card__avatar {
+    width: 56px;
+  }
+
+  .pers-avatar-frame {
+    width: 160px;
+  }
+
+  .abil-row__hardness {
+    flex: 1 0 100px;
+  }
+}

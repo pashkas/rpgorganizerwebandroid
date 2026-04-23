@@ -159,6 +159,19 @@ export abstract class GameSettings {
 
   perkHardness: number = 0.5;
 
+  /**
+   * Каждый N-й уровень персонажа даёт 1 ОП вместо ОН за уровень.
+   */
+  perkPointLvlInterval: number = 4;
+
+  /**
+   * Экономика перков: стоимость 1 ОП в «уровнях ОН».
+   * 1 ОП = perkPointAbLevelCost * abPointsPerLvl ОН.
+   * Учитывается в опыте за задачу перка и в стоимости ОП-уровней
+   * (каждый perkPointLvlInterval-й уровень требует во столько же раз больше опыта).
+   */
+  perkPointAbLevelCost: number = 1;
+
   sort = ["abil", "abLvl", "cha", "chaLvl", "qwest", "exp", "hp", "gold"];
 
   /**
@@ -229,6 +242,28 @@ export abstract class GameSettings {
     let v = curLvl - 1;
 
     return (10 + (v * (v + 1)) / 2) * hardness;
+  }
+
+  /**
+   * Стоимость следующего апгрейда перка в ОП — всегда 1 ОП за клик.
+   */
+  perkCost(_value: number, _perkHardnes?: number): number {
+    return 1;
+  }
+
+  /**
+   * Сумма потраченных ОП на перк. Норм = 1 ОП (один шаг), сложн = 1 или 2 ОП (половина/целиком).
+   */
+  perkTotalCost(value: number, perkHardnes?: number): number {
+    if (value <= 0) {
+      return 0;
+    }
+
+    if ((perkHardnes ?? 0.5) === 1) {
+      return value <= 5 ? 1 : 2;
+    }
+
+    return 1;
   }
 
   calculateHp(prs: Pers, prevLvl: number, curLvl: number) {}

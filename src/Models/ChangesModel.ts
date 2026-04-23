@@ -89,6 +89,12 @@ export class ChangesModel {
 
     this.valFrom = ((valFrom - totalMin) / (totalMax - totalMin)) * 100;
     this.valTo = ((valTo - totalMin) / (totalMax - totalMin)) * 100;
+
+    // кламп 0..100 — ниже totalMin бар уходил в минус и визуально не двигался
+    if (this.valFrom < 0) this.valFrom = 0;
+    if (this.valFrom > 100) this.valFrom = 100;
+    if (this.valTo < 0) this.valTo = 0;
+    if (this.valTo > 100) this.valTo = 100;
     //---------------------------------------
   }
 }

@@ -21,7 +21,7 @@
     <input matInput hidden />
   </mat-form-field>
   <mat-form-field *ngIf="ReqForm.get('type').value != 'Квест'">
-    <input matInput autocomplete="off" type="number" placeholder="Значение ≥" formControlName="elVal" onfocus="this.select()" />
+    <input matInput autocomplete="off" type="number" placeholder="Значение ≥" formControlName="elVal" onfocus="this.select()" min="1" [max]="maxElVal" />
   </mat-form-field>
 </div>
 <div mat-dialog-actions [align]="'end'">

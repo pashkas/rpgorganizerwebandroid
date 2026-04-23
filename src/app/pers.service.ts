@@ -938,10 +938,22 @@ export class PersService {
   }
 
   getClassicalAbPoints(persLevel: number, abValTotal: number, prs: Pers, abCount: number): number {
-    let gained = persLevel * this.gameSettings.abPointsPerLvl + this.gameSettings.abPointsStart;
+    // Каждый N-й уровень (perkPointLvlInterval) даёт ОП вместо ОН — эти уровни не участвуют в расчёте ОН.
+    const perkLvls = Math.floor(persLevel / this.gameSettings.perkPointLvlInterval);
+    const onLvls = persLevel - perkLvls;
+    let gained = onLvls * this.gameSettings.abPointsPerLvl + this.gameSettings.abPointsStart;
     let spent = abValTotal;
 
     return gained - spent;
+  }
+
+  /**
+   * Расчёт текущего баланса ОП: начислено по уровням минус потрачено на перки.
+   */
+  getClassicalPerkPoints(persLevel: number, opValTotal: number): number {
+    const gained = Math.floor(persLevel / this.gameSettings.perkPointLvlInterval);
+
+    return gained - opValTotal;
   }
 
   getEraCostLvl(curAbLvl: number) {
@@ -1623,6 +1635,7 @@ export class PersService {
     let abExpPointsTotalCur = 0;
     let classicalExpTotal = 0;
     let abValTotal = 0;
+    let opValTotal = 0;
 
     if (!prs.currentView) {
       prs.currentView = curpersview.SkillTasks;
@@ -1889,6 +1902,9 @@ export class PersService {
           }
           classicalExpTotal += tsk.classicalExp;
           abValTotal += this.gameSettings.abTotalCost(tsk.value, tsk.hardnes, tsk.isPerk, tsk.perkHardnes);
+          if (tsk.isPerk) {
+            opValTotal += this.gameSettings.perkTotalCost(tsk.value, tsk.perkHardnes);
+          }
         }
 
         if (ab.isOpen) {
@@ -2129,6 +2145,7 @@ export class PersService {
     prs.prevExp = expResult.startExp;
     prs.nextExp = expResult.nextExp;
     prs.ON = ons;
+    prs.OP = this.getClassicalPerkPoints(expResult.persLevel, opValTotal);
     prs.exp = expResult.exp;
     prs.totalProgress = (prs.level / this.gameSettings.maxPersLevel) * 100;
 
@@ -3577,72 +3594,47 @@ export class PersService {
   /**
    * Пересчитывает флаг `mayUp` у всех задач перса — можно ли прямо сейчас поднять уровень навыка/перка.
    *
-   * Флаг `mayUp` изначально выставляется в других местах (при начислении ОН, апгрейде и т.п.),
+   * Флаг `mayUp` изначально выставляется в других местах (при начислении очков, апгрейде и т.п.),
    * здесь же он «фильтруется» цепочкой блокирующих правил — каждое может только сбросить `mayUp` в false.
    * Правила применяются последовательно, порядок важен.
    *
-   * Попутно считаются вспомогательные флаги:
-   *  - `IsNextLvlSame` на задаче — признак начатого сложн-перка (value>0, прокачка = повтор того же уровня).
-   *  - `ab.HasSameAbLvl` / `ch.HasSameAbLvl` — есть ли такой перк в навыке/характеристике (для сортировки).
-   *  - `ch.anyMayUp` — есть ли в характеристике что-то доступное к прокачке (для сортировки характеристик).
+   * Обычные навыки расходуют ОН, перки — ОП. Это разные пулы, проверяются независимо.
    *
    * В конце пересортирует характеристики и навыки — апаемые всплывают наверх.
    */
   private recountAbilMayUp(prs: Pers) {
     let on = prs.ON;
-    let anySame = false;
+    let op = prs.OP ?? 0;
 
-    // Шаг 1. Базовые блокировки и расчёт IsNextLvlSame.
+    // Шаг 1. Базовые блокировки по нехватке очков.
     for (let ch of prs.characteristics) {
       for (let ab of ch.abilities) {
         for (let tsk of ab.tasks) {
-          // Не хватает ОН на апгрейд (если учёт очков вообще включён).
-          if (on < this.gameSettings.abCost(tsk.value, tsk.hardnes, tsk.isPerk) && this.gameSettings.isAbPointsEnabled) {
-            tsk.mayUp = false;
-            tsk.IsNextLvlSame = false;
-            ab.HasSameAbLvl = false;
+          if (this.gameSettings.isAbPointsEnabled) {
+            if (tsk.isPerk) {
+              // Перки тратят ОП — проверяем отдельный пул.
+              if (op < this.gameSettings.perkCost(tsk.value, tsk.perkHardnes)) {
+                tsk.mayUp = false;
+              }
+            } else {
+              // Обычные навыки тратят ОН.
+              if (on < this.gameSettings.abCost(tsk.value, tsk.hardnes, tsk.isPerk)) {
+                tsk.mayUp = false;
+              }
+            }
           }
 
-          // Навык ещё не открыт (value<1) или уже заблокирован — сбрасываем «повтор уровня».
-          if (tsk.value < 1 || !tsk.mayUp) {
-            tsk.IsNextLvlSame = false;
-            ab.HasSameAbLvl = false;
-          }
-
-          // Начатый сложн-перк (value>0 и mayUp=true) — следующий апгрейд не повышает уровень,
-          // а «добивает» тот же. Используется для специальной отрисовки и принудительной докачки ниже.
-          if (tsk.isPerk && tsk.value > 0 && tsk.mayUp) {
-            tsk.IsNextLvlSame = true;
-          } else {
-            tsk.IsNextLvlSame = false;
-          }
-
-          if (tsk.IsNextLvlSame) {
-            anySame = true;
-            ab.HasSameAbLvl = true;
-          }
+          tsk.IsNextLvlSame = false;
+          ab.HasSameAbLvl = false;
         }
       }
 
       ch.anyMayUp = ch.abilities.some((q) => q.tasks.some((qq) => qq.mayUp));
-      ch.HasSameAbLvl = ch.abilities.some((q) => q.tasks.some((qq) => qq.IsNextLvlSame));
+      ch.HasSameAbLvl = false;
     }
 
-    // Шаг 2. Если есть начатый сложн-перк — всё остальное блокируется, пока его не докачают.
-    if (anySame) {
-      for (let ch of prs.characteristics) {
-        for (let ab of ch.abilities) {
-          for (let tsk of ab.tasks) {
-            if (!tsk.IsNextLvlSame) {
-              tsk.mayUp = false;
-            }
-          }
-        }
-      }
-    }
-
-    // Шаг 3. Потолок по уровню перса (см. задачу 0019):
-    //   обычные навыки: max = 2 + floor(persLevel/10)*2  (0-9 ур. → 2, 10-19 → 4, ...).
+    // Шаг 2. Потолок по уровню перса (см. задачу 0019, под maxAbilLvl=10):
+    //   обычные навыки: max = 2 + floor(persLevel/10) * 2  (0-9 ур. → 2, 10-19 → 4, ..., 40+ → 10).
     //   перки: ограничены только общим maxAbilLvl.
     var max = 2 + Math.floor(prs.level / 10) * 2;
     for (let ch of prs.characteristics) {
@@ -3659,26 +3651,18 @@ export class PersService {
       }
     }
 
-    // Шаг 4. Перки качаются только если обычные навыки упёрлись в потолок.
-    // Идея: сначала разгоняй базу, перки — как «вишенка», когда апать уже нечего.
-    // Исключение — начатый сложн-перк (perkHardnes=1, value>0): его обязательно докачать,
-    // иначе ОН за половинный апгрейд останутся «застрявшими». Норм-перк (perkHardnes=0.5)
-    // прокачивается в один шаг до maxAbilLvl, поэтому у него value>0 уже означает «готов»
-    // и отсекается на шаге 3.
-    const anyRegularMayUp = prs.characteristics.some((ch) =>
-      ch.abilities.some((ab) => ab.tasks.some((t) => !t.isPerk && t.mayUp))
-    );
+    // Шаг 3. Начатый сложн-перк (value=5) принуждает «докачать» — всё остальное блокируется,
+    // пока он не достигнет maxAbilLvl. Иначе 1 ОП окажется «застрявшим» в половине перка.
+    const maxAbilLvl = this.gameSettings.maxAbilLvl;
+    const isStartedHardPerk = (t: Task) => t.isPerk && (t.perkHardnes ?? 0.5) === 1 && t.value > 0 && t.value < maxAbilLvl;
+    const anyStartedHardPerk = prs.characteristics.some((ch) => ch.abilities.some((ab) => ab.tasks.some((t) => isStartedHardPerk(t))));
 
-    if (anyRegularMayUp) {
+    if (anyStartedHardPerk) {
       for (let ch of prs.characteristics) {
         for (let ab of ch.abilities) {
           for (let tsk of ab.tasks) {
-            if (tsk.isPerk) {
-              const isHardOpened = (tsk.perkHardnes ?? 0.5) === 1 && tsk.value > 0;
-
-              if (!isHardOpened) {
-                tsk.mayUp = false;
-              }
+            if (!isStartedHardPerk(tsk)) {
+              tsk.mayUp = false;
             }
           }
         }

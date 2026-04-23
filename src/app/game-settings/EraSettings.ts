@@ -24,48 +24,45 @@ export class EraSettings extends GameSettings {
   public minAbilLvl = 1;
   public minChaLvl = 1;
   public perkHardness: number = 1;
+  public perkPointAbLevelCost = 2;
   rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
 
-  public abChangeExp(curLvl: number, hardness: number, isPerk: boolean, perkHardnes?: number): number {
-    let v = curLvl * hardness;
+  public abChangeExp(curLvl: number, hardness: number, isPerk: boolean, _perkHardnes?: number): number {
     if (isPerk) {
-      v = v * (perkHardnes ?? 0.5);
+      // Перк даёт опыт как навык максимального уровня. curLvl=0 (неактивированный) — 0 опыта.
+      return curLvl > 0 ? this.maxAbilLvl : 0;
     }
 
-    return v;
+    return curLvl * hardness;
   }
 
   public abCost(curLvl: number, hardness: number, isPerk: boolean): number {
-    // if (isPerk) {
-    //   return this.maxAbilLvl * hardness;
-    // }
+    // Перки тратят ОП, а не ОН — см. perkCost.
     if (isPerk) {
-      return 5 * hardness;
+      return 0;
     }
 
     return 1 * hardness;
   }
 
   public abTotalCost(curLvl: number, hardness: number, isPerk: boolean, perkHardnes?: number) {
-    let v = curLvl * hardness;
+    // Перки не учитываются в балансе ОН — они расходуют только ОП.
     if (isPerk) {
-      v = v * (perkHardnes ?? 0.5);
+      return 0;
     }
 
-    return v;
+    return curLvl * hardness;
   }
 
   public checkPerkTskValue(tsk: Task) {
     if (!tsk.isPerk) {
       return;
     }
-    if (tsk.perkHardnes == null) {
-      tsk.perkHardnes = 0.5;
-    }
+    // Сложность перков скрыта в UI — все перки принудительно норм.
+    // Старые сложн-перки (perkHardnes=1) с любым value>0 добиваются до полного значения.
+    tsk.perkHardnes = 0.5;
 
-    if (tsk.value > 0 && tsk.value <= 5) {
-      tsk.value = 5;
-    } else if (tsk.value > 5) {
+    if (tsk.value > 0) {
       tsk.value = this.maxAbilLvl;
     }
   }
@@ -162,11 +159,19 @@ export class EraSettings extends GameSettings {
       // Коэффициент сложности: сигмоида 1→5, основной рост на 10-20 уровнях, округление вниз до десятых
       // let e = Math.floor((1 + 4 / (1 + Math.exp(-0.35 * (persLevel - 18)))) * 10) / 10;
 
-      // Сначала 2 дня, потом с каждым рангом + 1
-      let e = Math.floor(persLevel / 10) + 2;
+      // Сначала 1 день, потом с каждым рангом + 1
+      let e = Math.floor(persLevel / 10) + 1;
+
+      // На каждом perkPointLvlInterval-м уровне вместо ОН начисляется 1 ОП,
+      // а 1 ОП = perkPointAbLevelCost * abPointsPerLvl ОН по экономике —
+      // значит такой уровень «стоит» во столько же раз дороже по опыту.
+      let lvlPoints =
+        this.perkPointLvlInterval > 0 && persLevel % this.perkPointLvlInterval === 0
+          ? this.abPointsPerLvl * this.perkPointAbLevelCost
+          : this.abPointsPerLvl;
 
       // Опыт, нужный для перехода на следующий уровень
-      let cur = this.abPointsPerLvl * persLevel * e;
+      let cur = lvlPoints * persLevel * e;
       expLvl += cur;
 
       result.nextExp = expLvl;
@@ -184,7 +189,7 @@ export class EraSettings extends GameSettings {
     return result;
   }
 
-  public getPersRangName(persLvl): string {
+  public getPersRangName(persLvl: number): string {
     let rngIdx = Math.min(Math.floor(persLvl / 10), this.rangNames.length - 1);
 
     return this.rangNames[rngIdx];

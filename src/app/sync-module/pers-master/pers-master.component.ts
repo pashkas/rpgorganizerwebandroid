@@ -11,6 +11,7 @@ import { Rangse } from "src/Models/Rangse";
 })
 export class PersMasterComponent implements OnInit {
   rangse: Rangse[];
+  selectedStep = 0;
   constructor(private fb: FormBuilder, private srv: PersService, private router: Router, public gameSettings: GameSettings) {}
 
   persForm: FormGroup;

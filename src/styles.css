@@ -68,6 +68,51 @@
   box-shadow: none !important;
 }
 
+.charactProgr {
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  background-color: #fdfdfa !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+.abProgr {
+  overflow: hidden;
+  box-sizing: border-box;
+  background-color: #fdfdfa !important;
+}
+
+.charactProgrFill {
+  background-color: transparent !important;
+  background-image: linear-gradient(90deg, #c2ebcc 0%, #85cfa0 100%) !important;
+  transition: width 0.4s ease;
+}
+
+.skillProgrFill {
+  background-color: transparent !important;
+  background-image: linear-gradient(90deg, #faef8a 0%, #ead238 100%) !important;
+  transition: width 0.4s ease;
+}
+
+.charactNextLevFill {
+  background-color: transparent !important;
+  background-image: linear-gradient(90deg, rgba(255, 180, 60, 0.5), rgba(230, 130, 30, 0.5)) !important;
+  mix-blend-mode: multiply;
+  transition: width 0.4s ease;
+}
+
+.charactProgrSegments {
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(10% - 1px),
+    rgba(0, 0, 0, 0.07) calc(10% - 1px),
+    rgba(0, 0, 0, 0.07) 10%
+  );
+  background-size: calc(100% + 1px) 100%;
+}
+
 .dot-table td {
   overflow: hidden;
   white-space: nowrap;

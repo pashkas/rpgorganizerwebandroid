@@ -1,15 +1,19 @@
 <div class="text-light" fxLayout="column" fxFill fxLayoutAlign="space-around center" (click)="closeDialog()">
   <div fxLayout="row" fxLayoutAlign="space-evenly end" fxLayoutGap="15px">
-    <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
-      <div class="pl-2">{{ this.abPoints }}</div>
-      <img src="assets/icons/diamond.png" class="img-fluid px-2 secImg" />
+    <div fxLayout="column" fxLayoutAlign="center end" *ngIf="this.perkPoints != null">
+      <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="pl-2" style="color: gold">{{ this.perkPoints }}</div>
+        <img src="assets/icons/star.png" class="img-fluid px-2 secImg" />
+      </div>
     </div>
     <div>
       <img src="{{ img }}" class="img-fluid mainImg" />
     </div>
-    <div fxLayout="row" fxLayoutAlign="center" *ngIf="this.abPoints != null">
-      <div class="pl-2">{{ this.abPoints }}</div>
-      <img src="assets/icons/diamond.png" class="img-fluid px-2 secImg" />
+    <div fxLayout="column" fxLayoutAlign="center start" *ngIf="this.abPoints != null">
+      <div fxLayout="row" fxLayoutAlign="center center">
+        <img src="assets/icons/diamond.png" class="img-fluid px-2 secImg" />
+        <div class="pr-2">{{ this.abPoints }}</div>
+      </div>
     </div>
   </div>
   <div class="py-2 w-100">

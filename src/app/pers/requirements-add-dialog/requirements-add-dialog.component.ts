@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
 import { BehaviorSubject, Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { GameSettings } from "src/app/GameSettings";
 import { PersService } from "src/app/pers.service";
 import { RevardService } from "src/app/revard.service";
 import { ReqItem, ReqItemType } from "src/Models/ReqItem";
@@ -27,9 +28,23 @@ export class RequirementsAddDialogComponent implements OnInit {
     private srv: PersService,
     private revSrv: RevardService,
     private dialogRef: MatDialogRef<RequirementsAddDialogComponent>,
+    public gameSettings: GameSettings,
     @Inject(MAT_DIALOG_DATA)
     public data: Reqvirement
   ) {}
+
+  /** Максимум для поля «Значение ≥» в зависимости от выбранного типа требования. */
+  get maxElVal(): number {
+    const type = this.ReqForm && this.ReqForm.get("type").value;
+    if (type == ReqItemType.charact) {
+      return this.gameSettings.maxChaLvl;
+    }
+    if (type == ReqItemType.persLvl) {
+      return this.gameSettings.maxPersLevel;
+    }
+
+    return this.gameSettings.maxAbilLvl;
+  }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
