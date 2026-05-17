@@ -72,7 +72,13 @@ export class PersChangesItemComponent implements OnInit {
   }
 
   setpercentage() {
-    if (this.item.valFrom == this.item.valTo) {
+    // Многосегментная анимация (level-up) играет по item.expChanges/abilChanges,
+    // даже если внешние valFrom/valTo совпали из-за клампа диапазона
+    const hasMultiSegment =
+      (this.item.type == "exp" && this.item.expChanges && this.item.expChanges.length > 1) ||
+      ((this.item.type == "abil" || this.item.type == "cha") && this.item.abilChanges && this.item.abilChanges.length > 1);
+
+    if (this.item.valFrom == this.item.valTo && !hasMultiSegment) {
       return;
     }
 
@@ -147,10 +153,16 @@ export class PersChangesItemComponent implements OnInit {
 
       let player = factory.create(this.progress.nativeElement, {});
       if (this.item.lvl != null) {
-        // счётчик уровня тикает вместе с заливкой
         const toLvl = Math.floor(this.item.lvl);
         this.plusName = ": " + toLvl;
-        this.tickLevel(Math.max(0, toLvl - 1), toLvl, this.gameSettings.animationDelay);
+        // Тикаем уровень только при дискретном переходе (chaLvl/abLvl-стиль) — нет внутренних сегментов.
+        // Для exp/abil/cha с одним сегментом (значение в пределах одного уровня) уровень не менялся, тикать нечего.
+        const hasSegments =
+          (this.item.expChanges && this.item.expChanges.length > 0) ||
+          (this.item.abilChanges && this.item.abilChanges.length > 0);
+        if (!hasSegments) {
+          this.tickLevel(Math.max(0, toLvl - 1), toLvl, this.gameSettings.animationDelay);
+        }
       }
 
       player.play();

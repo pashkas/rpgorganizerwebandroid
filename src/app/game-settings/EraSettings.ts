@@ -26,11 +26,12 @@ export class EraSettings extends GameSettings {
   public perkHardness: number = 1;
   public perkPointAbLevelCost = 2;
   rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
+  isPerkPointsEnable: boolean = false;
 
   public abChangeExp(curLvl: number, hardness: number, isPerk: boolean, _perkHardnes?: number): number {
     if (isPerk) {
-      // Перк даёт опыт как навык максимального уровня. curLvl=0 (неактивированный) — 0 опыта.
-      return curLvl > 0 ? this.maxAbilLvl : 0;
+      // Опыт за задачу перка = текущий value: пол-прокачаный (5) даёт 5, полностью (10) — 10.
+      return curLvl;
     }
 
     return curLvl * hardness;
@@ -38,8 +39,12 @@ export class EraSettings extends GameSettings {
 
   public abCost(curLvl: number, hardness: number, isPerk: boolean): number {
     // Перки тратят ОП, а не ОН — см. perkCost.
-    if (isPerk) {
+    if (this.isPerkPointsEnable && isPerk) {
       return 0;
+    }
+    // ОП выкл — перк стоит как уровень навыка (abPointsPerLvl ОН за клик).
+    if (!this.isPerkPointsEnable && isPerk) {
+      return this.abPointsPerLvl * hardness;
     }
 
     return 1 * hardness;
@@ -47,7 +52,7 @@ export class EraSettings extends GameSettings {
 
   public abTotalCost(curLvl: number, hardness: number, isPerk: boolean, perkHardnes?: number) {
     // Перки не учитываются в балансе ОН — они расходуют только ОП.
-    if (isPerk) {
+    if (this.isPerkPointsEnable && isPerk) {
       return 0;
     }
 
@@ -58,45 +63,17 @@ export class EraSettings extends GameSettings {
     if (!tsk.isPerk) {
       return;
     }
-    // Сложность перков скрыта в UI — все перки принудительно норм.
-    // Старые сложн-перки (perkHardnes=1) с любым value>0 добиваются до полного значения.
-    tsk.perkHardnes = 0.5;
+    // Сложность перков скрыта в UI — все перки принудительно сложн (=как навык).
+    tsk.perkHardnes = 1;
+
+    // ОП выкл — даём докачивать, промежуточное value (maxAbilLvl/2) сохраняем.
+    if (!this.isPerkPointsEnable) {
+      return;
+    }
 
     if (tsk.value > 0) {
       tsk.value = this.maxAbilLvl;
     }
-  }
-
-  public calculateHp(prs: Pers, prevLvl: number, curLvl: number) {
-    if (prs.hp == null) {
-      prs.hp = 100;
-    }
-    if (prs.maxHp == null) {
-      prs.maxHp = 100;
-    }
-    if (prs.hpProgr == null) {
-      prs.hpProgr = 100;
-    }
-
-    if (!this.isHpEnabled) {
-      prs.hp = 100;
-      prs.maxHp = 100;
-      prs.hpProgr = 100;
-
-      return;
-    }
-
-    prs.maxHp = (this.abPointsStart + prs.level * this.abPointsPerLvl) / 3;
-
-    if (curLvl > prevLvl) {
-      prs.hp = prs.maxHp;
-    }
-
-    if (prs.hp > prs.maxHp) {
-      prs.hp = prs.maxHp;
-    }
-
-    prs.hpProgr = (prs.hp / prs.maxHp) * 100;
   }
 
   public changeExpClassical(tsk: Task, isDone: boolean, koef: number, prs: Pers) {
@@ -131,6 +108,17 @@ export class EraSettings extends GameSettings {
     return 6;
   }
 
+  /**
+   * Стоимость следующего апгрейда перка в ОП — если отключены, то в ОН.
+   */
+  perkCost(_value: number, _perkHardnes?: number): number {
+    if (!this.isPerkPointsEnable) {
+      return 5;
+    }
+
+    return 1;
+  }
+
   public getPersExpAndLevel(
     totalAbVal: number,
     abCount: number,
@@ -156,19 +144,18 @@ export class EraSettings extends GameSettings {
     while (true) {
       result.startExp = expLvl;
 
-      // Коэффициент сложности: сигмоида 1→5, основной рост на 10-20 уровнях, округление вниз до десятых
-      // let e = Math.floor((1 + 4 / (1 + Math.exp(-0.35 * (persLevel - 18)))) * 10) / 10;
-
       // Сначала 1 день, потом с каждым рангом + 1
-      let e = Math.floor(persLevel / 10) + 1;
+      let e = 1 + (persLevel - 1) * 0.1;
 
       // На каждом perkPointLvlInterval-м уровне вместо ОН начисляется 1 ОП,
       // а 1 ОП = perkPointAbLevelCost * abPointsPerLvl ОН по экономике —
       // значит такой уровень «стоит» во столько же раз дороже по опыту.
-      let lvlPoints =
-        this.perkPointLvlInterval > 0 && persLevel % this.perkPointLvlInterval === 0
-          ? this.abPointsPerLvl * this.perkPointAbLevelCost
-          : this.abPointsPerLvl;
+      let lvlPoints = this.abPointsPerLvl;
+
+      // Когда перки отдельно
+      if (this.isPerkPointsEnable && this.perkPointLvlInterval > 0 && persLevel % this.perkPointLvlInterval === 0) {
+        lvlPoints *= this.perkPointAbLevelCost;
+      }
 
       // Опыт, нужный для перехода на следующий уровень
       let cur = lvlPoints * persLevel * e;

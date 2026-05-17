@@ -143,7 +143,8 @@ export class AddItemDialogComponent implements OnInit {
 
   ok() {
     if (this.data.showChecklist) {
-      this.dialogRef.close({ name: this.data.text, isChecklist: this.data.isChecklist, checklistItems: this.data.checklistItems, tskWeekDays: this.data.isWeekDays ? (this.data.tskWeekDays || []) : [] });
+      let checklistItems = (this.data.checklistItems || []).filter(ci => ci && ci.name && ci.name.trim());
+      this.dialogRef.close({ name: this.data.text, isChecklist: this.data.isChecklist && checklistItems.length > 0, checklistItems: checklistItems, tskWeekDays: this.data.isWeekDays ? (this.data.tskWeekDays || []) : [] });
     } else {
       this.dialogRef.close(this.data.text);
     }

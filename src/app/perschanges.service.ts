@@ -159,17 +159,16 @@ export class PerschangesService {
       // Навыки
       else if (el.type == "abil") {
         // Активирован (только для перков — обычные навыки показываем прогресс-баром 0→1)
-        if (this.gameSettings.changesIsShowAbActivate && el.abIsOpenBefore != el.abIsOpenAfter && el.isPerk) {
+        const justActivated = el.abIsOpenBefore != el.abIsOpenAfter;
+        const justMaxed = el.before < this.gameSettings.maxAbilLvl && el.after >= this.gameSettings.maxAbilLvl;
+        if (this.gameSettings.changesIsShowAbActivate && el.isPerk && (justActivated || justMaxed)) {
           isAbilActivated = true;
           abToEdit = n;
 
           let txt: string;
           if (el.abIsOpenAfter == true) {
-            if (el.isPerk) {
-              txt = el.perkHardnes === 1 ? "перк активирован" : "перк прокачан";
-            } else {
-              txt = "активирован";
-            }
+            // Прокачан до конца — «перк прокачан», иначе только активирован
+            txt = el.after >= this.gameSettings.maxAbilLvl ? "перк прокачан" : "перк активирован";
           } else {
             txt = "сброшен";
           }

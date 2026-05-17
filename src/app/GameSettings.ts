@@ -165,6 +165,11 @@ export abstract class GameSettings {
   perkPointLvlInterval: number = 4;
 
   /**
+   * Очки перков активны? Если да, то по perkPointLvlInterval дается 1 ОП, и не дается ОН.
+   */
+  isPerkPointsEnable: boolean = true;
+
+  /**
    * Экономика перков: стоимость 1 ОП в «уровнях ОН».
    * 1 ОП = perkPointAbLevelCost * abPointsPerLvl ОН.
    * Учитывается в опыте за задачу перка и в стоимости ОП-уровней
@@ -201,7 +206,7 @@ export abstract class GameSettings {
   /**
    * Число картинок скиллов.
    */
-  skillImgNum: number = 164;
+  skillImgNum: number = 169;
   tskOrderDefault: number = -1;
 
   /**

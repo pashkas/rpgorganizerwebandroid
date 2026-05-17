@@ -54,12 +54,12 @@
                   <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.gold | floor }}</span>
                 </span>
               </button>
-              <button mat-button *ngIf="this.gameSettings.isAbPointsEnabled">
-                <span style="position: relative; display: inline-block; line-height: 0">
-                  <img src="assets/icons/star.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
-                  <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.OP }}</span>
-                </span>
-              </button>
+                <button mat-button *ngIf="this.gameSettings.isAbPointsEnabled && this.gameSettings.isPerkPointsEnable">
+                 <span style="position: relative; display: inline-block; line-height: 0">
+                   <img src="assets/icons/star.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
+                   <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.OP }}</span>
+                 </span>
+               </button>
               <button mat-button color="accent" (click)="quickAddAbil()">
                 <span style="position: relative; display: inline-block; line-height: 0">
                   <img src="assets/icons/diamond.png" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
@@ -143,7 +143,7 @@
                             <div class="align-self-center w-100 d-flex">
                               <div class="flex-grow-1 progress position-relative abProgr" style="height: 24px">
                                 <div class="position-absolute progress-bar skillProgrFill" role="progressbar" [style.width]="ab.progressValue + '%'" style="height: 24px; z-index: 1" *ngIf="ab.isOpen"></div>
-                                <div class="position-absolute w-100 charactProgrSegments" style="height: 24px; z-index: 2"></div>
+                                <div class="position-absolute w-100" style="height: 24px; z-index: 2"></div>
                                 <!-- <div
                                   *ngIf="ab.isOpen"
                                   class="position-absolute progress-bar"

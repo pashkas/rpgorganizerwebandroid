@@ -44,3 +44,9 @@
 .perk-hardnes-row ::ng-deep .mat-button-toggle-focus-overlay {
   background-color: transparent !important;
 }
+
+.state-view-item {
+  display: block;
+  width: 100%;
+  padding: 4px 0;
+}

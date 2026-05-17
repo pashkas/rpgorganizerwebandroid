@@ -308,7 +308,7 @@ export class MainWindowComponent implements OnInit {
       return null;
     }
 
-    return st.checklistItems.find(ci => !ci.isDone) || null;
+    return st.checklistItems.find(ci => ci && ci.name && ci.name.trim() && !ci.isDone) || null;
   }
 
   /**

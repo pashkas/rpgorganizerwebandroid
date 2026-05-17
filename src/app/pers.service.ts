@@ -939,7 +939,12 @@ export class PersService {
 
   getClassicalAbPoints(persLevel: number, abValTotal: number, prs: Pers, abCount: number): number {
     // Каждый N-й уровень (perkPointLvlInterval) даёт ОП вместо ОН — эти уровни не участвуют в расчёте ОН.
-    const perkLvls = Math.floor(persLevel / this.gameSettings.perkPointLvlInterval);
+    let perkLvls = 0;
+    // Если очки перков отдельно
+    if (this.gameSettings.isPerkPointsEnable) {
+      perkLvls = Math.floor(persLevel / this.gameSettings.perkPointLvlInterval);
+    }
+
     const onLvls = persLevel - perkLvls;
     let gained = onLvls * this.gameSettings.abPointsPerLvl + this.gameSettings.abPointsStart;
     let spent = abValTotal;
@@ -951,6 +956,11 @@ export class PersService {
    * Расчёт текущего баланса ОП: начислено по уровням минус потрачено на перки.
    */
   getClassicalPerkPoints(persLevel: number, opValTotal: number): number {
+    if (!this.gameSettings.isPerkPointsEnable) {
+      return 0;
+    }
+
+    // Если очки перков отдельно
     const gained = Math.floor(persLevel / this.gameSettings.perkPointLvlInterval);
 
     return gained - opValTotal;
@@ -1815,14 +1825,9 @@ export class PersService {
           //   ab.progressValue = 100;
           // }
 
-          abMax += this.gameSettings.maxAbilLvl - this.gameSettings.minAbilLvl;
+          abMax += this.getTaskCharacteristicCost(tsk, this.gameSettings.maxAbilLvl);
           if (ab.isOpen) {
-            let vl = tsk.value - this.gameSettings.minAbilLvl;
-            if (vl < 0) {
-              vl = 0;
-            }
-
-            abLvl += vl;
+            abLvl += this.getTaskCharacteristicCost(tsk, tsk.value);
           }
 
           abValMax += this.gameSettings.tesMaxVal;
@@ -2037,7 +2042,12 @@ export class PersService {
 
       this.sortQwestTasks(qw);
 
-      if ((prs.currentView == curpersview.QwestTasks || prs.currentView == curpersview.QwestsGlobal) && (!qw.isNoActive || (qw.abilitiId && !qw.parrentId)) && totalTasks > 0 && totalTasks != doneTasks) {
+      if (
+        (prs.currentView == curpersview.QwestTasks || prs.currentView == curpersview.QwestsGlobal) &&
+        (!qw.isNoActive || (qw.abilitiId && !qw.parrentId)) &&
+        totalTasks > 0 &&
+        totalTasks != doneTasks
+      ) {
         if (this.checkTask(qw.tasks[0])) {
           tasks.push(qw.tasks[0]);
         }
@@ -2824,8 +2834,17 @@ export class PersService {
 
     if (this.gameSettings.isClassicaRPG) {
       for (const tsk of ab.tasks) {
-        if (tsk.isPerk && (tsk.perkHardnes ?? 0.5) === 0.5) {
-          tsk.value = this.gameSettings.maxAbilLvl;
+        if (tsk.isPerk) {
+          const isHard = (tsk.perkHardnes ?? 0.5) === 1;
+          if (isHard && !this.gameSettings.isPerkPointsEnable) {
+            // ОП выкл — сложн перк идёт по половинам: активация на maxAbilLvl/2, докачка до maxAbilLvl.
+            const half = Math.floor(this.gameSettings.maxAbilLvl / 2);
+            tsk.value = tsk.value < half ? half : this.gameSettings.maxAbilLvl;
+          } else if (isHard) {
+            tsk.value += 1;
+          } else {
+            tsk.value = this.gameSettings.maxAbilLvl;
+          }
         } else {
           tsk.value += 1;
         }
@@ -3092,6 +3111,10 @@ export class PersService {
     }
 
     let progr = abCur / abMax;
+    if (progr > 1) {
+      progr = 1;
+    }
+
     ch.value = start + left * progr;
 
     let chaCeilProgr;
@@ -3112,6 +3135,18 @@ export class PersService {
     }
 
     return chaCeilProgr;
+  }
+
+  private getTaskCharacteristicCost(tsk: Task, value: number): number {
+    if (value <= 0) {
+      return 0;
+    }
+
+    if (tsk.isPerk && this.gameSettings.isPerkPointsEnable) {
+      return this.gameSettings.perkTotalCost(value, tsk.perkHardnes) * this.gameSettings.abPointsPerLvl * this.gameSettings.perkPointAbLevelCost;
+    }
+
+    return this.gameSettings.abTotalCost(value, tsk.hardnes, tsk.isPerk, tsk.perkHardnes);
   }
 
   // private countPersLevelAndOns(abTotalMax: number, prevOn: number, startExp: number, exp: number, ons: number, nextExp: number, prs: Pers, persLevel: number) {
@@ -3309,7 +3344,7 @@ export class PersService {
         for (let i = 0; i < tsk.states.length; i++) {
           const el = tsk.states[i];
           if (el.isActive && el.tskWeekDays && el.tskWeekDays.length > 0) {
-            if (!this.checkDate(tskDate, 'дни недели', el.tskWeekDays)) {
+            if (!this.checkDate(tskDate, "дни недели", el.tskWeekDays)) {
               el.isActive = false;
             }
           }
@@ -3605,6 +3640,11 @@ export class PersService {
   private recountAbilMayUp(prs: Pers) {
     let on = prs.ON;
     let op = prs.OP ?? 0;
+    
+    // Если очки перков отключены, то приравниваются к ОН.
+    if (!this.gameSettings.isPerkPointsEnable) {
+      op = on;
+    }
 
     // Шаг 1. Базовые блокировки по нехватке очков.
     for (let ch of prs.characteristics) {
@@ -3612,9 +3652,16 @@ export class PersService {
         for (let tsk of ab.tasks) {
           if (this.gameSettings.isAbPointsEnabled) {
             if (tsk.isPerk) {
-              // Перки тратят ОП — проверяем отдельный пул.
-              if (op < this.gameSettings.perkCost(tsk.value, tsk.perkHardnes)) {
-                tsk.mayUp = false;
+              if (!this.gameSettings.isPerkPointsEnable) {
+                // Перки тратят ОН — проверяем ОН.
+                if (on < this.gameSettings.abCost(tsk.value, tsk.hardnes, tsk.isPerk)) {
+                  tsk.mayUp = false;
+                }
+              } else {
+                // Перки тратят ОП — проверяем отдельный пул.
+                if (op < this.gameSettings.perkCost(tsk.value, tsk.perkHardnes)) {
+                  tsk.mayUp = false;
+                }
               }
             } else {
               // Обычные навыки тратят ОН.
@@ -3651,10 +3698,10 @@ export class PersService {
       }
     }
 
-    // Шаг 3. Начатый сложн-перк (value=5) принуждает «докачать» — всё остальное блокируется,
-    // пока он не достигнет maxAbilLvl. Иначе 1 ОП окажется «застрявшим» в половине перка.
+    // Шаг 3. Начатый сложн-перк (value=5) или перк при отключённых ОП принуждает «докачать» — всё остальное блокируется,
+    // пока он не достигнет maxAbilLvl.
     const maxAbilLvl = this.gameSettings.maxAbilLvl;
-    const isStartedHardPerk = (t: Task) => t.isPerk && (t.perkHardnes ?? 0.5) === 1 && t.value > 0 && t.value < maxAbilLvl;
+    const isStartedHardPerk = (t: Task) => t.isPerk && ((t.perkHardnes ?? 0.5) === 1 || !this.gameSettings.isPerkPointsEnable) && t.value > 0 && t.value < maxAbilLvl;
     const anyStartedHardPerk = prs.characteristics.some((ch) => ch.abilities.some((ab) => ab.tasks.some((t) => isStartedHardPerk(t))));
 
     if (anyStartedHardPerk) {

@@ -1,4 +1,4 @@
-<ng-container *ngIf="item.valFrom!=item.valTo">
+<ng-container *ngIf="item.valFrom!=item.valTo || item.expChanges?.length > 1 || item.abilChanges?.length > 1">
   <div class="flex-grow-1 w-100">
     <div class="progress position-relative abProgr changesRow" [class.flashActive]="flashActive" style="height: 24px; overflow: visible;">
       <div #progress class="position-absolute progress-bar progressFill" [ngClass]="fillClass"

@@ -199,7 +199,11 @@ export class TaskDetailComponent implements OnInit {
   }
 
   getChecklistText(st: taskState): string {
-    return (st.checklistItems || []).map(ci => ci.name).join('; ');
+    return this.getChecklistItems(st).map(ci => ci.name).join('; ');
+  }
+
+  getChecklistItems(st: taskState): ChecklistItem[] {
+    return (st.checklistItems || []).filter(ci => ci && ci.name && ci.name.trim());
   }
 
   /**
@@ -229,8 +233,10 @@ export class TaskDetailComponent implements OnInit {
     }
 
     const id = this.route.snapshot.paramMap.get("id");
+    const taskMapItem = this.srv.allMap[id];
 
-    this.tsk = this.srv.allMap[id].item;
+    this.tsk = taskMapItem.item;
+    this.tskAbility = taskMapItem.link && taskMapItem.link.rang ? taskMapItem.link : null;
 
     if (this.tsk) {
       if (this.tsk.requrense == "нет") {
@@ -238,8 +244,7 @@ export class TaskDetailComponent implements OnInit {
           return n === "нет";
         });
       } else {
-        this.tskAbility = this.srv.allMap[id].link;
-        this.tskCharact$.next(this.srv.allMap[this.srv.allMap[id].link.id].link);
+        this.tskCharact$.next(this.srv.allMap[this.tskAbility.id].link);
         this.requrenses = Task.requrenses.filter((n) => {
           return n != "нет";
         });

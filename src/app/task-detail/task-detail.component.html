@@ -35,12 +35,13 @@
            Ни одной: алмаз уходит в правый нижний угол. -->
       <div *ngIf="tsk.requrense != 'нет'" style="flex: 0 0 auto; display: flex; justify-content: flex-end; align-items: stretch">
         <div style="display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap">
-          <ng-container *ngIf="this.gameSettings.isAbPointsEnabled">
-            <div style="position: relative; display: inline-block; line-height: 0" class="px-1">
-              <img src="assets/icons/star.png" [ngStyle]="{ 'object-fit': 'contain', height: '25px' }" />
-              <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.OP }}</span>
-            </div>
-            <div style="flex: 1 1 auto"></div>
+           <ng-container *ngIf="this.gameSettings.isAbPointsEnabled">
+              <div *ngIf="this.gameSettings.isPerkPointsEnable" style="position: relative; display: inline-block; line-height: 0" class="px-1">
+               <img src="assets/icons/star.png" [ngStyle]="{ 'object-fit': 'contain', height: '25px' }" />
+               <span class="badge badge-pill badge-warning" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ pers.OP }}</span>
+             </div>
+            <!-- Распорка между ОП и ОН только когда ОП показаны, иначе ОН прижимается к верху -->
+            <div *ngIf="this.gameSettings.isPerkPointsEnable" style="flex: 1 1 auto"></div>
             <div style="position: relative; display: inline-block; line-height: 0" class="px-1">
               <img src="assets/icons/diamond.png" [ngStyle]="{ 'object-fit': 'contain', height: '25px' }" />
               <span class="badge badge-pill" [ngClass]="pers.ON < 0 ? 'badge-danger' : 'badge-success'" style="position: absolute; top: -4px; right: -4px; font-size: 0.65em; padding: 2px 5px">{{ this.pers.ON }}</span>
@@ -115,10 +116,9 @@
       <mat-icon>refresh</mat-icon>
     </button>
 
-    <ng-container *ngIf="!tskAbility && tsk.states.length > 0">
+    <ng-container *ngIf="tskAbility && tsk.states.length > 0">
       <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="states" *ngIf="tsk.states.length > 0">
-        <div mat-list-item *ngFor="let st of tsk.states; let i = index">
-          <ng-container *ngIf="isStateVisibleByDate(st)">
+        <div class="state-view-item" *ngFor="let st of tsk.states; let i = index">
           <ng-container *ngIf="st.isDone">
             <del>
               <div class="text-center">
@@ -131,12 +131,9 @@
               {{ st.name }}<small *ngIf="st.tskWeekDays?.length > 0" class="text-secondary"> ({{ st.tskWeekDays.join(", ") }})</small>
             </div>
           </ng-container>
-          <ng-container *ngIf="st.isChecklist && st.checklistItems?.length > 0">
-            <div *ngFor="let ci of st.checklistItems">
-              <mat-checkbox [(ngModel)]="ci.isDone">{{ ci.name }}</mat-checkbox>
-            </div>
-          </ng-container>
-          </ng-container>
+          <div *ngIf="getChecklistText(st)" class="text-center text-secondary font-italic">
+            {{ getChecklistText(st) }}
+          </div>
         </div>
       </mat-list>
     </ng-container>
@@ -287,7 +284,7 @@
 
     <!-- Состояния -->
     <!-- <h5>Состояния:</h5> -->
-    <div fxLayout="row" fxLayoutAlign="space-between center">
+    <div *ngIf="tskAbility" fxLayout="row" fxLayoutAlign="space-between center">
       <ng-container *ngIf="tsk.requrense != 'нет'">
         <h5 class="py-0">Подзадачи:</h5>
       </ng-container>
@@ -310,7 +307,7 @@
       </button>
     </div>
 
-    <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="states" *ngIf="tsk.states.length > 0">
+    <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="states" *ngIf="tskAbility && tsk.states.length > 0">
       <div mat-list-item cdkDrag *ngFor="let st of tsk.states; let i = index; let even = even; let odd = odd">
         <div class="d-flex row-striped" [ngClass]="{ even: even }">
           <div class="flex-grow-1 align-self-center">
@@ -339,7 +336,7 @@
             </button>
           </div>
         </div>
-        <div *ngIf="st.isChecklist && st.checklistItems?.length > 0">
+        <div *ngIf="getChecklistText(st)">
           <small class="text-secondary"><i>{{ getChecklistText(st) }}</i></small>
         </div>
       </div>
