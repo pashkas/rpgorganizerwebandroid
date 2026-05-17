@@ -118,23 +118,25 @@
 
     <ng-container *ngIf="tskAbility && tsk.states.length > 0">
       <mat-list (cdkDropListDropped)="drop($event)" cdkDropList id="states" *ngIf="tsk.states.length > 0">
-        <div class="state-view-item" *ngFor="let st of tsk.states; let i = index">
-          <ng-container *ngIf="st.isDone">
-            <del>
+        <ng-container *ngFor="let st of tsk.states; let i = index">
+          <div class="state-view-item" *ngIf="isShowStateDetails(st)">
+            <ng-container *ngIf="st.isDone">
+              <del>
+                <div class="text-center">
+                  {{ st.name }}<small *ngIf="st.tskWeekDays?.length > 0" class="text-secondary"> ({{ st.tskWeekDays.join(", ") }})</small>
+                </div>
+              </del>
+            </ng-container>
+            <ng-container *ngIf="!st.isDone">
               <div class="text-center">
                 {{ st.name }}<small *ngIf="st.tskWeekDays?.length > 0" class="text-secondary"> ({{ st.tskWeekDays.join(", ") }})</small>
               </div>
-            </del>
-          </ng-container>
-          <ng-container *ngIf="!st.isDone">
-            <div class="text-center">
-              {{ st.name }}<small *ngIf="st.tskWeekDays?.length > 0" class="text-secondary"> ({{ st.tskWeekDays.join(", ") }})</small>
+            </ng-container>
+            <div *ngIf="getChecklistText(st)" class="text-center text-secondary font-italic">
+              {{ getChecklistText(st) }}
             </div>
-          </ng-container>
-          <div *ngIf="getChecklistText(st)" class="text-center text-secondary font-italic">
-            {{ getChecklistText(st) }}
           </div>
-        </div>
+        </ng-container>
       </mat-list>
     </ng-container>
     <br />

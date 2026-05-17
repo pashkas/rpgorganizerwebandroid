@@ -206,6 +206,10 @@ export class TaskDetailComponent implements OnInit {
     return (st.checklistItems || []).filter(ci => ci && ci.name && ci.name.trim());
   }
 
+  isShowStateDetails(st: taskState): boolean {
+    return st.isChecklist || !!(st.tskWeekDays && st.tskWeekDays.length > 0);
+  }
+
   /**
    * Сдвинуть задачу вниз.
    * @param i Индекс.
