@@ -230,11 +230,11 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
           'line-height': 1.2,
           'overlay-opacity': 0,
           'shape': 'round-rectangle',
-          'text-background-color': 'rgba(255, 255, 255, 0.78)',
-          'text-background-opacity': 1,
-          'text-background-padding': 3,
           'text-halign': 'center',
           'text-max-width': 112,
+          'text-outline-color': 'data(color)',
+          'text-outline-opacity': 0.28,
+          'text-outline-width': 2,
           'text-valign': 'center',
           'text-wrap': 'wrap',
           'width': 'data(width)'
@@ -274,7 +274,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
           'line-style': 'solid',
           'opacity': 0.78,
           'target-arrow-color': 'data(color)',
-          'target-arrow-shape': 'triangle',
+          'target-arrow-shape': 'none',
           'width': 2
         }
       },
@@ -285,6 +285,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
           'line-style': 'dashed',
           'opacity': 0.72,
           'target-arrow-color': '#9b5de5',
+          'target-arrow-shape': 'triangle',
           'width': 2
         }
       },
@@ -308,10 +309,14 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
       boxSelectionEnabled: false,
       container: this.mindMapCanvas.nativeElement,
       elements: [],
-      maxZoom: 2.2,
-      minZoom: 0.22,
+      hideEdgesOnViewport: true,
+      maxZoom: 3,
+      minZoom: 0.14,
+      motionBlur: true,
+      motionBlurOpacity: 0.2,
       style: this.getGraphStyle(),
-      wheelSensitivity: 0.24
+      textureOnViewport: true,
+      wheelSensitivity: 0.65
     });
 
     this.cy.on('tap', 'node', event => {
@@ -341,19 +346,15 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       this.cy.layout({
-        name: 'dagre',
+        name: 'preset',
         animate: true,
-        animationDuration: 450,
-        edgeSep: 18,
+        animationDuration: 260,
         fit: true,
-        nodeSep: 34,
-        padding: 78,
-        rankDir: 'LR',
-        rankSep: 96,
-        spacingFactor: 1.04
+        padding: 94,
+        positions: node => this.getMindMapPosition(node)
       }).run();
     } catch (err) {
-      console.warn('Карта персонажа: не удалось применить dagre-раскладку', err);
+      console.warn('Карта персонажа: не удалось применить mindmap-раскладку', err);
       this.cy.layout({
         name: 'breadthfirst',
         directed: true,
@@ -362,6 +363,63 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
         spacingFactor: 1.2
       }).run();
     }
+  }
+
+  private getMindMapPosition(node: any): any {
+    const id = node.id();
+    const data = node.data();
+
+    if (id == 'pers') {
+
+      return { x: 0, y: 0 };
+    }
+
+    if (!data || data.branchIndex == null) {
+
+      return { x: 0, y: 0 };
+    }
+
+    const branchCount = Math.max(data.branchCount || 1, 1);
+    const angle = this.getBranchAngle(data.branchIndex, branchCount);
+    const baseRadius = Math.max(270, branchCount * 72);
+
+    if (data.type == 'ch') {
+
+      return this.getPoint(angle, baseRadius);
+    }
+
+    if (data.type == 't') {
+      const taskCount = Math.max(data.taskCount || 1, 1);
+      const taskIndex = data.taskIndex || 0;
+      const layerSize = 7;
+      const layer = Math.floor(taskIndex / layerSize);
+      const indexInLayer = taskIndex % layerSize;
+      const countInLayer = Math.min(layerSize, taskCount - layer * layerSize);
+      const spread = Math.min(Math.PI * 0.95, Math.max(0.34, taskCount * 0.12));
+      const taskAngle = countInLayer <= 1
+        ? angle
+        : angle - spread / 2 + spread * indexInLayer / (countInLayer - 1);
+
+      return this.getPoint(taskAngle, baseRadius + 220 + layer * 150);
+    }
+
+    return { x: 0, y: 0 };
+  }
+
+  private getBranchAngle(index: number, count: number): number {
+    if (count <= 1) {
+
+      return 0;
+    }
+
+    return -Math.PI / 2 + Math.PI * 2 * index / count;
+  }
+
+  private getPoint(angle: number, radius: number): any {
+    return {
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius
+    };
   }
 
   private getLinksToRender(): any[] {
@@ -420,6 +478,8 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.links = [];
 
     let idx = 0;
+    const branchCount = Math.max((this.pers.characteristics || []).length, 1);
+    let branchIndex = 0;
     this.dic.set('pers', new mapDicItem('pers', this.pers.name, idx, null));
     idx++;
     this.date.push({
@@ -441,7 +501,10 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
             id: ch.id,
             index: this.dic.get(ch.id).index,
             label: this.getNodeLabel(ch.name, ch.rang ? 'ранг ' + ch.rang.name : ''),
+            branchCount: branchCount,
+            branchIndex: branchIndex,
             color: '#e9c46a',
+            parentId: 'pers',
             type: 'ch'
           }
         });
@@ -456,6 +519,8 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
       // Навыки
+      const taskCount = (ch.abilities || []).reduce((count, ab) => count + ((ab.tasks || []).length), 0);
+      let taskIndex = 0;
       for (const ab of ch.abilities || []) {
         // SumStates
         for (const t of ab.tasks || []) {
@@ -465,13 +530,19 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
               id: t.id,
               index: this.dic.get(t.id).index,
               label: this.getNodeLabel(t.name, ab.rang ? 'ранг ' + ab.rang.name : ''),
+              branchCount: branchCount,
+              branchIndex: branchIndex,
               color: this.getTaskColor(t),
               height: t.mayUp ? 46 : 40,
+              parentId: !this.pers.isNoAbs ? ch.id : 'pers',
+              taskCount: taskCount,
+              taskIndex: taskIndex,
               type: 't',
               width: t.mayUp ? 120 : 108
             }
           });
           idx++;
+          taskIndex++;
 
           // Если в требованиях есть с такой же характеристикой, ссылку не делаем
           let haveSameCharact = false;
@@ -498,6 +569,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
       }
+      branchIndex++;
     }
     // Требования
     for (const ch of this.pers.characteristics || []) {
