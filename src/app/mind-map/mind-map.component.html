@@ -1,16 +1,32 @@
-<nav *ngIf="pers && !this.srv.isDialogOpen" class="fixed-bottom">
-  <div fxLayout="row" fxLayoutAlign="space-between center" class="p-2">
-    <!-- Назад -->
-    <div *ngIf="!this.contextmenu">
-      &nbsp;
-    </div>
-    <button mat-icon-button (click)="goBack()" class="mx-2" *ngIf="!this.contextmenu">
-      <img src="assets/icons/left.png" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height':'2.5em'}">
+<div class="mind-map-page" *ngIf="pers">
+  <div class="mind-map-top">
+    <button mat-icon-button (click)="goBack()" class="mind-map-icon-btn" *ngIf="!this.contextmenu">
+      <img src="assets/icons/left.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '32px' }">
     </button>
-
+    <div class="mind-map-title">
+      <div class="mind-map-name">{{ pers.name }}</div>
+      <div class="mind-map-rang">{{ pers.rangName }}, уровень {{ pers.level }}</div>
+    </div>
+    <div class="mind-map-stats">
+      <span class="mind-map-stat mind-map-stat_level">{{ pers.level }}</span>
+      <span class="mind-map-stat">{{ getCharactCount() }} хар.</span>
+      <span class="mind-map-stat">{{ getAbilityCount() }} нав.</span>
+    </div>
   </div>
-</nav>
-<nav *ngIf="this.contextmenu" class="fixed-bottom">
+
+  <div class="mind-map-legend">
+    <span><i class="legend-dot legend-dot_pers"></i>Персонаж</span>
+    <span><i class="legend-dot legend-dot_charact"></i>Характеристики</span>
+    <span><i class="legend-dot legend-dot_task"></i>Навыки</span>
+    <span><i class="legend-line"></i>Требования</span>
+  </div>
+
+  <div class="mind-map-chart">
+    <div #mindMapCanvas class="mind-map-canvas"></div>
+  </div>
+</div>
+
+<nav *ngIf="this.contextmenu" class="fixed-bottom mind-map-actions">
   <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="3px">
     <div fxFlex>
       <button mat-flat-button [disabled]="item?.type=='st'" color="accent" class="pointer w-100"
@@ -37,5 +53,3 @@
     </div>
   </div>
 </nav>
-<div [autoResize]="true" echarts [options]="options" [merge]="updateOptions" style="height: 100vh; width: 100vw;"
-  (chartClick)="onChartEvent($event, 'chartClick')"></div>

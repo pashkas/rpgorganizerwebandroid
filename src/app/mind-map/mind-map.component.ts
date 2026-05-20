@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { EChartOption } from 'echarts';
+import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PersService } from '../pers.service';
-import { mapDicItem, mindMapItem, mindMapLink } from 'src/Models/mapDicItem';
+import { mapDicItem } from 'src/Models/mapDicItem';
 import { MatBottomSheet, MatDialog } from '@angular/material';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import { taskState } from 'src/Models/Task';
@@ -10,32 +9,36 @@ import { Location } from '@angular/common';
 import { Characteristic } from 'src/Models/Characteristic';
 import { Subject } from 'rxjs';
 import { Pers } from 'src/Models/Pers';
+import { takeUntil } from 'rxjs/operators';
+
+declare const require: any;
+
+const cytoscape = require('cytoscape');
+const dagre = require('cytoscape-dagre');
+let isDagreRegistered = false;
 
 @Component({
   selector: 'app-mind-map',
   templateUrl: './mind-map.component.html',
   styleUrls: ['./mind-map.component.css']
 })
-export class MindMapComponent implements OnInit {
+export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('mindMapCanvas', { static: false }) mindMapCanvas: ElementRef<HTMLDivElement>;
+
   private unsubscribe$ = new Subject();
+  private cy: any;
+  private isViewReady = false;
 
   contextmenu = false;
-  date: mindMapItem[] = [];
+  date: any[] = [];
   dic: Map<string, mapDicItem>;
   id: any;
   idx: any;
   item: mapDicItem;
-  links: mindMapLink[] = [];
-  options: EChartOption = this.getChart();
+  links: any[] = [];
   pers: Pers;
-  updateOptions = {
-    series: [{
-      data: this.date,
-      links: this.links
-    }]
-  };
 
-  constructor(public srv: PersService, private location: Location, private _bottomSheet: MatBottomSheet, public dialog: MatDialog, private router: Router) { }
+  constructor(public srv: PersService, private location: Location, private _bottomSheet: MatBottomSheet, public dialog: MatDialog, private router: Router, private zone: NgZone) { }
 
   choose(n) {
     this.contextmenu = false;
@@ -124,9 +127,43 @@ export class MindMapComponent implements OnInit {
     this.location.back();
   }
 
+  getAbilityCount(): number {
+    let count = 0;
+
+    if (!this.pers || !this.pers.characteristics) {
+
+      return count;
+    }
+
+    for (const ch of this.pers.characteristics) {
+      count += ch.abilities ? ch.abilities.length : 0;
+    }
+
+    return count;
+  }
+
+  getCharactCount(): number {
+    if (!this.pers || !this.pers.characteristics) {
+
+      return 0;
+    }
+
+    return this.pers.characteristics.length;
+  }
+
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+
+    if (this.cy) {
+      this.cy.destroy();
+      this.cy = null;
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.isViewReady = true;
+    this.renderGraph();
   }
 
   ngOnInit() {
@@ -134,50 +171,202 @@ export class MindMapComponent implements OnInit {
       this.router.navigate(['/main']);
     }
 
-    this.srv.pers$.subscribe(n => {
-      this.pers = n;
-      this.udateGraph();
+    this.srv.pers$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(n => {
+        this.pers = n;
+        if (this.pers) {
+          this.udateGraph();
+        }
+      });
+  }
+
+  private getShortNodeName(name: string): string {
+    if (!name || name.length <= 22) {
+
+      return name;
+    }
+
+    return name.substr(0, 20) + '...';
+  }
+
+  private getTaskColor(t): string {
+    if (t.isDone) {
+
+      return '#8ecae6';
+    }
+
+    if (t.mayUp) {
+
+      return '#f4a261';
+    }
+
+    return '#cad8d5';
+  }
+
+  private getNodeLabel(name: string, subText: any = ''): string {
+    let result = this.getShortNodeName(name);
+
+    if (subText !== undefined && subText !== null && subText !== '') {
+      result += '\n' + subText;
+    }
+
+    return result;
+  }
+
+  private getGraphStyle(): any[] {
+    return [
+      {
+        selector: 'node',
+        style: {
+          'background-color': 'data(color)',
+          'border-color': '#ffffff',
+          'border-width': 2,
+          'color': '#1f2d2f',
+          'font-family': 'Roboto, Arial, sans-serif',
+          'font-size': 12,
+          'font-weight': 700,
+          'height': 'data(height)',
+          'label': 'data(label)',
+          'line-height': 1.2,
+          'overlay-opacity': 0,
+          'shape': 'round-rectangle',
+          'text-background-color': 'rgba(255, 255, 255, 0.78)',
+          'text-background-opacity': 1,
+          'text-background-padding': 3,
+          'text-halign': 'center',
+          'text-max-width': 112,
+          'text-valign': 'center',
+          'text-wrap': 'wrap',
+          'width': 'data(width)'
+        }
+      },
+      {
+        selector: 'node[type = "pers"]',
+        style: {
+          'border-color': '#f6d365',
+          'border-width': 4,
+          'font-size': 14,
+          'height': 64,
+          'text-max-width': 132,
+          'width': 150
+        }
+      },
+      {
+        selector: 'node[type = "ch"]',
+        style: {
+          'height': 50,
+          'width': 128
+        }
+      },
+      {
+        selector: 'node[type = "t"]',
+        style: {
+          'font-size': 11,
+          'height': 'data(height)',
+          'width': 'data(width)'
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'curve-style': 'bezier',
+          'line-color': 'data(color)',
+          'line-style': 'solid',
+          'opacity': 0.78,
+          'target-arrow-color': 'data(color)',
+          'target-arrow-shape': 'triangle',
+          'width': 2
+        }
+      },
+      {
+        selector: 'edge[linkType = "req"]',
+        style: {
+          'line-color': '#9b5de5',
+          'line-style': 'dashed',
+          'opacity': 0.72,
+          'target-arrow-color': '#9b5de5',
+          'width': 2
+        }
+      },
+      {
+        selector: ':selected',
+        style: {
+          'border-color': '#264653',
+          'border-width': 4
+        }
+      }
+    ];
+  }
+
+  private initCy() {
+    if (!isDagreRegistered) {
+      cytoscape.use(dagre);
+      isDagreRegistered = true;
+    }
+
+    this.cy = cytoscape({
+      boxSelectionEnabled: false,
+      container: this.mindMapCanvas.nativeElement,
+      elements: [],
+      maxZoom: 2.2,
+      minZoom: 0.22,
+      style: this.getGraphStyle(),
+      wheelSensitivity: 0.24
+    });
+
+    this.cy.on('tap', 'node', event => {
+      this.zone.run(() => {
+        const node = event.target;
+        this.id = node.id();
+        this.idx = node.data('index');
+        this.item = this.dic.get(this.id);
+        this.contextmenu = true;
+      });
+    });
+
+    this.cy.on('tap', event => {
+      if (event.target === this.cy) {
+        this.zone.run(() => {
+          this.contextmenu = false;
+        });
+      }
     });
   }
 
-  onChartEvent(event: any, type: string) {
-    this.id = event.data.id;
-    this.idx = event.dataIndex;
-    this.item = this.dic.get(this.id);
-    this.contextmenu = true;
+  private runLayout() {
+    if (!this.cy) {
+
+      return;
+    }
+
+    this.cy.layout({
+      name: 'dagre',
+      animate: true,
+      animationDuration: 450,
+      edgeSep: 18,
+      fit: true,
+      nodeSep: 34,
+      padding: 78,
+      rankDir: 'LR',
+      rankSep: 96,
+      spacingFactor: 1.04
+    }).run();
   }
 
-  private getChart(): EChartOption<EChartOption.Series> {
-    return {
-      title: {
-      },
-      tooltip: { show: false },
-      animationDurationUpdate: 1000,
-      animationEasingUpdate: 'quinticInOut',
-      series: [
-        {
-          type: 'graph',
-          layout: 'force',//'force', 'circular'
-          force: {
-            repulsion: 170,
-            edgeLength: 70,
-            //gravity: 0.17
-          },
-          roam: true,
-          nodeScaleRatio: 0.0005,
-          //draggable: true,
-          //focusNodeAdjacency: true,
-          symbol: 'circle',
-          label: {
-            normal: {
-              show: true,
-              color: 'black'
-            }
-          },
-          edgeSymbol: ['none', 'arrow'],
-        }
-      ]
-    };
+  private renderGraph() {
+    if (!this.isViewReady || !this.mindMapCanvas || !this.pers) {
+
+      return;
+    }
+
+    if (!this.cy) {
+      this.initCy();
+    }
+
+    this.cy.elements().remove();
+    this.cy.add(this.date.concat(this.links));
+    this.runLayout();
   }
 
   private udateGraph() {
@@ -188,21 +377,55 @@ export class MindMapComponent implements OnInit {
     let idx = 0;
     this.dic.set('pers', new mapDicItem('pers', this.pers.name, idx, null));
     idx++;
-    this.date.push(new mindMapItem('pers', this.pers.name, 60, 'LawnGreen'));
+    this.date.push({
+      data: {
+        id: 'pers',
+        index: this.dic.get('pers').index,
+        label: this.getNodeLabel(this.pers.name, 'уровень ' + this.pers.level),
+        color: '#2a9d8f',
+        type: 'pers'
+      }
+    });
     // Характеристики
     for (const ch of this.pers.characteristics) {
       if (!this.pers.isNoAbs) {
         this.dic.set(ch.id, new mapDicItem('ch', ch.name, idx, ch));
         idx++;
-        this.date.push(new mindMapItem(ch.id, ch.name, 45, 'LemonChiffon'));
-        this.links.push(new mindMapLink(this.dic.get('pers').index, this.dic.get(ch.id).index));
+        this.date.push({
+          data: {
+            id: ch.id,
+            index: this.dic.get(ch.id).index,
+            label: this.getNodeLabel(ch.name, ch.rang ? 'ранг ' + ch.rang.name : ''),
+            color: '#e9c46a',
+            type: 'ch'
+          }
+        });
+        this.links.push({
+          data: {
+            id: 'pers-' + ch.id,
+            source: 'pers',
+            target: ch.id,
+            color: 'rgba(42, 157, 143, 0.46)',
+            linkType: 'main'
+          }
+        });
       }
       // Навыки
       for (const ab of ch.abilities) {
         // SumStates
         for (const t of ab.tasks) {
           this.dic.set(t.id, new mapDicItem('t', t.name, idx, ab));
-          this.date.push(new mindMapItem(t.id, t.name, 25, 'transparent'));
+          this.date.push({
+            data: {
+              id: t.id,
+              index: this.dic.get(t.id).index,
+              label: this.getNodeLabel(t.name, ab.rang ? 'ранг ' + ab.rang.name : ''),
+              color: this.getTaskColor(t),
+              height: t.mayUp ? 46 : 40,
+              type: 't',
+              width: t.mayUp ? 120 : 108
+            }
+          });
           idx++;
 
           // Если в требованиях есть с такой же характеристикой, ссылку не делаем
@@ -218,7 +441,15 @@ export class MindMapComponent implements OnInit {
           }
 
           if (!haveSameCharact) {
-            this.links.push(new mindMapLink(!this.pers.isNoAbs ? this.dic.get(ch.id).index : this.dic.get('pers').index, this.dic.get(t.id).index));
+            this.links.push({
+              data: {
+                id: (!this.pers.isNoAbs ? ch.id : 'pers') + '-' + t.id,
+                source: !this.pers.isNoAbs ? ch.id : 'pers',
+                target: t.id,
+                color: 'rgba(233, 196, 106, 0.54)',
+                linkType: 'main'
+              }
+            });
           }
         }
       }
@@ -228,19 +459,22 @@ export class MindMapComponent implements OnInit {
       for (const ab of ch.abilities) {
         for (const t of ab.tasks) {
           for (const r of t.reqvirements) {
-            const source = this.dic.get(t.id).index;
-            const target = this.dic.get(r.elId).index;
-            this.links.push(new mindMapLink(target, source));
+            if (this.dic.get(t.id) && this.dic.get(r.elId)) {
+              this.links.push({
+                data: {
+                  id: r.elId + '-' + t.id + '-req',
+                  source: r.elId,
+                  target: t.id,
+                  color: '#9b5de5',
+                  linkType: 'req'
+                }
+              });
+            }
           }
         }
       }
     }
 
-    this.updateOptions = {
-      series: [{
-        data: this.date,
-        links: this.links
-      }]
-    };
+    this.renderGraph();
   }
 }
