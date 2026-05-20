@@ -51,4 +51,4 @@ package.json
 # UserTasks derived indexes
 docs/UserTasks/.cache/
 
-.cloude
+/.claude/
