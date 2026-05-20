@@ -25,8 +25,9 @@ export class EraSettings extends GameSettings {
   public minChaLvl = 1;
   public perkHardness: number = 1;
   public perkPointAbLevelCost = 2;
+  public perkPointLvlInterval = 3;
   rangNames = ["обыватель", "авантюрист", "воин", "мастер", "герой", "легенда"];
-  isPerkPointsEnable: boolean = false;
+  isPerkPointsEnable: boolean = true;
 
   public abChangeExp(curLvl: number, hardness: number, isPerk: boolean, _perkHardnes?: number): number {
     if (isPerk) {
