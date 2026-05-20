@@ -4,7 +4,6 @@ import { mapDicItem } from 'src/Models/mapDicItem';
 import { MatBottomSheet, MatDialog } from '@angular/material';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import { taskState } from 'src/Models/Task';
-import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Characteristic } from 'src/Models/Characteristic';
 import { Subject } from 'rxjs';
@@ -13,8 +12,12 @@ import { takeUntil } from 'rxjs/operators';
 
 declare const require: any;
 
-const cytoscape = require('cytoscape');
-const dagre = require('cytoscape-dagre');
+function getModule(m: any): any {
+  return m && m.default ? m.default : m;
+}
+
+const cytoscape = getModule(require('cytoscape'));
+const dagre = getModule(require('cytoscape-dagre'));
 let isDagreRegistered = false;
 
 @Component({
@@ -38,7 +41,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
   links: any[] = [];
   pers: Pers;
 
-  constructor(public srv: PersService, private location: Location, private _bottomSheet: MatBottomSheet, public dialog: MatDialog, private router: Router, private zone: NgZone) { }
+  constructor(public srv: PersService, private location: Location, private _bottomSheet: MatBottomSheet, public dialog: MatDialog, private zone: NgZone) { }
 
   choose(n) {
     this.contextmenu = false;
@@ -135,7 +138,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
       return count;
     }
 
-    for (const ch of this.pers.characteristics) {
+    for (const ch of this.pers.characteristics || []) {
       count += ch.abilities ? ch.abilities.length : 0;
     }
 
@@ -167,10 +170,6 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-    if (!this.srv.pers$.value) {
-      this.router.navigate(['/main']);
-    }
-
     this.srv.pers$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(n => {
@@ -340,18 +339,50 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.cy.layout({
-      name: 'dagre',
-      animate: true,
-      animationDuration: 450,
-      edgeSep: 18,
-      fit: true,
-      nodeSep: 34,
-      padding: 78,
-      rankDir: 'LR',
-      rankSep: 96,
-      spacingFactor: 1.04
-    }).run();
+    try {
+      this.cy.layout({
+        name: 'dagre',
+        animate: true,
+        animationDuration: 450,
+        edgeSep: 18,
+        fit: true,
+        nodeSep: 34,
+        padding: 78,
+        rankDir: 'LR',
+        rankSep: 96,
+        spacingFactor: 1.04
+      }).run();
+    } catch (err) {
+      console.warn('Карта персонажа: не удалось применить dagre-раскладку', err);
+      this.cy.layout({
+        name: 'breadthfirst',
+        directed: true,
+        fit: true,
+        padding: 78,
+        spacingFactor: 1.2
+      }).run();
+    }
+  }
+
+  private getLinksToRender(): any[] {
+    const nodeIds = new Set<string>(this.date.map(n => n.data.id));
+    const linkIds = new Set<string>();
+
+    return this.links.filter(l => {
+      if (!l || !l.data || !l.data.source || !l.data.target) {
+
+        return false;
+      }
+
+      if (!nodeIds.has(l.data.source) || !nodeIds.has(l.data.target) || linkIds.has(l.data.id)) {
+
+        return false;
+      }
+
+      linkIds.add(l.data.id);
+
+      return true;
+    });
   }
 
   private renderGraph() {
@@ -364,9 +395,23 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.initCy();
     }
 
-    this.cy.elements().remove();
-    this.cy.add(this.date.concat(this.links));
-    this.runLayout();
+    try {
+      this.cy.resize();
+      this.cy.elements().remove();
+      this.cy.add(this.date);
+      this.cy.add(this.getLinksToRender());
+      this.runLayout();
+    } catch (err) {
+      console.warn('Карта персонажа: не удалось отрисовать граф целиком', err);
+      this.cy.elements().remove();
+      this.cy.add(this.date);
+      this.cy.layout({
+        name: 'breadthfirst',
+        fit: true,
+        padding: 78,
+        spacingFactor: 1.2
+      }).run();
+    }
   }
 
   private udateGraph() {
@@ -387,7 +432,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
     // Характеристики
-    for (const ch of this.pers.characteristics) {
+    for (const ch of this.pers.characteristics || []) {
       if (!this.pers.isNoAbs) {
         this.dic.set(ch.id, new mapDicItem('ch', ch.name, idx, ch));
         idx++;
@@ -411,9 +456,9 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
       // Навыки
-      for (const ab of ch.abilities) {
+      for (const ab of ch.abilities || []) {
         // SumStates
-        for (const t of ab.tasks) {
+        for (const t of ab.tasks || []) {
           this.dic.set(t.id, new mapDicItem('t', t.name, idx, ab));
           this.date.push({
             data: {
@@ -430,9 +475,9 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
 
           // Если в требованиях есть с такой же характеристикой, ссылку не делаем
           let haveSameCharact = false;
-          for (const r of t.reqvirements) {
-            for (const abs of ch.abilities) {
-              for (const tscs of abs.tasks) {
+          for (const r of t.reqvirements || []) {
+            for (const abs of ch.abilities || []) {
+              for (const tscs of abs.tasks || []) {
                 if (tscs.id == r.elId) {
                   haveSameCharact = true;
                 }
@@ -455,10 +500,10 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     // Требования
-    for (const ch of this.pers.characteristics) {
-      for (const ab of ch.abilities) {
-        for (const t of ab.tasks) {
-          for (const r of t.reqvirements) {
+    for (const ch of this.pers.characteristics || []) {
+      for (const ab of ch.abilities || []) {
+        for (const t of ab.tasks || []) {
+          for (const r of t.reqvirements || []) {
             if (this.dic.get(t.id) && this.dic.get(r.elId)) {
               this.links.push({
                 data: {

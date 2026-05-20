@@ -1,5 +1,5 @@
-<div class="mind-map-page" *ngIf="pers">
-  <div class="mind-map-top">
+<div class="mind-map-page">
+  <div class="mind-map-top" *ngIf="pers">
     <button mat-icon-button (click)="goBack()" class="mind-map-icon-btn" *ngIf="!this.contextmenu">
       <img src="assets/icons/left.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '32px' }">
     </button>
@@ -14,7 +14,7 @@
     </div>
   </div>
 
-  <div class="mind-map-legend">
+  <div class="mind-map-legend" *ngIf="pers">
     <span><i class="legend-dot legend-dot_pers"></i>Персонаж</span>
     <span><i class="legend-dot legend-dot_charact"></i>Характеристики</span>
     <span><i class="legend-dot legend-dot_task"></i>Навыки</span>
