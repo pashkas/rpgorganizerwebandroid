@@ -31,7 +31,6 @@ export class EraSettings extends GameSettings {
 
   public abChangeExp(curLvl: number, hardness: number, isPerk: boolean, _perkHardnes?: number): number {
     if (isPerk) {
-      // Опыт за задачу перка = текущий value: пол-прокачаный (5) даёт 5, полностью (10) — 10.
       return curLvl;
     }
 
@@ -64,8 +63,9 @@ export class EraSettings extends GameSettings {
     if (!tsk.isPerk) {
       return;
     }
-    // Сложность перков скрыта в UI — все перки принудительно сложн (=как навык).
-    tsk.perkHardnes = 1;
+    // Сложность перков скрыта в UI: с ОП перк покупается целиком за 1 ОП,
+    // без ОП перк докачивается за ОН как навык.
+    tsk.perkHardnes = this.isPerkPointsEnable ? 0.5 : 1;
 
     // ОП выкл — даём докачивать, промежуточное value (maxAbilLvl/2) сохраняем.
     if (!this.isPerkPointsEnable) {
@@ -159,7 +159,7 @@ export class EraSettings extends GameSettings {
       }
 
       // Опыт, нужный для перехода на следующий уровень
-      let cur = lvlPoints * persLevel * e;
+      let cur = lvlPoints * e;
       expLvl += cur;
 
       result.nextExp = expLvl;
