@@ -1,9 +1,13 @@
 .mind-map-page {
   position: relative;
+  height: 100vh;
   min-height: 100vh;
   width: 100vw;
   overflow: hidden;
   background: linear-gradient(135deg, rgba(252, 251, 247, 0.96) 0%, rgba(238, 247, 242, 0.94) 48%, rgba(245, 240, 251, 0.94) 100%);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none;
 }
 
 .mind-map-page::before {
@@ -153,30 +157,45 @@
   width: 100vw;
 }
 
+.mind-map-canvas {
+  display: block;
+  outline: none;
+  touch-action: none;
+}
+
 .mind-map-actions {
   z-index: 4;
   padding: 0 4px 4px;
 }
 
 @media (max-width: 575.98px) {
+  .mind-map-page,
+  .mind-map-chart,
+  .mind-map-canvas {
+    height: 100vh;
+    min-height: 100vh;
+  }
+
   .mind-map-top {
     top: 6px;
     left: 6px;
     right: 6px;
-    min-height: 52px;
+    min-height: 46px;
     padding: 6px;
+    box-shadow: 0 6px 18px rgba(38, 70, 83, 0.12);
   }
 
   .mind-map-name {
-    font-size: 1rem;
+    font-size: 0.96rem;
   }
 
   .mind-map-rang {
-    font-size: 0.74rem;
+    font-size: 0.7rem;
   }
 
   .mind-map-stats {
     gap: 4px;
+    margin-left: 5px;
   }
 
   .mind-map-stat {
@@ -186,10 +205,10 @@
   }
 
   .mind-map-legend {
-    left: 6px;
-    right: 6px;
-    bottom: 8px;
-    justify-content: center;
-    font-size: 0.68rem;
+    display: none;
+  }
+
+  .mind-map-actions {
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
   }
 }

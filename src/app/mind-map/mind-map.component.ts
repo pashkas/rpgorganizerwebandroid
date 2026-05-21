@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PersService } from '../pers.service';
 import { mapDicItem } from 'src/Models/mapDicItem';
 import { MatBottomSheet, MatDialog } from '@angular/material';
@@ -169,6 +169,17 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderGraph();
   }
 
+  @HostListener('window:resize')
+  onWindowResize() {
+    if (!this.cy) {
+
+      return;
+    }
+
+    this.cy.resize();
+    this.runLayout();
+  }
+
   ngOnInit() {
     this.srv.pers$
       .pipe(takeUntil(this.unsubscribe$))
@@ -279,6 +290,12 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       },
       {
+        selector: ':active',
+        style: {
+          'overlay-opacity': 0
+        }
+      },
+      {
         selector: 'edge[linkType = "req"]',
         style: {
           'line-color': '#9b5de5',
@@ -292,8 +309,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
       {
         selector: ':selected',
         style: {
-          'border-color': '#264653',
-          'border-width': 4
+          'overlay-opacity': 0
         }
       }
     ];
@@ -306,12 +322,14 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.cy = cytoscape({
+      autoungrabify: true,
+      autounselectify: true,
       boxSelectionEnabled: false,
       container: this.mindMapCanvas.nativeElement,
       elements: [],
       hideEdgesOnViewport: true,
       maxZoom: 3,
-      minZoom: 0.14,
+      minZoom: 0.08,
       motionBlur: true,
       motionBlurOpacity: 0.2,
       style: this.getGraphStyle(),
@@ -347,25 +365,28 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.cy.layout({
         name: 'preset',
-        animate: true,
-        animationDuration: 260,
+        animate: false,
         fit: true,
-        padding: 94,
-        positions: node => this.getMindMapPosition(node)
+        padding: this.getLayoutPadding(),
+        positions: node => this.getHierarchyPosition(node)
       }).run();
+      this.cy.nodes().ungrabify();
+      this.fitGraphToScreen();
     } catch (err) {
       console.warn('Карта персонажа: не удалось применить mindmap-раскладку', err);
       this.cy.layout({
         name: 'breadthfirst',
         directed: true,
         fit: true,
-        padding: 78,
+        padding: this.getLayoutPadding(),
         spacingFactor: 1.2
       }).run();
+      this.cy.nodes().ungrabify();
+      this.fitGraphToScreen();
     }
   }
 
-  private getMindMapPosition(node: any): any {
+  private getHierarchyPosition(node: any): any {
     const id = node.id();
     const data = node.data();
 
@@ -379,47 +400,164 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
       return { x: 0, y: 0 };
     }
 
-    const branchCount = Math.max(data.branchCount || 1, 1);
-    const angle = this.getBranchAngle(data.branchIndex, branchCount);
-    const baseRadius = Math.max(270, branchCount * 72);
+    if (this.isPhonePortrait()) {
+
+      return this.getLeftToRightPosition(data);
+    }
+
+    return this.getTopToBottomPosition(data);
+  }
+
+  private getLeftToRightPosition(data: any): any {
+    const taskColumns = 2;
+    const branchTaskCount = this.getBranchTaskCount(data);
+    const branchY = this.getBranchTop(data.branchIndex, taskColumns) - this.getGraphHeight(taskColumns) / 2;
+    const taskRows = Math.max(1, Math.ceil(branchTaskCount / taskColumns));
 
     if (data.type == 'ch') {
 
-      return this.getPoint(angle, baseRadius);
+      return {
+        x: 235,
+        y: branchY + (taskRows - 1) * 72 / 2
+      };
     }
 
     if (data.type == 't') {
-      const taskCount = Math.max(data.taskCount || 1, 1);
       const taskIndex = data.taskIndex || 0;
-      const layerSize = 7;
-      const layer = Math.floor(taskIndex / layerSize);
-      const indexInLayer = taskIndex % layerSize;
-      const countInLayer = Math.min(layerSize, taskCount - layer * layerSize);
-      const spread = Math.min(Math.PI * 0.95, Math.max(0.34, taskCount * 0.12));
-      const taskAngle = countInLayer <= 1
-        ? angle
-        : angle - spread / 2 + spread * indexInLayer / (countInLayer - 1);
+      const row = Math.floor(taskIndex / taskColumns);
+      const column = taskIndex % taskColumns;
 
-      return this.getPoint(taskAngle, baseRadius + 220 + layer * 150);
+      return {
+        x: 470 + column * 130,
+        y: branchY + row * 72
+      };
     }
 
     return { x: 0, y: 0 };
   }
 
-  private getBranchAngle(index: number, count: number): number {
-    if (count <= 1) {
+  private getTopToBottomPosition(data: any): any {
+    const taskColumns = 4;
+    const taskCount = this.getBranchTaskCount(data);
+    const taskIndex = data.taskIndex || 0;
+    const branchWidth = this.getBranchWidth(taskCount, taskColumns);
+    const branchX = this.getBranchLeft(data.branchIndex, taskColumns) - this.getGraphWidth(taskColumns) / 2;
+    const branchCenter = branchX + branchWidth / 2;
 
-      return 0;
+    if (data.type == 'ch') {
+
+      return {
+        x: branchCenter,
+        y: 175
+      };
     }
 
-    return -Math.PI / 2 + Math.PI * 2 * index / count;
+    if (data.type == 't') {
+      const row = Math.floor(taskIndex / taskColumns);
+      const column = taskIndex % taskColumns;
+
+      return {
+        x: branchCenter + (column - (Math.min(taskCount, taskColumns) - 1) / 2) * 142,
+        y: 300 + row * 76
+      };
+    }
+
+    return { x: 0, y: 0 };
   }
 
-  private getPoint(angle: number, radius: number): any {
-    return {
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius
-    };
+  private getBranchTaskCounts(): number[] {
+    if (!this.pers || !this.pers.characteristics) {
+
+      return [1];
+    }
+
+    return (this.pers.characteristics || []).map(ch => {
+      const count = (ch.abilities || []).reduce((total, ab) => total + ((ab.tasks || []).length), 0);
+
+      return Math.max(count, 1);
+    });
+  }
+
+  private getBranchTaskCount(data: any): number {
+    const branchCounts = this.getBranchTaskCounts();
+
+    return Math.max(data.taskCount || branchCounts[data.branchIndex] || 1, 1);
+  }
+
+  private getBranchTop(branchIndex: number, taskColumns: number): number {
+    const counts = this.getBranchTaskCounts();
+    let top = 0;
+
+    for (let i = 0; i < branchIndex; i++) {
+      top += this.getBranchHeight(counts[i], taskColumns) + this.getBranchGap();
+    }
+
+    return top;
+  }
+
+  private getGraphHeight(taskColumns: number): number {
+    return this.getBranchTaskCounts()
+      .reduce((height, count, index) => height + this.getBranchHeight(count, taskColumns) + (index > 0 ? this.getBranchGap() : 0), 0);
+  }
+
+  private getBranchHeight(taskCount: number, taskColumns: number): number {
+    const rowCount = Math.max(1, Math.ceil(taskCount / taskColumns));
+
+    return Math.max(80, rowCount * 72);
+  }
+
+  private getBranchGap(): number {
+    return 96;
+  }
+
+  private getBranchLeft(branchIndex: number, taskColumns: number): number {
+    const counts = this.getBranchTaskCounts();
+    let left = 0;
+
+    for (let i = 0; i < branchIndex; i++) {
+      left += this.getBranchWidth(counts[i], taskColumns) + this.getHorizontalBranchGap();
+    }
+
+    return left;
+  }
+
+  private getGraphWidth(taskColumns: number): number {
+    return this.getBranchTaskCounts()
+      .reduce((width, count, index) => width + this.getBranchWidth(count, taskColumns) + (index > 0 ? this.getHorizontalBranchGap() : 0), 0);
+  }
+
+  private getBranchWidth(taskCount: number, taskColumns: number): number {
+    const columnCount = Math.min(Math.max(taskCount, 1), taskColumns);
+
+    return Math.max(260, columnCount * 142);
+  }
+
+  private getHorizontalBranchGap(): number {
+    return 126;
+  }
+
+  private getLayoutPadding(): number {
+    if (this.isPhonePortrait()) {
+
+      return 22;
+    }
+
+    return 34;
+  }
+
+  private isPhonePortrait(): boolean {
+    return window.innerWidth <= 575 && window.innerHeight > window.innerWidth;
+  }
+
+  private fitGraphToScreen() {
+    if (!this.cy || this.cy.elements().length == 0) {
+
+      return;
+    }
+
+    this.cy.resize();
+    this.cy.fit(this.cy.elements(), this.getLayoutPadding());
+    this.cy.center(this.cy.elements());
   }
 
   private getLinksToRender(): any[] {
