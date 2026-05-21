@@ -141,12 +141,10 @@ export class EraSettings extends GameSettings {
     // Итеративно определяем уровень персонажа по накопленному опыту
     let persLevel = 1;
     let expLvl = 0; // суммарный опыт, необходимый для достижения текущего уровня
+    let cur = 0;
 
     while (true) {
       result.startExp = expLvl;
-
-      // Сначала 1 день, потом с каждым рангом + 1
-      let e = 1 + (persLevel - 1) * 0.1;
 
       // На каждом perkPointLvlInterval-м уровне вместо ОН начисляется 1 ОП,
       // а 1 ОП = perkPointAbLevelCost * abPointsPerLvl ОН по экономике —
@@ -159,7 +157,7 @@ export class EraSettings extends GameSettings {
       }
 
       // Опыт, нужный для перехода на следующий уровень
-      let cur = lvlPoints * e;
+      cur = persLevel === 1 ? lvlPoints : (cur + lvlPoints) * 1.1;
       expLvl += cur;
 
       result.nextExp = expLvl;
