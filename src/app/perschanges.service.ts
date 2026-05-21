@@ -467,7 +467,9 @@ export class PerschangesService {
       if (this.gameSettings.isOpenPersAtNewLevel) {
         this.srvSt.selTabPersList = 0;
         this.srvSt.selInventoryList = 0;
-        if (this.afterPers.ON >= 1) {
+        const isHasAbPoints = this.afterPers.ON >= 1;
+        const isHasPerkPoints = this.gameSettings.isPerkPointsEnable && this.afterPers.OP >= 1;
+        if (isHasAbPoints || isHasPerkPoints) {
           this.router.navigate(["/pers"]);
         }
       }
