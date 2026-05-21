@@ -370,7 +370,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
         padding: this.getLayoutPadding(),
         positions: node => this.getHierarchyPosition(node)
       }).run();
-      this.cy.nodes().ungrabify();
+      this.enableNodePanning();
       this.fitGraphToScreen();
     } catch (err) {
       console.warn('Карта персонажа: не удалось применить mindmap-раскладку', err);
@@ -381,7 +381,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
         padding: this.getLayoutPadding(),
         spacingFactor: 1.2
       }).run();
-      this.cy.nodes().ungrabify();
+      this.enableNodePanning();
       this.fitGraphToScreen();
     }
   }
@@ -560,6 +560,15 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cy.center(this.cy.elements());
   }
 
+  private enableNodePanning() {
+    if (!this.cy) {
+
+      return;
+    }
+
+    this.cy.nodes().panify();
+  }
+
   private getLinksToRender(): any[] {
     const nodeIds = new Set<string>(this.date.map(n => n.data.id));
     const linkIds = new Set<string>();
@@ -607,6 +616,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
         padding: 78,
         spacingFactor: 1.2
       }).run();
+      this.enableNodePanning();
     }
   }
 
@@ -638,7 +648,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
           data: {
             id: ch.id,
             index: this.dic.get(ch.id).index,
-            label: this.getNodeLabel(ch.name, ch.rang ? 'ранг ' + ch.rang.name : ''),
+            label: this.getNodeLabel(ch.name),
             branchCount: branchCount,
             branchIndex: branchIndex,
             color: '#e9c46a',
@@ -667,7 +677,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
             data: {
               id: t.id,
               index: this.dic.get(t.id).index,
-              label: this.getNodeLabel(t.name, ab.rang ? 'ранг ' + ab.rang.name : ''),
+              label: this.getNodeLabel(t.name),
               branchCount: branchCount,
               branchIndex: branchIndex,
               color: this.getTaskColor(t),
