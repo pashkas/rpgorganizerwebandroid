@@ -25,7 +25,7 @@
 
       <!-- Картинка по центру -->
       <div style="flex-grow: 1; display: flex; justify-content: center">
-        <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image"></app-image-component>
+        <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image" localImageType="ability" [localImageId]="tskAbility.id"></app-image-component>
         <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"></app-image-component>
       </div>
 
@@ -168,7 +168,7 @@
 <!-- Режим редактирования -->
 <div class="container pt-2 pb-4" *ngIf="this.pers && tsk && isEditMode" #goUp>
   <form class="pb-4">
-    <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image" [isCanEdit]="true"> </app-image-component>
+    <app-image-component *ngIf="tskAbility && tskAbility?.image" [(data)]="tskAbility.image" [isCanEdit]="true" localImageType="ability" [localImageId]="tskAbility.id"> </app-image-component>
     <app-image-component *ngIf="!tskAbility" [data]="'assets/img/' + tsk.imageLvl + '/' + tsk.image + '.webp'"> </app-image-component>
     <!-- Название -->
     <div fxLayout="row" fxLayoutAlign="none center" fxLayoutGap="15px">

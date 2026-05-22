@@ -46,7 +46,7 @@
                 <img src="assets/icons/create.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '1.8em' }" />
               </button>
             </div>
-            <app-image-component [(data)]="pers.image" [isCanEdit]="false"></app-image-component>
+            <app-image-component [(data)]="pers.image" [isCanEdit]="false" localImageType="pers" [localImageId]="pers.id"></app-image-component>
             <div fxLayout="column" fxLayoutAlign="space-between">
               <button mat-button (click)="openShop()">
                 <span style="position: relative; display: inline-block; line-height: 0">
@@ -97,7 +97,7 @@
           <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center" class="w-100 py-1">
             <div *ngFor="let rev of pers.achievements | filterByProperty : 'isAviable' : true; let i = index">
               <div style="display: flex; flex-direction: column; align-items: center; justify-content: center">
-                <img appImgBroken [src]="rev.image" class="img-fluid rounded w-100" style="height: 100px; object-fit: contain" />
+                <img appImgBroken localImageType="reward" [localImageId]="rev.id" [src]="rev.image" class="img-fluid rounded w-100" style="height: 100px; object-fit: contain" />
                 <div class="text-muted small mt-1 text-wrap">
                   {{ rev.name }}
                 </div>
@@ -209,7 +209,7 @@
       <!-- Редактирование -->
       <div *ngIf="isEditMode" class="pt-2 pb-4 w-100">
         <div class="pb-4">
-          <app-image-component [(data)]="pers.image" [isCanEdit]="true" [isPers]="true"></app-image-component>
+          <app-image-component [(data)]="pers.image" [isCanEdit]="true" [isPers]="true" localImageType="pers" [localImageId]="pers.id"></app-image-component>
           <mat-form-field class="w-100">
             <input matInput autocomplete="off" placeholder="Имя" [(ngModel)]="pers.name" name="pers.name" />
           </mat-form-field>
@@ -351,7 +351,7 @@
                 [ngStyle]="{ opacity: qwest.parrentId || qwest.isNoActive ? '0.4' : '1' }"
               >
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ qwest.image }}" class="masonry-img" />
+                  <img appImgBroken localImageType="qwest" [localImageId]="qwest.id" src="{{ qwest.image }}" class="masonry-img" />
                   <div class="text-wrap py-2">
                     {{ qwest.name }}
                   </div>
@@ -431,7 +431,7 @@
                 <div *ngFor="let rev of pers.inventory">
                   <button mat-stroked-button class="w-100 h-100 revBtn">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
-                      <img appImgBroken src="{{ rev.image }}" class="masonry-img" />
+                      <img appImgBroken localImageType="reward" [localImageId]="rev.id" src="{{ rev.image }}" class="masonry-img" />
                       <div style="color: green">
                         <small>{{ rev.rarityName }}</small>
                       </div>
@@ -465,7 +465,7 @@
                 <div *ngFor="let rev of pers.achievements | filterByProperty : 'isAviable' : false">
                   <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event, 'achive')" [ngClass]="{ revFade: !rev.isAviable }">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
-                      <img appImgBroken src="{{ rev.image }}" class="masonry-img" />
+                      <img appImgBroken localImageType="reward" [localImageId]="rev.id" src="{{ rev.image }}" class="masonry-img" />
                       <div class="text-wrap py-1">
                         {{ rev.name }}
                       </div>
@@ -501,7 +501,7 @@
                 <div *ngFor="let rev of pers.rewards | shop">
                   <button mat-stroked-button class="w-100 h-100 revBtn" (click)="addNewRevard(rev, $event)" [style.opacity]="!rev.isAviable ? '0.6' : '1'">
                     <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100 p-1">
-                      <img appImgBroken src="{{ rev.image }}" class="masonry-img" />
+                      <img appImgBroken localImageType="reward" [localImageId]="rev.id" src="{{ rev.image }}" class="masonry-img" />
                       <div class="text-wrap py-2" *ngIf="rev.name">
                         {{ rev.name }}
                       </div>

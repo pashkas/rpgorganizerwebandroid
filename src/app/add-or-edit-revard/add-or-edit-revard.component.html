@@ -2,7 +2,7 @@
 <div mat-dialog-content>
   <form [formGroup]="revForm">
     <div fxLayout="column" fxLayoutAlign="space-around center">
-      <app-image-component [(data)]="rev.image" [isCanEdit]="true" [isRev]="true" [isQwest]="false"></app-image-component>
+      <app-image-component [(data)]="rev.image" [isCanEdit]="true" [isRev]="true" [isQwest]="false" localImageType="reward" [localImageId]="rev.id"></app-image-component>
       <div fxFill fxLayoutGap="15px">
         <mat-form-field fxFlex>
           <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.rev.name" [ngModelOptions]="{ standalone: true }" autocomplete="off" placeholder="Название" name="data.rev.name" />

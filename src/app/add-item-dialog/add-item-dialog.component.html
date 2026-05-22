@@ -1,9 +1,14 @@
 <h1 mat-dialog-title class="text-center">{{ data.header }}</h1>
 <div mat-dialog-content [ngClass]="{ 'cust-mat-dialog-content': isGallery }">
   <div *ngIf="!this.isGallery">
-    <mat-form-field>
+    <mat-form-field *ngIf="galleryForm.get('type').value !== 'device'">
       <input onfocus="this.select()" cdkFocusInitial matInput [(ngModel)]="data.text" autocomplete="off" name="data.text" [placeholder]="lblTxt" />
     </mat-form-field>
+    <div *ngIf="galleryForm.get('type').value === 'device'" class="device-image-picker">
+      <input #deviceFileInput class="device-file-input" type="file" accept="image/*" (change)="chooseDeviceImg($event)" />
+      <button type="button" mat-button (click)="openDeviceImageDialog()">Выбрать с устройства</button>
+      <div *ngIf="deviceImageError" class="text-danger small mt-2">{{ deviceImageError }}</div>
+    </div>
     <div *ngIf="data.showWeekDays" class="mt-2">
       <mat-checkbox [(ngModel)]="data.isWeekDays" name="isWeekDays">Дни недели</mat-checkbox>
       <div *ngIf="data.isWeekDays" fxLayout="row" fxLayoutGap="0.3em" fxLayoutAlign="center center" class="mt-1">
@@ -51,13 +56,14 @@
     </div>
   </div>
 </div>
-<div mat-dialog-actions [align]="'end'" [formGroup]="galleryForm" [ngClass]="{ 'cust-mat-actions': isGallery || galleryForm.get('isUrl').value }">
-  <mat-form-field *ngIf="isGallery || galleryForm.get('isUrl').value">
+<div mat-dialog-actions [align]="'end'" [formGroup]="galleryForm" [ngClass]="{ 'cust-mat-actions': isGallery || galleryForm.get('type').value === 'url' || galleryForm.get('type').value === 'device' }">
+  <mat-form-field *ngIf="isGallery || galleryForm.get('type').value === 'url' || galleryForm.get('type').value === 'device'">
     <mat-select formControlName="type">
       <mat-option value="gallery">Галерея</mat-option>
       <mat-option value="pers">Персонажи</mat-option>
       <mat-option value="reward">Награды</mat-option>
       <mat-option value="url">Из интернета</mat-option>
+      <mat-option *ngIf="data.isDeviceEnable" value="device">С устройства</mat-option>
     </mat-select>
   </mat-form-field>
   <button mat-button mat-dialog-close>Отмена</button>

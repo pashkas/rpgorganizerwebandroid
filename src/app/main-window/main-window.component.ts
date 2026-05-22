@@ -33,6 +33,7 @@ export class MainWindowComponent implements OnInit {
   isSucessShownOv$ = new BehaviorSubject<boolean>(false);
   lastGlobalBeforeSort: boolean;
   loadedSkillImgs = new Set<string>();
+  isMasonryLongPress = false;
   pers$ = this.srv.pers$.asObservable();
   qwestsGlobal$ = this.srv.qwestsGlobal$;
   qwickSortVals: sortArr[] = [];
@@ -43,7 +44,12 @@ export class MainWindowComponent implements OnInit {
   addToQwest() {
     let qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
 
-    if (qwest) {
+    this.addTaskToQwest(qwest);
+  }
+
+  addTaskToQwest(qwest: Qwest) {
+    if (qwest && !this.srv.isDialogOpen) {
+      this.srv.isDialogOpen = true;
       const dialogRef = this.dialog.open(AddItemDialogComponent, {
         panelClass: "my-dialog",
         data: { header: "Добавить миссию", text: "" },
@@ -56,8 +62,23 @@ export class MainWindowComponent implements OnInit {
           this.srv.addTskToQwest(qwest, name);
           this.srv.savePers(false);
         }
+
+        this.srv.isDialogOpen = false;
       });
     }
+  }
+
+  addTaskToMasonryQwest(qwestItem) {
+    this.isMasonryLongPress = true;
+    clearTimeout(this.clickTimer);
+
+    if (!qwestItem || !this.srv.allMap[qwestItem.id]) {
+      return;
+    }
+
+    let qwest = this.srv.allMap[qwestItem.id].item;
+
+    this.addTaskToQwest(qwest);
   }
 
   async animate(isDone: boolean) {
@@ -237,6 +258,12 @@ export class MainWindowComponent implements OnInit {
   clickDelay: Number;
 
   masonrySingleClick(tskIdx: number) {
+    if (this.isMasonryLongPress) {
+      this.isMasonryLongPress = false;
+
+      return;
+    }
+
     this.clickPreventSingleClick = false;
     const clickDelay = 200;
     this.clickTimer = setTimeout(() => {

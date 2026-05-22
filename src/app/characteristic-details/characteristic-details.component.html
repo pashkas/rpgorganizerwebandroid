@@ -18,7 +18,7 @@
   <form class="pb-4">
     <!-- Картинка с ОП/ОН в правом верхнем углу (как в окне навыка) -->
     <div style="position: relative">
-      <app-image-component [(data)]="charact.image"></app-image-component>
+      <app-image-component [(data)]="charact.image" localImageType="characteristic" [localImageId]="charact.id"></app-image-component>
       <div *ngIf="this.gameSettings.isAbPointsEnabled" style="position: absolute; top: 4px; right: 4px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px">
         <div *ngIf="this.gameSettings.isPerkPointsEnable" style="position: relative; display: inline-block; line-height: 0">
           <img src="assets/icons/star.png" [ngStyle]="{ 'object-fit': 'contain', height: '25px' }" />
@@ -85,7 +85,7 @@
     <!-- <div class="md-form text-center" *ngIf="charact.image">
       <img src="{{charact.image}}" class="img-fluid" [ngStyle]="{'object-fit': 'contain', 'height': '25vh'}">
     </div> -->
-    <app-image-component [(data)]="charact.image" [isCanEdit]="true"></app-image-component>
+    <app-image-component [(data)]="charact.image" [isCanEdit]="true" localImageType="characteristic" [localImageId]="charact.id"></app-image-component>
     <!-- Название -->
     <mat-form-field class="w-100">
       <input matInput onfocus="this.select()" autocomplete="off" placeholder="Название" [(ngModel)]="charact.name" name="charact.name" #nameEdt />

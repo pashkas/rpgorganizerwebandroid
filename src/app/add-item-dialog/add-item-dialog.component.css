@@ -6,3 +6,12 @@
 .cust-mat-actions{
     flex-wrap: nowrap;
 }
+
+.device-image-picker{
+    min-width: 260px;
+    text-align: center;
+}
+
+.device-file-input{
+    display: none;
+}

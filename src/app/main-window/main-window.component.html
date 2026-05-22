@@ -68,7 +68,7 @@
             <div *ngFor="let skill of skills">
               <button mat-stroked-button class="w-100 h-100 skillBtn no-border" (click)="masonrySingleClick(skill.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ skill.img }}" class="masonry-img global-skill-img"
+                  <img appImgBroken localImageType="ability" [localImageId]="skill.id" src="{{ skill.img }}" class="masonry-img global-skill-img"
                     (load)="onSkillImgLoad(skill.tskId)"
                     [ngStyle]="{ 'border': (skill.failCounter > 0 && loadedSkillImgs.has(skill.tskId)) ? '3px solid red' : 'none' }" />
                 </div>
@@ -87,7 +87,15 @@
             <div *ngFor="let qwest of qwestsGlobal$ | async" [ngStyle]="{ opacity: qwest.isNoActive ? '0.75' : '1' }">
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="masonrySingleClick(qwest.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken src="{{ qwest.img }}" class="masonry-img" />
+                  <img
+                    appImgBroken
+                    localImageType="qwest"
+                    [localImageId]="qwest.id"
+                    src="{{ qwest.img }}"
+                    class="masonry-img"
+                    (press)="addTaskToMasonryQwest(qwest)"
+                    (contextmenu)="addTaskToMasonryQwest(qwest); $event.preventDefault(); $event.stopPropagation()"
+                  />
                   <div class="text-wrap py-1">
                     {{ qwest.name }}
                   </div>
@@ -204,6 +212,8 @@
       >
         <img
           appImgBroken
+          localImageType="pers"
+          [localImageId]="data.pers.id"
           draggable="false"
           (press)="qwickAddTask()"
           (contextmenu)="qwickAddTask(); $event.preventDefault(); $event.stopPropagation()"
