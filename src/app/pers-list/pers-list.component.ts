@@ -373,7 +373,7 @@ export class PersListComponent implements OnInit {
   }
 
   upAbil(ab: Ability) {
-    this.srv.upAbility(ab, true);
+    this.srv.upAbility(ab, true, false);
   }
 
   /**

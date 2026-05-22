@@ -2808,7 +2808,7 @@ export class PersService {
     // }
   }
 
-  upAbility(ab: Ability, isFromMain: boolean = false) {
+  upAbility(ab: Ability, isFromMain: boolean = false, isOpenAfterUp: boolean = true) {
     this.changesBefore();
 
     let wasOpen = ab.isOpen;
@@ -2859,9 +2859,9 @@ export class PersService {
       });
     }
 
-    if (this.gameSettings.isOpenAbWhenUp) {
+    if (isOpenAfterUp && this.gameSettings.isOpenAbWhenUp) {
       this.router.navigate(["pers/task", ab.tasks[0].id, false], { queryParams: { isQuick: false, isActivate: false, isFromMain: false } });
-    } else if (this.gameSettings.isOpenAbWhenActivate && !wasOpen && isFromMain) {
+    } else if (isOpenAfterUp && this.gameSettings.isOpenAbWhenActivate && !wasOpen && isFromMain) {
       this.router.navigate(["pers/task", ab.tasks[0].id, false], { queryParams: { isQuick: true, isActivate: true, isFromMain: false } });
     }
 
