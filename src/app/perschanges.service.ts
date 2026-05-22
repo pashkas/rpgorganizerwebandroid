@@ -455,7 +455,7 @@ export class PerschangesService {
         backdropClass: "backdrop-changes",
         data: {
           abPoints: this.afterPers.ON,
-          perkPoints: this.afterPers.OP,
+          perkPoints: this.gameSettings.isPerkPointsEnable ? this.afterPers.OP : null,
           lvl: this.afterPers.level,
           img: "assets/img/levelUp.png",
         },

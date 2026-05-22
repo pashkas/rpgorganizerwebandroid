@@ -167,7 +167,7 @@ export abstract class GameSettings {
   /**
    * Очки перков активны? Если да, то по perkPointLvlInterval дается 1 ОП, и не дается ОН.
    */
-  isPerkPointsEnable: boolean = true;
+  isPerkPointsEnable: boolean = false;
 
   /**
    * Экономика перков: стоимость 1 ОП в «уровнях ОН».
