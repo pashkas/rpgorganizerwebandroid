@@ -64,7 +64,7 @@
                   <div class="text-right pointer">
                     <a (click)="showAbility(ab)">{{ ab.rang.name }}</a>
                   </div>
-                  <a *ngIf="mayUp == true" class="ml-1 pointer d-flex align-items-center" (click)="showAbility(ab)">
+                  <a *ngIf="mayUp == true" class="ml-1 pointer d-flex align-items-center" (click)="upAbil(ab)">
                     <img src="assets/icons/up.png" [ngStyle]="{ 'object-fit': 'contain', height: '22px' }" />
                   </a>
                 </div>

@@ -467,7 +467,7 @@ export class PersListComponent implements OnInit {
   }
 
   upAbilityFromList(ab: Ability) {
-    this.showAbility(ab);
+    this.upAbil(ab);
   }
 
   sync(isDownload) {
