@@ -3680,10 +3680,10 @@ export class PersService {
       ch.HasSameAbLvl = false;
     }
 
-    // Шаг 2. Потолок по уровню перса (см. задачу 0019, под maxAbilLvl=10):
-    //   обычные навыки: max = 2 + floor(persLevel/10) * 2  (0-9 ур. → 2, 10-19 → 4, ..., 40+ → 10).
+    // Шаг 2. Потолок по уровню перса:
+    //   обычные навыки: max = 5 + floor(persLevel/10)  (0-9 ур. → 5, 10-19 → 6, ..., до maxAbilLvl).
     //   перки: ограничены только общим maxAbilLvl.
-    var max = 2 + Math.floor(prs.level / 10) * 2;
+    var max = Math.min(this.gameSettings.maxAbilLvl, 5 + Math.floor(prs.level / 10));
     for (let ch of prs.characteristics) {
       for (let ab of ch.abilities) {
         for (let tsk of ab.tasks) {
