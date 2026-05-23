@@ -1,0 +1,10 @@
+.file-status {
+  margin-top: 12px;
+  word-break: break-word;
+}
+
+.file-error {
+  color: #f44336;
+  margin-top: 12px;
+  word-break: break-word;
+}

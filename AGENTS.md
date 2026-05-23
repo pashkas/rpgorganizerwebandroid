@@ -28,6 +28,7 @@ Codex имеет явное разрешение запускать субаге
 ## Инструменты
 
 В этом проекте не используй MCP IDEA. Для навигации и чтения кода используй `rg`/PowerShell, для правок — `apply_patch`.
+При установке npm-пакетов используй `npm install ... --legacy-peer-deps`: в проекте есть существующий peer-конфликт Angular CDK/Flex Layout, обычный `npm install` падает с `ERESOLVE`.
 
 ---
 

@@ -1,22 +1,40 @@
 <p mat-dialog-title>
-  <ng-container *ngIf="isImport; else export">
-    Скопируй сюда данные твоего персонажа для импорта.
+  <ng-container *ngIf="isImport; else exportTitle">
+    Загрузить персонажа из JSON-файла.
   </ng-container>
-  <ng-template #export>
-    Данные твоего персонажа в текстовом виде.
+  <ng-template #exportTitle>
+    Выгрузить персонажа в JSON-файл.
   </ng-template>
 </p>
 
 <mat-dialog-content>
-  <mat-form-field class="w-100">
-    <textarea matInput autosize useImportant='true' onfocus="this.select()" autocomplete="off"
-      placeholder="Данные персонажа" [(ngModel)]="persData" name="persData" #userinput>
-    </textarea>
-  </mat-form-field>
+  <ng-container *ngIf="isImport; else exportContent">
+    <input #fileInput type="file" accept=".json,application/json" class="d-none" (change)="importFromFile($event)" />
+
+    <button mat-stroked-button color="accent" (click)="fileInput.click()" [disabled]="isBusy">
+      Выбрать файл
+    </button>
+  </ng-container>
+
+  <ng-template #exportContent>
+    <button mat-stroked-button color="accent" (click)="exportToFile()" [disabled]="isBusy">
+      Сохранить JSON
+    </button>
+  </ng-template>
+
+  <div class="file-status" *ngIf="fileName">
+    {{ fileName }}
+  </div>
+  <div class="file-status" *ngIf="message">
+    {{ message }}
+  </div>
+  <div class="file-error" *ngIf="error">
+    {{ error }}
+  </div>
 </mat-dialog-content>
 
 <mat-dialog-actions>
-  <button mat-button (click)="copy(userinput)" *ngIf="!isImport">Скопировать</button>
   <button mat-button mat-dialog-close>Отмена</button>
-  <button mat-button [mat-dialog-close]="persData" cdkFocusInitial>ОК</button>
+  <button mat-button *ngIf="isImport" [disabled]="!persData || isBusy" (click)="confirmImport()" cdkFocusInitial>ОК</button>
+  <button mat-button *ngIf="!isImport" mat-dialog-close cdkFocusInitial>ОК</button>
 </mat-dialog-actions>

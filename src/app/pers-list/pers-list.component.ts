@@ -272,10 +272,14 @@ export class PersListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((n) => {
       if (n) {
-        let newPers: Pers = JSON.parse(n);
-        newPers.id = this.srv.pers$.value.id;
-        newPers.userId = this.srv.pers$.value.userId;
-        this.srv.setPers(JSON.stringify(newPers));
+        try {
+          let newPers: Pers = JSON.parse(n);
+          newPers.id = this.srv.pers$.value.id;
+          newPers.userId = this.srv.pers$.value.userId;
+          this.srv.setPers(JSON.stringify(newPers));
+        } catch (e) {
+          window.alert("Не удалось загрузить персонажа из файла.");
+        }
       }
       this.srv.isDialogOpen = false;
     });
