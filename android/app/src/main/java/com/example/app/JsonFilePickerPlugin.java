@@ -16,16 +16,79 @@ import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 @CapacitorPlugin(name = "JsonFilePicker")
 public class JsonFilePickerPlugin extends Plugin {
+  private static final String PENDING_EXPORT_FILE = "pending-pers-export.json";
+
   @PluginMethod
   public void saveJsonFile(PluginCall call) {
     String fileName = call.getString("fileName", "rpgorganizer.json");
+    String data = call.getString("data");
 
+    if (data == null || data.length() == 0) {
+      call.reject("Нет данных для записи JSON-файла");
+
+      return;
+    }
+
+    try (OutputStream stream = new FileOutputStream(getPendingExportFile())) {
+      stream.write(data.getBytes(StandardCharsets.UTF_8));
+    } catch (Exception e) {
+      call.reject("Не удалось подготовить JSON-файл", e);
+
+      return;
+    }
+
+    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+    intent.setType("application/json");
+    intent.putExtra(Intent.EXTRA_TITLE, fileName);
+
+    startActivityForResult(call, intent, "saveJsonFileResult");
+  }
+
+  @PluginMethod
+  public void clearJsonFileExport(PluginCall call) {
+    deletePendingExportFile();
+    call.resolve();
+  }
+
+  @PluginMethod
+  public void appendJsonFileExport(PluginCall call) {
+    String data = call.getString("data");
+
+    if (data == null) {
+      call.reject("Нет данных для записи JSON-файла");
+
+      return;
+    }
+
+    try (OutputStream stream = new FileOutputStream(getPendingExportFile(), true)) {
+      stream.write(data.getBytes(StandardCharsets.UTF_8));
+      call.resolve();
+    } catch (Exception e) {
+      call.reject("Не удалось подготовить JSON-файл", e);
+    }
+  }
+
+  @PluginMethod
+  public void savePreparedJsonFile(PluginCall call) {
+    File file = getPendingExportFile();
+
+    if (!file.exists() || file.length() == 0) {
+      call.reject("Нет данных для записи JSON-файла");
+
+      return;
+    }
+
+    String fileName = call.getString("fileName", "rpgorganizer.json");
     Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
     intent.addCategory(Intent.CATEGORY_OPENABLE);
     intent.setType("application/json");
@@ -50,27 +113,38 @@ public class JsonFilePickerPlugin extends Plugin {
     }
 
     if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null || result.getData().getData() == null) {
+      deletePendingExportFile();
       call.reject("Выбор файла отменён", "CANCELED");
 
       return;
     }
 
     Uri uri = result.getData().getData();
-    String data = call.getString("data", "");
+    File file = getPendingExportFile();
 
-    try (OutputStream stream = getContext().getContentResolver().openOutputStream(uri)) {
+    if (!file.exists() || file.length() == 0) {
+      deletePendingExportFile();
+      call.reject("Нет данных для записи JSON-файла");
+
+      return;
+    }
+
+    try (InputStream input = new FileInputStream(file);
+         OutputStream stream = getContext().getContentResolver().openOutputStream(uri, "wt")) {
       if (stream == null) {
         call.reject("Не удалось открыть файл для записи");
 
         return;
       }
 
-      stream.write(data.getBytes(StandardCharsets.UTF_8));
+      copy(input, stream);
       JSObject ret = new JSObject();
       ret.put("uri", uri.toString());
       call.resolve(ret);
     } catch (Exception e) {
       call.reject("Не удалось записать JSON-файл", e);
+    } finally {
+      deletePendingExportFile();
     }
   }
 
@@ -115,6 +189,27 @@ public class JsonFilePickerPlugin extends Plugin {
     }
 
     return buffer.toString(StandardCharsets.UTF_8.name());
+  }
+
+  private void copy(InputStream input, OutputStream output) throws Exception {
+    byte[] chunk = new byte[8192];
+    int length;
+
+    while ((length = input.read(chunk)) != -1) {
+      output.write(chunk, 0, length);
+    }
+  }
+
+  private File getPendingExportFile() {
+
+    return new File(getContext().getCacheDir(), PENDING_EXPORT_FILE);
+  }
+
+  private void deletePendingExportFile() {
+    File file = getPendingExportFile();
+    if (file.exists()) {
+      file.delete();
+    }
   }
 
   private String getFileName(Uri uri) {

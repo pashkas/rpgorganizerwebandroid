@@ -8,15 +8,16 @@ import { Reward } from "src/Models/Reward";
 import { Subject } from "rxjs";
 import { Ability } from "src/Models/Ability";
 import { MatDialog } from "@angular/material";
+import { Capacitor } from "@capacitor/core";
 import { AddItemDialogComponent } from "../add-item-dialog/add-item-dialog.component";
 import { AddOrEditRevardComponent } from "../add-or-edit-revard/add-or-edit-revard.component";
 import { Qwest } from "src/Models/Qwest";
 import { StatesService } from "../states.service";
 import { takeUntil } from "rxjs/operators";
-import { PersImportExportDialogComponent } from "../pers-import-export-dialog/pers-import-export-dialog.component";
 import { RevardDialogData } from "src/Models/RevardDialogData";
 import { GameSettings } from "../GameSettings";
 import { QuickAddAbilityComponent } from "../pers/quick-add-ability/quick-add-ability.component";
+import { JsonFilePicker } from "../json-file-picker";
 
 @Component({
   selector: "app-pers-list",
@@ -235,19 +236,26 @@ export class PersListComponent implements OnInit {
   }
 
   /**
-   * Экспорт персонажа - в виде текста.
-   *
+   * Экспорт персонажа в JSON-файл.
    */
-  exportPers() {
+  async exportPers() {
     this.srv.isDialogOpen = true;
-    const dialogRef = this.dialog.open(PersImportExportDialogComponent, {
-      data: { isImport: false },
-      backdropClass: "backdrop",
-    });
 
-    dialogRef.afterClosed().subscribe((n) => {
+    try {
+      let fileName = this.getExportFileName();
+      let data = JSON.stringify(this.srv.pers$.value);
+      if (Capacitor.isNativePlatform()) {
+        await this.saveNativeJsonFile(fileName, data);
+      } else {
+        this.downloadInBrowser(fileName, data);
+      }
+    } catch (e) {
+      if (!this.isCancel(e)) {
+        window.alert("Не удалось сохранить файл персонажа.");
+      }
+    } finally {
       this.srv.isDialogOpen = false;
-    });
+    }
   }
 
   goBack() {
@@ -260,29 +268,30 @@ export class PersListComponent implements OnInit {
   }
 
   /**
-   * Импорт персонажа - из текстового файла.
-   *
+   * Импорт персонажа из JSON-файла.
    */
-  importPers() {
+  async importPers() {
     this.srv.isDialogOpen = true;
-    const dialogRef = this.dialog.open(PersImportExportDialogComponent, {
-      data: { isImport: true },
-      backdropClass: "backdrop",
-    });
 
-    dialogRef.afterClosed().subscribe((n) => {
-      if (n) {
-        try {
-          let newPers: Pers = JSON.parse(n);
-          newPers.id = this.srv.pers$.value.id;
-          newPers.userId = this.srv.pers$.value.userId;
-          this.srv.setPers(JSON.stringify(newPers));
-        } catch (e) {
-          window.alert("Не удалось загрузить персонажа из файла.");
-        }
+    try {
+      let data: string;
+      if (Capacitor.isNativePlatform()) {
+        let file = await JsonFilePicker.openJsonFile();
+        data = file.data;
+      } else {
+        data = await this.selectJsonFileInBrowser();
       }
+
+      if (data) {
+        this.applyImportedPers(data);
+      }
+    } catch (e) {
+      if (!this.isCancel(e)) {
+        window.alert("Не удалось загрузить персонажа из файла.");
+      }
+    } finally {
       this.srv.isDialogOpen = false;
-    });
+    }
   }
 
   loadSamplePers() {
@@ -528,5 +537,112 @@ export class PersListComponent implements OnInit {
   qwickAddReward(type: string) {
     this.addNewRevard(null, null, type);
     this.srv.savePers(false);
+  }
+
+  private applyImportedPers(data: string) {
+    let newPers: Pers = JSON.parse(data);
+    newPers.id = this.srv.pers$.value.id;
+    newPers.userId = this.srv.pers$.value.userId;
+    this.srv.setPers(JSON.stringify(newPers));
+  }
+
+  private getExportFileName(): string {
+    let persName = this.srv.pers$.value && this.srv.pers$.value.name ? this.srv.pers$.value.name : "pers";
+    let date = new Date().toISOString().slice(0, 10);
+
+    return this.cleanFileName(persName) + "-" + date + ".json";
+  }
+
+  private cleanFileName(value: string): string {
+
+    return (value || "pers").replace(/[^a-zA-Zа-яА-Я0-9_-]/g, "_");
+  }
+
+  private downloadInBrowser(fileName: string, data: string) {
+    let blob = new Blob([data], { type: "application/json;charset=utf-8" });
+    let url = window.URL.createObjectURL(blob);
+    let link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+  private async saveNativeJsonFile(fileName: string, data: string) {
+    let chunkSize = 32768;
+    await JsonFilePicker.clearJsonFileExport();
+
+    for (let i = 0; i < data.length;) {
+      let end = Math.min(i + chunkSize, data.length);
+      let lastChar = data.charCodeAt(end - 1);
+      if (end < data.length && lastChar >= 0xd800 && lastChar <= 0xdbff) {
+        end--;
+      }
+      await JsonFilePicker.appendJsonFileExport({
+        data: data.substring(i, end),
+      });
+      i = end;
+    }
+
+    await JsonFilePicker.savePreparedJsonFile({
+      fileName,
+    });
+  }
+
+  private selectJsonFileInBrowser(): Promise<string> {
+
+    return new Promise<string>((resolve, reject) => {
+      let input = document.createElement("input");
+      let isDone = false;
+      let cleanup = () => {
+        isDone = true;
+        window.removeEventListener("focus", onFocus);
+        if (document.body.contains(input)) {
+          document.body.removeChild(input);
+        }
+      };
+      let onFocus = () => {
+        setTimeout(() => {
+          if (!isDone && (!input.files || input.files.length == 0)) {
+            cleanup();
+            resolve("");
+          }
+        }, 300);
+      };
+      input.type = "file";
+      input.accept = ".json,application/json";
+      input.style.display = "none";
+      document.body.appendChild(input);
+      input.onchange = () => {
+        let file = input.files && input.files.length > 0 ? input.files[0] : null;
+        if (!file) {
+          cleanup();
+          resolve("");
+
+          return;
+        }
+
+        let reader = new FileReader();
+        reader.onload = (e) => {
+          cleanup();
+          resolve((e.target as FileReader).result as string);
+        };
+        reader.onerror = () => {
+          cleanup();
+          reject(reader.error);
+        };
+        reader.readAsText(file);
+      };
+      window.addEventListener("focus", onFocus);
+      input.click();
+    });
+  }
+
+  private isCancel(e: any): boolean {
+
+    return e && (e.code === "CANCELED" || (e.message && /отмен|cancel/i.test(e.message)));
   }
 }

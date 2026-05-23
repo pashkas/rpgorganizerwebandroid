@@ -35,7 +35,6 @@ import { MatChipsModule } from "@angular/material/chips";
 import { AbHardnessComponent } from "./ab-hardness/ab-hardness.component";
 import { AutosizeModule } from "ngx-autosize";
 import { NgxMaterialTimepickerModule } from "ngx-material-timepicker";
-import { PersImportExportDialogComponent } from "../pers-import-export-dialog/pers-import-export-dialog.component";
 import { AbilitySignsPipe } from "../ability-signs.pipe";
 import { QuickAddAbilityComponent } from "./quick-add-ability/quick-add-ability.component";
 import { ShopPipe } from "../shop.pipe";
@@ -70,7 +69,6 @@ import { FlexLayoutModule } from "@angular/flex-layout";
     ChangeCharactComponent,
     ImageComponentComponent,
     AbHardnessComponent,
-    PersImportExportDialogComponent,
     AbilitySignsPipe,
     QuickAddAbilityComponent,
     ShopPipe,
@@ -105,7 +103,6 @@ import { FlexLayoutModule } from "@angular/flex-layout";
     EditDiaryParamsComponent,
     ReqAddComponent,
     ChangeCharactComponent,
-    PersImportExportDialogComponent,
     QuickAddAbilityComponent,
     RequirementsAddDialogComponent,
   ],

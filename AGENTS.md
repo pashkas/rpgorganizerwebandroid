@@ -29,6 +29,7 @@ Codex имеет явное разрешение запускать субаге
 
 В этом проекте не используй MCP IDEA. Для навигации и чтения кода используй `rg`/PowerShell, для правок — `apply_patch`.
 При установке npm-пакетов используй `npm install ... --legacy-peer-deps`: в проекте есть существующий peer-конфликт Angular CDK/Flex Layout, обычный `npm install` падает с `ERESOLVE`.
+Для Android Gradle-проверок используй локальную JDK 17: `C:\Users\tretyakovpk\.jdks\openjdk-17.0.1`. Перед запуском Gradle выставляй `JAVA_HOME` в этот путь и добавляй `%JAVA_HOME%\bin` / `$env:JAVA_HOME\bin` в `PATH`.
 
 ---
 
