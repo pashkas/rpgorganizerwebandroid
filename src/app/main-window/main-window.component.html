@@ -84,7 +84,7 @@
       <ng-container *ngSwitchCase="'listQwest'">
         <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()">
           <div class="masonry-grid">
-            <div *ngFor="let qwest of qwestsGlobal$ | async" [ngStyle]="{ opacity: qwest.isNoActive ? '0.75' : '1' }">
+            <div *ngFor="let qwest of qwestsGlobal$ | async; trackBy: trackByGlobalItemId" [ngStyle]="{ opacity: qwest.isNoActive ? '0.75' : '1' }">
               <button mat-stroked-button class="w-100 h-100 revBtn" (click)="masonrySingleClick(qwest.tskIdx)">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img
@@ -93,8 +93,6 @@
                     [localImageId]="qwest.id"
                     src="{{ qwest.img }}"
                     class="masonry-img"
-                    (press)="addTaskToMasonryQwest(qwest, $event)"
-                    (contextmenu)="addTaskToMasonryQwest(qwest, $event)"
                   />
                   <div class="text-wrap py-1">
                     {{ qwest.name }}

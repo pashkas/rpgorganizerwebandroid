@@ -33,9 +33,6 @@ export class MainWindowComponent implements OnInit {
   isSucessShownOv$ = new BehaviorSubject<boolean>(false);
   lastGlobalBeforeSort: boolean;
   loadedSkillImgs = new Set<string>();
-  isMasonryLongPress = false;
-  masonryEventsBlockedUntil = 0;
-  masonryLongPressTimer: any;
   pers$ = this.srv.pers$.asObservable();
   qwestsGlobal$ = this.srv.qwestsGlobal$;
   qwickSortVals: sortArr[] = [];
@@ -50,36 +47,32 @@ export class MainWindowComponent implements OnInit {
   }
 
   addTaskToQwest(qwest: Qwest): boolean {
-    if (!qwest || this.srv.isDialogOpen) {
+    return this.openAddTaskToQwestDialog(qwest ? qwest.id : null);
+  }
+
+  private openAddTaskToQwestDialog(qwestId: string, isMasonryAdd: boolean = false): boolean {
+    if (!qwestId || this.srv.isDialogOpen) {
       return false;
     }
 
-    let qwestId = qwest.id;
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       panelClass: "my-dialog",
       data: { header: "Добавить миссию", text: "" },
 
       backdropClass: "backdrop",
+      autoFocus: false,
+      restoreFocus: false,
     });
 
     dialogRef.afterClosed().subscribe((name) => {
-      if (this.isMasonryLongPress) {
-        this.blockMasonryEvents();
+      try {
+        if (name) {
+          this.addTaskToQwestById(qwestId, name);
+        }
+      } finally {
+        this.finishTaskToQwestAdd(isMasonryAdd);
       }
-
-      this.srv.isDialogOpen = false;
-      if (this.isMasonryLongPress) {
-        this.clearMasonryLongPressDelayed();
-      }
-
-      if (!name) {
-        return;
-      }
-
-      setTimeout(() => {
-        this.addTaskToQwestById(qwestId, name);
-      }, 0);
     });
 
     return true;
@@ -96,87 +89,17 @@ export class MainWindowComponent implements OnInit {
       this.srv.savePers(false);
     } catch (e) {
       console.error("Ошибка быстрого добавления задачи в квест", e);
-      this.srv.isDialogOpen = false;
-      this.clearMasonryLongPress();
     }
   }
 
-  addTaskToMasonryQwest(qwestItem, event?) {
-    this.stopLongPressEvent(event);
-    if (this.isMasonryEventsBlocked()) {
-      return;
-    }
-
-    this.markMasonryLongPress();
-    clearTimeout(this.clickTimer);
-
-    if (!qwestItem) {
-      this.clearMasonryLongPressDelayed();
-
-      return;
-    }
-
-    let qwest = this.srv.pers$.value.qwests.find((q) => q.id == qwestItem.id);
-
-    if (!this.addTaskToQwest(qwest)) {
-      this.clearMasonryLongPressDelayed();
-    }
+  private finishTaskToQwestAdd(isMasonryAdd: boolean) {
+    this.srv.isDialogOpen = false;
+    this.cdr.markForCheck();
   }
 
-  private markMasonryLongPress() {
-    this.isMasonryLongPress = true;
-    clearTimeout(this.masonryLongPressTimer);
-    this.masonryLongPressTimer = setTimeout(() => {
-      if (!this.srv.isDialogOpen) {
-        this.isMasonryLongPress = false;
-      }
-    }, 1500);
-  }
+  trackByGlobalItemId(index: number, item): string {
 
-  private clearMasonryLongPress() {
-    clearTimeout(this.masonryLongPressTimer);
-    this.isMasonryLongPress = false;
-  }
-
-  private clearMasonryLongPressDelayed(delay: number = 700) {
-    clearTimeout(this.masonryLongPressTimer);
-    this.masonryLongPressTimer = setTimeout(() => {
-      if (!this.srv.isDialogOpen) {
-        this.isMasonryLongPress = false;
-      }
-    }, delay);
-  }
-
-  private blockMasonryEvents(delay: number = 1000) {
-    this.masonryEventsBlockedUntil = Date.now() + delay;
-  }
-
-  private isMasonryEventsBlocked(): boolean {
-    return Date.now() < this.masonryEventsBlockedUntil;
-  }
-
-  private stopLongPressEvent(event?) {
-    if (!event) {
-      return;
-    }
-
-    if (event.preventDefault) {
-      event.preventDefault();
-    }
-
-    if (event.stopPropagation) {
-      event.stopPropagation();
-    }
-
-    if (event.srcEvent) {
-      if (event.srcEvent.preventDefault) {
-        event.srcEvent.preventDefault();
-      }
-
-      if (event.srcEvent.stopPropagation) {
-        event.srcEvent.stopPropagation();
-      }
-    }
+    return item ? item.id : index.toString();
   }
 
   async animate(isDone: boolean) {
@@ -356,20 +279,6 @@ export class MainWindowComponent implements OnInit {
   clickDelay: Number;
 
   masonrySingleClick(tskIdx: number) {
-    if (this.isMasonryEventsBlocked()) {
-      return;
-    }
-
-    if (this.isMasonryLongPress) {
-      if (this.srv.isDialogOpen) {
-        return;
-      }
-
-      this.clearMasonryLongPress();
-
-      return;
-    }
-
     this.clickPreventSingleClick = false;
     const clickDelay = 200;
     this.clickTimer = setTimeout(() => {
@@ -380,10 +289,6 @@ export class MainWindowComponent implements OnInit {
   }
 
   masonryDoubleClick() {
-    if (this.isMasonryEventsBlocked()) {
-      return;
-    }
-
     this.clickPreventSingleClick = true;
     clearTimeout(this.clickTimer);
     this.firstOrGlobal();
@@ -596,6 +501,13 @@ export class MainWindowComponent implements OnInit {
       return;
     }
 
+    let qwestId = this.getCurrentQwestIdForQwickAdd();
+    if (qwestId) {
+      this.qwickAddTaskToQwest(qwestId);
+
+      return;
+    }
+
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       panelClass: "my-dialog",
@@ -614,6 +526,55 @@ export class MainWindowComponent implements OnInit {
           this.srv.addTskToQwest(dialQwest, name, true);
 
           this.srv.savePers(false);
+        }
+      } finally {
+        this.srv.isDialogOpen = false;
+      }
+    });
+  }
+
+  private getCurrentQwestIdForQwickAdd(): string {
+    let prs = this.srv.pers$.value;
+    if (!prs || prs.currentView != curpersview.QwestTasks) {
+      return null;
+    }
+
+    if (prs.currentQwestId) {
+      return prs.currentQwestId;
+    }
+
+    if (prs.currentTask && prs.currentTask.qwestId) {
+      return prs.currentTask.qwestId;
+    }
+
+    return null;
+  }
+
+  qwickAddTaskToQwest(qwestId: string) {
+    if (this.srv.isDialogOpen) {
+      return;
+    }
+
+    this.srv.isDialogOpen = true;
+    const dialogRef = this.dialog.open(AddItemDialogComponent, {
+      panelClass: "my-dialog",
+      data: { header: "Добавить миссию", text: "" },
+      backdropClass: "backdrop",
+      autoFocus: false,
+      restoreFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((name) => {
+      try {
+        if (name) {
+          let qwest = this.srv.pers$.value.qwests.find((q) => q.id == qwestId);
+          if (!qwest) {
+            return;
+          }
+
+          this.srv.addTskToQwest(qwest, name, true);
+          this.srv.savePers(false);
+          this.cdr.markForCheck();
         }
       } finally {
         this.srv.isDialogOpen = false;
