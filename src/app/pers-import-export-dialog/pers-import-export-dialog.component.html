@@ -11,9 +11,14 @@
   <ng-container *ngIf="isImport; else exportContent">
     <input #fileInput type="file" accept=".json,application/json" class="d-none" (change)="importFromFile($event)" />
 
-    <button mat-stroked-button color="accent" (click)="fileInput.click()" [disabled]="isBusy">
+    <button *ngIf="isNative; else webImportButton" mat-stroked-button color="accent" (click)="importFromNativeFile()" [disabled]="isBusy">
       Выбрать файл
     </button>
+    <ng-template #webImportButton>
+      <button mat-stroked-button color="accent" (click)="fileInput.click()" [disabled]="isBusy">
+        Выбрать файл
+      </button>
+    </ng-template>
   </ng-container>
 
   <ng-template #exportContent>

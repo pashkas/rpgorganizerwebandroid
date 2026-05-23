@@ -1,8 +1,7 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material";
 import { Capacitor } from "@capacitor/core";
-import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
-import { Share } from "@capacitor/share";
+import { JsonFilePicker } from "../json-file-picker";
 import { PersService } from "../pers.service";
 
 @Component({
@@ -16,6 +15,7 @@ export class PersImportExportDialogComponent implements OnInit {
   message: string = "";
   error: string = "";
   isBusy: boolean = false;
+  isNative: boolean = Capacitor.isNativePlatform();
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public dialogData,
@@ -43,13 +43,38 @@ export class PersImportExportDialogComponent implements OnInit {
 
     try {
       if (Capacitor.isNativePlatform()) {
-        this.message = await this.shareNativeFile(this.fileName, this.persData);
+        this.message = await this.saveNativeFile(this.fileName, this.persData);
       } else {
         this.downloadInBrowser(this.fileName, this.persData);
         this.message = "Файл подготовлен для скачивания.";
       }
     } catch (e) {
-      this.error = "Не удалось сохранить файл персонажа.";
+      if (!this.isCancel(e)) {
+        this.error = "Не удалось сохранить файл персонажа.";
+      }
+    } finally {
+      this.isBusy = false;
+    }
+  }
+
+  /**
+   * Импорт персонажа через системный выбор файла Android.
+   */
+  async importFromNativeFile() {
+    this.isBusy = true;
+    this.error = "";
+    this.message = "";
+    this.persData = "";
+    this.fileName = "";
+
+    try {
+      let file = await JsonFilePicker.openJsonFile();
+      this.fileName = file.name;
+      this.setImportData(file.data);
+    } catch (e) {
+      if (!this.isCancel(e)) {
+        this.error = "Не удалось прочитать файл.";
+      }
     } finally {
       this.isBusy = false;
     }
@@ -74,16 +99,7 @@ export class PersImportExportDialogComponent implements OnInit {
 
     let reader = new FileReader();
     reader.onload = (e) => {
-      this.persData = (e.target as FileReader).result as string;
-
-      try {
-        JSON.parse(this.persData);
-        this.message = "Файл готов к загрузке.";
-      } catch (err) {
-        this.persData = "";
-        this.error = "В файле нет корректного JSON персонажа.";
-      }
-
+      this.setImportData((e.target as FileReader).result as string);
       this.isBusy = false;
       input.value = "";
     };
@@ -120,27 +136,27 @@ export class PersImportExportDialogComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
-  private async shareNativeFile(fileName: string, data: string): Promise<string> {
-    let result = await Filesystem.writeFile({
-      path: fileName,
+  private async saveNativeFile(fileName: string, data: string): Promise<string> {
+    await JsonFilePicker.saveJsonFile({
+      fileName,
       data,
-      directory: Directory.Cache,
-      encoding: Encoding.UTF8,
-      recursive: true,
     });
-    let canShare = await Share.canShare();
 
-    if (!canShare.value) {
-      return "Файл создан: " + result.uri;
+    return "Файл сохранён.";
+  }
+
+  private setImportData(data: string) {
+    try {
+      JSON.parse(data);
+      this.persData = data;
+      this.message = "Файл готов к загрузке.";
+    } catch (err) {
+      this.persData = "";
+      this.error = "В файле нет корректного JSON персонажа.";
     }
+  }
 
-    await Share.share({
-      title: "Персонаж RPG Organizer",
-      text: "JSON-файл персонажа",
-      files: [result.uri],
-      dialogTitle: "Сохранить персонажа",
-    });
-
-    return "Файл передан в системное меню сохранения.";
+  private isCancel(e: any): boolean {
+    return e && (e.code === "CANCELED" || (e.message && /отмен|cancel/i.test(e.message)));
   }
 }
