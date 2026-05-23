@@ -523,7 +523,7 @@ export class MainWindowComponent implements OnInit {
             this.srv.addQwest("Дела");
           }
           dialQwest = this.srv.pers$.value.qwests.find((n) => n.name == "Дела");
-          this.srv.addTskToQwest(dialQwest, name, true);
+          this.srv.addTskToQwest(dialQwest, name);
 
           this.srv.savePers(false);
         }
@@ -572,7 +572,7 @@ export class MainWindowComponent implements OnInit {
             return;
           }
 
-          this.srv.addTskToQwest(qwest, name, true);
+          this.srv.addTskToQwest(qwest, name);
           this.srv.savePers(false);
           this.cdr.markForCheck();
         }
