@@ -34,6 +34,7 @@ export class MainWindowComponent implements OnInit {
   lastGlobalBeforeSort: boolean;
   loadedSkillImgs = new Set<string>();
   isMasonryLongPress = false;
+  masonryEventsBlockedUntil = 0;
   masonryLongPressTimer: any;
   pers$ = this.srv.pers$.asObservable();
   qwestsGlobal$ = this.srv.qwestsGlobal$;
@@ -53,6 +54,7 @@ export class MainWindowComponent implements OnInit {
       return false;
     }
 
+    let qwestId = qwest.id;
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       panelClass: "my-dialog",
@@ -62,22 +64,49 @@ export class MainWindowComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((name) => {
-      try {
-        if (name) {
-          this.srv.addTskToQwest(qwest, name);
-          this.srv.savePers(false);
-        }
-      } finally {
-        this.srv.isDialogOpen = false;
-        this.clearMasonryLongPress();
+      if (this.isMasonryLongPress) {
+        this.blockMasonryEvents();
       }
+
+      this.srv.isDialogOpen = false;
+      if (this.isMasonryLongPress) {
+        this.clearMasonryLongPressDelayed();
+      }
+
+      if (!name) {
+        return;
+      }
+
+      setTimeout(() => {
+        this.addTaskToQwestById(qwestId, name);
+      }, 0);
     });
 
     return true;
   }
 
+  private addTaskToQwestById(qwestId, name) {
+    try {
+      let currentQwest = this.srv.pers$.value.qwests.find((q) => q.id == qwestId);
+      if (!currentQwest) {
+        return;
+      }
+
+      this.srv.addTskToQwest(currentQwest, name);
+      this.srv.savePers(false);
+    } catch (e) {
+      console.error("Ошибка быстрого добавления задачи в квест", e);
+      this.srv.isDialogOpen = false;
+      this.clearMasonryLongPress();
+    }
+  }
+
   addTaskToMasonryQwest(qwestItem, event?) {
     this.stopLongPressEvent(event);
+    if (this.isMasonryEventsBlocked()) {
+      return;
+    }
+
     this.markMasonryLongPress();
     clearTimeout(this.clickTimer);
 
@@ -109,13 +138,21 @@ export class MainWindowComponent implements OnInit {
     this.isMasonryLongPress = false;
   }
 
-  private clearMasonryLongPressDelayed() {
+  private clearMasonryLongPressDelayed(delay: number = 700) {
     clearTimeout(this.masonryLongPressTimer);
     this.masonryLongPressTimer = setTimeout(() => {
       if (!this.srv.isDialogOpen) {
         this.isMasonryLongPress = false;
       }
-    }, 300);
+    }, delay);
+  }
+
+  private blockMasonryEvents(delay: number = 1000) {
+    this.masonryEventsBlockedUntil = Date.now() + delay;
+  }
+
+  private isMasonryEventsBlocked(): boolean {
+    return Date.now() < this.masonryEventsBlockedUntil;
   }
 
   private stopLongPressEvent(event?) {
@@ -319,7 +356,15 @@ export class MainWindowComponent implements OnInit {
   clickDelay: Number;
 
   masonrySingleClick(tskIdx: number) {
+    if (this.isMasonryEventsBlocked()) {
+      return;
+    }
+
     if (this.isMasonryLongPress) {
+      if (this.srv.isDialogOpen) {
+        return;
+      }
+
       this.clearMasonryLongPress();
 
       return;
@@ -335,6 +380,10 @@ export class MainWindowComponent implements OnInit {
   }
 
   masonryDoubleClick() {
+    if (this.isMasonryEventsBlocked()) {
+      return;
+    }
+
     this.clickPreventSingleClick = true;
     clearTimeout(this.clickTimer);
     this.firstOrGlobal();
