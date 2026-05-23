@@ -34,6 +34,7 @@ export class MainWindowComponent implements OnInit {
   lastGlobalBeforeSort: boolean;
   loadedSkillImgs = new Set<string>();
   isMasonryLongPress = false;
+  masonryLongPressTimer: any;
   pers$ = this.srv.pers$.asObservable();
   qwestsGlobal$ = this.srv.qwestsGlobal$;
   qwickSortVals: sortArr[] = [];
@@ -68,7 +69,7 @@ export class MainWindowComponent implements OnInit {
         }
       } finally {
         this.srv.isDialogOpen = false;
-        this.isMasonryLongPress = false;
+        this.clearMasonryLongPress();
       }
     });
 
@@ -77,24 +78,44 @@ export class MainWindowComponent implements OnInit {
 
   addTaskToMasonryQwest(qwestItem, event?) {
     this.stopLongPressEvent(event);
-    this.isMasonryLongPress = true;
+    this.markMasonryLongPress();
     clearTimeout(this.clickTimer);
 
-    if (!qwestItem || !this.srv.allMap[qwestItem.id]) {
-      setTimeout(() => {
-        this.isMasonryLongPress = false;
-      }, 300);
+    if (!qwestItem) {
+      this.clearMasonryLongPressDelayed();
 
       return;
     }
 
-    let qwest = this.srv.allMap[qwestItem.id].item;
+    let qwest = this.srv.pers$.value.qwests.find((q) => q.id == qwestItem.id);
 
     if (!this.addTaskToQwest(qwest)) {
-      setTimeout(() => {
-        this.isMasonryLongPress = false;
-      }, 300);
+      this.clearMasonryLongPressDelayed();
     }
+  }
+
+  private markMasonryLongPress() {
+    this.isMasonryLongPress = true;
+    clearTimeout(this.masonryLongPressTimer);
+    this.masonryLongPressTimer = setTimeout(() => {
+      if (!this.srv.isDialogOpen) {
+        this.isMasonryLongPress = false;
+      }
+    }, 1500);
+  }
+
+  private clearMasonryLongPress() {
+    clearTimeout(this.masonryLongPressTimer);
+    this.isMasonryLongPress = false;
+  }
+
+  private clearMasonryLongPressDelayed() {
+    clearTimeout(this.masonryLongPressTimer);
+    this.masonryLongPressTimer = setTimeout(() => {
+      if (!this.srv.isDialogOpen) {
+        this.isMasonryLongPress = false;
+      }
+    }, 300);
   }
 
   private stopLongPressEvent(event?) {
@@ -299,7 +320,7 @@ export class MainWindowComponent implements OnInit {
 
   masonrySingleClick(tskIdx: number) {
     if (this.isMasonryLongPress) {
-      this.isMasonryLongPress = false;
+      this.clearMasonryLongPress();
 
       return;
     }
