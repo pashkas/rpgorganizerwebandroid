@@ -93,8 +93,8 @@
                     [localImageId]="qwest.id"
                     src="{{ qwest.img }}"
                     class="masonry-img"
-                    (press)="addTaskToMasonryQwest(qwest)"
-                    (contextmenu)="addTaskToMasonryQwest(qwest); $event.preventDefault(); $event.stopPropagation()"
+                    (press)="addTaskToMasonryQwest(qwest, $event)"
+                    (contextmenu)="addTaskToMasonryQwest(qwest, $event)"
                   />
                   <div class="text-wrap py-1">
                     {{ qwest.name }}

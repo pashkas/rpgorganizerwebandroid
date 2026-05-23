@@ -47,38 +47,78 @@ export class MainWindowComponent implements OnInit {
     this.addTaskToQwest(qwest);
   }
 
-  addTaskToQwest(qwest: Qwest) {
-    if (qwest && !this.srv.isDialogOpen) {
-      this.srv.isDialogOpen = true;
-      const dialogRef = this.dialog.open(AddItemDialogComponent, {
-        panelClass: "my-dialog",
-        data: { header: "Добавить миссию", text: "" },
+  addTaskToQwest(qwest: Qwest): boolean {
+    if (!qwest || this.srv.isDialogOpen) {
+      return false;
+    }
 
-        backdropClass: "backdrop",
-      });
+    this.srv.isDialogOpen = true;
+    const dialogRef = this.dialog.open(AddItemDialogComponent, {
+      panelClass: "my-dialog",
+      data: { header: "Добавить миссию", text: "" },
 
-      dialogRef.afterClosed().subscribe((name) => {
+      backdropClass: "backdrop",
+    });
+
+    dialogRef.afterClosed().subscribe((name) => {
+      try {
         if (name) {
           this.srv.addTskToQwest(qwest, name);
           this.srv.savePers(false);
         }
-
+      } finally {
         this.srv.isDialogOpen = false;
-      });
-    }
+        this.isMasonryLongPress = false;
+      }
+    });
+
+    return true;
   }
 
-  addTaskToMasonryQwest(qwestItem) {
+  addTaskToMasonryQwest(qwestItem, event?) {
+    this.stopLongPressEvent(event);
     this.isMasonryLongPress = true;
     clearTimeout(this.clickTimer);
 
     if (!qwestItem || !this.srv.allMap[qwestItem.id]) {
+      setTimeout(() => {
+        this.isMasonryLongPress = false;
+      }, 300);
+
       return;
     }
 
     let qwest = this.srv.allMap[qwestItem.id].item;
 
-    this.addTaskToQwest(qwest);
+    if (!this.addTaskToQwest(qwest)) {
+      setTimeout(() => {
+        this.isMasonryLongPress = false;
+      }, 300);
+    }
+  }
+
+  private stopLongPressEvent(event?) {
+    if (!event) {
+      return;
+    }
+
+    if (event.preventDefault) {
+      event.preventDefault();
+    }
+
+    if (event.stopPropagation) {
+      event.stopPropagation();
+    }
+
+    if (event.srcEvent) {
+      if (event.srcEvent.preventDefault) {
+        event.srcEvent.preventDefault();
+      }
+
+      if (event.srcEvent.stopPropagation) {
+        event.srcEvent.stopPropagation();
+      }
+    }
   }
 
   async animate(isDone: boolean) {
@@ -482,6 +522,10 @@ export class MainWindowComponent implements OnInit {
   }
 
   qwickAddTask() {
+    if (this.srv.isDialogOpen) {
+      return;
+    }
+
     this.srv.isDialogOpen = true;
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       panelClass: "my-dialog",
@@ -490,17 +534,20 @@ export class MainWindowComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((name) => {
-      if (name) {
-        let dialQwest = this.srv.pers$.value.qwests.find((n) => n.name == "Дела");
-        if (dialQwest == null) {
-          this.srv.addQwest("Дела");
-        }
-        dialQwest = this.srv.pers$.value.qwests.find((n) => n.name == "Дела");
-        this.srv.addTskToQwest(dialQwest, name, true);
+      try {
+        if (name) {
+          let dialQwest = this.srv.pers$.value.qwests.find((n) => n.name == "Дела");
+          if (dialQwest == null) {
+            this.srv.addQwest("Дела");
+          }
+          dialQwest = this.srv.pers$.value.qwests.find((n) => n.name == "Дела");
+          this.srv.addTskToQwest(dialQwest, name, true);
 
-        this.srv.savePers(false);
+          this.srv.savePers(false);
+        }
+      } finally {
+        this.srv.isDialogOpen = false;
       }
-      this.srv.isDialogOpen = false;
     });
   }
 
