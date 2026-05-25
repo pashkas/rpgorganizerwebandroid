@@ -7,6 +7,7 @@ import { Ability } from "src/Models/Ability";
 import { MatDialog } from "@angular/material";
 import { sortArr } from "src/Models/sortArr";
 import { AddItemDialogComponent } from "../add-item-dialog/add-item-dialog.component";
+import { QwickAddTaskDialogComponent } from "../qwick-add-task-dialog/qwick-add-task-dialog.component";
 import { StatesService } from "../states.service";
 import { curpersview } from "src/Models/curpersview";
 import { Qwest } from "src/Models/Qwest";
@@ -277,8 +278,13 @@ export class MainWindowComponent implements OnInit {
   clickPreventSingleClick = false;
   clickTimer: any;
   clickDelay: Number;
+  masonryQwestClickBlockUntil = 0;
 
   masonrySingleClick(tskIdx: number) {
+    if (Date.now() < this.masonryQwestClickBlockUntil) {
+      return;
+    }
+
     this.clickPreventSingleClick = false;
     const clickDelay = 200;
     this.clickTimer = setTimeout(() => {
@@ -550,13 +556,14 @@ export class MainWindowComponent implements OnInit {
     return null;
   }
 
-  qwickAddTaskToQwest(qwestId: string) {
+  qwickAddTaskToQwest(qwestId: string, isMasonryAdd: boolean = false) {
     if (this.srv.isDialogOpen) {
       return;
     }
 
     this.srv.isDialogOpen = true;
-    const dialogRef = this.dialog.open(AddItemDialogComponent, {
+    let dialogComponent: any = isMasonryAdd ? QwickAddTaskDialogComponent : AddItemDialogComponent;
+    const dialogRef = this.dialog.open(dialogComponent, {
       panelClass: "my-dialog",
       data: { header: "Добавить миссию", text: "" },
       backdropClass: "backdrop",
@@ -567,19 +574,32 @@ export class MainWindowComponent implements OnInit {
     dialogRef.afterClosed().subscribe((name) => {
       try {
         if (name) {
-          let qwest = this.srv.pers$.value.qwests.find((q) => q.id == qwestId);
-          if (!qwest) {
-            return;
-          }
-
-          this.srv.addTskToQwest(qwest, name);
-          this.srv.savePers(false);
-          this.cdr.markForCheck();
+          setTimeout(() => {
+            this.addTaskToQwestById(qwestId, name);
+            this.cdr.markForCheck();
+          }, 0);
         }
       } finally {
         this.srv.isDialogOpen = false;
+        this.cdr.markForCheck();
       }
     });
+  }
+
+  qwickAddTaskToMasonryQwest(qwestId: string, ev?: any) {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+
+    this.blockMasonryQwestClick();
+    setTimeout(() => this.qwickAddTaskToQwest(qwestId, true), 0);
+  }
+
+  private blockMasonryQwestClick() {
+    this.masonryQwestClickBlockUntil = Date.now() + 1200;
+    this.clickPreventSingleClick = true;
+    clearTimeout(this.clickTimer);
   }
 
   setGlobalTaskView(b: boolean) {

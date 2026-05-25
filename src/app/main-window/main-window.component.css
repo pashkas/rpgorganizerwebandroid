@@ -170,6 +170,25 @@ li:hover {
   padding-bottom: 0px;
 }
 
-.pers-img-main{
+.pers-img-main {
   max-height: 22vh;
+}
+
+.qwest-card-wrap {
+  height: 100%;
+  position: relative;
+}
+
+.qwest-card-touch-layer {
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  z-index: 2;
 }

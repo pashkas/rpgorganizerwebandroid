@@ -85,7 +85,8 @@
         <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()">
           <div class="masonry-grid">
             <div *ngFor="let qwest of qwestsGlobal$ | async; trackBy: trackByGlobalItemId" [ngStyle]="{ opacity: qwest.isNoActive ? '0.75' : '1' }">
-              <button mat-stroked-button class="w-100 h-100 revBtn" (click)="masonrySingleClick(qwest.tskIdx)">
+              <div class="qwest-card-wrap">
+              <button mat-stroked-button class="w-100 h-100 revBtn" tabindex="-1">
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img
                     appImgBroken
@@ -93,8 +94,6 @@
                     [localImageId]="qwest.id"
                     src="{{ qwest.img }}"
                     class="masonry-img"
-                    (press)="qwickAddTaskToQwest(qwest.id)"
-                    (contextmenu)="qwickAddTaskToQwest(qwest.id); $event.preventDefault(); $event.stopPropagation()"
                   />
                   <div class="text-wrap py-1">
                     {{ qwest.name }}
@@ -111,6 +110,8 @@
                   </ng-template>
                 </div>
               </button>
+              <div class="qwest-card-touch-layer" appLongTap (shortTap)="masonrySingleClick(qwest.tskIdx)" (longTap)="qwickAddTaskToMasonryQwest(qwest.id)"></div>
+              </div>
             </div>
           </div>
         </div>

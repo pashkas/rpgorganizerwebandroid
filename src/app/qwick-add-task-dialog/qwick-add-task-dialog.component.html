@@ -1,0 +1,18 @@
+<h1 mat-dialog-title class="text-center">{{ data.header }}</h1>
+<div mat-dialog-content class="qwick-add-content">
+  <mat-form-field>
+    <input
+      #nameInput
+      matInput
+      [(ngModel)]="data.text"
+      autocomplete="off"
+      name="qwickTaskText"
+      placeholder="Название"
+      (keyup.enter)="ok()"
+    />
+  </mat-form-field>
+</div>
+<div mat-dialog-actions [align]="'end'">
+  <button type="button" mat-button mat-dialog-close>Отмена</button>
+  <button type="button" mat-button (click)="ok()">Ok</button>
+</div>

@@ -25,9 +25,11 @@ import { FailModPipe } from "./fail-mod.pipe";
 import { EraSettings } from "./game-settings/EraSettings";
 import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
 import { ListBgPipe } from "./list-bg.pipe";
+import { LongTapDirective } from "./long-tap.directive";
 import { MainProgrDescPipe } from "./main-window/main-progr-desc.pipe";
 import { MainWindowComponent } from "./main-window/main-window.component";
 import { TimerCounterComponent } from "./main-window/timer-counter/timer-counter.component";
+import { QwickAddTaskDialogComponent } from "./qwick-add-task-dialog/qwick-add-task-dialog.component";
 import { RestComponent } from "./rest/rest.component";
 import { RouteReuseService } from "./route-reuse.service";
 import { SelectOnClickDirective } from "./select-on-click.directive";
@@ -53,10 +55,12 @@ import { EraSettings5Lvl } from "./game-settings/EraSettings5Lvl";
     ConfirmationDialogComponent,
     TimerCounterComponent,
     FailModPipe,
+    LongTapDirective,
     MainProgrDescPipe,
     ListBgPipe,
     TaskTimerComponentComponent,
     CustomSwipeDirective,
+    QwickAddTaskDialogComponent,
   ],
   imports: [
     MatChipsModule,
@@ -97,7 +101,7 @@ import { EraSettings5Lvl } from "./game-settings/EraSettings5Lvl";
     },
   ],
   bootstrap: [AppComponent],
-  entryComponents: [LevelUpMsgComponent, ArrSortDialogComponent, TskTimeValDialogComponent, ConfirmationDialogComponent, TaskTimerComponentComponent],
+  entryComponents: [LevelUpMsgComponent, ArrSortDialogComponent, TskTimeValDialogComponent, ConfirmationDialogComponent, TaskTimerComponentComponent, QwickAddTaskDialogComponent],
   exports: [],
 })
 export class AppModule {}
