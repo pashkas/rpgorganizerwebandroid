@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 $projectDir = Split-Path -Parent $PSScriptRoot
 $androidDir = Join-Path $projectDir "android"
-$javaHome = "C:\Program Files\Android\Android Studio\jbr"
+$javaHome = "C:\Users\tretyakovpk\.jdks\openjdk-17.0.1"
 $keystoreProperties = Join-Path $androidDir "keystore.properties"
 $sourceApk = Join-Path $androidDir "app\build\outputs\apk\release\app-release.apk"
 
@@ -53,7 +53,8 @@ if ($npxCommand) {
 }
 
 if (-not $SkipWebBuild) {
-    Invoke-ExternalCommand "Angular prod build" { & $npx ng build --prod }
+    $ngCli = Join-Path $projectDir "node_modules\@angular\cli\bin\ng"
+    Invoke-ExternalCommand "Angular prod build" { & node --max_old_space_size=4096 $ngCli build --prod }
 }
 
 Invoke-ExternalCommand "Capacitor sync" { & $npx cap sync android }

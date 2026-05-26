@@ -1,0 +1,10 @@
+# This file is used by Angular CLI and autoprefixer.
+# Android APK builds target modern WebView/Chromium and do not need ES5 bundles.
+
+last 2 Chrome versions
+last 2 ChromeAndroid versions
+last 2 Firefox versions
+last 2 Edge versions
+last 2 Safari versions
+last 2 iOS versions
+not IE 9-11

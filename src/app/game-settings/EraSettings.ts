@@ -17,6 +17,7 @@ export class EraSettings extends GameSettings {
   public isClassicaRPG = true;
   public isHardnessEnable = false;
   public isHpEnabled: boolean = false;
+  public isVibro: boolean = true;
   public isOpenPersAtNewLevel = true;
   public maxAbilLvl = 10;
   public maxChaLvl = 10;

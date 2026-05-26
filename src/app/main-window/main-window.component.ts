@@ -14,6 +14,7 @@ import { Qwest } from "src/Models/Qwest";
 import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-component.component";
 import { takeUntil } from "rxjs/operators";
 import { GameSettings } from "../GameSettings";
+import { VibroService } from "../vibro.service";
 
 @Component({
   selector: "app-main-window",
@@ -39,7 +40,7 @@ export class MainWindowComponent implements OnInit {
   qwickSortVals: sortArr[] = [];
   skillsGlobal$ = this.srv.skillsGlobal$;
 
-  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, public gameSettings: GameSettings, private cdr: ChangeDetectorRef) {}
+  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, public gameSettings: GameSettings, private cdr: ChangeDetectorRef, private vibro: VibroService) {}
 
   addToQwest() {
     let qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
@@ -163,6 +164,7 @@ export class MainWindowComponent implements OnInit {
   }
 
   async done(t: Task) {
+    this.vibro.short();
     await this.animate(true);
 
     this.changeEnamyImageForItem(t.id, t);
@@ -225,7 +227,7 @@ export class MainWindowComponent implements OnInit {
   }
 
   async fail(t: Task) {
-    // Vibration.vibrate(250);
+    this.vibro.long();
 
     await this.animate(false);
 

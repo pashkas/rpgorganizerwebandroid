@@ -106,6 +106,7 @@ export abstract class GameSettings {
    */
   isClassicaRPG: boolean = true;
   isHpEnabled: boolean = false;
+  isVibro: boolean = true;
   /**
    * Новый навык открыт?
    */

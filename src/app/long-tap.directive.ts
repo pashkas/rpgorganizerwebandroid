@@ -1,11 +1,14 @@
 import { Directive, EventEmitter, HostListener, Input, OnDestroy, Output } from "@angular/core";
 
+import { VibroService } from "./vibro.service";
+
 @Directive({
   selector: "[appLongTap]",
 })
 export class LongTapDirective implements OnDestroy {
   @Input() longTapDelay = 650;
   @Input() longTapMoveTolerance = 14;
+  @Input() longTapVibration = 35;
 
   @Output() longTap = new EventEmitter<void>();
   @Output() shortTap = new EventEmitter<void>();
@@ -14,11 +17,11 @@ export class LongTapDirective implements OnDestroy {
   private blockClickUntil = 0;
   private fired = false;
   private lastTouchUntil = 0;
-  private ready = false;
-  private startTime = 0;
   private startX = 0;
   private startY = 0;
   private timer: any;
+
+  constructor(private vibro: VibroService) {}
 
   @HostListener("touchstart", ["$event"])
   onTouchStart(ev: TouchEvent) {
@@ -33,11 +36,13 @@ export class LongTapDirective implements OnDestroy {
 
   @HostListener("touchend", ["$event"])
   onTouchEnd(ev: TouchEvent) {
+    this.lastTouchUntil = Date.now() + 900;
     this.end(ev);
   }
 
   @HostListener("touchcancel", ["$event"])
   onTouchCancel(ev: TouchEvent) {
+    this.lastTouchUntil = Date.now() + 900;
     this.end(ev);
   }
 
@@ -106,11 +111,9 @@ export class LongTapDirective implements OnDestroy {
     let point = this.getPoint(ev);
     this.active = true;
     this.fired = false;
-    this.ready = false;
-    this.startTime = Date.now();
     this.startX = point.x;
     this.startY = point.y;
-    this.timer = setTimeout(() => this.ready = true, this.longTapDelay);
+    this.timer = setTimeout(() => this.finishLongTap(), this.longTapDelay);
   }
 
   private move(ev: TouchEvent | MouseEvent) {
@@ -126,15 +129,15 @@ export class LongTapDirective implements OnDestroy {
   }
 
   private end(ev: TouchEvent | MouseEvent) {
-    if (!this.active) {
+    if (!this.active && !this.fired) {
       return;
     }
 
     this.stop(ev);
-    if (this.ready || Date.now() - this.startTime >= this.longTapDelay) {
-      this.finishLongTap();
-    } else {
+    if (!this.fired) {
       this.finishShortTap();
+    } else {
+      this.blockClickUntil = Date.now() + 1200;
     }
   }
 
@@ -145,10 +148,10 @@ export class LongTapDirective implements OnDestroy {
 
     this.fired = true;
     this.active = false;
-    this.ready = false;
     this.blockClickUntil = Date.now() + 1200;
     this.clearTimer();
-    setTimeout(() => this.longTap.emit(), 120);
+    this.vibrate();
+    this.longTap.emit();
   }
 
   private finishShortTap() {
@@ -158,7 +161,6 @@ export class LongTapDirective implements OnDestroy {
 
     this.fired = true;
     this.active = false;
-    this.ready = false;
     this.blockClickUntil = Date.now() + 400;
     this.clearTimer();
     setTimeout(() => this.shortTap.emit(), 0);
@@ -166,7 +168,6 @@ export class LongTapDirective implements OnDestroy {
 
   private cancel() {
     this.active = false;
-    this.ready = false;
     this.clearTimer();
   }
 
@@ -175,6 +176,10 @@ export class LongTapDirective implements OnDestroy {
       clearTimeout(this.timer);
       this.timer = null;
     }
+  }
+
+  private vibrate() {
+    this.vibro.vibrate(this.longTapVibration);
   }
 
   private getPoint(ev: any) {
