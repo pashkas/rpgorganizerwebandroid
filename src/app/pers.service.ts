@@ -21,6 +21,7 @@ import { GameSettings } from "./GameSettings";
 import { getExpResult } from "src/Models/getExpResult";
 import { GlobalItem } from "src/Models/GlobalItem";
 import { allmap } from "src/Models/allmap";
+import { VibroService } from "./vibro.service";
 
 @Injectable({
   providedIn: "root",
@@ -59,6 +60,7 @@ export class PersService {
     private changes: PerschangesService,
     public dialog: MatDialog,
     public gameSettings: GameSettings,
+    private vibro: VibroService,
   ) {
     this.gameSettings.setTes();
     this.isOffline = true;
@@ -143,6 +145,8 @@ export class PersService {
    * @param qw Идентификатор квестов.
    */
   DoneQwest(qw: Qwest): any {
+    this.vibro.short();
+
     // Добавляем к персонажу награды от квеста
     qw.rewards.forEach((rew) => {
       this.pers$.value.inventory.push(rew);
@@ -2809,6 +2813,7 @@ export class PersService {
   }
 
   upAbility(ab: Ability, isFromMain: boolean = false, isOpenAfterUp: boolean = true) {
+    this.vibro.short();
     this.changesBefore();
 
     let wasOpen = ab.isOpen;
