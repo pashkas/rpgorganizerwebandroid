@@ -1,14 +1,11 @@
 import { Directive, EventEmitter, HostListener, Input, OnDestroy, Output } from "@angular/core";
 
-import { VibroService } from "./vibro.service";
-
 @Directive({
   selector: "[appLongTap]",
 })
 export class LongTapDirective implements OnDestroy {
   @Input() longTapDelay = 650;
   @Input() longTapMoveTolerance = 14;
-  @Input() longTapVibration = 35;
 
   @Output() longTap = new EventEmitter<void>();
   @Output() shortTap = new EventEmitter<void>();
@@ -20,8 +17,6 @@ export class LongTapDirective implements OnDestroy {
   private startX = 0;
   private startY = 0;
   private timer: any;
-
-  constructor(private vibro: VibroService) {}
 
   @HostListener("touchstart", ["$event"])
   onTouchStart(ev: TouchEvent) {
@@ -150,7 +145,6 @@ export class LongTapDirective implements OnDestroy {
     this.active = false;
     this.blockClickUntil = Date.now() + 1200;
     this.clearTimer();
-    this.vibrate();
     this.longTap.emit();
   }
 
@@ -176,10 +170,6 @@ export class LongTapDirective implements OnDestroy {
       clearTimeout(this.timer);
       this.timer = null;
     }
-  }
-
-  private vibrate() {
-    this.vibro.vibrate(this.longTapVibration);
   }
 
   private getPoint(ev: any) {

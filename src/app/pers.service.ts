@@ -145,7 +145,7 @@ export class PersService {
    * @param qw Идентификатор квестов.
    */
   DoneQwest(qw: Qwest): any {
-    this.vibro.short();
+    this.vibro.qwestDone();
 
     // Добавляем к персонажу награды от квеста
     qw.rewards.forEach((rew) => {
@@ -2813,7 +2813,7 @@ export class PersService {
   }
 
   upAbility(ab: Ability, isFromMain: boolean = false, isOpenAfterUp: boolean = true) {
-    this.vibro.short();
+    this.vibro.abilityUp();
     this.changesBefore();
 
     let wasOpen = ab.isOpen;

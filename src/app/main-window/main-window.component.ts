@@ -143,6 +143,8 @@ export class MainWindowComponent implements OnInit {
   }
 
   async clickCounter(cur: Task) {
+    this.vibro.counterClick();
+
     cur.counterDone = cur.counterDone + 1;
     this.srv.currentCounterDone$.next(cur.counterDone);
 
@@ -164,7 +166,7 @@ export class MainWindowComponent implements OnInit {
   }
 
   async done(t: Task) {
-    this.vibro.short();
+    this.vibro.taskDone();
     await this.animate(true);
 
     this.changeEnamyImageForItem(t.id, t);
@@ -227,7 +229,7 @@ export class MainWindowComponent implements OnInit {
   }
 
   async fail(t: Task) {
-    this.vibro.long();
+    this.vibro.taskFail();
 
     await this.animate(false);
 
@@ -367,6 +369,8 @@ export class MainWindowComponent implements OnInit {
   completeChecklistItem(tsk: Task) {
     let item = this.getNextChecklistItem(tsk);
     if (item) {
+      this.vibro.checklistDone();
+
       item.isDone = true;
       this.srv.savePers(false);
     }
@@ -444,6 +448,8 @@ export class MainWindowComponent implements OnInit {
   }
 
   openTaskTimer(tskIdx?: number) {
+    this.vibro.taskTimerOpen();
+
     let dialogRef = this.dialog.open(TaskTimerComponentComponent, {
       disableClose: true,
       panelClass: "backdrop-timer",
@@ -595,6 +601,7 @@ export class MainWindowComponent implements OnInit {
     }
 
     this.blockMasonryQwestClick();
+    this.vibro.masonryQwestQwickAdd();
     setTimeout(() => this.qwickAddTaskToQwest(qwestId, true), 0);
   }
 

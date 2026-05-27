@@ -2,6 +2,35 @@ import { Pers } from "src/Models/Pers";
 import { Task } from "src/Models/Task";
 import { getExpResult } from "src/Models/getExpResult";
 
+export enum VibroType {
+  None = "none",
+  Vibrate = "vibrate",
+  ImpactLight = "impactLight",
+  ImpactMedium = "impactMedium",
+  ImpactHeavy = "impactHeavy",
+  Success = "success",
+  Warning = "warning",
+  Error = "error",
+  Selection = "selection",
+}
+
+export interface VibroEventSettings {
+  isEnabled: boolean;
+  type: VibroType;
+  duration?: number;
+}
+
+export interface VibroEventsSettings {
+  abilityUp: VibroEventSettings;
+  checklistDone: VibroEventSettings;
+  counterClick: VibroEventSettings;
+  masonryQwestQwickAdd: VibroEventSettings;
+  qwestDone: VibroEventSettings;
+  taskDone: VibroEventSettings;
+  taskFail: VibroEventSettings;
+  taskTimerOpen: VibroEventSettings;
+}
+
 export abstract class GameSettings {
   /**
    * Можно открывать не одинаковые уровни навыков.
@@ -107,6 +136,16 @@ export abstract class GameSettings {
   isClassicaRPG: boolean = true;
   isHpEnabled: boolean = false;
   isVibro: boolean = true;
+  vibroEvents: VibroEventsSettings = {
+    abilityUp: { isEnabled: true, type: VibroType.Success },
+    checklistDone: { isEnabled: true, type: VibroType.ImpactLight },
+    counterClick: { isEnabled: true, type: VibroType.ImpactLight },
+    masonryQwestQwickAdd: { isEnabled: true, type: VibroType.ImpactLight },
+    qwestDone: { isEnabled: true, type: VibroType.Success },
+    taskDone: { isEnabled: true, type: VibroType.ImpactLight },
+    taskFail: { isEnabled: true, type: VibroType.Error },
+    taskTimerOpen: { isEnabled: true, type: VibroType.ImpactLight },
+  };
   /**
    * Новый навык открыт?
    */
