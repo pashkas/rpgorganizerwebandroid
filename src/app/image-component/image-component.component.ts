@@ -1,5 +1,5 @@
 import { Overlay } from "@angular/cdk/overlay";
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from "@angular/core";
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialog } from "@angular/material";
 import { AddItemDialogComponent } from "../add-item-dialog/add-item-dialog.component";
@@ -19,11 +19,14 @@ export class ImageComponentComponent implements OnInit, OnChanges {
   @Input() isPers: boolean = false;
   @Input() isRev: boolean = false;
   @Input() isQwest: boolean = false;
+  @Input() isLocalImage: boolean = false;
+  @Output() isLocalImageChange = new EventEmitter<boolean>();
   @Input() localImageType: string;
   @Input() localImageId: string;
   showData: any;
+  private loadIndex = 0;
 
-  constructor(private srv: PersService, public dialog: MatDialog, private overlay: Overlay, private localImageSrv: LocalImageService) { }
+  constructor(private srv: PersService, public dialog: MatDialog, private overlay: Overlay, private localImageSrv: LocalImageService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.refreshImage();
@@ -59,6 +62,8 @@ export class ImageComponentComponent implements OnInit, OnChanges {
               await this.saveLocalImage(result.file);
             } else {
               await this.deleteLocalImage();
+              this.isLocalImage = false;
+              this.isLocalImageChange.emit(false);
               this.showData = result;
               this.dataChange.emit(result);
             }
@@ -72,15 +77,24 @@ export class ImageComponentComponent implements OnInit, OnChanges {
   }
 
   private async refreshImage() {
-    this.showData = this.data;
-    if (!this.isLocalImageEnable()) {
+    let currentLoadIndex = ++this.loadIndex;
+    if (!this.isLocalImageEnable() || this.isLocalImage === false) {
+      this.showData = this.data;
+      this.cdr.markForCheck();
+
       return;
     }
 
+    let cachedImage = this.localImageSrv.getCached(this.localImageType, this.localImageId);
+    this.showData = cachedImage || (this.showData === this.data ? null : this.showData);
+
     let localImage = await this.localImageSrv.read(this.localImageType, this.localImageId);
-    if (localImage) {
-      this.showData = localImage;
+    if (currentLoadIndex !== this.loadIndex) {
+      return;
     }
+
+    this.showData = localImage || this.data;
+    this.cdr.markForCheck();
   }
 
   private async saveLocalImage(file: File) {
@@ -90,6 +104,8 @@ export class ImageComponentComponent implements OnInit, OnChanges {
 
     try {
       this.showData = await this.localImageSrv.save(this.localImageType, this.localImageId, file);
+      this.isLocalImage = true;
+      this.isLocalImageChange.emit(true);
     } catch (e) {
       this.showData = this.data;
     }

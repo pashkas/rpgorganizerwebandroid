@@ -219,6 +219,8 @@ export class Task implements IImg {
 
 export class taskState implements IImg {
   abRang: Rangse;
+  aimTimer: number = 0;
+  aimUnit: string = "Минут";
   autoTime: number = 0;
   chainIdx: number = -1;
   counterDone: number = 0;
@@ -228,8 +230,11 @@ export class taskState implements IImg {
   imageLvl: string = "0";
   img: string;
   isActive: boolean = false;
+  isAim: boolean = false;
+  isAlarmEnable: boolean = false;
   isChecklist: boolean = false;
   checklistItems: ChecklistItem[] = [];
+  isCounterEnable: boolean = false;
   isDone: boolean = false;
   isNotWriteTime: boolean = false;
   lastDate: number;
@@ -241,6 +246,7 @@ export class taskState implements IImg {
   prevId: any;
   requrense: string;
   secondsDone: number = 0;
+  secondsToDone: number = 0;
   startLvl: number = 999;
   time: string = "00:00";
   timeVal: number;

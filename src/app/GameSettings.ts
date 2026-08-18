@@ -24,8 +24,10 @@ export interface VibroEventsSettings {
   abilityUp: VibroEventSettings;
   checklistDone: VibroEventSettings;
   counterClick: VibroEventSettings;
+  levelUp: VibroEventSettings;
   masonryQwestQwickAdd: VibroEventSettings;
   qwestDone: VibroEventSettings;
+  rewardBuy: VibroEventSettings;
   taskDone: VibroEventSettings;
   taskFail: VibroEventSettings;
   taskTimerOpen: VibroEventSettings;
@@ -99,15 +101,15 @@ export abstract class GameSettings {
   /**
    * Длительность показа попапа с изменениями.
    */
-  changesPopupDuration: number = 3000;
-  changesPopupDurationGold: number = 8000;
-  changesPopupDurationAbil: number = 3000;
-  changesPopupDurationCha: number = 3000;
+  changesPopupDuration: number = 1750;
+  changesPopupDurationGold: number = 5000;
+  changesPopupDurationAbil: number = 1750;
+  changesPopupDurationCha: number = 1750;
   changesPopupDurationNewLevel: number = 5000;
   /**
    * Длительность попапа изменений квестов.
    */
-  changesPopupDurationQwest: number = 3000;
+  changesPopupDurationQwest: number = 1750;
   /**
    * Тип расчета опыта. (dynamic, abLvl, abLvlPoints, abValPoints)
    */
@@ -138,13 +140,15 @@ export abstract class GameSettings {
   isVibro: boolean = true;
   vibroEvents: VibroEventsSettings = {
     abilityUp: { isEnabled: true, type: VibroType.Success },
-    checklistDone: { isEnabled: true, type: VibroType.ImpactLight },
-    counterClick: { isEnabled: true, type: VibroType.ImpactLight },
-    masonryQwestQwickAdd: { isEnabled: true, type: VibroType.ImpactLight },
+    checklistDone: { isEnabled: true, type: VibroType.Selection },
+    counterClick: { isEnabled: true, type: VibroType.Selection },
+    levelUp: { isEnabled: true, type: VibroType.Success },
+    masonryQwestQwickAdd: { isEnabled: true, type: VibroType.Selection },
     qwestDone: { isEnabled: true, type: VibroType.Success },
-    taskDone: { isEnabled: true, type: VibroType.ImpactLight },
-    taskFail: { isEnabled: true, type: VibroType.Error },
-    taskTimerOpen: { isEnabled: true, type: VibroType.ImpactLight },
+    rewardBuy: { isEnabled: true, type: VibroType.Success },
+    taskDone: { isEnabled: true, type: VibroType.Selection },
+    taskFail: { isEnabled: true, type: VibroType.Vibrate, duration: 350 },
+    taskTimerOpen: { isEnabled: true, type: VibroType.Selection },
   };
   /**
    * Новый навык открыт?
@@ -195,7 +199,7 @@ export abstract class GameSettings {
   /**
    * Число картинок персонажей.
    */
-  persImgNum: number = 60;
+  persImgNum: number = 61;
 
   perkHardness: number = 0.5;
 
@@ -208,6 +212,11 @@ export abstract class GameSettings {
    * Очки перков активны? Если да, то по perkPointLvlInterval дается 1 ОП, и не дается ОН.
    */
   isPerkPointsEnable: boolean = false;
+
+  /**
+   * Разрешает покупать перк в два прохода по половине стоимости.
+   */
+  isPerkTwoStepUpgradeEnabled: boolean = false;
 
   /**
    * Экономика перков: стоимость 1 ОП в «уровнях ОН».
@@ -388,35 +397,35 @@ export abstract class GameSettings {
     this.expFotmulaType = type;
 
     if (type == "abLvl") {
-      this.changesPopupDuration = 3000;
-      this.changesPopupDurationAbil = 3000;
-      this.changesPopupDurationCha = 3000;
+      this.changesPopupDuration = 1750;
+      this.changesPopupDurationAbil = 1750;
+      this.changesPopupDurationCha = 1750;
       this.changesIsShowAbLevels = false;
       this.changesIsShowAbValues = true;
       this.changesIsChowChaLevels = false;
       this.changesIsChowChaValues = true;
     } else if (type == "abLvlPoints") {
-      this.changesPopupDuration = 3000;
-      this.changesPopupDurationAbil = 3000;
-      this.changesPopupDurationCha = 3000;
+      this.changesPopupDuration = 1750;
+      this.changesPopupDurationAbil = 1750;
+      this.changesPopupDurationCha = 1750;
       this.changesIsShowAbLevels = true;
       this.changesIsShowAbValues = false;
       this.changesIsChowChaLevels = true;
       this.changesIsChowChaValues = false;
     } else if (type == "abVal") {
-      this.changesPopupDuration = 3000;
-      this.changesPopupDurationAbil = 6000;
-      this.changesPopupDurationCha = 6000;
+      this.changesPopupDuration = 1750;
+      this.changesPopupDurationAbil = 1750;
+      this.changesPopupDurationCha = 1750;
       this.changesIsShowAbLevels = false;
       this.changesIsShowAbValues = true;
       this.changesIsChowChaLevels = false;
       this.changesIsChowChaValues = true;
       this.changesIsShowExp = false;
     } else if (type == "abValPoints") {
-      this.changesPopupDuration = 3000;
-      this.changesPopupDurationAbil = 6000;
-      this.changesPopupDurationCha = 6000;
-      this.changesPopupDurationQwest = 3000;
+      this.changesPopupDuration = 1750;
+      this.changesPopupDurationAbil = 1750;
+      this.changesPopupDurationCha = 1750;
+      this.changesPopupDurationQwest = 1750;
       this.changesIsShowAbLevels = true;
       this.changesIsShowAbValues = false;
       this.isShowAbLvlPopup = false;

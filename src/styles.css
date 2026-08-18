@@ -490,10 +490,6 @@ body {
   gap: 2px;
 }
 
-.masonry-grid.dense {
-  grid-template-columns: repeat(4, 1fr);
-}
-
 .no-border {
   outline: none !important;
   border: none !important;

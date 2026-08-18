@@ -6,11 +6,11 @@ import { Router } from "@angular/router";
 import { Task } from "src/Models/Task";
 import { ChangesModel, persExpChanges } from "src/Models/ChangesModel";
 import { LevelUpMsgComponent } from "./level-up-msg/level-up-msg.component";
-import { StatesService } from "./states.service";
 import { NewLvlData } from "src/Models/NewLvlData";
 import { GameSettings } from "./GameSettings";
 import { race, timer } from "rxjs";
 import { first } from "rxjs/operators";
+import { VibroService } from "./vibro.service";
 
 @Injectable({
   providedIn: "root",
@@ -19,7 +19,7 @@ export class PerschangesService {
   afterPers: Pers;
   beforePers: Pers;
 
-  constructor(public dialog: MatDialog, private router: Router, private srvSt: StatesService, public gameSettings: GameSettings) {}
+  constructor(public dialog: MatDialog, private router: Router, public gameSettings: GameSettings, private vibro: VibroService) {}
 
   getClone(pers: Pers): Pers {
     return JSON.parse(JSON.stringify(pers));
@@ -46,6 +46,14 @@ export class PerschangesService {
     this.fillChangesMap(changesMap, "before", this.beforePers);
     // Значения после
     this.fillChangesMap(changesMap, "after", this.afterPers);
+
+    if (!img && tsk && tsk.qwestId) {
+      const qwest =
+        this.afterPers.qwests.find((q) => q.id == tsk.qwestId) || this.beforePers.qwests.find((q) => q.id == tsk.qwestId);
+      if (qwest) {
+        img = qwest.image;
+      }
+    }
 
     // Ищем изменения
     let changes: ChangesModel[] = [];
@@ -363,20 +371,11 @@ export class PerschangesService {
 
     let wasGold = false;
 
-    // this.gameSettings.isClassicaRPG &&
-    // if (img != null) {
-    //   for (const ch of unionChanges) {
-    //     if (ch.type == "exp") {
-    //       ch.img = img;
-    //     }
-    //   }
-    // }
-
     for (const ch of unionChanges) {
       const head = ch.head;
       const abPoints = ch.head;
       const type = ch.type;
-      const img = ch.img;
+      const changeImg = ch.img || img;
       let gold = ch.gold;
       let goldTotal = ch.goldTotal;
 
@@ -388,6 +387,7 @@ export class PerschangesService {
           continue;
         }
 
+        this.vibro.levelUp();
         let dialogRefLvlUp = this.dialog.open(LevelUpMsgComponent, {
           panelClass: classPanel,
           backdropClass: "backdrop-changes",
@@ -424,7 +424,7 @@ export class PerschangesService {
           abPoints: null,
           isTES: this.afterPers.isTES,
           itemType: type,
-          img: img,
+          img: changeImg,
           gold: gold,
           goldTotal: goldTotal,
           tsk: tsk,
@@ -450,6 +450,10 @@ export class PerschangesService {
     }
 
     if (newLevel) {
+      if (this.afterPers.ON >= 1) {
+        this.afterPers.isAbilityUpgradeHighlightPending = true;
+      }
+      this.vibro.levelUp();
       let dialogRefLvlUp = this.dialog.open(LevelUpMsgComponent, {
         panelClass: classPanel,
         backdropClass: "backdrop-changes",
@@ -463,16 +467,6 @@ export class PerschangesService {
 
       await this.waitUserOrTimer(this.gameSettings.changesPopupDurationNewLevel, dialogRefLvlUp);
       dialogRefLvlUp.close();
-
-      if (this.gameSettings.isOpenPersAtNewLevel) {
-        this.srvSt.selTabPersList = 0;
-        this.srvSt.selInventoryList = 0;
-        const isHasAbPoints = this.afterPers.ON >= 1;
-        const isHasPerkPoints = this.gameSettings.isPerkPointsEnable && this.afterPers.OP >= 1;
-        if (isHasAbPoints || isHasPerkPoints) {
-          this.router.navigate(["/pers"]);
-        }
-      }
     }
 
     if (isDoneQwest && qwestToEdit != null) {

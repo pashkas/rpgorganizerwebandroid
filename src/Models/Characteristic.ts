@@ -8,6 +8,7 @@ export class Characteristic {
   descr: string;
   id: any = uuid();
   image: string = "assets/icons/defCha.webp";
+  isLocalImage: boolean = false;
   name: string;
   progressValue: number = 0;
   progresNextLevel: number = 0;

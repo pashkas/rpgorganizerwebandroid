@@ -16,6 +16,7 @@ export class AddItemDialogComponent implements OnInit {
   isGallery = false;
   lblTxt = "Название";
   newChecklistText = "";
+  aimUnits = ["Минут", "Секунд", "Часов", "Раз", "Раз чет", "Раз нечет"];
   times = [1, 2, 3, 4, 5];
   weekDays: string[] = Task.weekDays;
 
@@ -184,7 +185,17 @@ export class AddItemDialogComponent implements OnInit {
 
     if (this.data.showChecklist) {
       let checklistItems = (this.data.checklistItems || []).filter(ci => ci && ci.name && ci.name.trim());
-      this.dialogRef.close({ name: this.data.text, isChecklist: this.data.isChecklist && checklistItems.length > 0, checklistItems: checklistItems, tskWeekDays: this.data.isWeekDays ? (this.data.tskWeekDays || []) : [] });
+      this.dialogRef.close({
+        name: this.data.text,
+        isChecklist: this.data.isChecklist && checklistItems.length > 0,
+        checklistItems: checklistItems,
+        tskWeekDays: this.data.isWeekDays ? (this.data.tskWeekDays || []) : [],
+        isAim: this.data.isAim,
+        aimTimer: this.data.aimTimer || 0,
+        aimUnit: this.data.aimUnit || "Минут",
+        isCounterEnable: this.data.isCounterEnable,
+        isAlarmEnable: this.data.isAlarmEnable,
+      });
     } else {
       this.dialogRef.close(this.data.text);
     }

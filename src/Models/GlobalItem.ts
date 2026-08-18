@@ -10,5 +10,6 @@ export class GlobalItem {
   progressValue: number;
   masonryIdx: number;
   isNoActive: boolean;
+  isLocalImage: boolean;
   failCounter: number;
 }

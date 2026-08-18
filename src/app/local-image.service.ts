@@ -8,6 +8,7 @@ export class LocalImageService {
   private readonly rootDir = "local-images";
   private readonly maxSide = 720;
   private readonly quality = 0.85;
+  private cache: { [path: string]: string } = {};
 
   async save(type: string, id: string, file: File): Promise<string> {
     let dataUrl = await this.resize(file);
@@ -21,6 +22,8 @@ export class LocalImageService {
       recursive: true,
     });
 
+    this.cache[path] = dataUrl;
+
     return dataUrl;
   }
 
@@ -29,16 +32,33 @@ export class LocalImageService {
       return null;
     }
 
+    let path = this.getPath(type, id);
+    if (this.cache[path]) {
+
+      return this.cache[path];
+    }
+
     try {
       let file = await Filesystem.readFile({
-        path: this.getPath(type, id),
+        path,
         directory: Directory.Data,
       });
 
-      return "data:image/webp;base64," + file.data;
+      let dataUrl = "data:image/webp;base64," + file.data;
+      this.cache[path] = dataUrl;
+
+      return dataUrl;
     } catch (e) {
       return null;
     }
+  }
+
+  getCached(type: string, id: string): string {
+    if (!type || !id) {
+      return null;
+    }
+
+    return this.cache[this.getPath(type, id)] || null;
   }
 
   async delete(type: string, id: string): Promise<void> {
@@ -46,9 +66,12 @@ export class LocalImageService {
       return;
     }
 
+    let path = this.getPath(type, id);
+    delete this.cache[path];
+
     try {
       await Filesystem.deleteFile({
-        path: this.getPath(type, id),
+        path,
         directory: Directory.Data,
       });
     } catch (e) {

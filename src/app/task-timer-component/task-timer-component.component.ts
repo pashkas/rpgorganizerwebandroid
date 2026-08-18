@@ -1,8 +1,8 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, Inject, OnInit } from "@angular/core";
 import { Observable, Subject, timer } from "rxjs";
 import { map, shareReplay, takeUntil } from "rxjs/operators";
 import { PersService } from "../pers.service";
-import { MatDialogRef } from "@angular/material/dialog";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { CancelOptions, LocalNotificationSchema, LocalNotifications } from "@capacitor/local-notifications";
 import { Task } from "src/Models/Task";
 // import { LocalNotifications } from '@capacitor/local-notifications';
@@ -26,7 +26,7 @@ export class TaskTimerComponentComponent implements OnInit {
   stopWatchAim: number;
   public stopWatchTime$: Observable<timeComponents>;
 
-  constructor(private srv: PersService, private dialogRef: MatDialogRef<TaskTimerComponentComponent>) {}
+  constructor(private srv: PersService, private dialogRef: MatDialogRef<TaskTimerComponentComponent>, @Inject(MAT_DIALOG_DATA) private data: { task: Task }) {}
 
   calcDateDiff(startDate: number, endDate: number): timeComponents {
     const dDay = endDate;
@@ -66,7 +66,7 @@ export class TaskTimerComponentComponent implements OnInit {
   }
 
   ngOnInit() {
-    let tsk = this.srv.currentTask$.value;
+    let tsk = this.data && this.data.task ? this.data.task : this.srv.currentTask$.value;
     if (tsk.secondsDone == null) {
       tsk.secondsDone = 0;
     }

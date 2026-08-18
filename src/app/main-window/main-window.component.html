@@ -63,26 +63,27 @@
 
       <!-- Навыки grid -->
       <ng-container *ngSwitchCase="'listSkills'">
-        <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()" *ngIf="skillsGlobal$ | async as skills">
-          <div class="masonry-grid" [class.dense]="skills.length > 15">
-            <div *ngFor="let skill of skills">
-              <button mat-stroked-button class="w-100 h-100 skillBtn no-border" (click)="masonrySingleClick(skill.tskIdx)">
-                <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
-                  <img appImgBroken localImageType="ability" [localImageId]="skill.id" src="{{ skill.img }}" class="masonry-img global-skill-img"
-                    (load)="onSkillImgLoad(skill.tskId)"
-                    [ngStyle]="{ 'border': (skill.failCounter > 0 && loadedSkillImgs.has(skill.tskId)) ? '3px solid red' : 'none' }" />
-                </div>
-              </button>
+        <ng-container *ngIf="skillsGlobalReady">
+          <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()" *ngIf="skillsGlobal$ | async as skills">
+            <div class="masonry-grid">
+              <div *ngFor="let skill of skills">
+                <button mat-stroked-button class="w-100 h-100 skillBtn no-border" (click)="masonrySingleClick(skill.tskIdx)">
+                  <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
+                    <img appImgBroken [isLocalImage]="skill.isLocalImage" localImageType="ability" [localImageId]="skill.id" [src]="getGlobalImageSrc('ability', skill.id, skill.img)" class="masonry-img global-skill-img"
+                      [ngStyle]="{ 'border': skill.failCounter > 0 ? '3px solid red' : 'none' }" />
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ng-container>
 
         <div></div>
       </ng-container>
 
       <!-- Квесты grid -->
       <ng-container *ngSwitchCase="'listQwest'">
-        <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()">
+        <div class="masonry-container" (dblclick)="masonryDoubleClick()" swipe (next)="firstOrGlobal(true)" (previous)="firstOrGlobal()" *ngIf="qwestsGlobalReady">
           <div class="masonry-grid">
             <div *ngFor="let qwest of qwestsGlobal$ | async; trackBy: trackByGlobalItemId" [ngStyle]="{ opacity: qwest.isNoActive ? '0.75' : '1' }">
               <div class="qwest-card-wrap">
@@ -90,9 +91,10 @@
                 <div fxLayout="column" fxLayoutAlign="space-between center" class="w-100 h-100">
                   <img
                     appImgBroken
+                    [isLocalImage]="qwest.isLocalImage"
                     localImageType="qwest"
                     [localImageId]="qwest.id"
-                    src="{{ qwest.img }}"
+                    [src]="getGlobalImageSrc('qwest', qwest.id, qwest.img)"
                     class="masonry-img"
                   />
                   <div class="text-wrap py-1">
@@ -148,8 +150,8 @@
                     <ng-container>
                       {{ data.currentTask.tittle }}
                     </ng-container>
-                    <ng-container *ngIf="data?.currentTask?.isCounterEnable && data?.currentTask?.counterDone > 0">
-                      {{ " (" + (currentCounterDone$ | async) + ")" }}
+                    <ng-container *ngIf="isCounterEnabled(data.currentTask) && getCounterDone(data.currentTask) > 0">
+                      {{ " (" + getCounterDone(data.currentTask) + ")" }}
                     </ng-container>
                   </span>
                 </ng-container>
@@ -179,20 +181,13 @@
               </ng-template>
             </ng-container>
             <a
-              *ngIf="
-                data?.currentTask?.aimTimer &&
-                data?.currentTask?.aimTimer != 0 &&
-                data?.currentTask?.aimUnit != null &&
-                data?.currentTask?.aimUnit != 'Раз' &&
-                data?.currentTask?.aimUnit != 'Раз чет' &&
-                data?.currentTask?.aimUnit != 'Раз нечет'
-              "
+              *ngIf="hasTimerAim(data.currentTask)"
               class="text-secondary pointer nounderline"
               (click)="openTaskTimer()"
             >
               | ⌛&nbsp;
             </a>
-            <a *ngIf="data?.currentTask?.isCounterEnable" class="text-secondary pointer nounderline" (click)="clickCounter(data?.currentTask)"> | ✓&nbsp; </a>
+            <a *ngIf="isCounterEnabled(data.currentTask)" class="text-secondary pointer nounderline" (click)="clickCounter(data?.currentTask)"> | ✓&nbsp; </a>
             <a *ngIf="getNextChecklistItem(data.currentTask) as ci" class="text-info pointer nounderline" (click)="completeChecklistItem(data.currentTask)"> | ☐ {{ ci.name }}</a>
           </small>
         </div>
@@ -211,18 +206,22 @@
         routerLink="/pers"
         (click)="openPersList()"
       >
-        <img
-          appImgBroken
-          localImageType="pers"
-          [localImageId]="data.pers.id"
-          draggable="false"
-          (press)="qwickAddTask()"
-          (contextmenu)="qwickAddTask(); $event.preventDefault(); $event.stopPropagation()"
-          [ngClass]="{ disabled: isSort, 'vibrate-1': data.isFailShown }"
-          src="{{ data.pers.image }}"
-          class="img-fluid h-100 pers-img-main"
-          [ngStyle]="{ 'object-fit': 'contain' }"
-        />
+        <span class="pers-image-wrap">
+          <img
+            appImgBroken
+            [isLocalImage]="data.pers.isLocalImage"
+            localImageType="pers"
+            [localImageId]="data.pers.id"
+            draggable="false"
+            (press)="qwickAddTask()"
+            (contextmenu)="qwickAddTask(); $event.preventDefault(); $event.stopPropagation()"
+            [ngClass]="{ disabled: isSort, 'vibrate-1': data.isFailShown }"
+            src="{{ data.pers.image }}"
+            class="img-fluid h-100 pers-img-main"
+            [ngStyle]="{ 'object-fit': 'contain' }"
+          />
+          <img *ngIf="data.pers.isAbilityUpgradeHighlightPending" src="assets/icons/star.png" class="ability-upgrade-star" />
+        </span>
       </button>
       <!-- Сортировка навыков -->
       <div fxLayout="row" fxFlex fxLayoutAlign="end center" fxLayoutGap="0.6em" class="w-100 h-100 px-2" *ngIf="data.currentView == 'SkillsSort'">
@@ -242,15 +241,15 @@
         </button>
       </div>
       <div fxFlex fxLayout="row" *ngIf="data.currentView != 'QwestSort' && data.currentView != 'SkillsSort'" fxLayoutAlign="end center" fxLayoutGap="0.3em" class="w-100 h-100 px-2">
-        <!-- Первый / глобальный -->
-        <button [ngClass]="{ disabled: isSort }" [disabled]="isSort" [autofocus]="false" (click)="firstOrGlobal()" mat-icon-button>
+        <!-- Первая задача -->
+        <button [ngClass]="{ disabled: isSort || !data.currentTask }" [disabled]="isSort || !data.currentTask" [autofocus]="false" (click)="openBoundaryTask()" mat-icon-button>
           <img src="assets/icons/left.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
         </button>
         <button
-          [ngClass]="{ disabled: isSort || data.currentView == 'SkillTasks' || data.currentView == 'QwestTasks' || data.currentView == 'QwestsGlobal' }"
-          [disabled]="isSort || data.currentView == 'SkillTasks' || data.currentView == 'QwestTasks' || data.currentView == 'QwestsGlobal'"
+          [ngClass]="{ disabled: isSort || !data.currentTask }"
+          [disabled]="isSort || !data.currentTask"
           [autofocus]="false"
-          (click)="firstOrGlobal(true)"
+          (click)="openBoundaryTask(true)"
           mat-icon-button
         >
           <img src="assets/icons/right.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
@@ -274,8 +273,8 @@
           <button
             (click)="setSort(data.currentView)"
             mat-icon-button
-            [ngClass]="{ disabled: data.currentView == 'QwestsGlobal' || data.currentView == 'SkillTasks' }"
-            [disabled]="data.currentView == 'QwestsGlobal' || data.currentView == 'SkillTasks'"
+            [ngClass]="{ disabled: data.currentView == 'QwestsGlobal' }"
+            [disabled]="data.currentView == 'QwestsGlobal'"
           >
             <img src="assets/icons/edit.png" class="img-fluid" [ngStyle]="{ 'object-fit': 'contain', height: '3em' }" />
           </button>

@@ -1,6 +1,8 @@
 import { Injectable } from "@angular/core";
+import { Capacitor } from "@capacitor/core";
 import { Haptics, ImpactStyle, NotificationType } from "@capacitor/haptics";
 
+import { AndroidHapticFeedback } from "./android-haptic-feedback";
 import { GameSettings, VibroEventSettings, VibroType } from "./GameSettings";
 
 @Injectable({
@@ -21,12 +23,20 @@ export class VibroService {
     this.play(this.gameSettings.vibroEvents.counterClick);
   }
 
+  levelUp() {
+    this.play(this.gameSettings.vibroEvents.levelUp);
+  }
+
   masonryQwestQwickAdd() {
     this.play(this.gameSettings.vibroEvents.masonryQwestQwickAdd);
   }
 
   qwestDone() {
     this.play(this.gameSettings.vibroEvents.qwestDone);
+  }
+
+  rewardBuy() {
+    this.play(this.gameSettings.vibroEvents.rewardBuy);
   }
 
   taskDone() {
@@ -68,6 +78,44 @@ export class VibroService {
       return;
     }
 
+    this.playAndroidFeedback(settings)
+      .then((isPerformed) => {
+        if (!isPerformed) {
+          this.playCapacitorHaptics(settings);
+        }
+      })
+      .catch(() => this.playCapacitorHaptics(settings));
+  }
+
+  private playAndroidFeedback(settings: VibroEventSettings): Promise<boolean> {
+    if (Capacitor.getPlatform() != "android") {
+      return Promise.resolve(false);
+    }
+
+    let type = this.getAndroidFeedbackType(settings.type);
+    if (!type) {
+      return Promise.resolve(false);
+    }
+
+    return AndroidHapticFeedback.perform({ type: type }).then(() => true);
+  }
+
+  private getAndroidFeedbackType(type: VibroType): "tick" | "tap" | "longPress" {
+    switch (type) {
+      case VibroType.ImpactLight:
+        return "tick";
+      case VibroType.Selection:
+        return "tap";
+      case VibroType.ImpactMedium:
+        return "tap";
+      case VibroType.ImpactHeavy:
+        return "longPress";
+      default:
+        return null;
+    }
+  }
+
+  private playCapacitorHaptics(settings: VibroEventSettings) {
     switch (settings.type) {
       case VibroType.ImpactLight:
         Haptics.impact({ style: ImpactStyle.Light }).catch(() => this.browserVibrate(settings.duration || 35));

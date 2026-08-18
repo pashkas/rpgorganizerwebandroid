@@ -111,6 +111,7 @@ export class MindMapComponent implements OnInit, AfterViewInit, OnDestroy {
               case 't':
                 this.item.el.tasks[0].isSumStates = true;
                 let state = new taskState();
+                state.order = this.item.el.isOpen ? -this.pers.level : state.order;
                 state.value = this.item.el.tasks[0].value;
                 state.requrense = this.item.el.tasks[0].requrense;
                 state.image = this.srv.GetRndEnamy(state, this.pers.level, this.pers.maxPersLevel);

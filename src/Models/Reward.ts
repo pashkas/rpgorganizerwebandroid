@@ -4,6 +4,7 @@ export class Reward {
   id: any = uuid();
   name: string = "";
   image: string = "";
+  isLocalImage: boolean = false;
   descr: string = "";
   probability: number = 0;
   cumulative: number = 0;

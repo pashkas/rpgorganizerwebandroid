@@ -1,4 +1,4 @@
-import { Directive, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Directive, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { LocalImageService } from './local-image.service';
 
 @Directive({
@@ -11,18 +11,19 @@ import { LocalImageService } from './local-image.service';
 export class ImgBrokenDirective implements OnChanges {
 
   @Input() src:string;
+  @Input() isLocalImage: boolean = false;
   @Input() localImageType: string;
   @Input() localImageId: string;
   private loadIndex = 0;
 
-  constructor(private localImageSrv?: LocalImageService) {
+  constructor(private cdr: ChangeDetectorRef, private localImageSrv?: LocalImageService) {
   }
 
   async ngOnChanges(changes: SimpleChanges) {
     let currentLoadIndex = ++this.loadIndex;
     let fallbackSrc = this.src;
 
-    if (!this.localImageSrv || !this.localImageType || !this.localImageId) {
+    if (!this.localImageSrv || this.isLocalImage === false || !this.localImageType || !this.localImageId) {
       return;
     }
 
@@ -32,6 +33,7 @@ export class ImgBrokenDirective implements OnChanges {
     }
 
     this.src = localImage || fallbackSrc;
+    this.cdr.markForCheck();
   }
 
   updateUrl() {

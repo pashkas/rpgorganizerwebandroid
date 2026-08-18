@@ -15,6 +15,7 @@ import { TaskTimerComponentComponent } from "../task-timer-component/task-timer-
 import { takeUntil } from "rxjs/operators";
 import { GameSettings } from "../GameSettings";
 import { VibroService } from "../vibro.service";
+import { LocalImageService } from "../local-image.service";
 
 @Component({
   selector: "app-main-window",
@@ -25,7 +26,6 @@ import { VibroService } from "../vibro.service";
 export class MainWindowComponent implements OnInit {
   private unsubscribe$ = new Subject();
 
-  currentCounterDone$ = this.srv.currentCounterDone$.asObservable();
   currentTask$ = this.srv.currentTask$.asObservable();
   currentView$ = this.srv.currentView$.asObservable();
   isFailShown$ = new BehaviorSubject<boolean>(false);
@@ -34,13 +34,29 @@ export class MainWindowComponent implements OnInit {
   isSucessShown$ = new BehaviorSubject<boolean>(false);
   isSucessShownOv$ = new BehaviorSubject<boolean>(false);
   lastGlobalBeforeSort: boolean;
-  loadedSkillImgs = new Set<string>();
   pers$ = this.srv.pers$.asObservable();
   qwestsGlobal$ = this.srv.qwestsGlobal$;
   qwickSortVals: sortArr[] = [];
+  qwestsGlobalReady = false;
   skillsGlobal$ = this.srv.skillsGlobal$;
+  skillsGlobalReady = false;
 
-  constructor(public srv: PersService, public dialog: MatDialog, private srvSt: StatesService, public gameSettings: GameSettings, private cdr: ChangeDetectorRef, private vibro: VibroService) {}
+  private readonly brokenImage = "assets/img/broken.jpg";
+  private globalImageLoads = new Map<string, Promise<string>>();
+  // Ссылки удерживают декодированные изображения в памяти до закрытия главного окна.
+  private globalImages = new Map<string, HTMLImageElement>();
+  private globalViewLoadIndexes = new Map<curpersview, number>();
+  private preparedGlobalImageSources = new Map<string, string>();
+
+  constructor(
+    public srv: PersService,
+    public dialog: MatDialog,
+    private srvSt: StatesService,
+    public gameSettings: GameSettings,
+    private cdr: ChangeDetectorRef,
+    private vibro: VibroService,
+    private localImageSrv: LocalImageService,
+  ) {}
 
   addToQwest() {
     let qwest = this.srv.allMap[this.srv.pers$.value.currentQwestId].item;
@@ -63,7 +79,7 @@ export class MainWindowComponent implements OnInit {
       data: { header: "Добавить миссию", text: "" },
 
       backdropClass: "backdrop",
-      autoFocus: false,
+      autoFocus: true,
       restoreFocus: false,
     });
 
@@ -104,6 +120,114 @@ export class MainWindowComponent implements OnInit {
     return item ? item.id : index.toString();
   }
 
+  /** Возвращает уже подготовленный источник картинки глобальной сетки. */
+  getGlobalImageSrc(type: string, id: string, fallbackSrc: string): string {
+
+    return this.preparedGlobalImageSources.get(type + ":" + id) || fallbackSrc;
+  }
+
+  /** Показывает глобальный вид только после подготовки всех его картинок. */
+  private async openGlobalView(view: curpersview, previousView: curpersview): Promise<void> {
+    let isPrepared = await this.prepareGlobalView(view);
+    if (!isPrepared || this.srv.pers$.value.currentView != previousView) {
+      return;
+    }
+
+    this.srv.pers$.value.currentView = view;
+    this.srv.savePers(false);
+  }
+
+  /** Загружает и декодирует картинки выбранного глобального вида. */
+  private async prepareGlobalView(view: curpersview): Promise<boolean> {
+    let loadIndex = (this.globalViewLoadIndexes.get(view) || 0) + 1;
+    this.globalViewLoadIndexes.set(view, loadIndex);
+
+    let prs = this.srv.pers$.value;
+    if (!prs) {
+      return false;
+    }
+
+    let items: Array<{ type: string; id: string; src: string; isLocalImage: boolean }> = [];
+
+    if (view == curpersview.SkillsGlobal) {
+      for (const characteristic of prs.characteristics || []) {
+        for (const ability of characteristic.abilities || []) {
+          items.push({ type: "ability", id: ability.id, src: ability.image, isLocalImage: ability.isLocalImage });
+        }
+      }
+    } else {
+      for (const qwest of prs.qwests || []) {
+        items.push({ type: "qwest", id: qwest.id, src: qwest.image, isLocalImage: qwest.isLocalImage });
+      }
+    }
+
+    let preparedImages = await Promise.all(items.map(async item => {
+      let src = item.src || this.brokenImage;
+      if (item.isLocalImage) {
+        src = await this.localImageSrv.read(item.type, item.id) || src;
+      }
+
+      return {
+        key: item.type + ":" + item.id,
+        src: await this.preloadImage(src),
+      };
+    }));
+
+    if (this.globalViewLoadIndexes.get(view) != loadIndex) {
+      return false;
+    }
+
+    for (const image of preparedImages) {
+      this.preparedGlobalImageSources.set(image.key, image.src);
+    }
+
+    if (view == curpersview.SkillsGlobal) {
+      this.skillsGlobalReady = true;
+    } else {
+      this.qwestsGlobalReady = true;
+    }
+    this.cdr.markForCheck();
+
+    return true;
+  }
+
+  /** Загружает картинку и ждёт её декодирования браузером. */
+  private preloadImage(src: string): Promise<string> {
+    let cachedLoad = this.globalImageLoads.get(src);
+    if (cachedLoad) {
+      return cachedLoad;
+    }
+
+    let imageLoad = new Promise<string>((resolve) => {
+      let image = new Image();
+      let finishLoad = () => {
+        this.globalImages.set(src, image);
+        resolve(src);
+      };
+      image.onload = () => {
+        if (!image.decode) {
+          finishLoad();
+
+          return;
+        }
+
+        image.decode().then(finishLoad, finishLoad);
+      };
+      image.onerror = () => {
+        if (src == this.brokenImage) {
+          return;
+        }
+
+        this.preloadImage(this.brokenImage).then(resolve);
+      };
+      image.src = src;
+    });
+
+    this.globalImageLoads.set(src, imageLoad);
+
+    return imageLoad;
+  }
+
   async animate(isDone: boolean) {
     if (isDone) {
       this.isSucessShownOv$.next(true);
@@ -142,20 +266,52 @@ export class MainWindowComponent implements OnInit {
     return false;
   }
 
+  /** Возвращает настройки цели активной подзадачи или самой задачи. */
+  getAimTarget(cur: Task): Task | taskState {
+    let state: taskState;
+    if (cur.parrentTask) {
+      state = this.srv.allMap[cur.id].item;
+    } else if (cur.states && cur.states.length > 0) {
+      state = cur.states[cur.curStateDescrInd];
+    }
+
+    if (state && state.isAim && state.aimTimer) {
+      return state;
+    }
+
+    return cur;
+  }
+
+  hasTimerAim(cur: Task): boolean {
+    const target = this.getAimTarget(cur);
+
+    return !!target.aimTimer && !this.srv.isCounterAim(target);
+  }
+
+  isCounterEnabled(cur: Task): boolean {
+    return this.getAimTarget(cur).isCounterEnable;
+  }
+
+  getCounterDone(cur: Task): number {
+    return this.getAimTarget(cur).counterDone || 0;
+  }
+
   async clickCounter(cur: Task) {
     this.vibro.counterClick();
 
-    cur.counterDone = cur.counterDone + 1;
-    this.srv.currentCounterDone$.next(cur.counterDone);
+    const target = this.getAimTarget(cur);
+    target.counterDone = (target.counterDone || 0) + 1;
+    this.srv.currentCounterDone$.next(target.counterDone);
 
     if (cur.parrentTask) {
       let st: taskState = this.srv.allMap[cur.id].item;
 
-      st.counterDone = cur.counterDone;
-    } else {
+      st.counterDone = target.counterDone;
+      cur.counterDone = target.counterDone;
+    } else if (target === cur) {
       let tsk: Task = this.srv.allMap[cur.id].item;
 
-      tsk.counterDone = cur.counterDone;
+      tsk.counterDone = target.counterDone;
     }
 
     this.srv.savePers(false);
@@ -207,7 +363,6 @@ export class MainWindowComponent implements OnInit {
 
     if (prs.currentView == curpersview.SkillTasks) {
       this.srv.setCurInd(0);
-      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
     }
 
     this.srv.savePers(true);
@@ -267,7 +422,6 @@ export class MainWindowComponent implements OnInit {
 
     if (prs.currentView == curpersview.SkillTasks) {
       this.srv.setCurInd(0);
-      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
     }
 
     this.srv.savePers(true);
@@ -304,23 +458,29 @@ export class MainWindowComponent implements OnInit {
     this.firstOrGlobal();
   }
 
-  firstOrGlobal(isLast: boolean = false) {
-    if (this.srv.pers$.value.currentView == curpersview.SkillTasks) {
-      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
-    } else if (this.srv.pers$.value.currentView == curpersview.SkillsSort) {
+  async firstOrGlobal(isLast: boolean = false): Promise<void> {
+    let currentView = this.srv.pers$.value.currentView;
+
+    if (currentView == curpersview.SkillTasks) {
+      await this.openGlobalView(curpersview.SkillsGlobal, currentView);
+
+      return;
+    } else if (currentView == curpersview.SkillsSort) {
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
-    } else if (this.srv.pers$.value.currentView == curpersview.SkillsGlobal) {
+    } else if (currentView == curpersview.SkillsGlobal) {
       if (!isLast) {
         this.srv.setCurInd(0);
       } else {
         this.srv.setCurInd(this.srv.pers$.value.tasks.length);
       }
       this.srv.pers$.value.currentView = curpersview.SkillTasks;
-    } else if (this.srv.pers$.value.currentView == curpersview.QwestTasks) {
-      this.srv.pers$.value.currentView = curpersview.QwestsGlobal;
-    } else if (this.srv.pers$.value.currentView == curpersview.QwestsGlobal) {
+    } else if (currentView == curpersview.QwestTasks) {
+      await this.openGlobalView(curpersview.QwestsGlobal, currentView);
+
+      return;
+    } else if (currentView == curpersview.QwestsGlobal) {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
-    } else if (this.srv.pers$.value.currentView == curpersview.QwestSort) {
+    } else if (currentView == curpersview.QwestSort) {
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
     }
 
@@ -341,6 +501,35 @@ export class MainWindowComponent implements OnInit {
     this.clickPreventSingleClick = true;
     clearTimeout(this.clickTimer);
     this.firstOrGlobal(true);
+  }
+
+  /** Открывает первую или последнюю задачу в сфокусированном режиме. */
+  openBoundaryTask(isLast: boolean = false): void {
+    let prs = this.srv.pers$.value;
+    if (!prs.tasks.length) {
+      return;
+    }
+
+    if (prs.currentView == curpersview.SkillTasks || prs.currentView == curpersview.SkillsGlobal) {
+      let skills = this.skillsGlobal$.value;
+      let boundarySkill = isLast ? skills[skills.length - 1] : skills[0];
+      if (!boundarySkill) {
+        return;
+      }
+
+      prs.currentTaskIndex = boundarySkill.tskIdx;
+      prs.currentView = curpersview.SkillTasks;
+      this.srv.savePers(false);
+
+      return;
+    }
+
+    this.srv.setCurInd(isLast ? prs.tasks.length - 1 : 0);
+    if (prs.currentView == curpersview.QwestsGlobal) {
+      prs.currentView = curpersview.QwestTasks;
+    }
+
+    this.srv.savePers(false);
   }
 
   focusFocus() {
@@ -369,16 +558,11 @@ export class MainWindowComponent implements OnInit {
   completeChecklistItem(tsk: Task) {
     let item = this.getNextChecklistItem(tsk);
     if (item) {
-      this.vibro.checklistDone();
+      this.vibro.taskDone();
 
       item.isDone = true;
       this.srv.savePers(false);
     }
-  }
-
-  onSkillImgLoad(tskId: string) {
-    this.loadedSkillImgs = new Set(this.loadedSkillImgs).add(tskId);
-    this.cdr.markForCheck();
   }
 
   nextTask() {
@@ -394,7 +578,11 @@ export class MainWindowComponent implements OnInit {
     this.unsubscribe$.complete();
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
+    this.pers$.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
+      this.prepareGlobalView(curpersview.SkillsGlobal);
+      this.prepareGlobalView(curpersview.QwestsGlobal);
+    });
   }
 
   onLongPress(e) {
@@ -429,6 +617,12 @@ export class MainWindowComponent implements OnInit {
   }
 
   openPersList() {
+    const pers = this.srv.pers$.value;
+    if (pers && pers.isAbilityUpgradeHighlightPending) {
+      pers.isAbilityUpgradeHighlightPending = false;
+      this.srv.savePers(false);
+    }
+
     this.srvSt.selTabPersList = 0;
     this.srvSt.selInventoryList = 0;
   }
@@ -450,10 +644,22 @@ export class MainWindowComponent implements OnInit {
   openTaskTimer(tskIdx?: number) {
     this.vibro.taskTimerOpen();
 
+    const current = this.srv.currentTask$.value;
+    const target = this.getAimTarget(current);
+    let timerTask = current;
+    if (target !== current) {
+      timerTask = new Task();
+      timerTask.secondsDone = target.secondsDone;
+      timerTask.secondsToDone = target.secondsToDone;
+      timerTask.isAlarmEnable = target.isAlarmEnable;
+      timerTask.tittle = current.tittle;
+    }
+
     let dialogRef = this.dialog.open(TaskTimerComponentComponent, {
       disableClose: true,
       panelClass: "backdrop-timer",
       backdropClass: "backdrop-timer",
+      data: { task: timerTask },
     });
 
     dialogRef
@@ -461,37 +667,13 @@ export class MainWindowComponent implements OnInit {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((n) => {
         let diffSecconds = n / 1000;
-        let current = this.srv.currentTask$.value;
-        let isDone = false;
+        const isDone = target.aimTimer > 0 && target.secondsToDone - diffSecconds <= 0;
+        target.secondsDone = diffSecconds;
+
         if (current.parrentTask) {
-          let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.parrentTask].item;
-          let st: taskState = this.srv.allMap[this.srv.currentTask$.value.id].item;
-          let tt: number = tsk.secondsToDone - diffSecconds;
-          if (tt <= 0) {
-            tt = 0;
-            isDone = true;
-          }
-
-          if (tt > tsk.secondsToDone) {
-            tt = tsk.secondsToDone;
-          }
-
-          // st.secondsDone = tt;
-          st.secondsDone = n / 1000;
-        } else {
-          let tsk: Task = this.srv.allMap[this.srv.currentTask$.value.id].item;
-          let tt: number = tsk.secondsToDone - diffSecconds;
-          if (tt <= 0) {
-            tt = 0;
-            isDone = true;
-          }
-
-          if (tt > tsk.secondsToDone) {
-            tt = tsk.secondsToDone;
-          }
-
-          // tsk.secondsDone = tt;
-          tsk.secondsDone = n / 1000;
+          const state: taskState = this.srv.allMap[current.id].item;
+          state.secondsDone = diffSecconds;
+          current.secondsDone = diffSecconds;
         }
 
         if (tskIdx != null && isDone) {
@@ -661,13 +843,19 @@ export class MainWindowComponent implements OnInit {
       qwest.tasks.sort((a, b) => a.order - b.order);
 
       this.srv.pers$.value.currentView = curpersview.QwestTasks;
-    } else if (currentView == curpersview.SkillsGlobal) {
+    } else if (currentView == curpersview.SkillTasks || currentView == curpersview.SkillsGlobal) {
+      this.lastGlobalBeforeSort = currentView == curpersview.SkillsGlobal;
       this.srv.pers$.value.currentView = curpersview.SkillsSort;
-    } else if (currentView == curpersview.SkillsSort || currentView == curpersview.SkillsGlobal) {
+    } else if (currentView == curpersview.SkillsSort) {
       this.sortSkillsGlobal();
 
       this.srv.pers$.value.isMegaPlan = false;
-      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
+      if (this.lastGlobalBeforeSort) {
+        this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
+      } else {
+        this.srv.pers$.value.currentView = curpersview.SkillTasks;
+        this.srv.setCurInd(0);
+      }
     }
 
     this.srv.savePers(false);
@@ -677,13 +865,11 @@ export class MainWindowComponent implements OnInit {
    * Задать вид - задачи, квесты.
    * @param name Название вида.
    */
-  setView(currentView) {
+  async setView(currentView: curpersview): Promise<void> {
     if (currentView == curpersview.SkillTasks || currentView == curpersview.SkillsGlobal) {
-      this.srv.pers$.value.currentView = curpersview.QwestsGlobal;
-      this.srv.savePers(false);
+      await this.openGlobalView(curpersview.QwestsGlobal, currentView);
     } else if (currentView == curpersview.QwestTasks || currentView == curpersview.QwestsGlobal) {
-      this.srv.pers$.value.currentView = curpersview.SkillsGlobal;
-      this.srv.savePers(false);
+      await this.openGlobalView(curpersview.SkillsGlobal, currentView);
     }
   }
 

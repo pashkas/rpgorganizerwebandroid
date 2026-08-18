@@ -100,6 +100,12 @@ export class TaskDetailComponent implements OnInit {
       showWeekDays: true,
       isWeekDays: st ? (st.tskWeekDays?.length > 0) : false,
       tskWeekDays: st ? [...(st.tskWeekDays || [])] : [],
+      showAim: true,
+      isAim: st ? st.isAim : false,
+      aimTimer: st ? st.aimTimer : 0,
+      aimUnit: st ? st.aimUnit : "Минут",
+      isCounterEnable: st ? st.isCounterEnable : false,
+      isAlarmEnable: st ? st.isAlarmEnable : false,
     };
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       panelClass: "my-dialog",
@@ -111,6 +117,7 @@ export class TaskDetailComponent implements OnInit {
       if (stt) {
         if (!isEdit) {
           let state = new taskState();
+          state.order = this.tskAbility && this.tskAbility.isOpen ? -this.pers.level : state.order;
           state.value = this.tsk.value;
           state.requrense = this.tsk.requrense;
           state.image = this.srv.GetRndEnamy(state, this.pers.level, this.pers.maxPersLevel);
@@ -118,6 +125,11 @@ export class TaskDetailComponent implements OnInit {
           state.isChecklist = stt.isChecklist;
           state.checklistItems = stt.checklistItems || [];
           state.tskWeekDays = stt.tskWeekDays || [];
+          state.isAim = stt.isAim;
+          state.aimTimer = stt.aimTimer;
+          state.aimUnit = stt.aimUnit;
+          state.isCounterEnable = stt.isCounterEnable;
+          state.isAlarmEnable = stt.isAlarmEnable;
           this.tsk.states.push(state);
 
           if (this.tsk.requrense == "нет") {
@@ -130,6 +142,11 @@ export class TaskDetailComponent implements OnInit {
           st.isChecklist = stt.isChecklist;
           st.checklistItems = stt.checklistItems || [];
           st.tskWeekDays = stt.tskWeekDays || [];
+          st.isAim = stt.isAim;
+          st.aimTimer = stt.aimTimer;
+          st.aimUnit = stt.aimUnit;
+          st.isCounterEnable = stt.isCounterEnable;
+          st.isAlarmEnable = stt.isAlarmEnable;
         }
       }
       this.srv.isDialogOpen = false;

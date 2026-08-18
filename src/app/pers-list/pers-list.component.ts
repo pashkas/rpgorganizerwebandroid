@@ -18,6 +18,7 @@ import { RevardDialogData } from "src/Models/RevardDialogData";
 import { GameSettings } from "../GameSettings";
 import { QuickAddAbilityComponent } from "../pers/quick-add-ability/quick-add-ability.component";
 import { JsonFilePicker } from "../json-file-picker";
+import { VibroService } from "../vibro.service";
 
 @Component({
   selector: "app-pers-list",
@@ -41,7 +42,8 @@ export class PersListComponent implements OnInit {
     public srv: PersService,
     private router: Router,
     public dialog: MatDialog,
-    public gameSettings: GameSettings
+    public gameSettings: GameSettings,
+    private vibro: VibroService
   ) {}
 
   /**
@@ -169,6 +171,7 @@ export class PersListComponent implements OnInit {
       event.stopPropagation();
     }
 
+    this.vibro.rewardBuy();
     this.srv.changesBefore();
 
     this.pers.gold -= rev.cost;
@@ -318,6 +321,11 @@ export class PersListComponent implements OnInit {
   ngOnInit() {
     if (!this.srv.pers$.value) {
       this.router.navigate(["/main"]);
+    }
+
+    if (this.srv.pers$.value && this.srv.pers$.value.isAbilityUpgradeHighlightPending) {
+      this.srv.pers$.value.isAbilityUpgradeHighlightPending = false;
+      this.srv.savePers(false);
     }
 
     const id = this.route.snapshot.paramMap.get("isFirst");

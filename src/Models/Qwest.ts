@@ -5,6 +5,7 @@ export class Qwest {
   id: any = uuid();
   name: string = "";
   image: string = "assets/icons/defQwest.webp";
+  isLocalImage: boolean = false;
   descr: string = "";
   rewards: Reward[] = [];
   tasksDone: number = 0;

@@ -3,7 +3,7 @@ import { CommonModule } from "@angular/common";
 import { DiaryEditParamsComponent } from "../diary/diary-edit-params/diary-edit-params.component";
 import { MatDialogModule } from "@angular/material/dialog";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { MatListModule, MatInputModule, MatSliderModule, MatGridListModule, MatGridTile, MatSelectModule, MatChipsModule } from "@angular/material";
+import { MatListModule, MatInputModule, MatSliderModule, MatGridListModule, MatGridTile, MatSelectModule, MatChipsModule, MatIconModule } from "@angular/material";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -56,6 +56,7 @@ import { CustomSwipeDirective } from "../customSwipe.directive";
     MatSelectModule,
     MatCheckboxModule,
     MatChipsModule,
+    MatIconModule,
     MatButtonToggleModule,
   ],
   entryComponents: [DiaryEditParamsComponent, PersChangesComponent, AddItemDialogComponent],
@@ -84,6 +85,7 @@ import { CustomSwipeDirective } from "../customSwipe.directive";
     MainViewPipe,
     FilterByPropertyPipe,
     MatCheckboxModule,
+    MatIconModule,
     MatButtonToggleModule,
   ],
 })

@@ -10,6 +10,7 @@ import { curpersview } from "./curpersview";
 export class Pers {
   lastTaskId: any;
   isAutofocus: boolean = false;
+  isAbilityUpgradeHighlightPending: boolean = false;
   imgVers: number = 1;
   /**
    * Количество выполненных без пропусков задач.
@@ -200,6 +201,7 @@ export class Pers {
   expVal: number = 0;
   id: any;
   image: string = "assets/icons/link.webp";
+  isLocalImage: boolean = false;
   inventory: Reward[] = [];
   rewards: Reward[] = [];
   achievements: Reward[] = [];

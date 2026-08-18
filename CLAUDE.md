@@ -1,109 +1,72 @@
-# Если используешь PowerShell для получения информации из текстовых файлов, всегда явно используй UTF-8: `Get-Content -Encoding UTF8`, `Select-String -Encoding UTF8`. Не используй эти команды без `-Encoding UTF8`.
+# RPG Organizer
 
-# CLAUDE.md — «РПГ Органайзер»
+Геймифицированный таск-менеджер: RPG-персонаж развивается за выполнение задач. Один клиент обслуживает web, PWA и Android; отдельного backend нет, данные и авторизация работают через Firebase.
 
-## База знаний (taskdb)
+Стек: Angular 9.1.13, TypeScript 3.8.3, RxJS 6.5, Angular Material 8, Bootstrap 4, Flex Layout, Firebase 7 и Capacitor 5.
 
-Проект: `rpgorganizer`
+## Правила работы
 
-Git: `yes`
+1. Всегда применяй `.codex-rules/common-rules.md` и `.codex-rules/caveman.md`.
+2. Перед изменением или ревью Angular-кода, компонентов, сервисов, форм, RxJS и Angular API clients применяй `.codex-rules/angular-codding.md`.
+3. Перед изменением Python-кода, CLI, pipeline, парсеров и файловой обработки применяй `.codex-rules/python-coding.md`.
+4. Для новой нетривиальной задачи выполни один lookup taskdb по `.codex-rules/taskdb-read.md` до чтения кода. Проект: `rpgorganizer`.
+   - Пропусти lookup для простого вопроса, статуса, уточнения и объяснения уже найденного кода.
+   - Повтори lookup в текущей задаче только по просьбе `поищи в taskdb`.
+5. Записывай taskdb по `.codex-rules/taskdb-write.md` только по точной команде `+` или `=`.
+6. Навигацию, поиск и чтение выполняй через `rg` и PowerShell. `.codex-rules/mcp-idea.md` в этом проекте не применяй.
 
-При чтении и записи через `user-tasks-qdrant-read` / `user-tasks-qdrant-write` название проекта уже известно из этой главной конфигурации агента: `rpgorganizer`. Не перечитывай для этого `CLAUDE.md`/`AGENTS.md`; сразу передавай готовое имя проекта в shared taskdb/qdrant.
+Если MCP `user-tasks-qdrant` недоступен, сообщи об этом и продолжай без taskdb. REST, shell и HTTP fallback не используй.
 
-В начале рабочей сессии или новой самостоятельной задачи по проекту сначала taskdb, потом код: скилл `user-tasks-qdrant-read` запускай **до** анализа, чтения кода, планирования и действий по задаче.
-Внутри уже начатого обсуждения не повторяй поиск taskdb/qdrant на каждый уточняющий вопрос, короткую правку или продолжение той же темы; используй уже полученный контекст. Новый поиск делай только при смене задачи, явной просьбе пользователя или если прежний контекст явно устарел/не подходит.
-Правила чтения, поиска и отбора записей taskdb/qdrant определены в скилле `user-tasks-qdrant-read`.
-По закрытию задачи («+», «готово», «ок», «отлично», «сделано», «=», «закрывай», «задача завершена») — сначала скилл `user-tasks-qdrant-write`. Локальный коммит делай только по явной просьбе пользователя. `git push` не делать, если пользователь не попросил явно.
+## Границы проекта
 
-Пользователь заранее разрешает штатные обращения к MCP `user-tasks-qdrant` для taskdb-операций. Если нативные MCP tools доступны в Codex, вызывай их напрямую и не запрашивай дополнительное подтверждение на `search_*`, `get_*`, `add_*`, `update_*`, `delete_*`, `list_*`, `create_project` и `migrate_from_user_tasks`.
-
-Не лезь в git без явной необходимости: не запускай `git status`, `git diff`, просмотр истории и другие git-сверки просто для ориентации. Используй git-команды только по прямой просьбе пользователя, перед явно запрошенной фиксацией/коммитом или когда без этого нельзя безопасно завершить задачу.
-
----
-
-## Основные правила агента
-
-- Отвечай на русском языке, на «ты», кратко и без вводных фраз.
-- Комментарии к коду, логи и консольный вывод пиши на русском языке.
-- При чтении файлов через PowerShell явно используй UTF-8: `Get-Content -Encoding UTF8`, `Select-String -Encoding UTF8`.
-- Не запускай compile, сборку, тесты и Android Gradle-проверки без прямого запроса пользователя. Если проверка нужна — сначала спроси.
-- Выдавай готовые изменения, без лишних объяснений и приветствий.
-- Одноразовые скрипты для глубокого анализа складывай в `docs/scripts/`, промежуточные исследования — в `docs/research/`; после использования удаляй их без отдельного вопроса.
-
-## Субагенты
-
-Codex имеет явное разрешение запускать субагентов: для параллельного анализа кода, проверки гипотез и других самостоятельных подзадач. Делегируй им ограниченные задачи с понятным ожидаемым результатом и учитывай их вывод в основной работе.
-
-## Файлы инструкций
-
-`CLAUDE.md` и `AGENTS.md` связаны hardlink и должны оставаться одним и тем же файлом. Правки инструкций вноси так, чтобы оба имени указывали на актуальное содержимое.
-
-## Инструменты
-
-В этом проекте не используй MCP IDEA. Для навигации и чтения кода используй `rg`/PowerShell, для правок — `apply_patch`.
-При установке npm-пакетов используй `npm install ... --legacy-peer-deps`: в проекте есть существующий peer-конфликт Angular CDK/Flex Layout, обычный `npm install` падает с `ERESOLVE`.
-Для Android Gradle-проверок используй локальную JDK 17: `C:\Users\tretyakovpk\.jdks\openjdk-17.0.1`. Перед запуском Gradle выставляй `JAVA_HOME` в этот путь и добавляй `%JAVA_HOME%\bin` / `$env:JAVA_HOME\bin` в `PATH`.
-
----
-
-## Цель
-
-Геймифицированный таск-менеджер (аналог Habitica). RPG-персонаж с характеристиками/навыками/квестами, за выполнение задач растёт опыт и уровень. ToDo-лист в RPG-обёртке.
-
-## Стек
-
-- **Frontend:** Angular 9.1.13, TypeScript 3.8.3, RxJS 6.5
-- **UI:** Angular Material 8, Bootstrap 4, Flex-Layout, ngx-masonry
-- **BaaS:** Firebase (Firestore + Auth). Своего бэкенда нет, вся логика на клиенте.
-- **Mobile:** Capacitor 5 (Android), PWA
+- `AGENTS.md` и `CLAUDE.md` — hardlink одного файла. После изменения связь должна сохраниться.
+- `.codex-rules` — junction на `D:\MYPROJ\codex\.codex-rules`; rules в проект не копируй.
+- npm-пакеты устанавливай через `npm install ... --legacy-peer-deps`: в проекте есть peer-конфликт Angular CDK/Flex Layout.
+- Android Gradle запускай с JDK 17 из `C:\Users\tretyakovpk\.jdks\openjdk-17.0.1`.
+- Одноразовые скрипты размещай в `docs/scripts/`, исследования — в `docs/research/`; после использования удаляй.
+- Для ограниченных самостоятельных подзадач можно запускать субагентов; их вывод проверяй и учитывай в основной работе.
 
 ## Архитектура
 
 ### Модули
 
-```
+```text
 AppModule (eager)
-├── SharedModule           — общие компоненты + реэкспорт Material
-├── PersModule     (lazy /pers)     — основной функционал (~30 компонентов)
-├── MindMapModule  (lazy /mind-map)
+├── SharedModule                 общие компоненты и Material
+├── PersModule (lazy /pers)      основной функционал
+├── MindMapModule (lazy /mind-map)
 └── SyncModuleModule (lazy /sync)
 ```
 
-- **SharedModule** — центральный. Новые Material-модули добавляй сюда (imports + exports), чтобы были доступны в Pers и MindMap.
-- **SyncModuleModule** — SharedModule НЕ импортирует, тащит Material-модули напрямую.
-- `entryComponents` нужны (Angular 9).
+- Material-модули для `PersModule` и `MindMapModule` добавляй в imports и exports `SharedModule`.
+- `SyncModuleModule` не импортирует `SharedModule`; нужные Material-модули подключает напрямую.
+- Для динамических компонентов сохраняй `entryComponents`: проект использует Angular 9.
 
-### Состояние
-Никакого NgRx. Всё через `PersService` и `BehaviorSubject`:
-- `pers$`, `currentTask$`, `currentView$`, `skillsGlobal$`, `qwestsGlobal$`
-- Компоненты подписываются через `.asObservable()` + `takeUntil(unsubscribe$)`.
+### Состояние и модель
 
-### Доменная модель (`src/Models/`)
-- `Pers` (персонаж) → `Characteristic` → `Ability` → `Task`
-- `Qwest` — группа задач с наградами
-- `Reward` — награда/артефакт
-- `GameSettings` — абстрактный, реализации через DI (`EraSettings`, `EraSettings5Lvl`)
-- ID через `uuid()`
+- NgRx нет. Состояние хранит `PersService` через `BehaviorSubject`: `pers$`, `currentTask$`, `currentView$`, `skillsGlobal$`, `qwestsGlobal$`.
+- Компоненты подписываются через `.asObservable()` и завершают подписки через `takeUntil(unsubscribe$)`.
+- Основная модель в `src/Models/`: `Pers` → `Characteristic` → `Ability` → `Task`; отдельно `Qwest` и `Reward`.
+- `GameSettings` — абстракция с DI-реализациями `EraSettings` и `EraSettings5Lvl`. ID создаются через `uuid()`.
+- RPG-логика находится в `PersService`, попапы изменений — в `PerschangesService`.
 
-### Ключевые сервисы
-`PersService` (RPG-логика), `PerschangesService` (попапы изменений), `AuthService`, `UserService`, `StatesService`, `RevardService`, `EnamiesService`.
+### UI
 
-### Компоненты
-- `ChangeDetectionStrategy.OnPush` где возможно
-- `MatDialog` для модалок
-- **Иконки — PNG из `assets/icons/`**, `<mat-icon>` НЕ используем
+- Используй `ChangeDetectionStrategy.OnPush`, когда компонент совместим с ним.
+- Модальные окна открывай через `MatDialog`.
+- Иконки бери как PNG из `assets/icons/`; `<mat-icon>` не используй.
 
 ## Стиль кода
 
-- **Язык — русский.** Комментарии, логи, сообщения пользователю. Краткие JSDoc по сути метода (без описания параметров).
-- Писать просто, в стиле существующего кода.
-- Перед `return` — пустая строка.
-- Стримы и лямбды с короткими именами: `q => q.getValue()`. Method references не используем.
-- camelCase для переменных/методов, PascalCase для классов/интерфейсов.
+- Комментарии, логи и сообщения пользователю пиши по-русски. Для методов оставляй короткий JSDoc по сути без очевидных параметров и return.
+- Перед `return` оставляй пустую строку.
+- В стримах и лямбдах используй короткие имена: `q => q.getValue()`. Method references не используй.
+- Переменные и методы — camelCase, классы и интерфейсы — PascalCase.
 
-## Legacy — НЕ ТРОГАТЬ
+## Legacy
 
-- Опечатки в именах: `reqvirements`, `requrense`, `enamies`, `revard` — оставляем как есть.
-- `angularfire2` вместо `@angular/fire` в части импортов.
-- Русские строки прямо в моделях (ранги, подбадривания).
-- Микс стилей в полях моделей.
+Сохраняй без модернизации:
+
+- имена `reqvirements`, `requrense`, `enamies`, `revard`;
+- существующие импорты из `angularfire2`;
+- русские строки и смешанный стиль полей в моделях.

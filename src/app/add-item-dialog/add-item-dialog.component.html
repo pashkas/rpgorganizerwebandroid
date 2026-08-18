@@ -47,6 +47,29 @@
         </div>
       </div>
     </div>
+    <div *ngIf="data.showAim" class="mt-2">
+      <mat-checkbox [(ngModel)]="data.isAim" name="isAim">Цель</mat-checkbox>
+      <div *ngIf="data.isAim" fxLayout="column" class="mt-2">
+        <div fxLayout="row" fxLayoutGap="8px">
+          <mat-form-field fxFlex>
+            <input matInput type="number" onfocus="this.select()" autocomplete="off" placeholder="Цель" [(ngModel)]="data.aimTimer" name="aimTimer" />
+          </mat-form-field>
+          <mat-form-field fxFlex>
+            <mat-select [(ngModel)]="data.aimUnit" name="aimUnit">
+              <mat-option *ngFor="let aimUnit of aimUnits" [value]="aimUnit">{{ aimUnit }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <mat-chip-list selectable multiple>
+          <mat-chip [selected]="data.isCounterEnable" color="accent" (click)="data.isCounterEnable = !data.isCounterEnable" title="Счётчик">
+            <mat-icon>done</mat-icon>
+          </mat-chip>
+          <mat-chip [selected]="data.isAlarmEnable" color="accent" (click)="data.isAlarmEnable = !data.isAlarmEnable" title="Оповещения">
+            <mat-icon>alarm</mat-icon>
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+    </div>
   </div>
   <div *ngIf="this.isGallery" class="masonry-grid">
     <div *ngFor="let gi of gallerryImages">
